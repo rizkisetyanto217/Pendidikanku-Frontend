@@ -13,95 +13,196 @@ import AuthLayout from "@/layout/AuthLayout";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import api from "@/lib/axios";
+// 🔧 perbaiki path import komponen tombol Google
 import GoogleIdentityButton from "@/pages/dashboard/auth/components/GoogleIdentityButton";
 import LegalModal from "@/pages/dashboard/auth/components/LegalPrivacyModal";
 
 /* =======================
-   Types (ringkas)
+   Types (sesuai API lama & baru)
 ======================= */
-type AuthMe = {
-  user?: {
-    role?: "dkm" | "author" | "admin" | "teacher" | "user";
-    masjid_admin_ids?: string[];
-    masjid_teacher_ids?: string[];
-    masjid_student_ids?: string[];
+type MasjidRole = {
+  masjid_id: string;
+  roles: Array<"dkm" | "teacher" | "admin" | "author" | "student" | "user">;
+  tenant_profile?: string | null;
+};
+
+type User = {
+  id: string;
+  full_name: string;
+  user_name?: string;
+  email?: string;
+  is_owner?: boolean;
+  active_masjid_id?: string | null;
+  masjid_tenant_profile?: string | null;
+  roles_global?: string[] | null;
+  masjid_roles?: MasjidRole[];
+  masjid_ids?: string[];
+};
+
+type LoginApiResponse = {
+  data: {
+    user: User;
+    access_token: string;
   };
+  message: string;
+};
+
+// Simple-context (cookie-mode)
+type Membership = { roles: string[] };
+type SimpleCtx = {
+  user_id: string;
+  user_name: string;
+  memberships: Membership[];
 };
 
 /* =======================
    Config
 ======================= */
-const FORCE_RELOAD_AFTER_REDIRECT = true; // set ke false kalau tak perlu reload
+const FORCE_RELOAD_AFTER_REDIRECT = false; // set ke true bila perlu full reload
 const DEFAULT_USER_REDIRECT = "/masjid/masjid-baitussalam";
 
 /* =======================
    Utilities
 ======================= */
-function storeToken(token: string, remember: boolean) {
-  if (remember) localStorage.setItem("access_token", token);
-  else sessionStorage.setItem("access_token", token);
+function setAuthHeader(token: string) {
   try {
     api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
   } catch {}
 }
 
-function pickPrimaryMasjidId(me: AuthMe): string | null {
-  const u = me?.user;
-  if (!u) return null;
-  const id =
-    (u.masjid_admin_ids && u.masjid_admin_ids[0]) ||
-    (u.masjid_teacher_ids && u.masjid_teacher_ids[0]) ||
-    (u.masjid_student_ids && u.masjid_student_ids[0]) ||
-    null;
-  return id ?? null;
+function storeToken(token: string, remember: boolean) {
+  try {
+    if (remember) localStorage.setItem("access_token", token);
+    else sessionStorage.setItem("access_token", token);
+    setAuthHeader(token);
+  } catch {}
+}
+
+function saveUserLocal(user: User, remember: boolean) {
+  try {
+    const s = JSON.stringify(user);
+    if (remember) localStorage.setItem("auth_user", s);
+    else sessionStorage.setItem("auth_user", s);
+  } catch {}
+}
+
+function normalizePayload(
+  resData: LoginApiResponse | LoginApiResponse["data"]
+): LoginApiResponse["data"] {
+  const isWrapped =
+    (resData as any)?.data && (resData as any)?.data?.access_token;
+  return isWrapped
+    ? (resData as LoginApiResponse).data
+    : (resData as LoginApiResponse["data"]);
+}
+
+function derivePrimaryRole(user?: User): "dkm" | "teacher" | "user" {
+  const list = user?.masjid_roles ?? [];
+  if (list.some((mr) => mr.roles?.includes("dkm"))) return "dkm";
+  if (list.some((mr) => mr.roles?.includes("teacher"))) return "teacher";
+  return "user";
+}
+
+function pickActiveMasjidId(user?: User): string | null {
+  if (!user) return null;
+  return (
+    user.active_masjid_id ||
+    (user.masjid_ids && user.masjid_ids.length > 0 ? user.masjid_ids[0] : null)
+  );
 }
 
 async function redirectAfterLogin(args: {
-  role: string;
-  me: AuthMe;
+  primaryRole: "dkm" | "teacher" | "user";
+  user: User;
   slugParam?: string;
   navigate: ReturnType<typeof useNavigate>;
 }) {
-  const { role, me, slugParam, navigate } = args;
+  const { primaryRole, user, slugParam, navigate } = args;
 
-  if (role === "dkm") {
-    const masjidId = pickPrimaryMasjidId(me);
-
+  if (primaryRole === "dkm") {
+    const masjidId = pickActiveMasjidId(user);
     if (import.meta.env?.DEV) {
-      console.debug("[Login] role=dkm, selected masjidId:", masjidId, me);
+      console.debug("[Login] role=dkm, selected masjidId:", masjidId, user);
     }
-
     if (masjidId) {
-      localStorage.setItem("ctx_masjid_id", masjidId); // simpan konteks
+      localStorage.setItem("ctx_masjid_id", masjidId);
       navigate(`/${encodeURIComponent(masjidId)}/sekolah`, { replace: true });
     } else {
-      // kalau belum punya institusi → fallback
       navigate("/dkm", { replace: true });
     }
-
     if (FORCE_RELOAD_AFTER_REDIRECT) window.location.reload();
     return;
   }
 
-  // role lain
-  switch (role) {
-    case "author":
-      navigate("/author", { replace: true });
-      break;
-    case "admin":
-      navigate("/admin", { replace: true });
-      break;
+  switch (primaryRole) {
     case "teacher":
       navigate("/teacher", { replace: true });
       break;
     case "user":
     default: {
-      const target = slugParam ? `/masjid/${slugParam}` : DEFAULT_USER_REDIRECT;
+      const target = args.slugParam
+        ? `/masjid/${args.slugParam}`
+        : DEFAULT_USER_REDIRECT;
       navigate(target, { replace: true });
       break;
     }
   }
   if (FORCE_RELOAD_AFTER_REDIRECT) window.location.reload();
+}
+
+// Cookie-mode: derive role dari simple-context
+function roleFromSimpleCtx(ctx?: SimpleCtx): "dkm" | "teacher" | "user" {
+  const ms = ctx?.memberships ?? [];
+  if (ms.some((m) => m.roles?.includes("dkm"))) return "dkm";
+  if (ms.some((m) => m.roles?.includes("teacher"))) return "teacher";
+  return "user";
+}
+
+// Setelah login (email/password atau Google), coba cookie-mode dulu.
+// Kalau gagal, fallback ke token-mode (body mengandung access_token + user).
+async function finalizeAuthAndRedirect(opts: {
+  resData: LoginApiResponse | LoginApiResponse["data"];
+  remember: boolean;
+  slugParam?: string;
+  navigate: ReturnType<typeof useNavigate>;
+}) {
+  const { resData, remember, slugParam, navigate } = opts;
+
+  // 1) COOKIE-MODE
+  try {
+    const me = await api.get<{ data: SimpleCtx }>("/auth/me/simple-context", {
+      withCredentials: true,
+    });
+    const ctx = me?.data?.data;
+    if (ctx?.user_id) {
+      const syntheticUser: User = {
+        id: ctx.user_id,
+        full_name: ctx.user_name,
+      } as User;
+      const primaryRole = roleFromSimpleCtx(ctx);
+      await redirectAfterLogin({
+        primaryRole,
+        user: syntheticUser,
+        slugParam,
+        navigate,
+      });
+      return;
+    }
+  } catch {
+    // lanjut ke token-mode
+  }
+
+  // 2) TOKEN-MODE (fallback)
+  const { access_token, user } = normalizePayload(resData);
+  if (!access_token || !user) {
+    throw new Error(
+      "Login berhasil, tetapi sesi belum terpasang. Cek CORS/Set-Cookie/SameSite."
+    );
+  }
+  storeToken(access_token, remember);
+  saveUserLocal(user, remember);
+  const primaryRole = derivePrimaryRole(user);
+  await redirectAfterLogin({ primaryRole, user, slugParam, navigate });
 }
 
 /* =======================
@@ -143,35 +244,38 @@ export default function Login() {
     [theme, loading]
   );
 
+  async function doLogin(body: { identifier: string; password: string }) {
+    const res = await api.post<LoginApiResponse["data"] | LoginApiResponse>(
+      "/auth/login",
+      body,
+      { withCredentials: true }
+    );
+    return res.data;
+  }
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-
     if (!identifier || !password) {
-      setError("Harap isi email/username dan password.");
+      setError("Harap isi email/username dan password kamu.");
       return;
     }
-
     setLoading(true);
     try {
-      const res = await api.post("/auth/login", { identifier, password });
-      const token =
-        (res.data as any)?.data?.access_token ||
-        (res.data as any)?.access_token;
-      if (!token) throw new Error("Token tidak ditemukan.");
-      storeToken(token, remember);
-
-      const meRes = await api.get("/api/auth/me");
-      const me: AuthMe = meRes.data ?? {};
-      const role = me?.user?.role ?? "user";
-
-      await redirectAfterLogin({ role, me, slugParam, navigate });
+      const resData = await doLogin({ identifier, password });
+      await finalizeAuthAndRedirect({
+        resData,
+        remember,
+        slugParam,
+        navigate,
+      });
     } catch (err: any) {
       if (import.meta.env?.DEV) console.error("[LOGIN ERROR]", err);
-      if (err?.response)
-        setError(err.response.data?.message || "Login gagal, coba lagi.");
-      else if (err?.request) setError("Tidak ada respon dari server.");
-      else setError(err?.message || "Terjadi kesalahan saat login.");
+      const msg =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Login gagal, coba lagi.";
+      setError(String(msg));
     } finally {
       setLoading(false);
     }
@@ -181,23 +285,23 @@ export default function Login() {
     setError("");
     setLoading(true);
     try {
-      const res = await api.post("/auth/login-google", {
-        id_token: credential,
+      // Kirim id_token (bukan credential)
+      const res = await api.post<LoginApiResponse["data"] | LoginApiResponse>(
+        "/auth/login-google",
+        { id_token: credential },
+        { withCredentials: true }
+      );
+      await finalizeAuthAndRedirect({
+        resData: res.data,
+        remember: true, // Google biasanya persistent
+        slugParam,
+        navigate,
       });
-      const token =
-        (res.data as any)?.data?.access_token ||
-        (res.data as any)?.access_token;
-      if (!token) throw new Error("Token tidak ditemukan (Google).");
-      storeToken(token, true);
-
-      const meRes = await api.get("/api/auth/me");
-      const me: AuthMe = meRes.data ?? {};
-      const role = me?.user?.role ?? "user";
-
-      await redirectAfterLogin({ role, me, slugParam, navigate });
-    } catch (err) {
+    } catch (err: any) {
       if (import.meta.env?.DEV) console.error("[GOOGLE LOGIN ERROR]", err);
-      setError("Login Google gagal. Silakan coba lagi.");
+      setError(
+        err?.response?.data?.message || "Login Google gagal. Silakan coba lagi."
+      );
     } finally {
       setLoading(false);
     }

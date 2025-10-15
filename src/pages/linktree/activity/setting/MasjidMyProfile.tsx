@@ -18,23 +18,40 @@ type ProfilePayload = {
   occupation?: string;
 };
 
+// === Simple Context (route baru) ===
+type Membership = {
+  masjid_id: string;
+  masjid_name: string;
+  masjid_slug: string;
+  masjid_icon_url?: string | null;
+  roles: string[];
+};
+type SimpleContext = {
+  user_id: string;
+  user_name: string;
+  memberships: Membership[];
+};
+
 export default function MasjidMyProfile() {
   const { isDark, themeName } = useHtmlDarkMode();
-  const theme = pickTheme(themeName as ThemeName, isDark); // <- Palette
+  const theme = pickTheme(themeName as ThemeName, isDark);
   const qc = useQueryClient();
 
-  // auth (buat email & fallback nama)
-  const { data: userData } = useQuery({
-    queryKey: ["auth", "me"],
+  // ===== Auth (pakai simple-context baru)
+  const { data: ctx } = useQuery({
+    queryKey: ["auth", "simple-context"],
     queryFn: async () =>
-      (await axios.get("/api/auth/me")).data.user as {
-        user_name?: string;
-        email?: string;
-      },
+      (
+        await axios.get("/api/auth/me/simple-context", {
+          withCredentials: true,
+        })
+      ).data.data as SimpleContext,
     staleTime: 5 * 60 * 1000,
   });
+  const userName = ctx?.user_name ?? "";
+  const email = "-"; // simple-context tidak mengirim email
 
-  // profile
+  // ===== Profile
   const {
     data: profileData,
     isLoading,
@@ -42,11 +59,12 @@ export default function MasjidMyProfile() {
   } = useQuery({
     queryKey: ["user-profile", "me"],
     queryFn: async () =>
-      (await axios.get("/api/u/users-profiles/me")).data.data as ProfilePayload,
+      (await axios.get("/api/u/users-profiles/me", { withCredentials: true }))
+        .data.data as ProfilePayload,
     staleTime: 5 * 60 * 1000,
   });
 
-  // state form
+  // ===== State form
   const [form, setForm] = useState<ProfilePayload>({
     donation_name: "",
     full_name: "",
@@ -61,16 +79,14 @@ export default function MasjidMyProfile() {
     if (!profileData) return;
     setForm({
       donation_name: profileData.donation_name ?? "Hamba Allah",
-      full_name: profileData.full_name ?? userData?.user_name ?? "",
+      full_name: profileData.full_name ?? userName ?? "",
       date_of_birth: profileData.date_of_birth ?? "",
       phone_number: profileData.phone_number ?? "",
       bio: profileData.bio ?? "",
       location: profileData.location ?? "",
       occupation: profileData.occupation ?? "",
     });
-  }, [profileData, userData?.user_name]);
-
-  const email = userData?.email ?? "-";
+  }, [profileData, userName]);
 
   const updateField = (k: keyof ProfilePayload, v: string) =>
     setForm((p) => ({ ...p, [k]: v }));
@@ -78,14 +94,14 @@ export default function MasjidMyProfile() {
   const initial = useMemo<ProfilePayload>(
     () => ({
       donation_name: profileData?.donation_name ?? "Hamba Allah",
-      full_name: profileData?.full_name ?? userData?.user_name ?? "",
+      full_name: profileData?.full_name ?? userName ?? "",
       date_of_birth: profileData?.date_of_birth ?? "",
       phone_number: profileData?.phone_number ?? "",
       bio: profileData?.bio ?? "",
       location: profileData?.location ?? "",
       occupation: profileData?.occupation ?? "",
     }),
-    [profileData, userData?.user_name]
+    [profileData, userName]
   );
 
   const isDirty = useMemo(
@@ -107,7 +123,9 @@ export default function MasjidMyProfile() {
         location: payload.location?.trim(),
         occupation: payload.occupation?.trim(),
       };
-      const res = await axios.put("/api/u/users-profiles", body);
+      const res = await axios.put("/api/u/users-profiles", body, {
+        withCredentials: true,
+      });
       return res.data;
     },
     onSuccess: async () => {
@@ -257,7 +275,7 @@ function FieldCard({
 }: {
   children: React.ReactNode;
   label: string;
-  theme: Palette; // <- ganti tipe
+  theme: Palette;
 }) {
   return (
     <div
@@ -281,9 +299,7 @@ function FieldCard({
 }
 
 function Input(
-  props: React.InputHTMLAttributes<HTMLInputElement> & {
-    theme: Palette; // <- ganti tipe
-  }
+  props: React.InputHTMLAttributes<HTMLInputElement> & { theme: Palette }
 ) {
   const { theme, style, ...rest } = props;
   return (
@@ -301,9 +317,7 @@ function Input(
 }
 
 function Textarea(
-  props: React.TextareaHTMLAttributes<HTMLTextAreaElement> & {
-    theme: Palette; // <- ganti tipe
-  }
+  props: React.TextareaHTMLAttributes<HTMLTextAreaElement> & { theme: Palette }
 ) {
   const { theme, style, ...rest } = props;
   return (
