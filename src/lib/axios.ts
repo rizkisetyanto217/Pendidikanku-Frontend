@@ -1,24 +1,23 @@
-/* src/lib/axios.ts — minimal CSRF-less client + logout/helper */
-
+/* src/lib/axios.ts — minimal client (tanpa header aneh) + helper auth */
 import axiosLib, { AxiosError, type AxiosRequestConfig } from "axios";
 
 /* ============ ENV ============ */
 export const API_BASE =
   import.meta.env.VITE_API_BASE_URL ??
-  "https://masjidkubackend4-production.up.railway.app/api"; // ✅ pastikan /api
+  "https://masjidkubackend4-production.up.railway.app/api"; // sudah include /api
 
-// Default: FALSE (tidak kirim cookies/credentials lintas domain)
+// default false agar tak kirim cookie lintas domain tanpa perlu
 const WITH_CREDENTIALS =
   (import.meta.env.VITE_WITH_CREDENTIALS ?? "false") === "true";
 
 const DEBUG_API = (import.meta.env.VITE_DEBUG_API ?? "true") !== "false";
 
-/** (default OFF) Hindari kirim X-Requested-With agar preflight CORS tidak ditolak */
+/** default OFF biar preflight tidak ditolak CORS */
 const SEND_X_REQUESTED_WITH =
   (import.meta.env.VITE_SEND_X_REQUESTED_WITH ?? "false") === "true";
 
-/** Logout endpoint & method (opsional) */
-export const LOGOUT_PATH = import.meta.env.VITE_LOGOUT_PATH ?? "/api/logout";
+/** Logout endpoint & method */
+export const LOGOUT_PATH = import.meta.env.VITE_LOGOUT_PATH ?? "/logout"; // <— JANGAN /api/logout
 export const LOGOUT_METHOD = (
   import.meta.env.VITE_LOGOUT_METHOD ?? "GET"
 ).toUpperCase(); // "GET" | "POST"
@@ -28,18 +27,24 @@ export const TOKEN_KEY = import.meta.env.VITE_TOKEN_KEY ?? "access_token";
 /* ============ Token helpers ============ */
 export function getAuthToken(): string | null {
   try {
-    return typeof window !== "undefined"
-      ? localStorage.getItem(TOKEN_KEY)
-      : null;
+    if (typeof window === "undefined") return null;
+    return localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY);
   } catch {
     return null;
   }
 }
-export function setAuthToken(token: string | null) {
+export function setAuthToken(token: string | null, remember = true) {
   try {
     if (typeof window === "undefined") return;
-    if (token) localStorage.setItem(TOKEN_KEY, token);
-    else localStorage.removeItem(TOKEN_KEY);
+    if (token) {
+      if (remember) localStorage.setItem(TOKEN_KEY, token);
+      else sessionStorage.setItem(TOKEN_KEY, token);
+    } else {
+      localStorage.removeItem(TOKEN_KEY);
+      sessionStorage.removeItem(TOKEN_KEY);
+    }
+    if (token) (axios.defaults.headers.common as any).Authorization = `Bearer ${token}`;
+    else delete (axios.defaults.headers.common as any).Authorization;
   } catch {}
 }
 export function clearAuthToken() {
@@ -49,11 +54,11 @@ export function clearAuthToken() {
 /* ============ Axios instance ============ */
 const axios = axiosLib.create({
   baseURL: API_BASE,
-  withCredentials: WITH_CREDENTIALS, // ✅ default false; bisa override via env
+  withCredentials: WITH_CREDENTIALS,
   timeout: 60_000,
 });
 
-// Jaga-jaga kalau ada lib lain memaksa global
+// optional: samakan default global (kalau ada lib lain yang pakai axios langsung)
 axiosLib.defaults.withCredentials = WITH_CREDENTIALS;
 
 declare module "axios" {
@@ -78,7 +83,6 @@ const uuid = () => {
 axios.interceptors.request.use((config) => {
   config.headers = config.headers ?? {};
 
-  // Optional — default OFF untuk hindari preflight yang tidak perlu
   if (SEND_X_REQUESTED_WITH) {
     (config.headers as any)["X-Requested-With"] = "XMLHttpRequest";
   }
@@ -87,7 +91,6 @@ axios.interceptors.request.use((config) => {
   const token = getAuthToken();
   if (token) (config.headers as any).Authorization = `Bearer ${token}`;
 
-  // Debug metadata
   if (DEBUG_API) {
     config.metadata ??= {};
     config.metadata.start = now();
@@ -109,10 +112,6 @@ axios.interceptors.response.use(
   (res) => {
     if (DEBUG_API) {
       const dur = now() - (res.config.metadata?.start ?? now());
-      const ct = String(res.headers?.["content-type"] || "");
-      if (typeof res.data === "string" && ct.includes("text/html")) {
-        console.warn("[API] got HTML from", res.config.url);
-      }
       console.groupCollapsed(
         `%cAPI ⇠ ${res.status} ${res.config.method?.toUpperCase()} ${res.config.url} (${dur.toFixed(0)}ms)`,
         "color:#22c55e;font-weight:600"
@@ -141,14 +140,12 @@ axios.interceptors.response.use(
       console.groupEnd();
     }
 
-    // 401 → bersihkan token & broadcast event
     if (error.response?.status === 401) {
       clearAuthToken();
       try {
-        const ev = new CustomEvent("auth:unauthorized", {
-          detail: { source: "axios" },
-        });
-        window.dispatchEvent(ev);
+        window.dispatchEvent(
+          new CustomEvent("auth:unauthorized", { detail: { source: "axios" } })
+        );
       } catch {}
     }
 
@@ -156,19 +153,13 @@ axios.interceptors.response.use(
   }
 );
 
-/* ============ Helpers tambahan ============ */
 /** Panggil sekali saat app start agar header Authorization terpasang dari storage */
 export function bootstrapAuthFromStorage() {
   const t = getAuthToken();
-  if (t)
-    (axios.defaults.headers.common as any)["Authorization"] = `Bearer ${t}`;
+  if (t) (axios.defaults.headers.common as any).Authorization = `Bearer ${t}`;
 }
 
-/**
- * Best-effort logout:
- * - Coba request ke server (GET/POST sesuai ENV).
- * - Apapun hasilnya (termasuk 403), FE selalu clear token.
- */
+/** Logout best-effort (server lalu clear local) */
 export async function apiLogout() {
   try {
     if (LOGOUT_METHOD === "POST") {
@@ -177,14 +168,13 @@ export async function apiLogout() {
       await axios.get(LOGOUT_PATH);
     }
   } catch {
-    // abaikan error logout server
+    // abaikan
   } finally {
     clearAuthToken();
     try {
-      const ev = new CustomEvent("auth:logout", {
-        detail: { source: "axios" },
-      });
-      window.dispatchEvent(ev);
+      window.dispatchEvent(
+        new CustomEvent("auth:logout", { detail: { source: "axios" } })
+      );
     } catch {}
   }
 }

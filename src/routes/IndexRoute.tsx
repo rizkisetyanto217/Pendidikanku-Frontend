@@ -253,6 +253,7 @@ import StudentQuizPage from "@/pages/sekolahislamku/dashboard-student/class/Quiz
 import StudentExam from "@/pages/sekolahislamku/dashboard-student/class/StudentExam";
 import StudentAssignmentClass from "@/pages/sekolahislamku/dashboard-student/assignment/StudentAssignmentClass";
 import StudentAttandenceClass from "@/pages/sekolahislamku/dashboard-student/class/StudentAttandenceClass";
+import Unauthorized from "./UnAuthorized";
 
 // import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/routes";
 
@@ -442,40 +443,40 @@ export default function AppRoutes() {
         </Route>
       </Route>
       {/* ==== Protected Routes - DKM ==== */}
-      <Route element={<RequireRoleRoute allowedRoles={["dkm"]} />}>
-        <Route path="/dkm" element={<DkmLayout />}>
+      {/* <Route element={<RequireRoleRoute allowedRoles={["dkm"]} />}> */}
+        {/* <Route path="/dkm" element={<DkmLayout />}> */}
           {/* <Route index element={<DashboardAdminDkm />} /> */}
-          <Route index element={<Navigate to="profil-masjid" replace />} />
+          {/* <Route index element={<Navigate to="profil-masjid" replace />} /> */}
 
           {/* Profil Masjid */}
-          <Route path="profil-masjid" element={<DKMProfilMasjidParent />}>
-            <Route index element={<ProfilMasjid />} />
-            <Route path="edit-sosmed" element={<DkmEditSosmedProfile />} />
-            <Route path="edit-masjid" element={<DKMEditMasjid />} />
-            <Route
+          {/* <Route path="profil-masjid" element={<DKMProfilMasjidParent />}> */}
+            {/* <Route index element={<ProfilMasjid />} /> */}
+            {/* <Route path="edit-sosmed" element={<DkmEditSosmedProfile />} /> */}
+            {/* <Route path="edit-masjid" element={<DKMEditMasjid />} /> */}
+            {/* <Route
               path="edit-profil-masjid"
               element={<DKMEditProfileMasjid />}
-            />
-          </Route>
-          <Route path="profil-dkm" element={<DKMProfilMasjidParent />}>
-            <Route index element={<ProfileDKMPengajar />} />
+            /> */}
+          {/* </Route> */}
+          {/* <Route path="profil-dkm" element={<DKMProfilMasjidParent />}> */}
+            {/* <Route index element={<ProfileDKMPengajar />} /> */}
             {/* 🆕 Edit Pengajar */}
-          </Route>
-          <Route
+          {/* </Route> */}
+          {/* <Route
             path="pengajar/edit/:id"
             element={<DKMEditProfileDKMTeacher />}
-          />
+          /> */}
 
-          <Route path="kajian" element={<DKMLectureParent />}>
-            <Route index element={<DKMLectureSessions />} />
+          {/* <Route path="kajian" element={<DKMLectureParent />}> */}
+            {/* <Route index element={<DKMLectureSessions />} />
             <Route path="tambah-edit" element={<DKMAddEditLectureSession />} />
             <Route
               path="tambah-edit/:id"
               element={<DKMAddEditLectureSession />}
-            />
+            /> */}
 
             {/* Detail & Subhalaman */}
-            <Route
+            {/* <Route
               path="kajian-detail/:id"
               element={<DKMDetailLectureSessions />}
             />
@@ -494,10 +495,10 @@ export default function AppRoutes() {
             <Route
               path="kajian-detail/:id/statistik-soal"
               element={<DKMStatsQuizLectureSessions />}
-            />
+            /> */}
 
             {/* Materi Lengkap */}
-            <Route
+            {/* <Route
               path="kajian-detail/:id/materi-lengkap"
               element={<DKMFullTranscriptLectureSessions />}
             />
@@ -508,10 +509,10 @@ export default function AppRoutes() {
             <Route
               path="kajian-detail/:id/materi-lengkap/tambah-edit/:materialId"
               element={<DKMAddEditFullTransciptLectureSessions />}
-            />
+            /> */}
 
             {/* Ringkasan */}
-            <Route
+            {/* <Route
               path="kajian-detail/:id/ringkasan"
               element={<DKMSummaryLectureSessions />}
             />
@@ -522,10 +523,10 @@ export default function AppRoutes() {
             <Route
               path="kajian-detail/:id/ringkasan/tambah-edit/:materialId"
               element={<DKMAddEditSummaryLectureSessions />}
-            />
+            /> */}
 
             {/* Dokumen */}
-            <Route
+            {/* <Route
               path="kajian-detail/:id/dokumen"
               element={<DKMDocumentLectureSessions />}
             />
@@ -536,15 +537,15 @@ export default function AppRoutes() {
             <Route
               path="kajian-detail/:id/dokumen/tambah-edit/:docId"
               element={<DKMAddEditDocumentLectureSessions />}
-            />
-          </Route>
+            /> */}
+          {/* </Route> */}
 
-          <Route path="tema" element={<DKMLectureParent />}>
-            <Route index element={<DKMLecture />} />
+          {/* <Route path="tema" element={<DKMLectureParent />}> */}
+            {/* <Route index element={<DKMLecture />} />
             <Route path="tambah-edit" element={<DKMAddEditLecture />} />
-            <Route path="tambah-edit/:id" element={<DKMAddEditLecture />} />
+            <Route path="tambah-edit/:id" element={<DKMAddEditLecture />} /> */}
             {/* Tambahan */}
-            <Route path="tema-detail/:id" element={<DKMDetailLecture />} />
+            {/* <Route path="tema-detail/:id" element={<DKMDetailLecture />} />
             <Route
               path="tema-detail/:id/semua-kajian"
               element={<DKMAllLectureLectureSessions />}
@@ -573,12 +574,12 @@ export default function AppRoutes() {
             <Route
               path="tema-detail/:id/dokumen"
               element={<DKMDocumentLecture />}
-            />
-          </Route>
+            /> */}
+          {/* </Route> */}
 
-          <Route path="sertifikat" element={<Sertifikat />} />
-          <Route path="keuangan" element={<Keuangan />} />
-          <Route path="post" element={<DKMPostParent />}>
+          {/* <Route path="sertifikat" element={<Sertifikat />} /> */}
+          {/* <Route path="keuangan" element={<Keuangan />} /> */}
+          {/* <Route path="post" element={<DKMPostParent />}>
             <Route index element={<DKMPost />} />
             <Route path="tambah-edit" element={<DKMAddEditPost />} />
             <Route path="tambah-edit/:id" element={<DKMAddEditPost />} />
@@ -589,18 +590,18 @@ export default function AppRoutes() {
             <Route path="tambah-edit" element={<DKMAddEditThemaPost />} />
             <Route path="tambah-edit/:id" element={<DKMAddEditThemaPost />} />
             <Route path="detail/:id" element={<DKMDetailThemaPost />} />
-          </Route>
+          </Route> */}
 
           {/* Nested setting layout */}
-          <Route element={<DKMSettingParent />}>
+          {/* <Route element={<DKMSettingParent />}>
             <Route path="profil-saya" element={<ProfilSayaDkm />} />
             <Route path="tampilan" element={<DKMAppereance />} />
             <Route path="dukung-kami" element={<SupportUs />} />
             <Route path="kerjasama" element={<Partnership />} />
             <Route path="tanya-jawab" element={<DKMFaq />} />
-          </Route>
-        </Route>
-      </Route>
+          </Route> */}
+        {/* </Route> */}
+      {/* </Route> */}
       {/*  */}
       {/*  */}
       {/* ==== Protected Routes - Author ==== */}
@@ -910,6 +911,7 @@ export default function AppRoutes() {
       </Route>
       {/* ==== 404 ==== */}
       <Route path="*" element={<NotFound />} />
+      <Route path="/unauthorized" element={<Unauthorized />} />
     </Routes>
   );
 }
