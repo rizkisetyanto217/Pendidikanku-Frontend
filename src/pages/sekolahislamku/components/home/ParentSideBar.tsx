@@ -1,5 +1,5 @@
 // src/pages/sekolahislamku/components/home/ParentSidebar.tsx
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Link,
   useLocation,
@@ -12,6 +12,7 @@ import {
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 import { NAVS, type NavItem } from "./navsConfig";
+import api from "@/lib/axios";
 
 export type Kind = "sekolah" | "murid" | "guru";
 export type AutoKind = Kind | "auto";
@@ -21,30 +22,19 @@ export type ParentSidebarProps = {
   kind?: AutoKind;
   className?: string;
   desktopOnly?: boolean;
-  mode?: "desktop" | "mobile" | "auto"; // default: auto
-  openMobile?: boolean; // dipakai saat mode=auto
+  mode?: "desktop" | "mobile" | "auto";
+  openMobile?: boolean;
   onCloseMobile?: () => void;
 };
 
-/* ---------- Helpers ---------- */
-const resolveKind = (pathname: string): Kind => {
-  if (pathname.includes("/sekolah")) return "sekolah";
-  if (pathname.includes("/guru")) return "guru";
-  return "murid";
-};
-
+const normalize = (s: string) => s.replace(/\/+$/, "");
 const buildBase = (slug: string | undefined, kind: Kind) =>
   slug ? `/${slug}/${kind}` : `/${kind}`;
-
-const normalize = (s: string) => s.replace(/\/+$/, "");
-
-// Pastikan path tanpa trailing slash
 const buildTo = (base: string, p: string) => {
   const raw = p === "" || p === "." ? base : `${base}/${p.replace(/^\/+/, "")}`;
   return normalize(raw);
 };
 
-/* ---------- Sidebar item ---------- */
 function SidebarItem({
   palette,
   to,
@@ -62,10 +52,8 @@ function SidebarItem({
 }) {
   const location = useLocation();
   const resolved = useResolvedPath(to);
-
   const current = normalize(location.pathname);
   const target = normalize(resolved.pathname);
-
   const isActive = end
     ? current === target
     : current === target || current.startsWith(target + "/");
@@ -97,7 +85,6 @@ function SidebarItem({
   );
 }
 
-/* ---------- Component ---------- */
 export default function ParentSidebar({
   palette,
   kind = "auto",
@@ -112,13 +99,55 @@ export default function ParentSidebar({
   const match = useMatch("/:slug/*");
   const slug = params.slug ?? match?.params.slug ?? "";
 
-  const resolvedKind: Kind = kind === "auto" ? resolveKind(pathname) : kind;
-  const base = buildBase(slug, resolvedKind);
+  const [resolvedKind, setResolvedKind] = useState<Kind>("sekolah");
+  const [loading, setLoading] = useState(true);
 
-  const navs: (NavItem & { to: string })[] = NAVS[resolvedKind].map((n) => ({
-    ...n,
-    to: buildTo(base, n.path),
-  }));
+  useEffect(() => {
+    async function determineRole() {
+      try {
+        const savedRole = localStorage.getItem("active_role");
+        if (savedRole) {
+          const r = savedRole.toLowerCase();
+          if (["teacher", "guru"].includes(r)) setResolvedKind("guru");
+          else if (["student", "murid"].includes(r)) setResolvedKind("murid");
+          else setResolvedKind("sekolah");
+          setLoading(false);
+          return;
+        }
+
+        const res = await api.get("/auth/me/simple-context");
+        const memberships = res.data?.data?.memberships ?? [];
+        let role = "user";
+
+        if (memberships.length > 0) {
+          const allRoles = memberships.flatMap((m: any) => m.roles ?? []);
+          if (allRoles.includes("dkm") || allRoles.includes("admin"))
+            role = "dkm";
+          else if (allRoles.includes("teacher")) role = "teacher";
+          else if (allRoles.includes("student")) role = "student";
+        }
+
+        localStorage.setItem("active_role", role);
+
+        if (["teacher", "guru"].includes(role)) setResolvedKind("guru");
+        else if (["student", "murid"].includes(role)) setResolvedKind("murid");
+        else setResolvedKind("sekolah");
+      } catch (err) {
+        console.error("Gagal menentukan role sidebar:", err);
+        setResolvedKind("sekolah");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    determineRole();
+  }, []);
+
+  const base = buildBase(slug, resolvedKind);
+  const navs: (NavItem & { to: string })[] = useMemo(
+    () => NAVS[resolvedKind].map((n) => ({ ...n, to: buildTo(base, n.path) })),
+    [resolvedKind, base]
+  );
 
   const SidebarContent = (
     <SectionCard
@@ -126,24 +155,29 @@ export default function ParentSidebar({
       className="p-2"
       style={{ border: `1px solid ${palette.silver1}` }}
     >
-      <ul className="space-y-2">
-        {navs.map(({ to, label, icon, end }) => (
-          <li key={to}>
-            <SidebarItem
-              palette={palette}
-              to={to}
-              end={end}
-              icon={icon}
-              label={label}
-              onClick={mode !== "desktop" ? onCloseMobile : undefined}
-            />
-          </li>
-        ))}
-      </ul>
+      {loading ? (
+        <div className="text-sm text-gray-500 text-center py-6">
+          Memuat menu...
+        </div>
+      ) : (
+        <ul className="space-y-2">
+          {navs.map(({ to, label, icon, end }) => (
+            <li key={to}>
+              <SidebarItem
+                palette={palette}
+                to={to}
+                end={end}
+                icon={icon}
+                label={label}
+                onClick={mode !== "desktop" ? onCloseMobile : undefined}
+              />
+            </li>
+          ))}
+        </ul>
+      )}
     </SectionCard>
   );
 
-  // Desktop only
   if (mode === "desktop") {
     return (
       <nav
@@ -158,7 +192,6 @@ export default function ParentSidebar({
     );
   }
 
-  // Mobile drawer
   if (mode === "mobile" || (mode === "auto" && openMobile)) {
     return (
       <div className="fixed inset-0 z-50 flex lg:hidden">
@@ -168,7 +201,6 @@ export default function ParentSidebar({
     );
   }
 
-  // Auto → desktop render
   return (
     <nav
       className={[
