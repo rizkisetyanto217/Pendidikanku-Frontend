@@ -186,7 +186,7 @@ const SchoolProfile: React.FC<SchoolProfileProps> = ({
         palette={palette}
         title="Profil Sekolah"
         gregorianDate={nowISO}
-        dateFmt={topbarDateFmt}
+
         showBack={isFromMenuUtama}
       />
 

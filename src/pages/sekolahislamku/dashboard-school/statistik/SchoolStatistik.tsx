@@ -181,7 +181,7 @@ const SchoolStatistik: React.FC = () => {
         title="Statistik Sekolah"
         gregorianDate={gregorianISO}
         hijriDate={hijriLong(gregorianISO)}
-        dateFmt={dateLong}
+
         showBack
       />
 

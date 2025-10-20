@@ -279,7 +279,7 @@ export default function ClassAttandence() {
         title="Absensi Kelas"
         gregorianDate={todayISO}
         hijriDate={hijriLong(todayISO)}
-        dateFmt={dateLong}
+
         showBack
       />
 

@@ -223,7 +223,7 @@ export default function StudentProgress() {
         title={data?.parentName}
         gregorianDate={gregorianISO}
         hijriDate={hijriLong(gregorianISO)}
-        dateFmt={dateLong}
+
         showBack={isFromMenuUtama}
       />
 

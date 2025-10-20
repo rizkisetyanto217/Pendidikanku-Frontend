@@ -1015,7 +1015,7 @@ const SchoolFinance: React.FC<SchoolFinanceProps> = ({
         title="Keuangan"
         gregorianDate={gregorianISO}
         hijriDate={hijriLong(gregorianISO)}
-        dateFmt={dateLong}
+
         showBack={isFromMenuUtama}
       />
 

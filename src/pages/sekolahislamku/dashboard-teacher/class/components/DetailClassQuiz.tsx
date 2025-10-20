@@ -158,7 +158,7 @@ const DetailClassQuiz: React.FC = () => {
         palette={palette}
         title="Detail Quiz"
         gregorianDate={headerDateISO}
-        dateFmt={dateLong}
+
         showBack
       />
 

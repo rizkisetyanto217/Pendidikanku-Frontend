@@ -193,7 +193,7 @@ export default function StudentRaport() {
         palette={palette}
         title="Rapor Nilai"
         gregorianDate={new Date().toISOString()}
-        dateFmt={topbarDateFmt}
+
         hijriDate={hijriWithWeekday(new Date().toISOString())}
       />
 

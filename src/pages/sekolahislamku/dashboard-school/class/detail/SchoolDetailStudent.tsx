@@ -516,7 +516,7 @@ export default function SchoolDetailStudent() {
         palette={palette}
         title="Detail Siswa"
         gregorianDate={new Date().toISOString()}
-        dateFmt={dateLong}
+
       />
 
       <main className="mx-auto Replace px-4 py-6">

@@ -421,7 +421,7 @@ const TeachersPage: React.FC<SchoolTeacherProps> = ({ showBack = false }) => {
   const [openImport, setOpenImport] = useState(false);
   const [q, setQ] = useState("");
 
-  const { user } = useCurrentUser();
+  const { data: user } = useCurrentUser();
   const masjidId = useMemo(() => {
     const u: any = user || {};
     return u.masjid_id || u.lembaga_id || u?.masjid?.id || u?.lembaga?.id || "";

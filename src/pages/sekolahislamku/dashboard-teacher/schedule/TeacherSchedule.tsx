@@ -303,7 +303,7 @@ const TeacherSchedule: React.FC<TeacherScheduleProps> = ({
         title="Jadwal Mengajar"
         gregorianDate={nowISO}
         hijriDate={hijriLong(nowISO)}
-        dateFmt={dateLong}
+
         showBack
       />
 

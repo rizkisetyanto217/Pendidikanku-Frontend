@@ -96,7 +96,7 @@ export default function DetailAssignment() {
         palette={palette}
         title="Detail Tugas"
         gregorianDate={new Date().toISOString()}
-        dateFmt={fmtDateLong}
+
       />
 
       {/* Modals */}

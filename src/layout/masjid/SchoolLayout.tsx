@@ -20,7 +20,7 @@ export default function SchoolLayout() {
         palette={palette}
         // hijriDate="15 Rajab 1446"
         // gregorianDate="2025-01-15"
-        // dateFmt={(iso) => new Date(iso).toLocaleDateString('id-ID')}
+        //
       /> */}
 
       {/* Container + 2 kolom saat lg+ */}

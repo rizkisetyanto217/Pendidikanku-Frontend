@@ -176,7 +176,7 @@ const TeacherCertificate: React.FC<CertificateProps> = ({
         title="Sertifikat & Kompetensi"
         gregorianDate={TODAY_ISO}
         hijriDate={hijriWithWeekday(TODAY_ISO)}
-        dateFmt={dateLong}
+
         showBack
       />
 

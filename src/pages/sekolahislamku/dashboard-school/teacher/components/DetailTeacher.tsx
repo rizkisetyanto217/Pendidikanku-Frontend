@@ -72,7 +72,7 @@ const hijriWithWeekday = (iso?: string) =>
 const DetailTeacher: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user } = useCurrentUser();
+  const { data: user } = useCurrentUser();
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
 

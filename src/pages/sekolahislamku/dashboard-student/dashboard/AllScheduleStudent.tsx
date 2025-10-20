@@ -51,7 +51,7 @@ export default function AllScheduleStudent() {
         palette={palette}
         title={state?.title ?? "Jadwal Hari Ini"}
         gregorianDate={new Date().toISOString()}
-        dateFmt={topbarDateFmt}
+
       />
 
       <main className="w-full px-4 md:px-6 py-4   md:py-8">

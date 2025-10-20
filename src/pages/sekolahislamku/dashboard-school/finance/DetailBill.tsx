@@ -303,7 +303,7 @@ const DetailBill: React.FC = () => {
           title="Detail Tagihan"
           gregorianDate={gregorianISO}
           hijriDate={hijriLong(gregorianISO)}
-          dateFmt={dateLong}
+
           showBack
         />
         <main className="w-full px-4 md:px-6 md:py-8">
@@ -334,7 +334,7 @@ const DetailBill: React.FC = () => {
           title="Detail Tagihan"
           gregorianDate={gregorianISO}
           hijriDate={hijriLong(gregorianISO)}
-          dateFmt={dateLong}
+
           showBack={true}
         />
         <main className="w-full px-4 md:px-6 md:py-8">
@@ -376,7 +376,7 @@ const DetailBill: React.FC = () => {
         title="Detail Tagihan"
         gregorianDate={gregorianISO}
         hijriDate={hijriLong(gregorianISO)}
-        dateFmt={dateLong}
+
         showBack
       />
 

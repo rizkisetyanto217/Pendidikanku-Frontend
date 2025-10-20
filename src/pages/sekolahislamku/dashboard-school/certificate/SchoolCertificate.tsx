@@ -394,7 +394,7 @@ const SchoolCertificate: React.FC = () => {
         title="Sertifikat"
         gregorianDate={gregorianISO}
         hijriDate={hijriLong(gregorianISO)}
-        dateFmt={dateLong}
+
         showBack
       />
 

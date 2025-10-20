@@ -142,7 +142,7 @@ const MyClass: React.FC = () => {
         palette={palette}
         title="Kelas Saya (Murid)"
         gregorianDate={new Date().toISOString()}
-        dateFmt={dateLong}
+
         showBack
       />
 

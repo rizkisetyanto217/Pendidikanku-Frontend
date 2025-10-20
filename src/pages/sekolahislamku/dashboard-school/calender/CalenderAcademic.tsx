@@ -218,7 +218,7 @@ const CalenderAcademic: React.FC = () => {
         title="Kalender Akademik"
         gregorianDate={nowISO}
         hijriDate={hijriLong(nowISO)}
-        dateFmt={dateLong}
+
         showBack={true}
       />
 

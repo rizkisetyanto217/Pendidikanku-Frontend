@@ -6,9 +6,9 @@ import DKMSettingParent from "@/layout/DKMSettingLayout";
 
 // Halaman DKM
 import DashboardAdminDkm from "@/pages/dashboard/dkm/home/DKMHome";
-import ProfilMasjid from "@/pages/dashboard/dkm/profile/masjid/DKMProfile";
+// import ProfilMasjid from "@/pages/dashboard/dkm/profile/masjid/DKMProfile";
 import ProfileDKMPengajar from "@/pages/dashboard/dkm/profile/dkm/DKMProfileDKMTeacher";
-import Kajian from "@/pages/dashboard/dkm/lecture/lecture-sessions/DKMLectureSessions";
+// import Kajian from "@/pages/dashboard/dkm/lecture/lecture-sessions/DKMLectureSessions";
 import Sertifikat from "@/pages/dashboard/dkm/certificate/DKMCertificate";
 import Keuangan from "@/pages/dashboard/dkm/finance/DKMFinance";
 import Postingan from "@/pages/dashboard/dkm/post/DKMPostParent";
@@ -39,11 +39,11 @@ import AdminLayout from "@/layout/AdminLayout";
 import TeacherHome from "@/pages/dashboard/teacher/home/TeacherHome";
 import TreasurerHome from "@/pages/dashboard/treasurer/home/TreasurerHome";
 import AdminHome from "@/pages/dashboard/admin/home/AdminHome";
-import DkmEditSosmedProfile from "@/pages/dashboard/dkm/profile/masjid/DKMEditSosmedMasjid";
-import DKMEditMasjid from "@/pages/dashboard/dkm/profile/masjid/DKMEditMasjid";
-import DKMEditProfileMasjid from "@/pages/dashboard/dkm/profile/masjid/DKMEditProfileMasjid";
-import DKMLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/DKMLectureSessions";
-import DKMLecture from "@/pages/dashboard/dkm/lecture/lecture/DKMLecture";
+// import DkmEditSosmedProfile from "@/pages/dashboard/dkm/profile/masjid/DKMEditSosmedMasjid";
+// import DKMEditMasjid from "@/pages/dashboard/dkm/profile/masjid/DKMEditMasjid";
+// import DKMEditProfileMasjid from "@/pages/dashboard/dkm/profile/masjid/DKMEditProfileMasjid";
+// import DKMLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/DKMLectureSessions";
+// import DKMLecture from "@/pages/dashboard/dkm/lecture/lecture/DKMLecture";
 import DKMLectureParent from "@/pages/dashboard/dkm/lecture/DKMLectureParent";
 import DKMDetailLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/detail/DKMDetailLectureSessions";
 import DKMInformationLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/information/DKMInformationLectureSessions";
@@ -62,8 +62,8 @@ import DKMSummaryLecture from "@/pages/dashboard/dkm/lecture/lecture/materials/D
 import DKMDocumentLecture from "@/pages/dashboard/dkm/lecture/lecture/assets/DKMDocumentLecture";
 import DKMAllLectureLectureSessions from "@/pages/dashboard/dkm/lecture/lecture/all-lecture-sessions/DKMAllLectureSession";
 import DKMSuggestLecture from "@/pages/dashboard/dkm/lecture/lecture/suggest/DKMSuggestLecture";
-import DKMAddLectureSession from "@/pages/dashboard/dkm/lecture/lecture-sessions/detail/add-edit/DKMAddEditLectureSessions";
-import DKMAddEditLectureSession from "@/pages/dashboard/dkm/lecture/lecture-sessions/detail/add-edit/DKMAddEditLectureSessions";
+// import DKMAddLectureSession from "@/pages/dashboard/dkm/lecture/lecture-sessions/detail/add-edit/DKMAddEditLectureSessions";
+// import DKMAddEditLectureSession from "@/pages/dashboard/dkm/lecture/lecture-sessions/detail/add-edit/DKMAddEditLectureSessions";
 import DKMAddEditLecture from "@/pages/dashboard/dkm/lecture/lecture/detail/DKMAddEditLecture";
 import MasjidLinkTree from "@/pages/linktree/MasjidLinkTreeHome";
 import MasjidDonationMasjid from "@/pages/linktree/finansial/donation/MasjidDonation";
@@ -88,8 +88,8 @@ import MasjidResultQuizLectureSessions from "@/pages/linktree/lecture/material/l
 import DKMAddEditDocumentLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/assets/DKMAddEditDocumentLectureSessions";
 import MasjidVideoAudioLectureSessions from "@/pages/linktree/lecture/material/lecture-sessions/assets/MasjidVideoAudioLectureSessions";
 import DKMAddEditFullTransciptLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/materials/fullTranscipt/DKMAddEditFullTransciptLectureSessions";
-import DKMAddEditSummaryLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/materials/summary/DKMAddEditSummaryLectureSessions";
-import DKMProfilMasjidParent from "@/pages/dashboard/dkm/profile/DKMProfileParent";
+// import DKMAddEditSummaryLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/materials/summary/DKMAddEditSummaryLectureSessions";
+// import DKMProfilMasjidParent from "@/pages/dashboard/dkm/profile/DKMProfileParent";
 import MasjidMaterial from "@/pages/linktree/lecture/material/MasjidMaterial";
 import MasjidCertificateLecture from "@/pages/linktree/lecture/certificate/MasjidCertificate";
 import MasjidDocsLecture from "@/pages/linktree/lecture/material/lecture/assets/MasjidDocsLecture";
@@ -103,7 +103,7 @@ import MasjidResultExamLecture from "@/pages/linktree/lecture/material/lecture/e
 import MasjidMyProfile from "@/pages/linktree/activity/setting/MasjidMyProfile";
 import MasjidMyActivity from "@/pages/linktree/activity/my-activity/MasjidMyActivity";
 import MasjidPost from "@/pages/linktree/post/main/MasjidPost";
-import MasjidDetailPost from "@/pages/linktree/post/main/MasjidDetailPost";
+// import MasjidDetailPost from "@/pages/linktree/post/main/MasjidDetailPost";
 import MasjidDetailDonation from "@/pages/linktree/post/main/MasjidDetailMotivation";
 import MasjidSettingLayout from "@/layout/masjid/MasjidSettingLayout";
 import MasjidAppereance from "@/pages/linktree/activity/setting/MasjidAppereance";
@@ -114,11 +114,11 @@ import MasjidSettingMenu from "@/layout/masjid/MasjidSettingMenu";
 import MasjidMyDonation from "@/pages/linktree/finansial/report/MasjidMyDonation";
 
 import MasjidMyStats from "@/pages/linktree/activity/my-activity/MasjidMyStats";
-import DKMThemaPost from "@/pages/dashboard/dkm/post/themaPost/DKMThemaPost";
-import DKMPost from "@/pages/dashboard/dkm/post/post/DKMPost";
+// import DKMThemaPost from "@/pages/dashboard/dkm/post/themaPost/DKMThemaPost";
+// import DKMPost from "@/pages/dashboard/dkm/post/post/DKMPost";
 import DKMPostParent from "@/pages/dashboard/dkm/post/DKMPostParent";
-import DKMAddEditThemaPost from "@/pages/dashboard/dkm/post/themaPost/DKMAddEditThemaPost";
-import DKMAddEditPost from "@/pages/dashboard/dkm/post/post/DKMAddEditPost";
+// import DKMAddEditThemaPost from "@/pages/dashboard/dkm/post/themaPost/DKMAddEditThemaPost";
+// import DKMAddEditPost from "@/pages/dashboard/dkm/post/post/DKMAddEditPost";
 import DKMDetailPost from "@/pages/dashboard/dkm/post/post/DKMDetailPost";
 import DKMDetailThemaPost from "@/pages/dashboard/dkm/post/themaPost/DKMDetailThemaPost";
 import MasjidInformationLecture from "@/pages/linktree/lecture/material/lecture/main/MasjidInformationLecture";
@@ -420,7 +420,7 @@ export default function AppRoutes() {
           />{" "}
           {/* detail */}
           <Route path="post" element={<MasjidPost />} />
-          <Route path="post/:postId" element={<MasjidDetailPost />} />
+          {/* <Route path="post/:postId" element={<MasjidDetailPost />} /> */}
           <Route path="motivation/:id" element={<MasjidDetailDonation />} />
           {/* Activity  */}
           <Route path="aktivitas" element={<MasjidMyActivity />} />
@@ -781,7 +781,7 @@ export default function AppRoutes() {
             <Route path=":id" element={<ClassDetail />} />
           </Route>
           <Route path="jadwal" element={<TeacherSchedule showBack />} />
-          <Route path="profil-guru" element={<TeacherProfil showBack />} />
+          <Route path="profil-guru" element={<TeacherProfil  />} />
           <Route path="pengaturan" element={<TeacherSettings />} />
           <Route path="tugas" element={<TeacherAssignment />} />
           <Route path="sertifikat" element={<TeacherCertificate />} />

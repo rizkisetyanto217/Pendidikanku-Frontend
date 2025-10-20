@@ -16,12 +16,7 @@ import {
   mockTodaySchedule,
 } from "@/pages/sekolahislamku/dashboard-school/types/TodaySchedule";
 import { BookOpen, GraduationCap, UserCog, Users } from "lucide-react";
-import {
-  SectionCard,
- 
-} from "@/pages/sekolahislamku/components/ui/Primitives";
-
-
+import { SectionCard } from "@/pages/sekolahislamku/components/ui/Primitives";
 
 /* ---------- Types ---------- */
 interface ChildDetail {
@@ -97,7 +92,6 @@ const hijriLong = (iso?: string) =>
       })
     : "-";
 
-
 function KpiTile({
   palette,
   label,
@@ -128,7 +122,7 @@ function KpiTile({
     </SectionCard>
   );
 }
-    
+
 /* ---------- Fake API ---------- */
 async function fetchParentHome() {
   const now = new Date();
@@ -202,9 +196,6 @@ const formatIDR = (n: number) =>
     maximumFractionDigits: 0,
   }).format(n);
 
-
-  
-  
 /* ---------- Page ---------- */
 export default function StudentDashboard() {
   const { isDark, themeName } = useHtmlDarkMode();
@@ -242,7 +233,7 @@ export default function StudentDashboard() {
         title={data?.parentName}
         gregorianDate={gregorianISO}
         hijriDate={hijriLong(gregorianISO)}
-        // dateFmt={dateFmt}
+        //
       />
 
       <main className="w-full px-4 md:px-6 py-4   md:py-8">
@@ -291,11 +282,11 @@ export default function StudentDashboard() {
               <div className="lg:col-span-8">
                 <BillsSectionCard
                   palette={palette}
-                  bills={data?.bills ?? []}
-                  dateFmt={(iso) => dateFmt(normalizeISOToLocalNoon(iso))}
+                  // bills={homeQ.data?.finance.outstandingBills ?? []}
+                  dateFmt={dateFmt}
                   formatIDR={formatIDR}
-                  seeAllPath="finnance-list"
-                  getPayHref={(b) => `tagihan/${b.id}`}
+                  seeAllPath="all-invoices"
+                  getPayHref={(b) => `/tagihan/${b.id}`}
                 />
               </div>
 
@@ -313,7 +304,6 @@ export default function StudentDashboard() {
               <AnnouncementsList
                 palette={palette}
                 items={data?.announcements ?? []}
-                dateFmt={(iso) => dateFmt(normalizeISOToLocalNoon(iso))}
                 seeAllPath="announcements"
                 seeAllState={{
                   items: data?.announcements,

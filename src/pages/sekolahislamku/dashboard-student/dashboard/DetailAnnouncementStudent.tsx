@@ -66,7 +66,7 @@ export default function DetailAnnouncementStudent() {
         palette={palette}
         title="Detail Pengumuman"
         gregorianDate={new Date().toISOString()}
-        dateFmt={dateFmt}
+
       />
 
       <main className="mx-auto Replace px-4 py-6">

@@ -394,7 +394,7 @@ export default function TeacherAttendance() {
         title="Kehadiran"
         gregorianDate={qDate} // sudah local-noon safe
         hijriDate={hijriLong(qDate)} // ⬅️ paksa pakai Umm al-Qura, anti-geser
-        dateFmt={(iso) => dateLong(iso)}
+
       />
 
       <main className="mx-auto Replace px-4 py-6">

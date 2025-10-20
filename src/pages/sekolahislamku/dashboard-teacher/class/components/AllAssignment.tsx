@@ -239,7 +239,7 @@ export default function AllAssignment() {
         palette={palette}
         gregorianDate={new Date().toISOString()}
         title={heading || "Semua Tugas"}
-        dateFmt={fmtDateLong}
+
       />
 
       {/* Modals */}

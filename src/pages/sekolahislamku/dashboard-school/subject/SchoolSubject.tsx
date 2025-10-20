@@ -338,7 +338,7 @@ const SchoolSubject: React.FC = () => {
         title="Mata Pelajaran"
         gregorianDate={gregorianISO}
         hijriDate={hijriLong(gregorianISO)}
-        dateFmt={dateLong}
+
         showBack
       />
 

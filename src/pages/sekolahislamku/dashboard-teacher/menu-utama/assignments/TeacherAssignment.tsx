@@ -213,7 +213,7 @@ const TeacherAssignment: React.FC = () => {
         title="Tugas Guru"
         gregorianDate={TODAY_ISO}
         hijriDate={hijriWithWeekday(TODAY_ISO)}
-        dateFmt={dateLong}
+
         showBack
       />
 

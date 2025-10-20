@@ -193,7 +193,7 @@ const TeacherSettings: React.FC<TeacherSettingsProps> = ({
         title="Pengaturan"
         gregorianDate={TODAY_ISO}
         hijriDate={hijriWithWeekday(TODAY_ISO)}
-        dateFmt={dateLong}
+
         showBack
       />
 

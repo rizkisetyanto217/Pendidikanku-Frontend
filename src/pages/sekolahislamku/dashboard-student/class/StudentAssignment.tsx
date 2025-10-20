@@ -275,7 +275,7 @@ const StudentAssignment: React.FC = () => {
         palette={palette}
         title={`Tugas — ${classMeta.name}`}
         gregorianDate={new Date().toISOString()}
-        dateFmt={dateLong}
+
         showBack
       />
 

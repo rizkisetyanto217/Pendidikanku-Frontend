@@ -148,7 +148,7 @@ const QuizPage: React.FC = () => {
         palette={palette}
         title={`Kelola Quiz`}
         gregorianDate={new Date().toISOString()}
-        dateFmt={dateLong}
+
         showBack
       />
 

@@ -137,7 +137,7 @@ const SchoolSpp: React.FC = () => {
         title="SPP"
         gregorianDate={gregorianISO}
         hijriDate={hijriLong(gregorianISO)}
-        dateFmt={dateLong}
+
         showBack
       />
 

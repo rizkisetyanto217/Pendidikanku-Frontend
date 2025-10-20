@@ -227,7 +227,7 @@ export default function DetailClass() {
         title={cls ? `Kelas: ${cls.name}` : "Kelas"}
         gregorianDate={todayISO}
         hijriDate={hijriLong(todayISO)}
-        dateFmt={dateLong}
+
         showBack
       />
 

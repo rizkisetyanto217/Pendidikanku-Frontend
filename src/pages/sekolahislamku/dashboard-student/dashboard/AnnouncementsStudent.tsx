@@ -77,7 +77,7 @@ export default function AnnouncementsStudent() {
         palette={palette}
         title={state?.heading ?? "Semua Pengumuman"}
         gregorianDate={new Date().toISOString()}
-        dateFmt={dateFmt}
+
         showBack={isFromMenuUtama}
       />
 

@@ -89,7 +89,7 @@ export default function DetailAcademic() {
         palette={palette}
         title="Detail Akademik"
         gregorianDate={topbarISO}
-        dateFmt={dateLong}
+
         showBack={true}
       />
 

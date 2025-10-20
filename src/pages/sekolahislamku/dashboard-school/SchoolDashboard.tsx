@@ -4,7 +4,7 @@ import { Outlet, useNavigate } from "react-router-dom";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import axios from "@/lib/axios";
-import { useEffectiveMasjidId } from "@/hooks/useEffectiveMasjidId";
+// import { useEffectiveMasjidId } from "@/hooks/useEffectiveMasjidId";
 
 import {
   SectionCard,
@@ -188,15 +188,18 @@ const atLocalNoon = (d: Date) => {
   return x;
 };
 const toLocalNoonISO = (d: Date) => atLocalNoon(d).toISOString();
-const dateFmt = (iso?: string) =>
-  iso
-    ? new Date(iso).toLocaleDateString("id-ID", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    : "-";
+const dateFmt = (iso: string): string => {
+  if (!iso) return "-";
+  try {
+    return new Date(iso).toLocaleDateString("id-ID", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    });
+  } catch {
+    return iso;
+  }
+};
 const hijriLong = (iso?: string) =>
   iso
     ? new Date(iso).toLocaleDateString("id-ID-u-ca-islamic-umalqura", {
@@ -582,7 +585,7 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
     }
   }, [flash]);
 
-  useEffectiveMasjidId();
+  // useEffectiveMasjidId();
 
   const homeQ = useQuery({ queryKey: QK.HOME, queryFn: fetchSchoolHome });
   const statsQ = useLembagaStats();
@@ -612,7 +615,6 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
         title="Dashboard Sekolah"
         gregorianDate={topbarGregorianISO}
         hijriDate={hijriLong(topbarGregorianISO)}
-        
       />
       <Flash palette={palette} flash={flash} />
 
@@ -641,7 +643,6 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
                 { label: "Kelas", value: 18, icon: <BookOpen size={18} /> },
               ].map((k) => (
                 <KpiTile
-                 
                   key={k.label}
                   palette={palette}
                   label={k.label}
@@ -721,10 +722,7 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
                   dateFmt={dateFmt}
                   formatIDR={formatIDR}
                   seeAllPath="all-invoices"
-                  seeAllState={{
-                    bills: homeQ.data?.finance.outstandingBills ?? [],
-                    heading: "Semua Tagihan",
-                  }}
+                  getPayHref={(b) => `/tagihan/${b.id}`}
                 />
               </div>
 
@@ -732,13 +730,14 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
               <div className="lg:col-span-12">
                 <AnnouncementsList
                   palette={palette}
-                  items={announcementsQ.data ?? homeQ.data?.announcements ?? []}
                   dateFmt={dateFmt}
+                  items={announcementsQ.data ?? homeQ.data?.announcements ?? []}
                   seeAllPath="all-announcement"
                   getDetailHref={(a) => `/pengumuman/${a.slug ?? a.id}`}
                   showActions
                   canAdd
                 />
+
                 {(announcementsQ.isLoading || announcementsQ.isFetching) && (
                   <div className="px-4 pt-2 text-xs opacity-70">
                     Memuat pengumuman…

@@ -69,7 +69,7 @@ export default function AttendanceDetail() {
         palette={palette}
         title="Detail Kehadiran Kelas"
         gregorianDate={effectiveDateISO}
-        dateFmt={(iso) => dateLong(iso)}
+
       />
 
       <main className="mx-auto Replace px-4 py-6">

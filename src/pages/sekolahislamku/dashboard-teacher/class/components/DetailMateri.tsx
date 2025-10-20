@@ -113,7 +113,7 @@ export default function DetailMateri() {
         palette={palette}
         title={material?.title || "Detail Materi"}
         gregorianDate={new Date().toISOString()}
-        dateFmt={dateLong}
+
       />
 
       <main className="mx-auto Replace px-4 py-6">

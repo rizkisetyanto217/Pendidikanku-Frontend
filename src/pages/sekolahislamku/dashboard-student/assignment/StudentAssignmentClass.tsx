@@ -229,7 +229,7 @@ const StudentAssignment: React.FC = () => {
             : `Tugas — ${SUBJECT_LABEL[subjectFilter]}`
         }
         gregorianDate={new Date().toISOString()}
-        dateFmt={dateLong}
+
         showBack
       />
 

@@ -1,53 +1,47 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import api from "@/lib/axios";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
-import api from "@/lib/axios";
-
 import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
 import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar";
 import {
   SectionCard,
-  Badge,
   Btn,
+  Badge,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
-
 import {
-  ArrowLeft,
-  Camera,
-  Edit,
   MessageCircle,
-  User,
-  GraduationCap,
+  Camera,
+  BookOpen,
   MapPin,
-  Mail,
-  Phone,
-  Briefcase,
+  GraduationCap,
   Calendar,
-  Award,
-  Star,
-  Users,
-  Clock,
-  CheckCircle,
 } from "lucide-react";
 
-import ModalEditRingkasan from "./ModalEditRingkasan";
-import ModalEditProfilLengkap from "./ModalEditProfil";
-import ModalEditInformasiMengajar from "./ModalEditRingkasMengajar";
+/* ================= Date/Time Utils ================ */
+const atLocalNoon = (d: Date) => {
+  const x = new Date(d);
+  x.setHours(12, 0, 0, 0);
+  return x;
+};
 
-/* ===== Helpers ===== */
-const dateLong = (iso?: string) =>
+const toLocalNoonISO = (d: Date) => atLocalNoon(d).toISOString();
+
+const normalizeISOToLocalNoon = (iso?: string) =>
+  iso ? toLocalNoonISO(new Date(iso)) : undefined;
+
+const fmtLong = (iso?: string) =>
   iso
     ? new Date(iso).toLocaleDateString("id-ID", {
         weekday: "long",
-        year: "numeric",
+        day: "2-digit",
         month: "long",
-        day: "numeric",
+        year: "numeric",
       })
-    : "-";
+    : "";
 
-const hijriWithWeekday = (iso?: string) =>
+const hijriLong = (iso?: string) =>
   iso
     ? new Date(iso).toLocaleDateString("id-ID-u-ca-islamic-umalqura", {
         weekday: "long",
@@ -55,92 +49,68 @@ const hijriWithWeekday = (iso?: string) =>
         month: "long",
         year: "numeric",
       })
-    : "-";
+    : "";
 
-const TODAY_ISO = new Date().toISOString();
-
-/* ===== Types ===== */
-type TeacherProfilProps = {
-  showBack?: boolean;
-  backLabel?: string;
-};
-
-const TeacherProfil: React.FC<TeacherProfilProps> = ({
-  showBack = false,
-  backLabel = "Kembali",
-}) => {
+/* ==========================================
+   MAIN COMPONENT
+========================================== */
+export default function TeacherProfil() {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
-  const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
-  const [userTeacher, setUserTeacher] = useState<any>(null);
-  const [avatarPreview, setAvatarPreview] = useState("");
+  const [teacher, setTeacher] = useState<any>(null);
+  const [form, setForm] = useState<any>({
+    user_teacher_name: "",
+    user_teacher_field: "",
+    user_teacher_short_bio: "",
+    user_teacher_long_bio: "",
+    user_teacher_greeting: "",
+    user_teacher_education: "",
+    user_teacher_activity: "",
+    user_teacher_experience_years: 0,
+    user_teacher_gender: "male",
+    user_teacher_location: "",
+    user_teacher_city: "",
+    user_teacher_specialties: [],
+    user_teacher_certificates: [],
+    user_teacher_instagram_url: "",
+    user_teacher_whatsapp_url: "",
+    user_teacher_youtube_url: "",
+    user_teacher_linkedin_url: "",
+    user_teacher_github_url: "",
+    user_teacher_telegram_username: "",
+    user_teacher_title_prefix: "",
+    user_teacher_title_suffix: "",
+    user_teacher_is_verified: false,
+    user_teacher_is_active: true,
+  });
 
-  // Modal States
-  const [openRingkasanEdit, setOpenRingkasanEdit] = useState(false);
-  const [openProfilEdit, setOpenProfilEdit] = useState(false);
-  const [openMengajarEdit, setOpenMengajarEdit] = useState(false);
+  const TODAY_ISO =
+    normalizeISOToLocalNoon(new Date().toISOString()) ??
+    toLocalNoonISO(new Date());
 
   const getInitials = (name: string) =>
     name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .substring(0, 2)
-      .toUpperCase();
+      ? name
+          .split(" ")
+          .map((n) => n[0])
+          .join("")
+          .substring(0, 2)
+          .toUpperCase()
+      : "U";
 
   /* ======================================================
-     FETCH DATA GURU
+     FETCH DATA
   ====================================================== */
   const fetchTeacherData = async () => {
     try {
       setLoading(true);
       const res = await api.get("/api/u/user-teachers/list");
       const items = res.data?.data?.items || [];
-      if (items.length > 0) {
-        const teacher = items[0];
-        setUserTeacher(teacher);
-        setAvatarPreview(teacher.user_teacher_avatar_url || "");
-      } else {
-        setUserTeacher(null);
-      }
+      setTeacher(items.length > 0 ? items[0] : null);
     } catch (err) {
       console.error("❌ Gagal ambil data guru:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  /* ======================================================
-     CREATE DATA GURU (MANUAL TRIGGER)
-  ====================================================== */
-  const handleCreateTeacher = async () => {
-    try {
-      setLoading(true);
-      const payload = {
-        user_teacher_name: "Ust. Ahmad Zidan",
-        user_teacher_field: "Fiqih",
-        user_teacher_short_bio: "Pengajar fiqih dasar",
-        user_teacher_long_bio: "Aktif mengajar kajian rutin dan fiqih harian.",
-        user_teacher_greeting: "Assalamu'alaikum warahmatullahi wabarakatuh",
-        user_teacher_education: "Lulusan Pesantren Al-Mubarok",
-        user_teacher_activity: "Kajian rutin setiap Ahad pagi",
-        user_teacher_experience_years: 5,
-        user_teacher_gender: "male",
-        user_teacher_location: "Jawa Barat",
-        user_teacher_city: "Bandung",
-        user_teacher_specialties: ["fiqih", "adab"],
-        user_teacher_certificates: [{ title: "Sertifikat Dakwah", year: 2020 }],
-        user_teacher_instagram_url: "https://instagram.com/ust_zidan",
-        user_teacher_whatsapp_url: "https://wa.me/6281234567890",
-      };
-
-      await api.post("/api/u/user-teachers", payload);
-      console.log("✅ Profil guru berhasil dibuat!");
-      await fetchTeacherData();
-    } catch (err) {
-      console.error("❌ Gagal buat data guru:", err);
     } finally {
       setLoading(false);
     }
@@ -151,582 +121,483 @@ const TeacherProfil: React.FC<TeacherProfilProps> = ({
   }, []);
 
   /* ======================================================
-     RENDER
+     CREATE TEACHER PROFILE
+  ====================================================== */
+  const handleCreateTeacher = async () => {
+    try {
+      setLoading(true);
+      await api.post("/api/u/user-teachers", form);
+      await fetchTeacherData();
+    } catch (err) {
+      console.error("❌ Gagal membuat profil guru:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /* ======================================================
+     UI - FORM CREATE
+  ====================================================== */
+  const renderCreateForm = () => (
+    <div className="flex-1 flex flex-col space-y-6 min-w-0">
+      <SectionCard palette={palette}>
+        <div className="p-4 md:p-6">
+          <h2 className="text-lg font-semibold mb-6">Buat Profil Guru</h2>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Nama Lengkap
+              </label>
+              <input
+                type="text"
+                placeholder="Masukkan nama lengkap"
+                value={form.user_teacher_name}
+                onChange={(e) =>
+                  setForm({ ...form, user_teacher_name: e.target.value })
+                }
+                className="w-full border rounded-lg p-3"
+                style={{
+                  borderColor: palette.silver1,
+                  background: palette.white1,
+                  color: palette.black1,
+                }}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Bidang</label>
+              <input
+                type="text"
+                placeholder="Contoh: Fiqih, Tahfiz"
+                value={form.user_teacher_field}
+                onChange={(e) =>
+                  setForm({ ...form, user_teacher_field: e.target.value })
+                }
+                className="w-full border rounded-lg p-3"
+                style={{
+                  borderColor: palette.silver1,
+                  background: palette.white1,
+                  color: palette.black1,
+                }}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Bio Singkat
+              </label>
+              <textarea
+                placeholder="Deskripsi singkat tentang Anda"
+                value={form.user_teacher_short_bio}
+                onChange={(e) =>
+                  setForm({ ...form, user_teacher_short_bio: e.target.value })
+                }
+                rows={3}
+                className="w-full border rounded-lg p-3"
+                style={{
+                  borderColor: palette.silver1,
+                  background: palette.white1,
+                  color: palette.black1,
+                }}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Bio Lengkap
+              </label>
+              <textarea
+                placeholder="Ceritakan lebih detail tentang pengalaman dan keahlian Anda"
+                value={form.user_teacher_long_bio}
+                onChange={(e) =>
+                  setForm({ ...form, user_teacher_long_bio: e.target.value })
+                }
+                rows={5}
+                className="w-full border rounded-lg p-3"
+                style={{
+                  borderColor: palette.silver1,
+                  background: palette.white1,
+                  color: palette.black1,
+                }}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Salam Pembuka
+              </label>
+              <input
+                type="text"
+                placeholder="Assalamualaikum..."
+                value={form.user_teacher_greeting}
+                onChange={(e) =>
+                  setForm({ ...form, user_teacher_greeting: e.target.value })
+                }
+                className="w-full border rounded-lg p-3"
+                style={{
+                  borderColor: palette.silver1,
+                  background: palette.white1,
+                  color: palette.black1,
+                }}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Pendidikan
+                </label>
+                <input
+                  type="text"
+                  placeholder="LIPIA 2018; Pesantren X"
+                  value={form.user_teacher_education}
+                  onChange={(e) =>
+                    setForm({ ...form, user_teacher_education: e.target.value })
+                  }
+                  className="w-full border rounded-lg p-3"
+                  style={{
+                    borderColor: palette.silver1,
+                    background: palette.white1,
+                    color: palette.black1,
+                  }}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Kegiatan Mengajar
+                </label>
+                <input
+                  type="text"
+                  placeholder="Mengajar di..."
+                  value={form.user_teacher_activity}
+                  onChange={(e) =>
+                    setForm({ ...form, user_teacher_activity: e.target.value })
+                  }
+                  className="w-full border rounded-lg p-3"
+                  style={{
+                    borderColor: palette.silver1,
+                    background: palette.white1,
+                    color: palette.black1,
+                  }}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Tahun Pengalaman
+                </label>
+                <input
+                  type="number"
+                  placeholder="0"
+                  value={form.user_teacher_experience_years}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      user_teacher_experience_years: Number(e.target.value),
+                    })
+                  }
+                  className="w-full border rounded-lg p-3"
+                  style={{
+                    borderColor: palette.silver1,
+                    background: palette.white1,
+                    color: palette.black1,
+                  }}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Kota</label>
+                <input
+                  type="text"
+                  placeholder="Jakarta"
+                  value={form.user_teacher_city}
+                  onChange={(e) =>
+                    setForm({ ...form, user_teacher_city: e.target.value })
+                  }
+                  className="w-full border rounded-lg p-3"
+                  style={{
+                    borderColor: palette.silver1,
+                    background: palette.white1,
+                    color: palette.black1,
+                  }}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Provinsi
+                </label>
+                <input
+                  type="text"
+                  placeholder="DKI Jakarta"
+                  value={form.user_teacher_location}
+                  onChange={(e) =>
+                    setForm({ ...form, user_teacher_location: e.target.value })
+                  }
+                  className="w-full border rounded-lg p-3"
+                  style={{
+                    borderColor: palette.silver1,
+                    background: palette.white1,
+                    color: palette.black1,
+                  }}
+                />
+              </div>
+            </div>
+
+            <div
+              className="flex justify-end gap-3 mt-6 pt-4 border-t"
+              style={{ borderColor: palette.silver1 }}
+            >
+              <Btn
+                palette={palette}
+                variant="outline"
+                onClick={() =>
+                  setForm({
+                    user_teacher_name: "",
+                    user_teacher_field: "",
+                    user_teacher_short_bio: "",
+                    user_teacher_long_bio: "",
+                    user_teacher_greeting: "",
+                    user_teacher_education: "",
+                    user_teacher_activity: "",
+                    user_teacher_experience_years: 0,
+                    user_teacher_gender: "male",
+                    user_teacher_location: "",
+                    user_teacher_city: "",
+                    user_teacher_specialties: [],
+                    user_teacher_certificates: [],
+                    user_teacher_instagram_url: "",
+                    user_teacher_whatsapp_url: "",
+                    user_teacher_youtube_url: "",
+                    user_teacher_linkedin_url: "",
+                    user_teacher_github_url: "",
+                    user_teacher_telegram_username: "",
+                    user_teacher_title_prefix: "",
+                    user_teacher_title_suffix: "",
+                    user_teacher_is_verified: false,
+                    user_teacher_is_active: true,
+                  })
+                }
+              >
+                Reset
+              </Btn>
+              <Btn
+                palette={palette}
+                onClick={handleCreateTeacher}
+                disabled={loading}
+              >
+                {loading ? "Menyimpan..." : "Simpan Profil Guru"}
+              </Btn>
+            </div>
+          </div>
+        </div>
+      </SectionCard>
+    </div>
+  );
+
+  /* ======================================================
+     UI - TAMPIL DATA
+  ====================================================== */
+  const renderProfileView = () => (
+    <div className="flex-1 flex flex-col space-y-6 min-w-0">
+      {/* Header Card dengan Avatar */}
+      <SectionCard palette={palette}>
+        <div className="p-4 md:p-6 flex flex-col md:flex-row items-start md:items-center gap-6">
+          <div className="relative flex-shrink-0">
+            <div
+              className="w-24 h-24 md:w-28 md:h-28 rounded-full flex items-center justify-center text-white text-2xl font-semibold overflow-hidden"
+              style={{ backgroundColor: palette.primary }}
+            >
+              {teacher.user_teacher_avatar_url ? (
+                <img
+                  src={teacher.user_teacher_avatar_url}
+                  alt={teacher.user_teacher_name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                getInitials(teacher.user_teacher_name)
+              )}
+            </div>
+            <button
+              className="absolute -bottom-1 -right-1 text-white w-9 h-9 rounded-full flex items-center justify-center shadow-lg hover:scale-105 transition-transform"
+              style={{ backgroundColor: palette.primary }}
+            >
+              <Camera size={18} />
+            </button>
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-4 flex-wrap">
+              <div>
+                <h2 className="font-semibold text-xl md:text-2xl">
+                  {teacher.user_teacher_title_prefix}{" "}
+                  {teacher.user_teacher_name}{" "}
+                  {teacher.user_teacher_title_suffix}
+                </h2>
+                <p className="text-base mt-1" style={{ color: palette.black2 }}>
+                  {teacher.user_teacher_field}
+                </p>
+              </div>
+              <Badge
+                palette={palette}
+                // variant={teacher.user_teacher_is_active ? "success" : "neutral"}
+              >
+                {teacher.user_teacher_is_active ? "Aktif" : "Nonaktif"}
+              </Badge>
+            </div>
+
+            <div
+              className="mt-4 flex flex-wrap gap-4 text-sm"
+              style={{ color: palette.black2 }}
+            >
+              <div className="flex items-center gap-2">
+                <MapPin size={16} />
+                <span>
+                  {teacher.user_teacher_city}, {teacher.user_teacher_location}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Calendar size={16} />
+                <span>
+                  {teacher.user_teacher_experience_years} tahun pengalaman
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </SectionCard>
+
+      {/* Grid 2 Kolom: Salam & Info */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
+        {/* Salam Pembuka */}
+        <SectionCard palette={palette}>
+          <div className="p-4 md:p-5 h-full">
+            <div className="flex items-center gap-2 mb-3">
+              <div
+                className="h-9 w-9 rounded-xl flex items-center justify-center"
+                style={{
+                  background: palette.white3,
+                  color: palette.quaternary,
+                }}
+              >
+                <MessageCircle size={18} />
+              </div>
+              <h3 className="font-semibold text-base">Salam Pembuka</h3>
+            </div>
+            <p
+              className="italic leading-relaxed"
+              style={{ color: palette.black2 }}
+            >
+              "{teacher.user_teacher_greeting}"
+            </p>
+          </div>
+        </SectionCard>
+
+        {/* Informasi Singkat */}
+        <SectionCard palette={palette}>
+          <div className="p-4 md:p-5 h-full">
+            <div className="flex items-center gap-2 mb-3">
+              <div
+                className="h-9 w-9 rounded-xl flex items-center justify-center"
+                style={{
+                  background: palette.white3,
+                  color: palette.secondary,
+                }}
+              >
+                <BookOpen size={18} />
+              </div>
+              <h3 className="font-semibold text-base">Informasi</h3>
+            </div>
+            <div className="space-y-2 text-sm">
+              <div className="flex items-start gap-2">
+                <GraduationCap
+                  size={16}
+                  className="mt-0.5 flex-shrink-0"
+                  style={{ color: palette.primary }}
+                />
+                <div>
+                  <span className="font-medium">Pendidikan: </span>
+                  <span style={{ color: palette.black2 }}>
+                    {teacher.user_teacher_education}
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <BookOpen
+                  size={16}
+                  className="mt-0.5 flex-shrink-0"
+                  style={{ color: palette.primary }}
+                />
+                <div>
+                  <span className="font-medium">Kegiatan: </span>
+                  <span style={{ color: palette.black2 }}>
+                    {teacher.user_teacher_activity}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </SectionCard>
+      </section>
+
+      {/* Tentang (Full Width) */}
+      <section>
+        <SectionCard palette={palette}>
+          <div className="p-4 md:p-5">
+            <h3 className="font-semibold text-lg mb-4">Tentang</h3>
+            <p
+              className="leading-relaxed whitespace-pre-line"
+              style={{ color: palette.black2 }}
+            >
+              {teacher.user_teacher_long_bio}
+            </p>
+          </div>
+        </SectionCard>
+      </section>
+    </div>
+  );
+
+  /* ======================================================
+     RENDER FINAL
   ====================================================== */
   return (
     <div
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
+      {/* Topbar */}
       <ParentTopBar
         palette={palette}
         title="Profil Guru"
         gregorianDate={TODAY_ISO}
-        hijriDate={hijriWithWeekday(TODAY_ISO)}
-        // dateFmt={dateLong(TODAY_ISO)}
-        showBack
+        hijriDate={hijriLong(TODAY_ISO)}
       />
 
-      <main className="w-full px-4 md:px-6 md:py-8">
-        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-7">
+      {/* Content + Sidebar */}
+      <main className="w-full px-4 md:px-6 py-4 md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Sidebar */}
           <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
             <ParentSidebar palette={palette} />
           </aside>
 
-          {/* === Main Content === */}
-          <div className="flex-1 flex flex-col space-y-8 min-w-0">
-            <div className="md:flex hidden items-center gap-3">
-              {showBack && (
-                <Btn
-                  palette={palette}
-                  onClick={() => navigate(-1)}
-                  variant="ghost"
-                  className="cursor-pointer flex items-center gap-2"
-                >
-                  <ArrowLeft size={20} aria-label={backLabel} />
-                </Btn>
-              )}
-              <h1 className="text-lg font-semibold">Profil Guru</h1>
+          {/* Main Content */}
+          {loading ? (
+            <div className="flex-1 flex items-center justify-center py-20">
+              <div className="text-center" style={{ color: palette.silver2 }}>
+                Memuat data guru...
+              </div>
             </div>
-
-            {loading ? (
-              <div className="text-center py-20 text-gray-500">
-                ⏳ Memuat data guru...
-              </div>
-            ) : !userTeacher ? (
-              <div className="flex flex-col items-center py-20 gap-4">
-                <p className="text-gray-600 text-sm">
-                  Kamu belum memiliki profil guru.
-                </p>
-                <Btn
-                  palette={palette}
-                  onClick={handleCreateTeacher}
-                  disabled={loading}
-                >
-                  {loading ? "Membuat..." : "Buat Profil Guru"}
-                </Btn>
-              </div>
-            ) : (
-              <>
-                {/* === Header Card === */}
-                <SectionCard palette={palette}>
-                  <div className="p-6 md:p-8">
-                    <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-                      {/* Avatar */}
-                      <div className="relative">
-                        <div
-                          className="w-24 h-24 rounded-full flex items-center justify-center text-lg font-semibold text-white overflow-hidden"
-                          style={{ backgroundColor: palette.primary }}
-                        >
-                          {avatarPreview ? (
-                            <img
-                              src={avatarPreview}
-                              alt={userTeacher.user_teacher_name}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            getInitials(userTeacher.user_teacher_name || "U")
-                          )}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            document.getElementById("avatarInput")?.click()
-                          }
-                          className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full flex items-center justify-center text-white shadow-md"
-                          style={{ backgroundColor: palette.primary }}
-                        >
-                          <Camera size={16} />
-                        </button>
-                      </div>
-
-                      {/* Info */}
-                      <div className="flex-1 text-center md:text-left space-y-3">
-                        <div>
-                          <h1 className="text-xl font-bold">
-                            {userTeacher.user_teacher_name}
-                          </h1>
-                          <p
-                            className="text-sm font-medium mt-1"
-                            style={{ color: palette.primary }}
-                          >
-                            {userTeacher.user_teacher_field}
-                          </p>
-                        </div>
-                        <div className="flex flex-wrap gap-2 justify-center md:justify-start">
-                          <Badge palette={palette} variant="success">
-                            <CheckCircle size={14} className="mr-1" />
-                            {userTeacher.user_teacher_is_active
-                              ? "Aktif Mengajar"
-                              : "Nonaktif"}
-                          </Badge>
-                          {userTeacher.user_teacher_experience_years > 0 && (
-                            <Badge palette={palette} variant="default">
-                              <Clock size={14} className="mr-1" />
-                              {userTeacher.user_teacher_experience_years} Tahun
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </SectionCard>
-
-                {/* === Ringkasan & Salam === */}
-                <SectionCard palette={palette}>
-                  <div className="p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <MessageCircle
-                          size={20}
-                          style={{ color: palette.primary }}
-                        />
-                        <h3 className="font-semibold text-lg">
-                          Ringkasan Profil
-                        </h3>
-                      </div>
-                      <Btn
-                        palette={palette}
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setOpenRingkasanEdit(true)}
-                      >
-                        <Edit size={16} />
-                      </Btn>
-                    </div>
-
-                    {/* Salam */}
-                    <div
-                      className="p-4 rounded-lg italic text-sm leading-relaxed mb-4"
-                      style={{ backgroundColor: palette.silver1 + "40" }}
-                    >
-                      "{userTeacher.user_teacher_greeting}"
-                    </div>
-
-                    {/* Bio Singkat */}
-                    <div className="mb-4">
-                      <h4 className="text-sm font-semibold mb-2">
-                        Bio Singkat
-                      </h4>
-                      <p className="text-sm text-gray-600 leading-relaxed">
-                        {userTeacher.user_teacher_short_bio}
-                      </p>
-                    </div>
-
-                    {/* Mata Pelajaran */}
-                    {userTeacher.user_teacher_specialties?.length > 0 && (
-                      <div>
-                        <h4 className="text-sm font-semibold mb-2">
-                          Mata Pelajaran
-                        </h4>
-                        <div className="flex flex-wrap gap-2">
-                          {userTeacher.user_teacher_specialties.map(
-                            (subject: string, idx: number) => (
-                              <Badge
-                                key={idx}
-                                palette={palette}
-                                variant="default"
-                              >
-                                {subject}
-                              </Badge>
-                            )
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </SectionCard>
-
-                {/* === Profil Lengkap === */}
-                <SectionCard palette={palette}>
-                  <div className="p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <User size={20} style={{ color: palette.primary }} />
-                        <h3 className="font-semibold text-lg">
-                          Profil Lengkap
-                        </h3>
-                      </div>
-                      <Btn
-                        palette={palette}
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setOpenProfilEdit(true)}
-                      >
-                        <Edit size={16} />
-                      </Btn>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                      {/* Email */}
-                      {userTeacher.user_teacher_email && (
-                        <div className="flex items-start gap-3">
-                          <Mail size={16} className="mt-1 flex-shrink-0" />
-                          <div>
-                            <p className="text-gray-500 text-xs">Email</p>
-                            <p className="font-medium">
-                              {userTeacher.user_teacher_email}
-                            </p>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Phone */}
-                      {userTeacher.user_teacher_phone && (
-                        <div className="flex items-start gap-3">
-                          <Phone size={16} className="mt-1 flex-shrink-0" />
-                          <div>
-                            <p className="text-gray-500 text-xs">Telepon</p>
-                            <p className="font-medium">
-                              {userTeacher.user_teacher_phone}
-                            </p>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Lokasi */}
-                      {userTeacher.user_teacher_city && (
-                        <div className="flex items-start gap-3">
-                          <MapPin size={16} className="mt-1 flex-shrink-0" />
-                          <div>
-                            <p className="text-gray-500 text-xs">Lokasi</p>
-                            <p className="font-medium">
-                              {userTeacher.user_teacher_city}
-                              {userTeacher.user_teacher_location &&
-                                `, ${userTeacher.user_teacher_location}`}
-                            </p>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Pendidikan */}
-                      {userTeacher.user_teacher_education && (
-                        <div className="flex items-start gap-3">
-                          <GraduationCap
-                            size={16}
-                            className="mt-1 flex-shrink-0"
-                          />
-                          <div>
-                            <p className="text-gray-500 text-xs">Pendidikan</p>
-                            <p className="font-medium">
-                              {userTeacher.user_teacher_education}
-                            </p>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Instansi */}
-                      {userTeacher.user_teacher_company && (
-                        <div className="flex items-start gap-3">
-                          <Briefcase size={16} className="mt-1 flex-shrink-0" />
-                          <div>
-                            <p className="text-gray-500 text-xs">Instansi</p>
-                            <p className="font-medium">
-                              {userTeacher.user_teacher_company}
-                            </p>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Tempat/Tanggal Lahir */}
-                      {(userTeacher.user_teacher_birth_place ||
-                        userTeacher.user_teacher_birth_date) && (
-                        <div className="flex items-start gap-3">
-                          <Calendar size={16} className="mt-1 flex-shrink-0" />
-                          <div>
-                            <p className="text-gray-500 text-xs">
-                              Tempat, Tanggal Lahir
-                            </p>
-                            <p className="font-medium">
-                              {userTeacher.user_teacher_birth_place}
-                              {userTeacher.user_teacher_birth_date &&
-                                `, ${dateLong(
-                                  userTeacher.user_teacher_birth_date
-                                )}`}
-                            </p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </SectionCard>
-
-                {/* === Informasi Mengajar === */}
-                <SectionCard palette={palette}>
-                  <div className="p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <Award size={20} style={{ color: palette.primary }} />
-                        <h3 className="font-semibold text-lg">
-                          Informasi Mengajar
-                        </h3>
-                      </div>
-                      <Btn
-                        palette={palette}
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setOpenMengajarEdit(true)}
-                      >
-                        <Edit size={16} />
-                      </Btn>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      {/* Rating */}
-                      <div
-                        className="p-4 rounded-lg"
-                        style={{ backgroundColor: palette.silver1 + "20" }}
-                      >
-                        <div className="flex items-center gap-2 mb-1">
-                          <Star
-                            size={16}
-                            style={{ color: palette.primary }}
-                            fill={palette.primary}
-                          />
-                          <span className="text-xs text-gray-500">Rating</span>
-                        </div>
-                        <p className="text-xl font-bold">
-                          {userTeacher.user_teacher_rating || 0}/5
-                        </p>
-                      </div>
-
-                      {/* Total Siswa */}
-                      <div
-                        className="p-4 rounded-lg"
-                        style={{ backgroundColor: palette.silver1 + "20" }}
-                      >
-                        <div className="flex items-center gap-2 mb-1">
-                          <Users size={16} style={{ color: palette.primary }} />
-                          <span className="text-xs text-gray-500">
-                            Total Siswa
-                          </span>
-                        </div>
-                        <p className="text-xl font-bold">
-                          {userTeacher.user_teacher_total_students || 0}
-                        </p>
-                      </div>
-
-                      {/* Pengalaman */}
-                      <div
-                        className="p-4 rounded-lg"
-                        style={{ backgroundColor: palette.silver1 + "20" }}
-                      >
-                        <div className="flex items-center gap-2 mb-1">
-                          <Clock size={16} style={{ color: palette.primary }} />
-                          <span className="text-xs text-gray-500">
-                            Pengalaman
-                          </span>
-                        </div>
-                        <p className="text-xl font-bold">
-                          {userTeacher.user_teacher_experience_years || 0} Tahun
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Kegiatan Mengajar */}
-                    {userTeacher.user_teacher_activity && (
-                      <div className="mt-4">
-                        <h4 className="text-sm font-semibold mb-2">
-                          Kegiatan Mengajar
-                        </h4>
-                        <p className="text-sm text-gray-600 leading-relaxed">
-                          {userTeacher.user_teacher_activity}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </SectionCard>
-
-                {/* === Bio Lengkap === */}
-                {userTeacher.user_teacher_long_bio && (
-                  <SectionCard palette={palette}>
-                    <div className="p-6">
-                      <div className="flex items-center gap-3 mb-4">
-                        <GraduationCap
-                          size={20}
-                          style={{ color: palette.primary }}
-                        />
-                        <h3 className="font-semibold text-lg">Bio Lengkap</h3>
-                      </div>
-                      <p className="text-sm text-gray-600 leading-relaxed">
-                        {userTeacher.user_teacher_long_bio}
-                      </p>
-                    </div>
-                  </SectionCard>
-                )}
-
-                {/* === Sertifikat === */}
-                {userTeacher.user_teacher_certificates?.length > 0 && (
-                  <SectionCard palette={palette}>
-                    <div className="p-6">
-                      <div className="flex items-center gap-3 mb-4">
-                        <Award size={20} style={{ color: palette.primary }} />
-                        <h3 className="font-semibold text-lg">
-                          Sertifikat & Penghargaan
-                        </h3>
-                      </div>
-                      <div className="space-y-3">
-                        {userTeacher.user_teacher_certificates.map(
-                          (cert: any, idx: number) => (
-                            <div
-                              key={idx}
-                              className="flex items-start gap-3 p-3 rounded-lg"
-                              style={{
-                                backgroundColor: palette.silver1 + "20",
-                              }}
-                            >
-                              <Award
-                                size={16}
-                                className="mt-1 flex-shrink-0"
-                                style={{ color: palette.primary }}
-                              />
-                              <div>
-                                <p className="font-medium text-sm">
-                                  {cert.title}
-                                </p>
-                                <p className="text-xs text-gray-500">
-                                  {cert.year}
-                                </p>
-                              </div>
-                            </div>
-                          )
-                        )}
-                      </div>
-                    </div>
-                  </SectionCard>
-                )}
-
-                {/* === Kontak Sosial === */}
-                {(userTeacher.user_teacher_whatsapp_url ||
-                  userTeacher.user_teacher_instagram_url) && (
-                  <SectionCard palette={palette}>
-                    <div className="p-6">
-                      <div className="flex items-center gap-3 mb-4">
-                        <Phone size={20} style={{ color: palette.primary }} />
-                        <h3 className="font-semibold text-lg">
-                          Kontak & Media Sosial
-                        </h3>
-                      </div>
-                      <div className="flex flex-wrap gap-3">
-                        {userTeacher.user_teacher_whatsapp_url && (
-                          <a
-                            href={userTeacher.user_teacher_whatsapp_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-2 px-4 py-2 rounded-lg border hover:opacity-80 transition-opacity"
-                            style={{
-                              borderColor: palette.silver1,
-                              color: palette.primary,
-                            }}
-                          >
-                            <Phone size={16} />
-                            <span className="text-sm font-medium">
-                              WhatsApp
-                            </span>
-                          </a>
-                        )}
-                        {userTeacher.user_teacher_instagram_url && (
-                          <a
-                            href={userTeacher.user_teacher_instagram_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-2 px-4 py-2 rounded-lg border hover:opacity-80 transition-opacity"
-                            style={{
-                              borderColor: palette.silver1,
-                              color: palette.primary,
-                            }}
-                          >
-                            <svg
-                              width="16"
-                              height="16"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <rect
-                                x="2"
-                                y="2"
-                                width="20"
-                                height="20"
-                                rx="5"
-                                ry="5"
-                              />
-                              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-                              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
-                            </svg>
-                            <span className="text-sm font-medium">
-                              Instagram
-                            </span>
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  </SectionCard>
-                )}
-              </>
-            )}
-          </div>
+          ) : teacher ? (
+            renderProfileView()
+          ) : (
+            renderCreateForm()
+          )}
         </div>
       </main>
-
-      {/* === MODALS === */}
-      <ModalEditRingkasan
-        open={openRingkasanEdit}
-        onClose={() => setOpenRingkasanEdit(false)}
-        initial={{
-          greeting: userTeacher?.user_teacher_greeting || "",
-          shortBio: userTeacher?.user_teacher_short_bio || "",
-          subjects: userTeacher?.user_teacher_specialties || [],
-        }}
-        palette={palette}
-        teacherId={userTeacher?.user_teacher_id}
-        onSubmit={() => fetchTeacherData()}
-      />
-
-      <ModalEditProfilLengkap
-        open={openProfilEdit}
-        onClose={() => setOpenProfilEdit(false)}
-        initial={{
-          fullname: userTeacher?.user_teacher_name || "",
-          phone: userTeacher?.user_teacher_phone || "",
-          email: userTeacher?.user_teacher_email || "",
-          city: userTeacher?.user_teacher_city || "",
-          location: userTeacher?.user_teacher_location || "",
-          birthPlace: userTeacher?.user_teacher_birth_place || "",
-          birthDate: userTeacher?.user_teacher_birth_date || "",
-          company: userTeacher?.user_teacher_company || "",
-          position: userTeacher?.user_teacher_field || "",
-          education: userTeacher?.user_teacher_education || "",
-          experience: userTeacher?.user_teacher_experience_years || 0,
-          gender: userTeacher?.user_teacher_gender || "male",
-          whatsappUrl: userTeacher?.user_teacher_whatsapp_url || "",
-          instagramUrl: userTeacher?.user_teacher_instagram_url || "",
-        }}
-        palette={palette}
-        teacherId={userTeacher?.user_teacher_id}
-        onSubmit={() => fetchTeacherData()}
-      />
-
-      <ModalEditInformasiMengajar
-        open={openMengajarEdit}
-        onClose={() => setOpenMengajarEdit(false)}
-        initial={{
-          activity: userTeacher?.user_teacher_activity || "",
-          rating: userTeacher?.user_teacher_rating || 0,
-          totalStudents: userTeacher?.user_teacher_total_students || 0,
-          experience: userTeacher?.user_teacher_experience_years || 0,
-          isActive: userTeacher?.user_teacher_is_active ?? true,
-        }}
-        palette={palette}
-        teacherId={userTeacher?.user_teacher_id}
-        onSubmit={() => fetchTeacherData()}
-      />
     </div>
   );
-};
-
-export default TeacherProfil;
+}

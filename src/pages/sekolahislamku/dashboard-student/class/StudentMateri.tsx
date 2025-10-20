@@ -145,7 +145,7 @@ const StudentMateri: React.FC = () => {
         palette={palette}
         title={`Materi — ${classMeta.name}`}
         gregorianDate={new Date().toISOString()}
-        dateFmt={dateLong}
+
         showBack
       />
 

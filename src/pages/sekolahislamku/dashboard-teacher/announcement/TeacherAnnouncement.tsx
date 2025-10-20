@@ -335,7 +335,7 @@ export default function TeacherAnnouncements() {
         title="Pengumuman"
         gregorianDate={data?.gregorianDate}
         hijriDate={data?.hijriDate}
-        dateFmt={(iso) => dateLong(iso)}
+
         showBack
       />
 
@@ -561,7 +561,7 @@ export default function TeacherAnnouncements() {
               <AnnouncementsListCard
                 palette={palette}
                 items={announcementsFiltered}
-                dateFmt={dateShort}
+
                 seeAllPath="/guru/pengumuman"
                 getDetailHref={(a) => `/guru/pengumuman/detail/${a.id}`}
                 onEdit={openEdit}

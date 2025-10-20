@@ -107,7 +107,8 @@ export default function MasjidPost() {
   const theme = pickTheme(themeName as ThemeName, isDark);
   const [activeTab, setActiveTab] = useState<"masjid" | "motivasi">("masjid");
   const { slug = "" } = useParams<{ slug: string }>();
-  const { user, isLoggedIn } = useCurrentUser();
+  const { data: user } = useCurrentUser();
+const isLoggedIn = !!user;
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [showHeartId, setShowHeartId] = useState<string | null>(null);

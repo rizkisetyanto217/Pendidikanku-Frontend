@@ -699,7 +699,7 @@ export default function TeacherAttendancePage({
         palette={palette}
         title="Absensi & Progress Harian (Guru)"
         gregorianDate={new Date().toISOString()}
-        dateFmt={(iso) => idDateLong(iso)}
+
       />
 
       <main className="mx-auto Replace px-4 py-6">

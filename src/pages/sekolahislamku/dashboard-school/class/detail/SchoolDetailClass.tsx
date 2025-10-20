@@ -319,7 +319,7 @@ export default function SchoolDetailClass() {
         palette={palette}
         title="Kelas"
         gregorianDate={new Date().toISOString()}
-        dateFmt={dateLong}
+
         showBack
       />
       <main className="px-4  md:px-6  md:py-8">

@@ -388,7 +388,7 @@ const ClassDetail: React.FC = () => {
         title="Detail Kelas"
         gregorianDate={TODAY_ISO}
         hijriDate={hijriLong(TODAY_ISO)}
-        dateFmt={dateLong}
+
       />
 
       <main className="mx-auto max-w-7xl px-4 py-6 space-y-6">

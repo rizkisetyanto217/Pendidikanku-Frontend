@@ -444,7 +444,7 @@ export default function TeacherGrading() {
           normalizeISOToLocalNoon(data?.gregorianDate) ??
             toLocalNoonISO(new Date())
         )}
-        dateFmt={dateLong}
+
       />
 
       {/* Modal Grading */}

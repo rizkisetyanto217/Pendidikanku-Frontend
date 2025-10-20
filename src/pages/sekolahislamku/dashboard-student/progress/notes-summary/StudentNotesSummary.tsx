@@ -184,7 +184,7 @@ export default function StudentNotesSummary() {
         palette={palette}
         title="Catatan & Hafalan"
         gregorianDate={new Date().toISOString()}
-        dateFmt={topbarDateFmt}
+
       />
 
       {/* Content + Sidebar */}

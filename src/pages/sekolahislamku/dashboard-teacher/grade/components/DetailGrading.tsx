@@ -88,7 +88,7 @@ export default function DetailGrading() {
         palette={palette}
         title="Detail Penilaian"
         gregorianDate={new Date().toISOString()}
-        dateFmt={dateLong}
+
       />
 
       {/* Modal Grading */}

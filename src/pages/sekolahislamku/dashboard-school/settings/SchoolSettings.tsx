@@ -102,7 +102,7 @@ const AttendanceDetailPage: React.FC = () => {
         title="Detail Kehadiran Santri"
         gregorianDate={new Date().toISOString()}
         hijriDate={new Date().toLocaleDateString("id-ID-u-ca-islamic-umalqura")}
-        dateFmt={(iso) => new Date(iso || "").toLocaleDateString("id-ID")}
+
         showBack
       />
 

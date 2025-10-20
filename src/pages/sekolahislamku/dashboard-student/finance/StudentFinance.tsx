@@ -420,7 +420,7 @@ export default function StudentFinance() {
         gregorianDate={topbarGregorianISO}
         hijriDate={hijriLong(topbarGregorianISO)}
         title="Pembayaran"
-        dateFmt={dateLong}
+
         showBack={isFromMenuUtama}
       />
 

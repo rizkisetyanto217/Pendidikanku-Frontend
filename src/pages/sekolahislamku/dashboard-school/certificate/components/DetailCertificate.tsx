@@ -177,7 +177,7 @@ const DetailCertificate: React.FC = () => {
         title="Detail Sertifikat"
         gregorianDate={gIso}
         hijriDate={hijriLong(gIso)}
-        dateFmt={dateLong}
+
       />
 
       <main className="mx-auto Replace px-4 py-6">

@@ -192,7 +192,7 @@ export default function StudentAbsence() {
         palette={palette}
         title="Riwayat Absensi"
         gregorianDate={new Date().toISOString()}
-        dateFmt={topbarDateFmt}
+
       />
 
       {/* Content + Sidebar */}

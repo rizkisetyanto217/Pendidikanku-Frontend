@@ -80,7 +80,7 @@ export default function DetailAssignmentClass() {
         title="Detail Tugas"
         gregorianDate={new Date().toISOString()}
         hijriDate={hijriToday}
-        dateFmt={dateLong}
+
       />
 
       <main className="mx-auto max-w-5xl px-4 py-6">

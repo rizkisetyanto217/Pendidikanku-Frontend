@@ -291,7 +291,7 @@ const StudentQuizPage: React.FC = () => {
         palette={palette}
         title={`Kuis — ${classMeta.name}`}
         gregorianDate={new Date().toISOString()}
-        dateFmt={dateLong}
+
         showBack
       />
 

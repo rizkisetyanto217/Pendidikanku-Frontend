@@ -282,7 +282,7 @@ export default function AssignmentClass() {
             year: "numeric",
           }
         )}
-        dateFmt={dateLong}
+
         showBack
       />
 

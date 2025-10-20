@@ -448,7 +448,7 @@
 //         title={cls ? `Materi: ${cls.name}` : "Materi Kelas"}
 //         gregorianDate={todayISO}
 //         hijriDate={hijriLong(todayISO)}
-//         dateFmt={dateLong}
+//
 //         showBack
 //       />
 
@@ -1469,7 +1469,7 @@ const { slug, id: classId } = useParams<{ slug: string; id: string }>();
         title={cls ? `Materi: ${cls.name}` : "Materi Kelas"}
         gregorianDate={todayISO}
         hijriDate={hijriLong(todayISO)}
-        dateFmt={dateLong}
+
         showBack
       />
 

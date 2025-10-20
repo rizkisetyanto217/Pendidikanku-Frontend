@@ -981,7 +981,7 @@ const TeacherClassesList: React.FC<TeacherClassesProps> = ({
         title="Daftar Kelas Saya"
         gregorianDate={TODAY_ISO}
         hijriDate={hijriLong(TODAY_ISO)}
-        dateFmt={dateLong}
+
         showBack
       />
 

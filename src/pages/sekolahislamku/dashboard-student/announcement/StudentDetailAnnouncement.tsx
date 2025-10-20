@@ -157,7 +157,7 @@ export default function StudentDetailAnnouncement() {
         title="Pengumuman"
         gregorianDate={data?.gregorianDate}
         hijriDate={data?.hijriDate}
-        dateFmt={dateFmt}
+
       />
 
       <main className="mx-auto Replace px-4 py-6">

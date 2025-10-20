@@ -119,7 +119,7 @@ export default function ListFinance() {
         title={state?.parentName ?? "Daftar Tagihan"}
         hijriDate={state?.hijriDate}
         gregorianDate={state?.gregorianDate ?? new Date().toISOString()}
-        dateFmt={dateLong}
+
         showBack
       />
 

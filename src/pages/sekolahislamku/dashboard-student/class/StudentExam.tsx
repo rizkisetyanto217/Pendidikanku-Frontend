@@ -373,7 +373,7 @@ const StudentExam: React.FC = () => {
         palette={palette}
         title={`Ujian — ${classMeta.name}`}
         gregorianDate={new Date().toISOString()}
-        dateFmt={dateLong}
+
         showBack
       />
 

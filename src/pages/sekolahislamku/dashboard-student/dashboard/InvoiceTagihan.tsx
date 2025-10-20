@@ -137,7 +137,7 @@ export default function InvoiceTagihan() {
         title={state?.parentName ?? "Invoice Tagihan"}
         hijriDate={state?.hijriDate ?? data?.hijriDate}
         gregorianDate={state?.gregorianDate ?? data?.gregorianDate}
-        dateFmt={dateLong}
+
         showBack
       />
 

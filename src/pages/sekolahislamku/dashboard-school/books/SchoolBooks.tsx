@@ -2,7 +2,7 @@
 import React, { useMemo, useState } from "react";
 import { useSearchParams, useNavigate, useParams } from "react-router-dom";
 import axios from "@/lib/axios";
-import { useEffectiveMasjidId } from "@/hooks/useEffectiveMasjidId";
+// import { useEffectiveMasjidId } from "@/hooks/useEffectiveMasjidId";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import {
@@ -191,7 +191,7 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
 
   const navigate = useNavigate();
-  useEffectiveMasjidId();
+  // useEffectiveMasjidId();
 
   const [sp, setSp] = useSearchParams();
   const nav = useNavigate();
@@ -421,7 +421,7 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
         title="Buku Pelajaran"
         gregorianDate={new Date().toISOString()}
         hijriDate={hijriWithWeekday(new Date().toISOString())}
-        dateFmt={dateLong}
+
         showBack={isFromMenuUtama}
       />
 

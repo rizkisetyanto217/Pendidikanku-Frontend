@@ -22,9 +22,10 @@ interface ParentTopBarProps {
   gregorianDate?: string;
   showBack?: boolean;
   onBackClick?: () => void;
+  dateFmt?: (iso: string) => string;
 }
 
-const formatHijriLocal = (d: Date) =>
+const defaultFormatHijri = (d: Date) =>
   new Intl.DateTimeFormat("id-ID-u-ca-islamic-umalqura", {
     day: "numeric",
     month: "long",
@@ -47,9 +48,11 @@ const getLocalMasjid = () => {
 export default function ParentTopBar({
   palette,
   hijriDate,
+  gregorianDate,
   title,
   showBack = false,
   onBackClick,
+  dateFmt,
 }: ParentTopBarProps) {
   const { isDark } = useHtmlDarkMode();
   const navigate = useNavigate();
@@ -204,7 +207,7 @@ export default function ParentTopBar({
       isMounted = false;
       isFetching.current = false;
     };
-  }, [masjidId]); // Hanya depend pada masjidId
+  }, [masjidId, pathname, navigate]);
 
   /* ======================================================
      NAVIGATION LOGIC
@@ -233,12 +236,22 @@ export default function ParentTopBar({
     return found?.label ?? "";
   }, [pathname, navs, title]);
 
+  /* ======================================================
+     DATE FORMATTING
+  ====================================================== */
   const now = new Date();
-  const hijriLabel = hijriDate || formatHijriLocal(now);
+
+  // Gunakan custom dateFmt jika tersedia, atau gunakan default
+  const hijriLabel = useMemo(() => {
+    if (hijriDate) return hijriDate;
+    if (dateFmt && gregorianDate) return dateFmt(gregorianDate);
+    return defaultFormatHijri(now);
+  }, [hijriDate, gregorianDate, dateFmt, now]);
+
   const handleBackClick = () => (onBackClick ? onBackClick() : navigate(-1));
 
   /* ======================================================
-     RENDER - LANGSUNG TANPA LOADING
+     RENDER
   ====================================================== */
   return (
     <div
@@ -280,7 +293,6 @@ export default function ParentTopBar({
             className="w-12 h-12 rounded-full object-cover border transition-all duration-300"
             style={{ borderColor: palette.primary }}
             onError={(e) => {
-              // Fallback jika gambar gagal load
               e.currentTarget.src = "/image/Gambar-Masjid.jpeg";
             }}
           />

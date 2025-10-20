@@ -71,7 +71,7 @@ const StudentAttandenceClass: React.FC = () => {
         palette={palette}
         title={`Kehadiran • ${cls.name}`}
         gregorianDate={todayISO}
-        dateFmt={dateLong}
+
         showBack
       />
 

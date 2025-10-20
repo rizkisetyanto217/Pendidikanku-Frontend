@@ -110,7 +110,7 @@ export default function ManagementAcademic() {
         palette={palette}
         title="Manajemen Ruang Kelas"
         gregorianDate={topbarISO}
-        dateFmt={dateLong}
+
         showBack={true}
       />
 

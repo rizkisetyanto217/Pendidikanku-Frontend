@@ -139,7 +139,7 @@ export default function SchoolMenuGrids() {
         title="Menu Sekolah"
   
         gregorianDate={topbarISO}
-        dateFmt={dateLong}
+
       />
 
       <main className="w-full px-4 md:px-6 py-4 md:py-8">

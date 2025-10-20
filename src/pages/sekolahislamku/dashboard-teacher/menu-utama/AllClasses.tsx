@@ -230,7 +230,7 @@ const AllClasses: React.FC = () => {
         title="Semua Kelas"
         gregorianDate={TODAY_ISO}
         hijriDate={hijriLong(TODAY_ISO)}
-        dateFmt={dateLong}
+
         showBack
       />
 

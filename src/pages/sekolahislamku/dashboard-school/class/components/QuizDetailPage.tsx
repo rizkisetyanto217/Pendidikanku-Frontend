@@ -81,7 +81,7 @@ const QuizDetailPage: React.FC = () => {
         palette={palette}
         title={`Kerjakan: ${quiz.title}`}
         gregorianDate={new Date().toISOString()}
-        dateFmt={dateLong}
+
         showBack
       />
 

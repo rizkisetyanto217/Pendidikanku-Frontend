@@ -281,7 +281,7 @@ const StudentsPage: React.FC<SchoolStudentProps> = () => {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
-  const { user } = useCurrentUser();
+  const { data: user } = useCurrentUser();
 
   const [openAdd, setOpenAdd] = useState(false);
   const [openImport, setOpenImport] = useState(false);

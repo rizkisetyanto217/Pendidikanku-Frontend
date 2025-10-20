@@ -105,7 +105,7 @@ const SchoolActiveClass: React.FC = () => {
         title="Kelas Aktif"
         gregorianDate={gregorianISO}
         hijriDate={hijriLong(gregorianISO)}
-        dateFmt={dateLong}
+
         showBack={true}
       />
 

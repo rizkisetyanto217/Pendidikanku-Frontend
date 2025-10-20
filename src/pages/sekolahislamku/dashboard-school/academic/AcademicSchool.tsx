@@ -167,7 +167,7 @@ const AcademicSchool: React.FC<SchoolAcademicProps> = ({
         palette={palette}
         title="Akademik"
         gregorianDate={topbarISO}
-        dateFmt={dateLong}
+
         showBack={isFromMenuUtama}
       />
 

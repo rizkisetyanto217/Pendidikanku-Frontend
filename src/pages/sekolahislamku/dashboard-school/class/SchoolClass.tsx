@@ -433,7 +433,7 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
         palette={palette}
         title="Kelas"
         gregorianDate={new Date().toISOString()}
-        dateFmt={dateLong}
+
         hijriDate={hijriWithWeekday(new Date().toISOString())}
         showBack={isFromMenuUtama}
       />

@@ -134,7 +134,7 @@ export default function SchoolBookDetail() {
         palette={palette}
         title="Detail Buku"
         gregorianDate={new Date().toISOString()}
-        dateFmt={dateLong}
+
         showBack
       />
 
