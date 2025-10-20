@@ -242,7 +242,7 @@ export default function StudentDashboard() {
         title={data?.parentName}
         gregorianDate={gregorianISO}
         hijriDate={hijriLong(gregorianISO)}
-        dateFmt={dateFmt}
+        // dateFmt={dateFmt}
       />
 
       <main className="w-full px-4 md:px-6 py-4   md:py-8">

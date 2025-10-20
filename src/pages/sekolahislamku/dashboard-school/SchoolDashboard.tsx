@@ -612,7 +612,7 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
         title="Dashboard Sekolah"
         gregorianDate={topbarGregorianISO}
         hijriDate={hijriLong(topbarGregorianISO)}
-        dateFmt={(iso) => dateFmt(iso)}
+        
       />
       <Flash palette={palette} flash={flash} />
 

@@ -339,7 +339,7 @@ export default function TeacherDashboard() {
         title="Dashboard Pengajar"
         gregorianDate={normalizedGregorianISO} // ✅ ISO “siang lokal”
         hijriDate={hijriLong(normalizedGregorianISO)} // ✅ Umm al-Qura (stabil)
-        dateFmt={fmtLong} // ✅ formatter yang ada di file ini
+        // dateFmt={fmtLong} // ✅ formatter yang ada di file ini
       />
 
       {/* Modal: Tambah Jadwal */}

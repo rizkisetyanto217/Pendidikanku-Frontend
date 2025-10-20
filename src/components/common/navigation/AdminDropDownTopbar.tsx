@@ -17,7 +17,7 @@ export default function UserDropdown() {
 
   const { data: user } = useCurrentUser();
   const userName = user?.user_name || "User";
-  const userRole = user?.role || "Role";
+  // const userRole = user?.role || "Role";
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
@@ -65,9 +65,9 @@ export default function UserDropdown() {
           <div className="font-semibold" style={{ color: theme.black1 }}>
             {userName}
           </div>
-          <div className="text-xs" style={{ color: theme.silver2 }}>
+          {/* <div className="text-xs" style={{ color: theme.silver2 }}>
             {userRole}
-          </div>
+          </div> */}
         </div>
       </button>
 

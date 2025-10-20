@@ -1,6 +1,6 @@
-// src/pages/sekolahislamku/pages/teacher/ModalEditInformasiMengajar.tsx
 import React, { useState } from "react";
-import { X } from "lucide-react";
+import { X, Loader2 } from "lucide-react";
+import api from "@/lib/axios";
 import {
   Btn,
   type Palette,
@@ -20,6 +20,7 @@ type ModalEditInformasiMengajarProps = {
   initial: InformasiMengajarData;
   onSubmit: (data: InformasiMengajarData) => void;
   palette: Palette;
+  teacherId?: string; // optional untuk identifikasi guru
 };
 
 const ModalEditInformasiMengajar: React.FC<ModalEditInformasiMengajarProps> = ({
@@ -28,13 +29,47 @@ const ModalEditInformasiMengajar: React.FC<ModalEditInformasiMengajarProps> = ({
   initial,
   onSubmit,
   palette,
+  teacherId,
 }) => {
   const [form, setForm] = useState<InformasiMengajarData>(initial);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   if (!open) return null;
 
   const set = (k: keyof InformasiMengajarData, v: any) =>
     setForm((prev) => ({ ...prev, [k]: v }));
+
+  const handleSave = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // bentuk payload sesuai struktur backend
+      const payload = {
+        user_teacher_activity: form.activity,
+        user_teacher_rating: form.rating,
+        user_teacher_total_students: form.totalStudents,
+        user_teacher_experience_years: form.experience,
+        user_teacher_is_active: form.isActive,
+      };
+
+      // panggil endpoint PATCH
+      await api.patch(`/api/u/user-teachers/update`, {
+        ...(teacherId ? { user_teacher_id: teacherId } : {}),
+        ...payload,
+      });
+
+      // update parent data
+      onSubmit(form);
+      onClose();
+    } catch (err: any) {
+      console.error("❌ Gagal update data guru:", err);
+      setError(err?.response?.data?.message || "Gagal memperbarui data guru.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center">
@@ -53,6 +88,13 @@ const ModalEditInformasiMengajar: React.FC<ModalEditInformasiMengajarProps> = ({
             <X size={18} />
           </button>
         </div>
+
+        {/* error */}
+        {error && (
+          <div className="text-red-600 text-sm mb-3 border border-red-200 rounded-md p-2 bg-red-50">
+            {error}
+          </div>
+        )}
 
         {/* form */}
         <div className="space-y-4 text-sm">
@@ -124,17 +166,22 @@ const ModalEditInformasiMengajar: React.FC<ModalEditInformasiMengajarProps> = ({
 
         {/* footer */}
         <div className="flex justify-end gap-2 mt-4">
-          <Btn palette={palette} variant="ghost" onClick={onClose}>
-            Batal
-          </Btn>
           <Btn
             palette={palette}
-            onClick={() => {
-              onSubmit(form);
-              onClose();
-            }}
+            variant="ghost"
+            onClick={onClose}
+            disabled={loading}
           >
-            Simpan
+            Batal
+          </Btn>
+          <Btn palette={palette} onClick={handleSave} disabled={loading}>
+            {loading ? (
+              <span className="flex items-center gap-2">
+                <Loader2 size={16} className="animate-spin" /> Menyimpan...
+              </span>
+            ) : (
+              "Simpan"
+            )}
           </Btn>
         </div>
       </div>

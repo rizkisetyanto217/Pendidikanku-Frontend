@@ -1,5 +1,4 @@
-// src/pages/auth/Login.tsx
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   EyeIcon,
@@ -12,26 +11,19 @@ import {
 } from "lucide-react";
 
 import AuthLayout from "@/layout/AuthLayout";
-import api, { setAuthToken } from "@/lib/axios";
+import api from "@/lib/axios";
+import { setTokens } from "@/lib/axios";
 import LegalModal from "@/pages/dashboard/auth/components/LegalPrivacyModal";
 
 /* =======================
    Types
 ======================= */
 type MasjidRole = "dkm" | "admin" | "teacher" | "student" | "user";
-
 type MasjidItem = {
   masjid_id: string;
   masjid_name: string;
   masjid_icon_url?: string;
   roles: MasjidRole[];
-};
-
-type LoginApiResponse = {
-  data: {
-    user: { id: string; full_name: string };
-    access_token: string;
-  };
 };
 
 /* =======================
@@ -52,9 +44,8 @@ function ModalSelectRoleMasjid({
     role: MasjidRole;
   } | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!open) return;
     setLoading(true);
     api
@@ -69,7 +60,6 @@ function ModalSelectRoleMasjid({
         }));
         setMasjids(mapped);
       })
-      .catch(() => setError("Gagal mengambil data masjid."))
       .finally(() => setLoading(false));
   }, [open]);
 
@@ -85,62 +75,47 @@ function ModalSelectRoleMasjid({
 
         {loading ? (
           <div className="text-center text-gray-500 py-10">Memuat...</div>
-        ) : error ? (
-          <div className="text-center text-red-600 text-sm py-3">{error}</div>
         ) : (
           <div className="max-h-80 overflow-y-auto space-y-3">
-            {masjids.length > 0 ? (
-              masjids.map((m) => (
-                <div
-                  key={m.masjid_id}
-                  className={`border rounded-xl p-3 ${
-                    selected?.masjid_id === m.masjid_id
-                      ? "border-blue-600 bg-blue-50"
-                      : "border-gray-200"
-                  }`}
-                >
-                  <div className="flex items-center gap-3 mb-2">
-                    {m.masjid_icon_url ? (
-                      <img
-                        src={m.masjid_icon_url}
-                        alt={m.masjid_name}
-                        className="w-10 h-10 rounded-lg object-cover border"
-                      />
-                    ) : (
-                      <div className="w-10 h-10 bg-gray-100 flex items-center justify-center border rounded-lg">
-                        🕌
-                      </div>
-                    )}
-                    <span className="font-semibold text-gray-800">
-                      {m.masjid_name}
-                    </span>
-                  </div>
-
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {m.roles.map((r) => (
-                      <button
-                        key={r}
-                        onClick={() =>
-                          setSelected({ masjid_id: m.masjid_id, role: r })
-                        }
-                        className={`px-3 py-1 text-xs rounded-lg border ${
-                          selected?.masjid_id === m.masjid_id &&
-                          selected?.role === r
-                            ? "bg-blue-600 text-white border-blue-600"
-                            : "border-gray-300 text-gray-700"
-                        }`}
-                      >
-                        {r.toUpperCase()}
-                      </button>
-                    ))}
-                  </div>
+            {masjids.map((m) => (
+              <div
+                key={m.masjid_id}
+                className={`border rounded-xl p-3 ${
+                  selected?.masjid_id === m.masjid_id
+                    ? "border-blue-600 bg-blue-50"
+                    : "border-gray-200"
+                }`}
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <img
+                    src={m.masjid_icon_url || "/image/Gambar-Masjid.jpeg"}
+                    alt={m.masjid_name}
+                    className="w-10 h-10 rounded-lg object-cover border"
+                  />
+                  <span className="font-semibold text-gray-800">
+                    {m.masjid_name}
+                  </span>
                 </div>
-              ))
-            ) : (
-              <div className="text-center text-gray-400 py-6">
-                Tidak ada masjid.
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {m.roles.map((r) => (
+                    <button
+                      key={r}
+                      onClick={() =>
+                        setSelected({ masjid_id: m.masjid_id, role: r })
+                      }
+                      className={`px-3 py-1 text-xs rounded-lg border ${
+                        selected?.masjid_id === m.masjid_id &&
+                        selected?.role === r
+                          ? "bg-blue-600 text-white border-blue-600"
+                          : "border-gray-300 text-gray-700"
+                      }`}
+                    >
+                      {r.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
               </div>
-            )}
+            ))}
           </div>
         )}
 
@@ -164,7 +139,7 @@ function ModalSelectRoleMasjid({
 }
 
 /* =======================
-   Modal Pilih Tujuan Awal
+   Modal Pilih Tujuan
 ======================= */
 function ModalPilihTujuan({
   open,
@@ -176,6 +151,7 @@ function ModalPilihTujuan({
   onPilih: (tujuan: "dkm" | "teacher" | "student") => void;
 }) {
   if (!open) return null;
+
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white rounded-2xl p-6 w-full max-w-md text-center space-y-4">
@@ -267,9 +243,8 @@ function ModalJoinAtauBuat({
                   name: masjidName,
                   file: iconFile || undefined,
                 });
-                setTimeout(() => setLoading(false), 1000);
               }}
-              className="w-full py-2 bg-green-600 text-white rounded-lg"
+              className="w-full py-2 bg-green-600 text-white rounded-lg disabled:opacity-50"
             >
               {loading ? "Membuat..." : "Buat Masjid"}
             </button>
@@ -292,9 +267,8 @@ function ModalJoinAtauBuat({
               onClick={() => {
                 setLoading(true);
                 onJoinSekolah(accessCode, mode);
-                setTimeout(() => setLoading(false), 1000);
               }}
-              className="w-full py-2 bg-blue-600 text-white rounded-lg"
+              className="w-full py-2 bg-blue-600 text-white rounded-lg disabled:opacity-50"
             >
               {loading ? "Memproses..." : "Gabung Sekarang"}
             </button>
@@ -311,8 +285,9 @@ function ModalJoinAtauBuat({
   );
 }
 
+
 /* =======================
-   Komponen Utama Login
+   MAIN COMPONENT
 ======================= */
 export default function Login() {
   const navigate = useNavigate();
@@ -334,21 +309,17 @@ export default function Login() {
     setLoading(true);
     setError("");
     try {
-      const res = await api.post<LoginApiResponse>("/auth/login", {
-        identifier,
-        password,
-      });
-      const { access_token } = res.data.data;
-      setAuthToken(access_token);
+      const res = await api.post("/auth/login", { identifier, password });
+      const { access_token, refresh_token } = res.data.data;
 
+      // ✅ Simpan token ke cookie
+      setTokens(access_token, refresh_token);
+
+      // ✅ Ambil context user
       const ctx = await api.get("/auth/me/simple-context");
       const memberships = ctx.data?.data?.memberships ?? [];
 
-      if (memberships.length === 0) {
-        setOpenPilihTujuan(true);
-        return;
-      }
-
+      if (memberships.length === 0) return setOpenPilihTujuan(true);
       if (memberships.length === 1) {
         const m = memberships[0];
         const role = m.roles?.[0] ?? "user";
@@ -358,6 +329,7 @@ export default function Login() {
 
       setOpenSelectMasjid(true);
     } catch (err: any) {
+      console.error(err);
       setError(err?.response?.data?.message || "Login gagal.");
     } finally {
       setLoading(false);
@@ -375,47 +347,69 @@ export default function Login() {
       const fd = new FormData();
       fd.append("masjid_name", data.name);
       if (data.file) fd.append("icon", data.file);
+
       const res = await api.post("/u/masjids/user", fd, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      const id = res.data?.data?.item?.masjid_id;
-      if (id) navigate(`/${id}/sekolah`, { replace: true });
-    } catch {
-      alert("Gagal membuat masjid.");
-    } finally {
+
+      const item = res.data?.data?.item;
+      if (!item) throw new Error("Masjid gagal dibuat.");
+
+      const masjidId = item.masjid_id;
+      const name = item.masjid_name || data.name;
+      const iconUrl = item.masjid_icon_url || "/image/Gambar-Masjid.jpeg";
+
+      const activeMasjid = {
+        masjid_id: masjidId,
+        masjid_name: name,
+        masjid_icon_url: iconUrl,
+      };
+      localStorage.setItem("active_masjid", JSON.stringify(activeMasjid));
+      localStorage.setItem("active_role", "dkm");
+
       setOpenJoinAtauBuat(false);
+      navigate(`/${masjidId}/sekolah`, { replace: true });
+    } catch (err: any) {
+      alert(err?.response?.data?.message || "Gagal membuat masjid.");
     }
   }
 
-  function handleJoinSekolah(code: string, role: "teacher" | "student") {
-    setOpenJoinAtauBuat(false);
-    navigate(`/join?role=${role}&code=${encodeURIComponent(code)}`);
+  async function handleJoinSekolah(code: string, role: "teacher" | "student") {
+    try {
+      await api.post("/u/user-class-sections/join", { student_code: code });
+
+      const ctx = await api.get("/auth/me/simple-context");
+      const memberships = ctx.data?.data?.memberships ?? [];
+      if (memberships.length > 0) {
+        const m = memberships[0];
+        const masjidId = m.masjid_id;
+        const masjidData = {
+          masjid_id: masjidId,
+          masjid_name: m.masjid_name || "Masjid",
+          masjid_icon_url: m.masjid_icon_url || "/image/Gambar-Masjid.jpeg",
+        };
+        localStorage.setItem("active_masjid", JSON.stringify(masjidData));
+        localStorage.setItem("active_role", role);
+
+        const path = role === "teacher" ? "guru" : "murid";
+        navigate(`/${masjidId}/${path}`, { replace: true });
+      }
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || "Gagal bergabung ke sekolah.";
+      alert(msg);
+    }
   }
 
   function handleSelectMasjidRole(masjidId: string, role: MasjidRole) {
-    setOpenSelectMasjid(false);
-
     localStorage.setItem("active_role", role);
     localStorage.setItem(
       "active_masjid",
       JSON.stringify({ masjid_id: masjidId })
     );
 
-    switch (role) {
-      case "dkm":
-      case "admin":
-        navigate(`/${masjidId}/sekolah`, { replace: true });
-        break;
-      case "teacher":
-        navigate(`/${masjidId}/guru`, { replace: true });
-        break;
-      case "student":
-        navigate(`/${masjidId}/murid`, { replace: true });
-        break;
-      default:
-        navigate(`/${masjidId}/sekolah`, { replace: true });
-        break;
-    }
+    const path =
+      role === "teacher" ? "guru" : role === "student" ? "murid" : "sekolah";
+    navigate(`/${masjidId}/${path}`, { replace: true });
   }
 
   return (
@@ -427,7 +421,6 @@ export default function Login() {
             {error}
           </div>
         )}
-
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <label className="block text-sm font-medium">
@@ -492,7 +485,6 @@ export default function Login() {
         onCreateMasjid={handleCreateMasjid}
         onJoinSekolah={handleJoinSekolah}
       />
-
       <LegalModal open={false} initialTab="tos" onClose={() => {}} />
     </AuthLayout>
   );
