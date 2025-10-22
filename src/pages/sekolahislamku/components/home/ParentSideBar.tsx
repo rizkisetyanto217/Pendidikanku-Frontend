@@ -1,4 +1,3 @@
-// src/pages/sekolahislamku/components/home/ParentSidebar.tsx
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Link,
@@ -6,6 +5,7 @@ import {
   useMatch,
   useParams,
   useResolvedPath,
+  useNavigate,
 } from "react-router-dom";
 import {
   SectionCard,
@@ -13,6 +13,7 @@ import {
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 import { NAVS, type NavItem } from "./navsConfig";
 import api from "@/lib/axios";
+import { LogOut } from "lucide-react";
 
 export type Kind = "sekolah" | "murid" | "guru";
 export type AutoKind = Kind | "auto";
@@ -94,13 +95,29 @@ export default function ParentSidebar({
   openMobile = false,
   onCloseMobile,
 }: ParentSidebarProps) {
-  const { pathname } = useLocation();
+  const navigate = useNavigate();
   const params = useParams<{ slug?: string }>();
   const match = useMatch("/:slug/*");
   const slug = params.slug ?? match?.params.slug ?? "";
 
   const [resolvedKind, setResolvedKind] = useState<Kind>("sekolah");
   const [loading, setLoading] = useState(true);
+  const [loggingOut, setLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      setLoggingOut(true);
+      await api.post("/auth/logout");
+    } catch (err) {
+      console.error("Logout error:", err);
+    } finally {
+      localStorage.clear();
+      document.cookie =
+        "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+      setLoggingOut(false);
+      navigate("/login", { replace: true });
+    }
+  };
 
   useEffect(() => {
     async function determineRole() {
@@ -149,67 +166,78 @@ export default function ParentSidebar({
     [resolvedKind, base]
   );
 
-  const SidebarContent = (
-    <SectionCard
-      palette={palette}
-      className="p-2"
-      style={{ border: `1px solid ${palette.silver1}` }}
-    >
-      {loading ? (
-        <div className="text-sm text-gray-500 text-center py-6">
-          Memuat menu...
-        </div>
-      ) : (
-        <ul className="space-y-2">
-          {navs.map(({ to, label, icon, end }) => (
-            <li key={to}>
-              <SidebarItem
-                palette={palette}
-                to={to}
-                end={end}
-                icon={icon}
-                label={label}
-                onClick={mode !== "desktop" ? onCloseMobile : undefined}
-              />
-            </li>
-          ))}
-        </ul>
-      )}
-    </SectionCard>
-  );
-
-  if (mode === "desktop") {
-    return (
-      <nav
-        className={[
-          desktopOnly ? "hidden lg:block" : "",
-          "w-64 shrink-0 lg:sticky lg:top-20 lg:z-30 lg:max-h-[calc(100vh-5rem)] lg:overflow-auto overflow-y-auto",
-          className,
-        ].join(" ")}
-      >
-        {SidebarContent}
-      </nav>
-    );
-  }
-
-  if (mode === "mobile" || (mode === "auto" && openMobile)) {
-    return (
-      <div className="fixed inset-0 z-50 flex lg:hidden">
-        <div className="absolute inset-0 bg-black/40" onClick={onCloseMobile} />
-        <div className="relative w-64 bg-white shadow-xl">{SidebarContent}</div>
-      </div>
-    );
-  }
-
   return (
-    <nav
+    <aside
       className={[
-        desktopOnly ? "hidden lg:block" : "",
-        "w-64 shrink-0 lg:sticky lg:top-20 lg:z-30 lg:max-h-[calc(100vh-5rem)] lg:overflow-auto overflow-y-auto",
+        desktopOnly ? "hidden lg:block" : "block",
+        "w-full lg:w-64 xl:w-72 shrink-0 bg-white border-r border-gray-200",
         className,
       ].join(" ")}
+      style={{
+        position: "sticky",
+        top: "5rem",
+        height: "calc(100vh - 5rem)",
+        display: "flex",
+        flexDirection: "column",
+      }}
     >
-      {SidebarContent}
-    </nav>
+      {/* Scrollable menu area */}
+      <div
+        className="flex-1 p-2"
+        style={{
+          overflowY: "auto",
+          minHeight: 0,
+        }}
+      >
+        <SectionCard
+          palette={palette}
+          className="p-2"
+          style={{ border: `1px solid ${palette.silver1}` }}
+        >
+          {loading ? (
+            <div className="text-sm text-gray-500 text-center py-6">
+              Memuat menu...
+            </div>
+          ) : (
+            <ul className="space-y-2">
+              {navs.map(({ to, label, icon, end }) => (
+                <li key={to}>
+                  <SidebarItem
+                    palette={palette}
+                    to={to}
+                    end={end}
+                    icon={icon}
+                    label={label}
+                    onClick={mode !== "desktop" ? onCloseMobile : undefined}
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
+        </SectionCard>
+      </div>
+
+      {/* Fixed footer - ALWAYS VISIBLE */}
+      <div
+        className="p-3 border-t border-gray-200 bg-white"
+        style={{
+          flexShrink: 0,
+        }}
+      >
+        <button
+          onClick={handleLogout}
+          disabled={loggingOut}
+          className="w-full flex items-center justify-center gap-2 rounded-xl border py-2 text-red-600 hover:bg-red-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{
+            borderColor: palette.silver1,
+          }}
+        >
+          <LogOut size={18} />
+          <span className="font-medium">
+            {loggingOut ? "Logging out..." : "Logout"}
+          </span>
+        </button>
+      </div>
+    </aside>
   );
 }

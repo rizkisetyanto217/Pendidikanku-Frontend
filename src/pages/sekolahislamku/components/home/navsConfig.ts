@@ -11,7 +11,7 @@ import {
   School,
 } from "lucide-react";
 
-/* ================= Types ================= */
+/* ===================== Types ===================== */
 export type NavItem = {
   path: "" | "." | string;
   label: string;
@@ -25,8 +25,9 @@ export type NavDict = {
   guru: NavItem[];
 };
 
-/* ================= Default Navs ================= */
+/* ===================== Default Navs ===================== */
 export const NAVS: NavDict = {
+  /* ============ ROLE: SEKOLAH ============ */
   sekolah: [
     { path: "", label: "Dashboard", icon: LayoutDashboard, end: true },
     { path: "menu-utama", label: "Menu Utama", icon: ChartBar },
@@ -34,9 +35,11 @@ export const NAVS: NavDict = {
     { path: "kelas", label: "Kelas", icon: BookOpen },
     { path: "buku", label: "Buku", icon: BookOpen },
     { path: "keuangan", label: "Keuangan", icon: Wallet },
-    { path: "profil-sekolah", label: "Profil", icon: School },
     { path: "academic", label: "Akademik", icon: FileSpreadsheet },
+    { path: "profil-sekolah", label: "Profil", icon: School },
   ],
+
+  /* ============ ROLE: MURID ============ */
   murid: [
     { path: "", label: "Dashboard", icon: LayoutDashboard, end: true },
     { path: "menu-utama", label: "Menu Utama", icon: ChartBar },
@@ -45,16 +48,17 @@ export const NAVS: NavDict = {
     { path: "jadwal", label: "Jadwal", icon: CalendarDays },
     { path: "tugas", label: "Tugas", icon: ClipboardCheck },
     { path: "profil-murid", label: "Profil", icon: Users },
-    // kalau mau nambah "Pengumuman" atau "Rapor Nilai", tambahkan di sini
+    // Tambahan opsional:
     // { path: "pengumuman", label: "Pengumuman", icon: Megaphone },
     // { path: "rapor", label: "Rapor Nilai", icon: FileSpreadsheet },
   ],
+
+  /* ============ ROLE: GURU ============ */
   guru: [
     { path: "", label: "Dashboard", icon: LayoutDashboard, end: true },
     { path: "menu-utama", label: "Menu Utama", icon: ChartBar },
     { path: "kelas", label: "Kelas Saya", icon: Users },
-    { path: "guru-mapel", label: "Guru Mapel", icon: Users },
-
+    { path: "guru-mapel", label: "Guru Mapel", icon: UserCog },
     { path: "jadwal", label: "Jadwal", icon: CalendarDays },
     { path: "profil-guru", label: "Profil", icon: Users },
   ],

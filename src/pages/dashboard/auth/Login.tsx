@@ -8,6 +8,7 @@ import {
   GraduationCap,
   Users2,
   CheckCircle2,
+  Sparkles,
 } from "lucide-react";
 
 import AuthLayout from "@/layout/AuthLayout";
@@ -66,48 +67,58 @@ function ModalSelectRoleMasjid({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-white rounded-2xl w-full max-w-md p-6">
-        <h2 className="text-lg font-semibold mb-3">Pilih Masjid & Role</h2>
-        <p className="text-sm text-gray-500 mb-4">
-          Pilih masjid dan peran yang ingin kamu gunakan.
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white rounded-3xl w-full max-w-md p-8 shadow-2xl animate-in zoom-in-95 duration-200">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+            <Building2 className="w-5 h-5 text-white" />
+          </div>
+          <h2 className="text-xl font-bold text-gray-900">
+            Pilih Masjid & Role
+          </h2>
+        </div>
+        <p className="text-sm text-gray-600 mb-6">
+          Pilih masjid dan peran yang ingin kamu gunakan untuk melanjutkan.
         </p>
 
         {loading ? (
-          <div className="text-center text-gray-500 py-10">Memuat...</div>
+          <div className="text-center py-12">
+            <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-3"></div>
+            <p className="text-gray-500 text-sm">Memuat data...</p>
+          </div>
         ) : (
-          <div className="max-h-80 overflow-y-auto space-y-3">
+          <div className="max-h-80 overflow-y-auto space-y-3 pr-2">
             {masjids.map((m) => (
               <div
                 key={m.masjid_id}
-                className={`border rounded-xl p-3 ${
+                className={`border-2 rounded-2xl p-4 transition-all duration-200 ${
                   selected?.masjid_id === m.masjid_id
-                    ? "border-blue-600 bg-blue-50"
-                    : "border-gray-200"
+                    ? "border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100/50 shadow-md"
+                    : "border-gray-200 hover:border-gray-300 hover:shadow-sm"
                 }`}
               >
-                <div className="flex items-center gap-3 mb-2">
+                <div className="flex items-center gap-3 mb-3">
                   <img
                     src={m.masjid_icon_url || "/image/Gambar-Masjid.jpeg"}
                     alt={m.masjid_name}
-                    className="w-10 h-10 rounded-lg object-cover border"
+                    className="w-12 h-12 rounded-xl object-cover border-2 border-white shadow-sm"
                   />
-                  <span className="font-semibold text-gray-800">
+                  <span className="font-semibold text-gray-800 text-base">
                     {m.masjid_name}
                   </span>
                 </div>
-                <div className="flex flex-wrap gap-2 mt-2">
+                <div className="flex flex-wrap gap-2">
                   {m.roles.map((r) => (
                     <button
                       key={r}
                       onClick={() =>
                         setSelected({ masjid_id: m.masjid_id, role: r })
                       }
-                      className={`px-3 py-1 text-xs rounded-lg border ${
+                      className={`px-4 py-1.5 text-xs font-medium rounded-lg border-2 transition-all duration-200 ${
                         selected?.masjid_id === m.masjid_id &&
                         selected?.role === r
-                          ? "bg-blue-600 text-white border-blue-600"
-                          : "border-gray-300 text-gray-700"
+                          ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+                          : "border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50"
                       }`}
                     >
                       {r.toUpperCase()}
@@ -119,8 +130,11 @@ function ModalSelectRoleMasjid({
           </div>
         )}
 
-        <div className="mt-5 flex justify-between">
-          <button onClick={onClose} className="text-sm text-gray-500">
+        <div className="mt-6 flex gap-3">
+          <button
+            onClick={onClose}
+            className="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
+          >
             Batal
           </button>
           <button
@@ -128,9 +142,9 @@ function ModalSelectRoleMasjid({
             onClick={() =>
               selected && onSelect(selected.masjid_id, selected.role)
             }
-            className="bg-blue-600 text-white rounded-lg px-4 py-2 text-sm flex items-center gap-2 disabled:opacity-50"
+            className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl px-4 py-2.5 text-sm font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg shadow-blue-500/30"
           >
-            <CheckCircle2 className="w-4 h-4" /> Pilih
+            <CheckCircle2 className="w-4 h-4" /> Pilih & Lanjutkan
           </button>
         </div>
       </div>
@@ -153,35 +167,57 @@ function ModalPilihTujuan({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-2xl p-6 w-full max-w-md text-center space-y-4">
-        <h2 className="text-lg font-semibold">Apa peran Anda?</h2>
-        <p className="text-sm text-gray-500">
-          Pilih tujuan Anda bergabung di SekolahIslamKu:
-        </p>
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in duration-200">
+      <div className="bg-white rounded-3xl p-8 w-full max-w-md text-center space-y-6 shadow-2xl animate-in zoom-in-95 duration-200">
+        <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto">
+          <Sparkles className="w-8 h-8 text-white" />
+        </div>
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Apa peran Anda?
+          </h2>
+          <p className="text-sm text-gray-600">
+            Pilih tujuan Anda bergabung di SekolahIslamKu
+          </p>
+        </div>
         <div className="space-y-3">
           <button
             onClick={() => onPilih("dkm")}
-            className="w-full py-3 border rounded-xl flex items-center justify-center gap-2 hover:bg-gray-50"
+            className="w-full py-4 border-2 border-gray-200 rounded-2xl flex items-center justify-center gap-3 hover:border-blue-500 hover:bg-blue-50 transition-all group"
           >
-            <Building2 className="w-4 h-4" /> Jadi DKM / Admin Masjid
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <Building2 className="w-5 h-5 text-white" />
+            </div>
+            <span className="font-semibold text-gray-800">
+              Jadi DKM / Admin Masjid
+            </span>
           </button>
           <button
             onClick={() => onPilih("teacher")}
-            className="w-full py-3 border rounded-xl flex items-center justify-center gap-2 hover:bg-gray-50"
+            className="w-full py-4 border-2 border-gray-200 rounded-2xl flex items-center justify-center gap-3 hover:border-green-500 hover:bg-green-50 transition-all group"
           >
-            <Users2 className="w-4 h-4" /> Gabung Sebagai Guru
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <Users2 className="w-5 h-5 text-white" />
+            </div>
+            <span className="font-semibold text-gray-800">
+              Gabung Sebagai Guru
+            </span>
           </button>
           <button
             onClick={() => onPilih("student")}
-            className="w-full py-3 border rounded-xl flex items-center justify-center gap-2 hover:bg-gray-50"
+            className="w-full py-4 border-2 border-gray-200 rounded-2xl flex items-center justify-center gap-3 hover:border-purple-500 hover:bg-purple-50 transition-all group"
           >
-            <GraduationCap className="w-4 h-4" /> Gabung Sebagai Murid
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <GraduationCap className="w-5 h-5 text-white" />
+            </div>
+            <span className="font-semibold text-gray-800">
+              Gabung Sebagai Murid
+            </span>
           </button>
         </div>
         <button
           onClick={onClose}
-          className="text-sm text-gray-500 hover:underline mt-4"
+          className="text-sm text-gray-500 hover:text-gray-700 font-medium transition-colors"
         >
           Nanti Saja
         </button>
@@ -214,27 +250,48 @@ function ModalJoinAtauBuat({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-2xl p-6 w-full max-w-md space-y-4">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in duration-200">
+      <div className="bg-white rounded-3xl p-8 w-full max-w-md space-y-6 shadow-2xl animate-in zoom-in-95 duration-200">
         {mode === "dkm" ? (
           <>
-            <h2 className="text-lg font-semibold">Buat Masjid Baru</h2>
-            <p className="text-sm text-gray-500">
-              Sebagai DKM / Admin, kamu akan membuat masjid baru di sistem.
-            </p>
-            <input
-              type="text"
-              placeholder="Nama Masjid"
-              value={masjidName}
-              onChange={(e) => setMasjidName(e.target.value)}
-              className="w-full border rounded-lg px-3 py-2"
-            />
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setIconFile(e.target.files?.[0] || null)}
-              className="w-full text-sm"
-            />
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                <Building2 className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">
+                  Buat Masjid Baru
+                </h2>
+                <p className="text-sm text-gray-600">
+                  Daftarkan masjid Anda ke sistem
+                </p>
+              </div>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Nama Masjid
+                </label>
+                <input
+                  type="text"
+                  placeholder="Contoh: Masjid Al-Ikhlas"
+                  value={masjidName}
+                  onChange={(e) => setMasjidName(e.target.value)}
+                  className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Logo Masjid (Opsional)
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setIconFile(e.target.files?.[0] || null)}
+                  className="w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 file:font-medium"
+                />
+              </div>
+            </div>
             <button
               disabled={!masjidName.trim() || loading}
               onClick={() => {
@@ -244,31 +301,49 @@ function ModalJoinAtauBuat({
                   file: iconFile || undefined,
                 });
               }}
-              className="w-full py-2 bg-green-600 text-white rounded-lg disabled:opacity-50"
+              className="w-full py-3.5 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:from-green-700 hover:to-green-800 transition-all shadow-lg shadow-green-500/30"
             >
-              {loading ? "Membuat..." : "Buat Masjid"}
+              {loading ? "Membuat Masjid..." : "Buat Masjid"}
             </button>
           </>
         ) : (
           <>
-            <h2 className="text-lg font-semibold">Gabung ke Sekolah</h2>
-            <p className="text-sm text-gray-500">
-              Masukkan kode akses dari sekolah Anda.
-            </p>
-            <input
-              type="text"
-              placeholder="Kode Akses Sekolah"
-              value={accessCode}
-              onChange={(e) => setAccessCode(e.target.value)}
-              className="w-full border rounded-lg px-3 py-2"
-            />
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
+                {mode === "teacher" ? (
+                  <Users2 className="w-6 h-6 text-white" />
+                ) : (
+                  <GraduationCap className="w-6 h-6 text-white" />
+                )}
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">
+                  Gabung ke Sekolah
+                </h2>
+                <p className="text-sm text-gray-600">
+                  Masukkan kode akses dari admin sekolah
+                </p>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Kode Akses Sekolah
+              </label>
+              <input
+                type="text"
+                placeholder="Masukkan kode akses"
+                value={accessCode}
+                onChange={(e) => setAccessCode(e.target.value)}
+                className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all font-mono text-center text-lg tracking-wider"
+              />
+            </div>
             <button
               disabled={!accessCode.trim() || loading}
               onClick={() => {
                 setLoading(true);
                 onJoinSekolah(accessCode, mode);
               }}
-              className="w-full py-2 bg-blue-600 text-white rounded-lg disabled:opacity-50"
+              className="w-full py-3.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:from-purple-700 hover:to-purple-800 transition-all shadow-lg shadow-purple-500/30"
             >
               {loading ? "Memproses..." : "Gabung Sekarang"}
             </button>
@@ -276,7 +351,7 @@ function ModalJoinAtauBuat({
         )}
         <button
           onClick={onClose}
-          className="text-sm text-gray-500 hover:underline"
+          className="w-full text-sm text-gray-500 hover:text-gray-700 font-medium transition-colors"
         >
           Batal
         </button>
@@ -284,7 +359,6 @@ function ModalJoinAtauBuat({
     </div>
   );
 }
-
 
 /* =======================
    MAIN COMPONENT
@@ -312,10 +386,8 @@ export default function Login() {
       const res = await api.post("/auth/login", { identifier, password });
       const { access_token, refresh_token } = res.data.data;
 
-      // ✅ Simpan token ke cookie
       setTokens(access_token, refresh_token);
 
-      // ✅ Ambil context user
       const ctx = await api.get("/auth/me/simple-context");
       const memberships = ctx.data?.data?.memberships ?? [];
 
@@ -414,53 +486,77 @@ export default function Login() {
 
   return (
     <AuthLayout mode="login" fullWidth contentClassName="max-w-xl mx-auto">
-      <div className="bg-white rounded-2xl p-6 md:p-8 border shadow-sm">
-        <h1 className="text-2xl font-bold mb-4">Masuk ke Akun Anda</h1>
+      <div className="bg-white rounded-3xl p-8 md:p-10 shadow-xl border border-gray-100">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Selamat Datang Kembali
+          </h1>
+          <p className="text-gray-600">Masuk ke akun Anda untuk melanjutkan</p>
+        </div>
+
         {error && (
-          <div className="mb-4 text-red-600 text-sm border border-red-300 rounded-lg p-2">
-            {error}
+          <div className="mb-6 text-red-700 text-sm bg-red-50 border-2 border-red-200 rounded-xl p-4 flex items-start gap-3 animate-in slide-in-from-top-2 duration-300">
+            <div className="w-5 h-5 rounded-full bg-red-200 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <span className="text-red-700 text-xs font-bold">!</span>
+            </div>
+            <span>{error}</span>
           </div>
         )}
-        <form onSubmit={handleLogin} className="space-y-4">
+
+        <form onSubmit={handleLogin} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
               Email / Username
             </label>
             <input
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
-              className="w-full border rounded-lg px-3 py-2"
+              className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition-all"
+              placeholder="Masukkan email atau username"
               required
             />
           </div>
+
           <div>
-            <label className="block text-sm font-medium">Password</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Password
+            </label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full border rounded-lg px-3 py-2 pr-10"
+                className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 pr-12 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition-all"
+                placeholder="Masukkan password"
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-2 top-2 text-gray-500"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
               >
-                {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+                {showPassword ? (
+                  <EyeOffIcon className="w-5 h-5" />
+                ) : (
+                  <EyeIcon className="w-5 h-5" />
+                )}
               </button>
             </div>
           </div>
+
           <button
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 rounded-lg flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3.5 rounded-xl font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg shadow-blue-500/30 mt-8"
           >
             {loading ? (
-              "Memproses..."
+              <>
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                Memproses...
+              </>
             ) : (
               <>
-                Masuk <ArrowRight className="w-4 h-4" />
+                Masuk ke Akun
+                <ArrowRight className="w-5 h-5" />
               </>
             )}
           </button>

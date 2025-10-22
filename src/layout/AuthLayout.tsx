@@ -83,7 +83,7 @@ export default function AuthLayout({
               </>
             ) : (
               <>
-                Sudah punya akun?{" "}
+                Sudah punya?{" "}
                 <Link
                   to="/login"
                   className="hover:underline"

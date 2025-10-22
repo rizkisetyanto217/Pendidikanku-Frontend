@@ -15,6 +15,9 @@ import {
   CheckCircle2,
   AlertCircle,
   ArrowRight,
+  Check,
+  X,
+  Sparkles,
 } from "lucide-react";
 
 type FormState = {
@@ -70,6 +73,12 @@ export default function Register() {
     form.password === form.confirm_password && form.password.length > 0;
   const formValid = usernameValid && emailValid && passwordValid && pwdMatch;
 
+  // Password strength indicators
+  const hasUpperCase = /[A-Z]/.test(form.password);
+  const hasLowerCase = /[a-z]/.test(form.password);
+  const hasNumber = /[0-9]/.test(form.password);
+  const hasMinLength = form.password.length >= 8;
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!formValid) return;
@@ -100,30 +109,37 @@ export default function Register() {
 
   return (
     <AuthLayout mode="register" fullWidth contentClassName="max-w-md mx-auto">
-      <div className="text-center mb-8">
-        <img
-          src="https://picsum.photos/200/300"
-          alt="Logo"
-          className="h-16 w-16 rounded-2xl mx-auto mb-4 object-cover shadow-md"
-        />
-        <h1 className="text-2xl font-bold mb-1" style={{ color: theme.black1 }}>
+      {/* Header Section */}
+      <div className="text-center mb-8 animate-in fade-in slide-in-from-top-4 duration-500">
+        <div className="relative inline-block mb-4">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl blur-xl opacity-20"></div>
+          <img
+            src="https://picsum.photos/200/300"
+            alt="Logo"
+            className="relative h-20 w-20 rounded-2xl mx-auto object-cover shadow-xl border-2 border-white"
+          />
+        </div>
+        <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
           SekolahIslamku Suite
         </h1>
-        <p className="text-sm" style={styles.muted}>
+        <p className="text-sm max-w-sm mx-auto" style={styles.muted}>
           Satu platform untuk operasional sekolah yang rapi & efisien
         </p>
       </div>
 
+      {/* Main Card */}
       <div
-        className="max-w-md mx-auto rounded-2xl p-8 shadow-lg border transition-shadow hover:shadow-xl"
+        className="max-w-md mx-auto rounded-3xl p-8 shadow-2xl border transition-all hover:shadow-3xl animate-in fade-in slide-in-from-bottom-4 duration-500"
         style={styles.card}
       >
-        <h2
-          className="text-xl font-semibold mb-6"
-          style={{ color: theme.black1 }}
-        >
-          Buat Akun Baru
-        </h2>
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+            <Sparkles className="w-5 h-5 text-white" />
+          </div>
+          <h2 className="text-2xl font-bold" style={{ color: theme.black1 }}>
+            Buat Akun Baru
+          </h2>
+        </div>
 
         {/* <div className="mb-6">
           <GoogleIdentityButton
@@ -144,15 +160,19 @@ export default function Register() {
         </div> */}
 
         {error && (
-          <div className="mb-6 flex items-start gap-3 rounded-xl px-4 py-3 text-sm border border-red-200 bg-red-50 text-red-700">
-            <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
-            <span>{error}</span>
+          <div className="mb-6 flex items-start gap-3 rounded-2xl px-4 py-4 text-sm border-2 border-red-200 bg-gradient-to-br from-red-50 to-red-100/50 text-red-700 animate-in slide-in-from-top-2 duration-300">
+            <div className="w-5 h-5 rounded-full bg-red-200 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <AlertCircle className="h-3.5 w-3.5" />
+            </div>
+            <span className="flex-1">{error}</span>
           </div>
         )}
         {success && (
-          <div className="mb-6 flex items-start gap-3 rounded-xl px-4 py-3 text-sm border border-green-200 bg-green-50 text-green-700">
-            <CheckCircle2 className="h-5 w-5 flex-shrink-0 mt-0.5" />
-            <span>{success}</span>
+          <div className="mb-6 flex items-start gap-3 rounded-2xl px-4 py-4 text-sm border-2 border-green-200 bg-gradient-to-br from-green-50 to-green-100/50 text-green-700 animate-in slide-in-from-top-2 duration-300">
+            <div className="w-5 h-5 rounded-full bg-green-200 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+            </div>
+            <span className="flex-1">{success}</span>
           </div>
         )}
 
@@ -167,7 +187,12 @@ export default function Register() {
             placeholder="Minimal 3 karakter"
             styles={styles}
             valid={usernameValid || form.user_name.length === 0}
+            showValidation={form.user_name.length > 0}
+            validationMessage={
+              usernameValid ? "Username tersedia" : "Minimal 3 karakter"
+            }
           />
+
           <InputField
             label="Email"
             type="email"
@@ -179,7 +204,12 @@ export default function Register() {
             placeholder="nama@email.com"
             styles={styles}
             valid={emailValid || form.email.length === 0}
+            showValidation={form.email.length > 0}
+            validationMessage={
+              emailValid ? "Format email valid" : "Format email tidak valid"
+            }
           />
+
           <PasswordField
             label="Password"
             value={form.password}
@@ -189,8 +219,37 @@ export default function Register() {
             show={showPw}
             toggle={() => setShowPw((s) => !s)}
             styles={styles}
-            helper="≥8 karakter, kombinasi huruf & angka"
           />
+
+          {/* Password Strength Indicator */}
+          {form.password.length > 0 && (
+            <div className="space-y-2 -mt-2 animate-in slide-in-from-top-2 duration-300">
+              <div className="flex gap-1">
+                {[hasMinLength, hasLowerCase, hasUpperCase, hasNumber].map(
+                  (met, i) => (
+                    <div
+                      key={i}
+                      className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
+                        met
+                          ? "bg-gradient-to-r from-green-400 to-green-500"
+                          : "bg-gray-200"
+                      }`}
+                    />
+                  )
+                )}
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <PasswordRequirement
+                  met={hasMinLength}
+                  text="Min. 8 karakter"
+                />
+                <PasswordRequirement met={hasLowerCase} text="Huruf kecil" />
+                <PasswordRequirement met={hasUpperCase} text="Huruf besar" />
+                <PasswordRequirement met={hasNumber} text="Angka" />
+              </div>
+            </div>
+          )}
+
           <PasswordField
             label="Konfirmasi Password"
             value={form.confirm_password}
@@ -201,31 +260,68 @@ export default function Register() {
             toggle={() => setShowPw2((s) => !s)}
             styles={styles}
             valid={pwdMatch || form.confirm_password.length === 0}
+            showValidation={form.confirm_password.length > 0}
+            validationMessage={
+              pwdMatch ? "Password cocok" : "Password tidak cocok"
+            }
           />
 
           <button
             type="submit"
             disabled={!formValid || loading}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 font-semibold transition-all hover:opacity-90 hover:shadow-md disabled:opacity-40 disabled:cursor-not-allowed"
-            style={styles.primaryBtn}
+            className="w-full inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed mt-8 shadow-lg relative overflow-hidden group"
+            style={{
+              background:
+                formValid && !loading
+                  ? "linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)"
+                  : styles.primaryBtn.backgroundColor,
+              color: styles.primaryBtn.color,
+            }}
           >
-            {loading ? "Memproses..." : "Daftar"}
-            <ArrowRight className="h-4 w-4" />
+            <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity"></div>
+            {loading ? (
+              <>
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                Memproses...
+              </>
+            ) : (
+              <>
+                Buat Akun
+                <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              </>
+            )}
           </button>
         </form>
+      </div>
 
-        <div className="mt-6 text-center text-sm">
-          <span style={styles.muted}>Sudah punya akun? </span>
-          <button
-            onClick={() => navigate("/login")}
-            className="font-semibold hover:underline"
-            style={{ color: theme.primary }}
-          >
-            Login
-          </button>
-        </div>
+      {/* Login Link - Outside Card */}
+      <div className="mt-6 text-center text-sm">
+        <span style={styles.muted}>Sudah punya akun? </span>
+        <button
+          onClick={() => navigate("/login")}
+          className="font-semibold hover:underline inline-flex items-center gap-1 transition-all hover:gap-2"
+          style={{ color: theme.primary }}
+        >
+          Login
+          <ArrowRight className="h-3.5 w-3.5" />
+        </button>
       </div>
     </AuthLayout>
+  );
+}
+
+function PasswordRequirement({ met, text }: { met: boolean; text: string }) {
+  return (
+    <div
+      className={`flex items-center gap-1.5 ${met ? "text-green-600" : "text-gray-400"}`}
+    >
+      {met ? (
+        <Check className="h-3.5 w-3.5 flex-shrink-0" />
+      ) : (
+        <X className="h-3.5 w-3.5 flex-shrink-0" />
+      )}
+      <span>{text}</span>
+    </div>
   );
 }
 
@@ -238,6 +334,8 @@ function InputField({
   icon,
   styles,
   valid = true,
+  showValidation = false,
+  validationMessage = "",
 }: any) {
   return (
     <div>
@@ -248,7 +346,7 @@ function InputField({
         {label}
       </label>
       <div className="relative">
-        <span className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+        <span className="absolute inset-y-0 left-3 flex items-center pointer-events-none z-10">
           {icon}
         </span>
         <input
@@ -256,14 +354,36 @@ function InputField({
           value={value}
           onChange={onChange}
           placeholder={placeholder}
-          className={`w-full rounded-xl border pl-10 pr-4 py-3 outline-none transition-all focus:ring-2 ${!valid && value.length > 0 ? "border-red-400" : ""}`}
+          className={`w-full rounded-xl border-2 pl-11 pr-4 py-3 outline-none transition-all ${
+            !valid && value.length > 0
+              ? "border-red-400 focus:border-red-500 focus:ring-4 focus:ring-red-100"
+              : "focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+          }`}
           style={{
             ...styles.input,
             borderColor:
               !valid && value.length > 0 ? "#f87171" : styles.input.borderColor,
           }}
         />
+        {showValidation && (
+          <span
+            className={`absolute inset-y-0 right-3 flex items-center ${
+              valid ? "text-green-500" : "text-red-500"
+            }`}
+          >
+            {valid ? <Check className="h-5 w-5" /> : <X className="h-5 w-5" />}
+          </span>
+        )}
       </div>
+      {showValidation && validationMessage && (
+        <p
+          className={`mt-1.5 text-xs flex items-center gap-1 ${
+            valid ? "text-green-600" : "text-red-600"
+          }`}
+        >
+          {validationMessage}
+        </p>
+      )}
     </div>
   );
 }
@@ -275,8 +395,9 @@ function PasswordField({
   show,
   toggle,
   styles,
-  helper,
   valid = true,
+  showValidation = false,
+  validationMessage = "",
 }: any) {
   return (
     <div>
@@ -288,14 +409,18 @@ function PasswordField({
       </label>
       <div className="relative">
         <Lock
-          className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5"
+          className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 z-10"
           style={styles.muted}
         />
         <input
           type={show ? "text" : "password"}
           value={value}
           onChange={onChange}
-          className={`w-full rounded-xl border pl-10 pr-12 py-3 outline-none transition-all focus:ring-2 ${!valid && value.length > 0 ? "border-red-400" : ""}`}
+          className={`w-full rounded-xl border-2 pl-11 pr-12 py-3 outline-none transition-all ${
+            !valid && value.length > 0
+              ? "border-red-400 focus:border-red-500 focus:ring-4 focus:ring-red-100"
+              : "focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+          }`}
           style={{
             ...styles.input,
             borderColor:
@@ -305,7 +430,7 @@ function PasswordField({
         <button
           type="button"
           onClick={toggle}
-          className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-lg hover:bg-gray-100 transition-colors"
+          className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
         >
           {show ? (
             <EyeOffIcon className="h-5 w-5" style={styles.muted} />
@@ -314,9 +439,13 @@ function PasswordField({
           )}
         </button>
       </div>
-      {helper && (
-        <p className="mt-1.5 text-xs" style={styles.muted}>
-          {helper}
+      {showValidation && validationMessage && (
+        <p
+          className={`mt-1.5 text-xs flex items-center gap-1 ${
+            valid ? "text-green-600" : "text-red-600"
+          }`}
+        >
+          {validationMessage}
         </p>
       )}
     </div>
