@@ -28,7 +28,7 @@ import StudentExam from "@/pages/sekolahislamku/dashboard-student/class/StudentE
 import StudentCertificate from "@/pages/sekolahislamku/dashboard-student/certificate/StudentCertificate";
 
 export const StudentRoutes = (
-  <Route path="masjid/:id/murid" element={<StudentLayout />}>
+  <Route path="/:id/murid" element={<StudentLayout />}>
     <Route index element={<StudentDashboard />} />
     <Route path="progress" element={<StudentProgressDetail />} />
     <Route path="all-schedule" element={<AllScheduleStudent />} />

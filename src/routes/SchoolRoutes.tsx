@@ -41,7 +41,7 @@ import SchoolSettings from "@/pages/sekolahislamku/dashboard-school/settings/Sch
 import SchoolActiveClass from "@/pages/sekolahislamku/dashboard-school/active-class/SchoolActiveClass";
 
 export const SchoolRoutes = (
-  <Route path="masjid/:id/sekolah" element={<StudentLayout />}>
+  <Route path="/:id/sekolah" element={<StudentLayout />}>
     {/* === Dashboard Utama === */}
     <Route index element={<SchoolDashboard />} />
 

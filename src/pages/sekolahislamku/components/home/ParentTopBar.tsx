@@ -27,11 +27,10 @@ interface ParentTopBarProps {
 
 const defaultFormatHijri = (d: Date) =>
   new Intl.DateTimeFormat("id-ID-u-ca-islamic-umalqura", {
+    weekday: "long",
     day: "numeric",
     month: "long",
     year: "numeric",
-    timeZone: "UTC",
-    weekday: "long",
   }).format(d);
 
 const getLocalMasjid = () => {
@@ -58,8 +57,8 @@ export default function ParentTopBar({
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const params = useParams<{ id?: string }>();
-  const match = useMatch("/:id/*");
-  const masjidId = params.id ?? match?.params.id ?? "";
+  const match = useMatch("/:id/*"); // ✅ sudah benar (tanpa /masjid/)
+  const id = params.id ?? match?.params.id ?? "";
 
   /* ---------- STATE ---------- */
   const [masjidName, setMasjidName] = useState(
@@ -69,72 +68,25 @@ export default function ParentTopBar({
     getLocalMasjid().masjid_icon_url || "/image/Gambar-Masjid.jpeg"
   );
 
-  // Ref untuk mencegah double fetch
   const isFetching = useRef(false);
   const lastFetchedId = useRef<string>("");
 
   /* ======================================================
-     SYNC LOCAL STORAGE + EVENT (REALTIME)
+     FETCH MASJID CONTEXT (sekali saja per id)
   ====================================================== */
   useEffect(() => {
-    const syncFromStorage = (e?: any) => {
-      const m = e?.detail || getLocalMasjid();
-      if (m.masjid_name) setMasjidName(m.masjid_name);
-      if (m.masjid_icon_url) setMasjidIcon(m.masjid_icon_url);
-    };
-
-    window.addEventListener("activeMasjidUpdated", syncFromStorage);
-    window.addEventListener("storage", syncFromStorage);
-
-    syncFromStorage();
-
-    return () => {
-      window.removeEventListener("activeMasjidUpdated", syncFromStorage);
-      window.removeEventListener("storage", syncFromStorage);
-    };
-  }, []);
-
-  /* ======================================================
-     FETCH MASJID CONTEXT (Background - Tanpa Loading UI)
-  ====================================================== */
-  useEffect(() => {
-    // Skip jika tidak ada masjidId atau sedang fetch atau sudah fetch ID ini
-    if (!masjidId || isFetching.current || lastFetchedId.current === masjidId) {
-      return;
-    }
-
+    if (!id || isFetching.current || lastFetchedId.current === id) return;
     isFetching.current = true;
-    let isMounted = true;
 
-    async function fetchMasjidContext() {
+    async function fetchContext() {
       try {
-        const [ctxRes, ownedRes] = await Promise.allSettled([
-          api.get("/auth/me/simple-context"),
-          api.get("/u/masjids/user"),
-        ]);
-
-        if (!isMounted) return;
-
-        const memberships =
-          ctxRes.status === "fulfilled"
-            ? (ctxRes.value.data?.data?.memberships ?? [])
-            : [];
-        const owned =
-          ownedRes.status === "fulfilled"
-            ? (ownedRes.value.data?.data?.items ?? [])
-            : [];
+        const res = await api.get("/auth/me/simple-context");
+        const userData = res.data?.data;
+        const memberships = userData?.memberships ?? [];
 
         const current =
-          memberships.find((m: any) => m.masjid_id === masjidId) ||
-          owned.find((m: any) => m.masjid_id === masjidId) ||
-          memberships[0] ||
-          owned[0] ||
-          null;
-
-        if (!current) {
-          lastFetchedId.current = masjidId;
-          return;
-        }
+          memberships.find((m: any) => m.masjid_id === id) || memberships[0];
+        if (!current) return;
 
         const newMasjid = {
           masjid_id: current.masjid_id,
@@ -145,72 +97,42 @@ export default function ParentTopBar({
             "/image/Gambar-Masjid.jpeg",
         };
 
-        // Cek apakah data sudah sama
-        const existing = getLocalMasjid();
-        const isSame =
-          existing.masjid_id === newMasjid.masjid_id &&
-          existing.masjid_name === newMasjid.masjid_name &&
-          existing.masjid_icon_url === newMasjid.masjid_icon_url;
-
-        // Update hanya jika berbeda
-        if (!isSame) {
-          localStorage.setItem("active_masjid", JSON.stringify(newMasjid));
-          window.dispatchEvent(
-            new CustomEvent("activeMasjidUpdated", { detail: newMasjid })
-          );
-        }
+        localStorage.setItem("active_masjid", JSON.stringify(newMasjid));
+        window.dispatchEvent(
+          new CustomEvent("activeMasjidUpdated", { detail: newMasjid })
+        );
 
         setMasjidName(newMasjid.masjid_name);
         setMasjidIcon(newMasjid.masjid_icon_url);
 
-        // Tentukan role aktif
-        let role = (localStorage.getItem("active_role") || "").toLowerCase();
-        if (!role && current.roles?.length) {
-          const roles = current.roles.map((r: string) => r.toLowerCase());
-          if (roles.includes("dkm") || roles.includes("admin")) role = "dkm";
-          else if (roles.includes("teacher")) role = "teacher";
-          else if (roles.includes("student")) role = "student";
-          else role = "user";
-          localStorage.setItem("active_role", role);
-        }
-
-        // Redirect hanya jika benar-benar di root path
-        const isRootPath =
-          pathname === `/${masjidId}` || pathname === `/${masjidId}/`;
-        if (isRootPath) {
+        // Tentukan role & redirect jika di root
+        const role = (
+          localStorage.getItem("active_role") || "user"
+        ).toLowerCase();
+        const isRoot = pathname === `/${id}` || pathname === `/${id}/`;
+        if (isRoot) {
           const target =
             role === "teacher"
               ? "guru"
               : role === "student"
                 ? "murid"
                 : "sekolah";
-          navigate(`/${masjidId}/${target}`, { replace: true });
+          navigate(`/${id}/${target}`, { replace: true });
         }
 
-        // Tandai ID ini sudah di-fetch
-        lastFetchedId.current = masjidId;
+        lastFetchedId.current = id;
       } catch (err) {
-        console.error("❌ Gagal mengambil data masjid:", err);
-        if (isMounted) {
-          lastFetchedId.current = masjidId;
-        }
+        console.error("Gagal fetch context:", err);
       } finally {
-        if (isMounted) {
-          isFetching.current = false;
-        }
+        isFetching.current = false;
       }
     }
 
-    fetchMasjidContext();
-
-    return () => {
-      isMounted = false;
-      isFetching.current = false;
-    };
-  }, [masjidId, pathname, navigate]);
+    fetchContext();
+  }, [id, pathname, navigate]);
 
   /* ======================================================
-     NAVIGATION LOGIC
+     PAGE TITLE
   ====================================================== */
   const pageKind: "sekolah" | "murid" | "guru" = pathname.includes("/sekolah")
     ? "sekolah"
@@ -218,7 +140,7 @@ export default function ParentTopBar({
       ? "guru"
       : "murid";
 
-  const base = masjidId ? `/${masjidId}/${pageKind}` : `/${pageKind}`;
+  const base = id ? `/${id}/${pageKind}` : `/${pageKind}`;
   const navs: NavItem[] = useMemo(
     () =>
       NAVS[pageKind].map((n) => ({
@@ -237,18 +159,27 @@ export default function ParentTopBar({
   }, [pathname, navs, title]);
 
   /* ======================================================
-     DATE FORMATTING
+     HIJRI DATE (fix)
   ====================================================== */
-  const now = new Date();
+  const [hijriLabel, setHijriLabel] = useState<string>("");
 
-  // Gunakan custom dateFmt jika tersedia, atau gunakan default
-  const hijriLabel = useMemo(() => {
-    if (hijriDate) return hijriDate;
-    if (dateFmt && gregorianDate) return dateFmt(gregorianDate);
-    return defaultFormatHijri(now);
-  }, [hijriDate, gregorianDate, dateFmt, now]);
+  useEffect(() => {
+    if (hijriDate) {
+      setHijriLabel(hijriDate);
+      return;
+    }
 
-  const handleBackClick = () => (onBackClick ? onBackClick() : navigate(-1));
+    if (gregorianDate && dateFmt) {
+      setHijriLabel(dateFmt(gregorianDate));
+      return;
+    }
+
+    // fallback ke defaultFormatHijri()
+    const today = new Date();
+    setHijriLabel(defaultFormatHijri(today));
+  }, [hijriDate, gregorianDate, dateFmt]);
+
+  const handleBack = () => (onBackClick ? onBackClick() : navigate(-1));
 
   /* ======================================================
      RENDER
@@ -259,45 +190,25 @@ export default function ParentTopBar({
       style={{ borderColor: palette.silver1 }}
     >
       <div className="mx-auto px-4 py-3 flex items-center justify-between">
-        {/* === MOBILE === */}
-        <div className="flex items-center gap-3 md:hidden flex-1">
+        {/* === DESKTOP === */}
+        <div className="hidden md:flex items-center gap-3 transition-all duration-300">
           {showBack && (
             <button
-              onClick={handleBackClick}
+              onClick={handleBack}
               className="h-9 w-9 grid place-items-center rounded-xl border"
               style={{ borderColor: palette.silver1 }}
             >
               <ArrowLeft size={18} />
             </button>
           )}
-          <span className="font-semibold text-lg truncate flex-1 text-start">
-            {activeLabel}
-          </span>
-          <div className="flex items-center gap-2">
-            <button
-              className="h-9 w-9 grid place-items-center rounded-xl border"
-              style={{ borderColor: palette.silver1 }}
-            >
-              <Menu size={18} />
-            </button>
-            <PublicUserDropdown variant="icon" withBg={false} />
-          </div>
-        </div>
-
-        {/* === DESKTOP === */}
-        <div className="hidden md:flex items-center gap-3 transition-all duration-300">
           <img
-            key={masjidIcon}
             src={masjidIcon}
             alt="Logo Masjid"
             className="w-12 h-12 rounded-full object-cover border transition-all duration-300"
             style={{ borderColor: palette.primary }}
-            onError={(e) => {
-              e.currentTarget.src = "/image/Gambar-Masjid.jpeg";
-            }}
+            onError={(e) => (e.currentTarget.src = "/image/Gambar-Masjid.jpeg")}
           />
           <span
-            key={masjidName}
             className="text-base font-semibold transition-opacity duration-300"
             style={{ color: palette.primary }}
           >
@@ -305,15 +216,37 @@ export default function ParentTopBar({
           </span>
         </div>
 
+        {/* === RIGHT SIDE === */}
         <div className="hidden md:flex items-center gap-3 text-sm">
-          <span
-            className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium"
-            style={{
-              background: palette.secondary,
-              color: isDark ? palette.black1 : palette.silver1,
-            }}
-          >
-            {hijriLabel}
+          {hijriLabel && (
+            <span
+              className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium"
+              style={{
+                background: palette.secondary,
+                color: isDark ? palette.black1 : palette.white1,
+              }}
+            >
+              {hijriLabel}
+            </span>
+          )}
+          <PublicUserDropdown variant="icon" withBg={false} />
+        </div>
+
+        {/* === MOBILE === */}
+        <div className="flex md:hidden items-center justify-between w-full">
+          {showBack ? (
+            <button
+              onClick={handleBack}
+              className="h-9 w-9 grid place-items-center rounded-xl border"
+              style={{ borderColor: palette.silver1 }}
+            >
+              <ArrowLeft size={18} />
+            </button>
+          ) : (
+            <Menu size={20} />
+          )}
+          <span className="font-semibold text-base truncate flex-1 text-center">
+            {activeLabel}
           </span>
           <PublicUserDropdown variant="icon" withBg={false} />
         </div>

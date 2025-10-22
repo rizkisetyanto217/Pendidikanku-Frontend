@@ -1,28 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
-// Layout
-import DkmLayout from "@/layout/DKMLayout";
-import DKMSettingParent from "@/layout/DKMSettingLayout";
-
-// Halaman DKM
-import DashboardAdminDkm from "@/pages/dashboard/dkm/home/DKMHome";
-// import ProfilMasjid from "@/pages/dashboard/dkm/profile/masjid/DKMProfile";
-import ProfileDKMPengajar from "@/pages/dashboard/dkm/profile/dkm/DKMProfileDKMTeacher";
-// import Kajian from "@/pages/dashboard/dkm/lecture/lecture-sessions/DKMLectureSessions";
-import Sertifikat from "@/pages/dashboard/dkm/certificate/DKMCertificate";
-import Keuangan from "@/pages/dashboard/dkm/finance/DKMFinance";
-import Postingan from "@/pages/dashboard/dkm/post/DKMPostParent";
-
-// Halaman Setting DKM
-import ProfilSayaDkm from "@/pages/dashboard/dkm/setting/DKMHomeMyProfile";
-import DKMAppereance from "@/pages/dashboard/dkm/setting/DKMAppereance";
-import SupportUs from "@/pages/dashboard/dkm/setting/DKMSupportUs";
-import Partnership from "@/pages/dashboard/dkm/setting/DKMPartnership";
-import DKMFaq from "@/pages/dashboard/dkm/setting/DKMFaq";
-
-// Halaman Penulis
-import AuthorHome from "@/pages/dashboard/author/home/AuthorHome";
-
 // Halaman Auth
 import Login from "@/pages/dashboard/auth/Login";
 // import Register from "@/pages/dashboard/auth/Register";
@@ -36,35 +13,7 @@ import AuthorLayout from "@/layout/AuthorLayout";
 import TeacherLayout from "@/layout/TeacherLayout";
 import TreasurerLayout from "@/layout/TreasurerLayout";
 import AdminLayout from "@/layout/AdminLayout";
-import TeacherHome from "@/pages/dashboard/teacher/home/TeacherHome";
-import TreasurerHome from "@/pages/dashboard/treasurer/home/TreasurerHome";
 import AdminHome from "@/pages/dashboard/admin/home/AdminHome";
-// import DkmEditSosmedProfile from "@/pages/dashboard/dkm/profile/masjid/DKMEditSosmedMasjid";
-// import DKMEditMasjid from "@/pages/dashboard/dkm/profile/masjid/DKMEditMasjid";
-// import DKMEditProfileMasjid from "@/pages/dashboard/dkm/profile/masjid/DKMEditProfileMasjid";
-// import DKMLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/DKMLectureSessions";
-// import DKMLecture from "@/pages/dashboard/dkm/lecture/lecture/DKMLecture";
-import DKMLectureParent from "@/pages/dashboard/dkm/lecture/DKMLectureParent";
-import DKMDetailLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/detail/DKMDetailLectureSessions";
-import DKMInformationLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/information/DKMInformationLectureSessions";
-import DKMVideoAudioLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/assets/DKMVideoAudioLectureSessions";
-import DKMQuizLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/quiz/DKMQuizLectureSessions";
-import DKMFullTranscriptLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/materials/fullTranscipt/DKMFullTranscriptLectureSessions";
-import DKMDocumentLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/assets/DKMdocumentLectureSessions";
-import DKMSummaryLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/materials/summary/DKMSummaryLectureSessions";
-import DKMStatsQuizLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/quiz/DKMStatsQuizLectureSessions";
-import DKMDetailLecture from "@/pages/dashboard/dkm/lecture/lecture/detail/DKMDetailLecture";
-import DKMInformationLecture from "@/pages/dashboard/dkm/lecture/lecture/information/DKMInformationLecture";
-import DKMVideoLecture from "@/pages/dashboard/dkm/lecture/lecture/assets/DKMVideoAudioLecture";
-import DKMQuizLecture from "@/pages/dashboard/dkm/lecture/lecture/quiz/DKMQuizLecture";
-import DKMFullTranscriptLecture from "@/pages/dashboard/dkm/lecture/lecture/materials/DKMFullTranscriptLecture";
-import DKMSummaryLecture from "@/pages/dashboard/dkm/lecture/lecture/materials/DKMSummaryLecture";
-import DKMDocumentLecture from "@/pages/dashboard/dkm/lecture/lecture/assets/DKMDocumentLecture";
-import DKMAllLectureLectureSessions from "@/pages/dashboard/dkm/lecture/lecture/all-lecture-sessions/DKMAllLectureSession";
-import DKMSuggestLecture from "@/pages/dashboard/dkm/lecture/lecture/suggest/DKMSuggestLecture";
-// import DKMAddLectureSession from "@/pages/dashboard/dkm/lecture/lecture-sessions/detail/add-edit/DKMAddEditLectureSessions";
-// import DKMAddEditLectureSession from "@/pages/dashboard/dkm/lecture/lecture-sessions/detail/add-edit/DKMAddEditLectureSessions";
-import DKMAddEditLecture from "@/pages/dashboard/dkm/lecture/lecture/detail/DKMAddEditLecture";
 import MasjidLinkTree from "@/pages/linktree/MasjidLinkTreeHome";
 import MasjidDonationMasjid from "@/pages/linktree/finansial/donation/MasjidDonation";
 import MasjidLayout from "@/pages/linktree/MasjidLayout";
@@ -85,11 +34,7 @@ import MasjidFullTranscriptLectureSessions from "@/pages/linktree/lecture/materi
 import MasjidSummaryLectureSessions from "@/pages/linktree/lecture/material/lecture-sessions/materials/MasjidSummaryLectureSessions";
 import MasjidDocsLectureSessions from "@/pages/linktree/lecture/material/lecture-sessions/assets/MasjidDocsLectureSessions";
 import MasjidResultQuizLectureSessions from "@/pages/linktree/lecture/material/lecture-sessions/quizzes/MasjidResultQuizLectureSessions";
-import DKMAddEditDocumentLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/assets/DKMAddEditDocumentLectureSessions";
 import MasjidVideoAudioLectureSessions from "@/pages/linktree/lecture/material/lecture-sessions/assets/MasjidVideoAudioLectureSessions";
-import DKMAddEditFullTransciptLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/materials/fullTranscipt/DKMAddEditFullTransciptLectureSessions";
-// import DKMAddEditSummaryLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/materials/summary/DKMAddEditSummaryLectureSessions";
-// import DKMProfilMasjidParent from "@/pages/dashboard/dkm/profile/DKMProfileParent";
 import MasjidMaterial from "@/pages/linktree/lecture/material/MasjidMaterial";
 import MasjidCertificateLecture from "@/pages/linktree/lecture/certificate/MasjidCertificate";
 import MasjidDocsLecture from "@/pages/linktree/lecture/material/lecture/assets/MasjidDocsLecture";
@@ -103,7 +48,6 @@ import MasjidResultExamLecture from "@/pages/linktree/lecture/material/lecture/e
 import MasjidMyProfile from "@/pages/linktree/activity/setting/MasjidMyProfile";
 import MasjidMyActivity from "@/pages/linktree/activity/my-activity/MasjidMyActivity";
 import MasjidPost from "@/pages/linktree/post/main/MasjidPost";
-// import MasjidDetailPost from "@/pages/linktree/post/main/MasjidDetailPost";
 import MasjidDetailDonation from "@/pages/linktree/post/main/MasjidDetailMotivation";
 import MasjidSettingLayout from "@/layout/masjid/MasjidSettingLayout";
 import MasjidAppereance from "@/pages/linktree/activity/setting/MasjidAppereance";
@@ -114,18 +58,10 @@ import MasjidSettingMenu from "@/layout/masjid/MasjidSettingMenu";
 import MasjidMyDonation from "@/pages/linktree/finansial/report/MasjidMyDonation";
 
 import MasjidMyStats from "@/pages/linktree/activity/my-activity/MasjidMyStats";
-// import DKMThemaPost from "@/pages/dashboard/dkm/post/themaPost/DKMThemaPost";
-// import DKMPost from "@/pages/dashboard/dkm/post/post/DKMPost";
-import DKMPostParent from "@/pages/dashboard/dkm/post/DKMPostParent";
-// import DKMAddEditThemaPost from "@/pages/dashboard/dkm/post/themaPost/DKMAddEditThemaPost";
-// import DKMAddEditPost from "@/pages/dashboard/dkm/post/post/DKMAddEditPost";
-import DKMDetailPost from "@/pages/dashboard/dkm/post/post/DKMDetailPost";
-import DKMDetailThemaPost from "@/pages/dashboard/dkm/post/themaPost/DKMDetailThemaPost";
 import MasjidInformationLecture from "@/pages/linktree/lecture/material/lecture/main/MasjidInformationLecture";
 import MasjidSholat from "@/pages/linktree/home/sholat/MasjidSholat";
 import MasjidAllMyLecture from "@/pages/linktree/activity/my-activity/MasjidAllMyLecture";
 import MasjidMyNotesLectureSessions from "@/pages/linktree/lecture/material/lecture-sessions/arsip/MasjidMyNotesLectureSessions";
-import DKMEditProfileDKMTeacher from "@/pages/dashboard/dkm/profile/dkm/DKMEditProfileDKMTeacher";
 import MasjidkuHome from "@/pages/masjidku/MasjidkuHome";
 import MasjidMaterialByMonth from "@/pages/linktree/lecture/material/lecture-sessions-by-month/MasjidLectureSessionsByMonth";
 import MasjidDetailSummaryLecture from "@/pages/linktree/lecture/material/lecture/materials/MasjidDetailSummaryLecture";
@@ -135,128 +71,25 @@ import MasjidkuFinancial from "@/pages/masjidku/financial/MasjidkuFinacial";
 import MasjidkuListMasjid from "@/pages/masjidku/masjid/MasjidkuListMasjid";
 import MasjidkuProfil from "@/pages/masjidku/profil/MasjidkuProfil";
 import MasjidkuProgram from "@/pages/masjidku/program/MasjidkuProgram";
-import ParentHome from "@/pages/sekolahislamku/dashboard-student/StudentDashboard";
-import StudentProgressDetail from "@/pages/sekolahislamku/dashboard-student/progress/StudentProgress";
 import StudentDashboard from "@/pages/sekolahislamku/dashboard-student/StudentDashboard";
-import StudentFInance from "@/pages/sekolahislamku/dashboard-student/finance/StudentFinance";
-import StudentSchedule from "@/pages/sekolahislamku/dashboard-student/schedule/StudentSchedule";
-import StudentAnnouncement from "@/pages/sekolahislamku/dashboard-student/announcement/StudentAnnouncement";
-import StudentRaport from "@/pages/sekolahislamku/dashboard-student/progress/raport/StudentRaport";
-import StudentNotesSummary from "@/pages/sekolahislamku/dashboard-student/progress/notes-summary/StudentNotesSummary";
-import StudentAbsence from "@/pages/sekolahislamku/dashboard-student/progress/absence/StudentAbsence";
-import StudentLayout from "@/layout/StudentLayout";
 import TeacherDashboard from "@/pages/sekolahislamku/dashboard-teacher/TeacherDashboard";
 import SchoolDashboard from "@/pages/sekolahislamku/dashboard-school/SchoolDashboard";
-import TeacherClass from "@/pages/sekolahislamku/dashboard-teacher/class/TeacherClass";
-import TeacherAttendance from "@/pages/sekolahislamku/dashboard-teacher/attendance/TeacherAttendance";
-import TeacherGrading from "@/pages/sekolahislamku/dashboard-teacher/grade/TeacherGrade";
-import TeacherAnnouncements from "@/pages/sekolahislamku/dashboard-teacher/announcement/TeacherAnnouncement";
-import SchoolStudent from "@/pages/sekolahislamku/dashboard-school/student-(pending)/SchoolStudent";
-import SchoolTeacher from "@/pages/sekolahislamku/dashboard-school/teacher/SchoolTeacher";
-import SchoolClasses from "@/pages/sekolahislamku/dashboard-school/class/SchoolClass";
-import SchoolAttendance from "@/pages/sekolahislamku/dashboard-school/attendance-(pending)/SchoolAttendance";
-import SchoolFinance from "@/pages/sekolahislamku/dashboard-school/finance/SchoolFinance";
-import SchoolAnnouncement from "@/pages/sekolahislamku/dashboard-school/announcement/SchoolAnnouncement";
-import StudentDetailAnnouncement from "@/pages/sekolahislamku/dashboard-student/announcement/StudentDetailAnnouncement";
-import TeacherSchedule from "@/pages/sekolahislamku/dashboard-teacher/schedule/TeacherSchedule";
-import TeacherClassAttendance from "@/pages/sekolahislamku/dashboard-teacher/class/TeacherClassAttendance";
 
 // School Routes
-import AllSchedule from "@/pages/sekolahislamku/dashboard-school/dashboard/AllSchedule";
-import AllAnnouncement from "@/pages/sekolahislamku/dashboard-school/dashboard/AllAnnouncement";
-import AllInvoices from "@/pages/sekolahislamku/dashboard-school/dashboard/AllInvoices";
-import TryoutTahfizhExam from "@/pages/sekolahislamku/dashboard-school/dashboard/TryoutTahfizhExam";
 
 import { financeRoutes } from "@/pages/masjidku/financial/routes";
-import SchoolManageClass from "@/pages/sekolahislamku/dashboard-school/class/detail/SchoolDetailClass";
-import SchoolBooks from "@/pages/sekolahislamku/dashboard-school/books/SchoolBooks";
-import SchoolDetailBook from "@/pages/sekolahislamku/dashboard-school/books/detail/SchoolDetailBook";
-import AllAnnouncementTeacher from "@/pages/sekolahislamku/dashboard-teacher/dashboard/AllAnnouncementTeacher";
-import AllTodaySchedule from "@/pages/sekolahislamku/dashboard-teacher/class/components/AllTodaySchedhule";
-import ScheduleThreeDays from "@/pages/sekolahislamku/dashboard-teacher/class/components/ScheduleThreeDays";
-import AllAssignment from "@/pages/sekolahislamku/dashboard-teacher/class/components/AllAssignment";
-import DetailMateri from "@/pages/sekolahislamku/dashboard-teacher/class/components/DetailMateri";
-import DetailAssignment from "@/pages/sekolahislamku/dashboard-teacher/class/components/DetailAssignment";
-import Register from "@/pages/dashboard/auth/register/RegisterAdminMasjid";
 import MasjidkuWebHome from "@/pages/masjidku/website/MasjidkuWebHome";
 import RegisterAdminMasjid from "@/pages/dashboard/auth/register/RegisterAdminMasjid";
 import RegisterUser from "@/pages/dashboard/auth/register/RegisterUser";
-import RegisterDetailAdminMasjid from "@/pages/dashboard/auth/register/RegisterDetailAdminMasjid";
-import DetailScheduleThreeDays from "@/pages/sekolahislamku/dashboard-teacher/class/components/DetailScheduleThreeDays";
-import ScheduleSevenDays from "@/pages/sekolahislamku/dashboard-teacher/class/components/ScheduleSevenDays";
-import DetailScheduleSevenDays from "@/pages/sekolahislamku/dashboard-teacher/class/components/DetailScheduleSevenDays";
-import RegisterDetailUser from "@/pages/dashboard/auth/register/RegisterDetailUser";
-import DetailSchedule from "@/pages/sekolahislamku/dashboard-school/dashboard/DetailSchedule";
-import DetailAnnouncementTeacher from "@/pages/sekolahislamku/dashboard-teacher/dashboard/DetailAnnouncementTeacher";
-import ManagementClass from "@/pages/sekolahislamku/dashboard-teacher/dashboard/ManagementClass";
-import HomeroomTeacher from "@/pages/sekolahislamku/dashboard-teacher/class/components/HomeroomTeacher";
-import TaskScore from "@/pages/sekolahislamku/dashboard-teacher/class/components/TaskScore";
-import AttendanceManagement from "@/pages/sekolahislamku/dashboard-teacher/class/components/AttendanceManagement";
-import DetailStudent from "@/pages/sekolahislamku/dashboard-teacher/class/components/DetailStudent";
-import StudentScore from "@/pages/sekolahislamku/dashboard-teacher/class/components/StudentScore";
-import AttendanceDetail from "@/pages/sekolahislamku/dashboard-teacher/attendance/components/AttendanceDetail";
-import DetailGrading from "@/pages/sekolahislamku/dashboard-teacher/grade/components/DetailGrading";
-import StudentDetail from "@/pages/sekolahislamku/dashboard-student/dashboard/StudentDetail";
-import ListFinance from "@/pages/sekolahislamku/dashboard-student/dashboard/ListFinnance";
-import InvoiceTagihan from "@/pages/sekolahislamku/dashboard-student/dashboard/InvoiceTagihan";
-import AnnouncementsStudent from "@/pages/sekolahislamku/dashboard-student/dashboard/AnnouncementsStudent";
-import AllScheduleStudent from "@/pages/sekolahislamku/dashboard-student/dashboard/AllScheduleStudent";
-import DetailScheduleStudent from "@/pages/sekolahislamku/dashboard-student/dashboard/DetailScheduleStudent";
-import Test from "@/pages/Test";
-import DetailClass from "@/pages/sekolahislamku/dashboard-teacher/class/components/DetailClass";
-import ClassAttandence from "@/pages/sekolahislamku/dashboard-teacher/class/components/ClassAttandence";
-import ClassMateri from "@/pages/sekolahislamku/dashboard-teacher/class/components/ClassMateri";
-import AssignmentClass from "@/pages/sekolahislamku/dashboard-teacher/class/components/AssignmentClass";
-import DetailAssignmentClass from "@/pages/sekolahislamku/dashboard-teacher/class/components/DetailAssignmentClass";
-import Bill from "@/pages/sekolahislamku/dashboard-school/finance/Bill";
-import DetailAnnouncementStudent from "@/pages/sekolahislamku/dashboard-student/dashboard/DetailAnnouncementStudent";
-import SchoolProfile from "@/pages/sekolahislamku/dashboard-school/profile/SchoolProfile";
-import AcademicSchool from "@/pages/sekolahislamku/dashboard-school/academic/AcademicSchool";
-import DetailAcademic from "@/pages/sekolahislamku/dashboard-school/academic/components/DetailAcademic";
-import ManagementAcademic from "@/pages/sekolahislamku/dashboard-school/academic/components/ManagementAcademic";
-import SchoolMenuGrids from "@/pages/sekolahislamku/dashboard-school/menu-utama/SchoolMenuGrids";
-import TeacherMenuGrids from "@/pages/sekolahislamku/dashboard-teacher/menu-utama/TeacherMenuGrids";
-import StudentMenuGrids from "@/pages/sekolahislamku/dashboard-student/menu-utama/StudentMenuGrids";
-import RoomSchool from "@/pages/sekolahislamku/dashboard-school/menu-utama/components/RoomSchool";
-import SchoolSpp from "@/pages/sekolahislamku/dashboard-school/spp/SchoolSpp";
-import SchoolSubject from "@/pages/sekolahislamku/dashboard-school/subject/SchoolSubject";
-import SchoolCertificate from "@/pages/sekolahislamku/dashboard-school/certificate/SchoolCertificate";
-import DetailCertificate from "@/pages/sekolahislamku/dashboard-school/certificate/components/DetailCertificate";
-import CalenderAcademic from "@/pages/sekolahislamku/dashboard-school/calender/CalenderAcademic";
-import SchoolStatistik from "@/pages/sekolahislamku/dashboard-school/statistik/SchoolStatistik";
-import SchoolSettings from "@/pages/sekolahislamku/dashboard-school/settings/SchoolSettings";
-import SchoolActiveClass from "@/pages/sekolahislamku/dashboard-school/active-class/SchoolActiveClass";
-import AllClasses from "@/pages/sekolahislamku/dashboard-teacher/menu-utama/AllClasses";
-import ClassDetail from "@/pages/sekolahislamku/dashboard-teacher/menu-utama/DetailClasses";
-import TeacherProfil from "@/pages/sekolahislamku/dashboard-teacher/profil/TeacherProfil";
-import TeacherSettings from "@/pages/sekolahislamku/dashboard-teacher/menu-utama/settings/TeacherSettings";
-import TeacherAssignment from "@/pages/sekolahislamku/dashboard-teacher/menu-utama/assignments/TeacherAssignment";
-import Certificate from "@/pages/dashboard/dkm/certificate/DKMCertificate";
-import TeacherCertificate from "@/pages/sekolahislamku/dashboard-teacher/menu-utama/certificate/Certificate";
-import DetailTeacher from "@/pages/sekolahislamku/dashboard-school/teacher/components/DetailTeacher";
-import StudentProfil from "@/pages/sekolahislamku/dashboard-student/profil/StudentProfil";
-import StudentCertificate from "@/pages/sekolahislamku/dashboard-student/certificate/StudentCertificate";
-import DetailBill from "@/pages/sekolahislamku/dashboard-school/finance/DetailBill";
-import DetailRoomSchool from "@/pages/sekolahislamku/dashboard-school/menu-utama/components/DetailRoomSchool";
 import SupportPage from "@/pages/masjidku/website/pages/navbar-page/support";
 import Panduan from "@/pages/masjidku/website/pages/navbar-page/panduan";
 import Fitur from "@/pages/masjidku/website/pages/navbar-page/fitur";
 import About from "@/pages/masjidku/website/pages/navbar-page/about";
 import Contact from "@/pages/masjidku/website/pages/navbar-page/contact";
-import QuizPage from "@/pages/sekolahislamku/dashboard-school/class/components/QuizPage";
-import QuizDetailPage from "@/pages/sekolahislamku/dashboard-school/class/components/QuizDetailPage";
-import DetailClassQuiz from "@/pages/sekolahislamku/dashboard-teacher/class/components/DetailClassQuiz";
-import MyClass from "@/pages/sekolahislamku/dashboard-student/class/MyClass";
-import StudentMateri from "@/pages/sekolahislamku/dashboard-student/class/StudentMateri";
-import StudentAssignment from "@/pages/sekolahislamku/dashboard-student/class/StudentAssignment";
-import StudentQuizPage from "@/pages/sekolahislamku/dashboard-student/class/QuizPage";
-import StudentExam from "@/pages/sekolahislamku/dashboard-student/class/StudentExam";
-import StudentAssignmentClass from "@/pages/sekolahislamku/dashboard-student/assignment/StudentAssignmentClass";
-import StudentAttandenceClass from "@/pages/sekolahislamku/dashboard-student/class/StudentAttandenceClass";
 import Unauthorized from "./UnAuthorized";
 import ProtectedRoute from "./ProtectedRoutes";
-import { StudentRoutes } from "./StudentRoutes";
 import { TeacherRoutes } from "./TeacherRoutes";
+import { StudentRoutes } from "./StudentRoutes";
 import { SchoolRoutes } from "./SchoolRoutes";
 
 // import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/routes";
@@ -276,7 +109,6 @@ export default function AppRoutes() {
         <Route path="website/fitur" element={<Fitur />} />
         <Route path="website/about" element={<About />} />
         <Route path="website/hubungi-kami" element={<Contact />} />
-
         <Route path="program" element={<MasjidkuProgram />} />
         {financeRoutes.map((route, index) => (
           <Route
@@ -297,9 +129,9 @@ export default function AppRoutes() {
         element={<RegisterDetailAdminMasjid />}
       /> */}
       <Route path="/register-user" element={<RegisterUser />} />
-      // 1. Tanpa layout untuk LinkTree
+      {/* 1. Tanpa layout untuk LinkTree */}
       <Route path="masjid/:slug" index element={<MasjidLinkTree />} />
-      // 2. Dengan layout untuk halaman lainnya
+      {/* 2. Dengan layout untuk halaman lainnya */}
       <Route path="/" element={<MasjidLayout />}>
         <Route path="masjid/:slug">
           {/* ==== Public Routes ==== */}
@@ -446,202 +278,28 @@ export default function AppRoutes() {
           </Route>
         </Route>
       </Route>
-      {/* ==== Protected Routes - DKM ==== */}
-      {/* <Route element={<RequireRoleRoute allowedRoles={["dkm"]} />}> */}
-      {/* <Route path="/dkm" element={<DkmLayout />}> */}
-      {/* <Route index element={<DashboardAdminDkm />} /> */}
-      {/* <Route index element={<Navigate to="profil-masjid" replace />} /> */}
-      {/* Profil Masjid */}
-      {/* <Route path="profil-masjid" element={<DKMProfilMasjidParent />}> */}
-      {/* <Route index element={<ProfilMasjid />} /> */}
-      {/* <Route path="edit-sosmed" element={<DkmEditSosmedProfile />} /> */}
-      {/* <Route path="edit-masjid" element={<DKMEditMasjid />} /> */}
-      {/* <Route
-              path="edit-profil-masjid"
-              element={<DKMEditProfileMasjid />}
-            /> */}
-      {/* </Route> */}
-      {/* <Route path="profil-dkm" element={<DKMProfilMasjidParent />}> */}
-      {/* <Route index element={<ProfileDKMPengajar />} /> */}
-      {/* 🆕 Edit Pengajar */}
-      {/* </Route> */}
-      {/* <Route
-            path="pengajar/edit/:id"
-            element={<DKMEditProfileDKMTeacher />}
-          /> */}
-      {/* <Route path="kajian" element={<DKMLectureParent />}> */}
-      {/* <Route index element={<DKMLectureSessions />} />
-            <Route path="tambah-edit" element={<DKMAddEditLectureSession />} />
-            <Route
-              path="tambah-edit/:id"
-              element={<DKMAddEditLectureSession />}
-            /> */}
-      {/* Detail & Subhalaman */}
-      {/* <Route
-              path="kajian-detail/:id"
-              element={<DKMDetailLectureSessions />}
-            />
-            <Route
-              path="kajian-detail/:id/informasi"
-              element={<DKMInformationLectureSessions />}
-            />
-            <Route
-              path="kajian-detail/:id/video-audio"
-              element={<DKMVideoAudioLectureSessions />}
-            />
-            <Route
-              path="kajian-detail/:id/latihan-soal"
-              element={<DKMQuizLectureSessions />}
-            />
-            <Route
-              path="kajian-detail/:id/statistik-soal"
-              element={<DKMStatsQuizLectureSessions />}
-            /> */}
-      {/* Materi Lengkap */}
-      {/* <Route
-              path="kajian-detail/:id/materi-lengkap"
-              element={<DKMFullTranscriptLectureSessions />}
-            />
-            <Route
-              path="kajian-detail/:id/materi-lengkap/tambah-edit"
-              element={<DKMAddEditFullTransciptLectureSessions />}
-            />
-            <Route
-              path="kajian-detail/:id/materi-lengkap/tambah-edit/:materialId"
-              element={<DKMAddEditFullTransciptLectureSessions />}
-            /> */}
-      {/* Ringkasan */}
-      {/* <Route
-              path="kajian-detail/:id/ringkasan"
-              element={<DKMSummaryLectureSessions />}
-            />
-            <Route
-              path="kajian-detail/:id/ringkasan/tambah-edit"
-              element={<DKMAddEditSummaryLectureSessions />}
-            />
-            <Route
-              path="kajian-detail/:id/ringkasan/tambah-edit/:materialId"
-              element={<DKMAddEditSummaryLectureSessions />}
-            /> */}
-      {/* Dokumen */}
-      {/* <Route
-              path="kajian-detail/:id/dokumen"
-              element={<DKMDocumentLectureSessions />}
-            />
-            <Route
-              path="kajian-detail/:id/dokumen/tambah-edit"
-              element={<DKMAddEditDocumentLectureSessions />}
-            />
-            <Route
-              path="kajian-detail/:id/dokumen/tambah-edit/:docId"
-              element={<DKMAddEditDocumentLectureSessions />}
-            /> */}
-      {/* </Route> */}
-      {/* <Route path="tema" element={<DKMLectureParent />}> */}
-      {/* <Route index element={<DKMLecture />} />
-            <Route path="tambah-edit" element={<DKMAddEditLecture />} />
-            <Route path="tambah-edit/:id" element={<DKMAddEditLecture />} /> */}
-      {/* Tambahan */}
-      {/* <Route path="tema-detail/:id" element={<DKMDetailLecture />} />
-            <Route
-              path="tema-detail/:id/semua-kajian"
-              element={<DKMAllLectureLectureSessions />}
-            />
-            <Route
-              path="tema-detail/:id/informasi"
-              element={<DKMInformationLecture />}
-            />
-            <Route path="tema-detail/:id/video" element={<DKMVideoLecture />} />
-            <Route
-              path="tema-detail/:id/latihan-soal"
-              element={<DKMQuizLecture />}
-            />
-            <Route
-              path="tema-detail/:id/materi-lengkap"
-              element={<DKMFullTranscriptLecture />}
-            />
-            <Route
-              path="tema-detail/:id/saran-masukan"
-              element={<DKMSuggestLecture />}
-            />
-            <Route
-              path="tema-detail/:id/ringkasan"
-              element={<DKMSummaryLecture />}
-            />
-            <Route
-              path="tema-detail/:id/dokumen"
-              element={<DKMDocumentLecture />}
-            /> */}
-      {/* </Route> */}
-      {/* <Route path="sertifikat" element={<Sertifikat />} /> */}
-      {/* <Route path="keuangan" element={<Keuangan />} /> */}
-      {/* <Route path="post" element={<DKMPostParent />}>
-            <Route index element={<DKMPost />} />
-            <Route path="tambah-edit" element={<DKMAddEditPost />} />
-            <Route path="tambah-edit/:id" element={<DKMAddEditPost />} />
-            <Route path="detail/:id" element={<DKMDetailPost />} />
-          </Route>
-          <Route path="post-tema" element={<DKMPostParent />}>
-            <Route index element={<DKMThemaPost />} />
-            <Route path="tambah-edit" element={<DKMAddEditThemaPost />} />
-            <Route path="tambah-edit/:id" element={<DKMAddEditThemaPost />} />
-            <Route path="detail/:id" element={<DKMDetailThemaPost />} />
-          </Route> */}
-      {/* Nested setting layout */}
-      {/* <Route element={<DKMSettingParent />}>
-            <Route path="profil-saya" element={<ProfilSayaDkm />} />
-            <Route path="tampilan" element={<DKMAppereance />} />
-            <Route path="dukung-kami" element={<SupportUs />} />
-            <Route path="kerjasama" element={<Partnership />} />
-            <Route path="tanya-jawab" element={<DKMFaq />} />
-          </Route> */}
-      {/* </Route> */}
-      {/* </Route> */}
-      {/*  */}
-      {/*  */}
-      {/* ==== Protected Routes - Author ==== */}
-      <Route element={<RequireRoleRoute allowedRoles={["author"]} />}>
-        <Route path="/author" element={<AuthorLayout />}>
-          <Route index element={<AuthorHome />} />
-        </Route>
-      </Route>
+
       {/* ==== Protected Routes - Teacher ==== */}
       {/* <Route element={<RequireRoleRoute allowedRoles={["teacher"]} />}>
         <Route path="/teacher" element={<TeacherLayout />}>
           <Route index element={<TeacherHome />} />
         </Route>
       </Route> */}
-      {/* ==== Protected Routes - Teacher ==== */}
-      <Route element={<RequireRoleRoute allowedRoles={["treasurer"]} />}>
-        <Route path="/treasurer" element={<TreasurerLayout />}>
-          <Route index element={<TreasurerHome />} />
-        </Route>
-      </Route>
+
       {/* ==== Protected Routes - Teacher ==== */}
       <Route element={<RequireRoleRoute allowedRoles={["admin"]} />}>
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminHome />} />
         </Route>
       </Route>
-      {/* === 🚫 Blokir slug yang mirip dashboard === */}
-      <Route
-        path="masjid/sekolah"
-        element={<Navigate to="/not-found" replace />}
-      />
-      <Route
-        path="masjid/murid"
-        element={<Navigate to="/not-found" replace />}
-      />
-      <Route
-        path="masjid/guru"
-        element={<Navigate to="/not-found" replace />}
-      />
+
       {/* === 🔒 Protected Dashboard Routes === */}
       <Route element={<ProtectedRoute />}>
-        <Route path="/:id/sekolah/*" element={<SchoolDashboard />} />
-        <Route path="/:id/murid/*" element={<StudentDashboard />} />
-        <Route path="/:id/guru/*" element={<TeacherDashboard />} />
+        {TeacherRoutes}
+        {StudentRoutes}
+        {SchoolRoutes}
       </Route>
+
       {/* ==== 404 ==== */}
       <Route path="/not-found" element={<NotFound />} />
       <Route path="*" element={<NotFound />} />

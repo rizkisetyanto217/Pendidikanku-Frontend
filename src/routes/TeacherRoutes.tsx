@@ -37,7 +37,7 @@ import TeacherAssignment from "@/pages/sekolahislamku/dashboard-teacher/menu-uta
 import TeacherCertificate from "@/pages/sekolahislamku/dashboard-teacher/menu-utama/certificate/Certificate";
 
 export const TeacherRoutes = (
-  <Route path="masjid/:id/guru" element={<StudentLayout />}>
+  <Route path="/:id/guru" element={<StudentLayout />}>
     <Route index element={<TeacherDashboard />} />
     <Route path="kehadiran" element={<TeacherAttendance />} />
     <Route path="kehadiran/:id" element={<AttendanceDetail />} />
