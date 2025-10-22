@@ -472,17 +472,19 @@ export default function Login() {
     }
   }
 
-  function handleSelectMasjidRole(masjidId: string, role: MasjidRole) {
-    localStorage.setItem("active_role", role);
-    localStorage.setItem(
-      "active_masjid",
-      JSON.stringify({ masjid_id: masjidId })
-    );
+ function handleSelectMasjidRole(masjidId: string, role: MasjidRole) {
+   localStorage.setItem("active_role", role);
+   localStorage.setItem(
+     "active_masjid",
+     JSON.stringify({ masjid_id: masjidId })
+   );
 
-    const path =
-      role === "teacher" ? "guru" : role === "student" ? "murid" : "sekolah";
-    navigate(`/${masjidId}/${path}`, { replace: true });
-  }
+   const path =
+     role === "teacher" ? "guru" : role === "student" ? "murid" : "sekolah";
+
+   navigate(`/${masjidId}/${path}`, { replace: true });
+ }
+
 
   return (
     <AuthLayout mode="login" fullWidth contentClassName="max-w-xl mx-auto">
