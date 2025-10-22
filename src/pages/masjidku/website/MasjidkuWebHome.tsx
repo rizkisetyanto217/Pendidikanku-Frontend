@@ -13,10 +13,10 @@ import {
 } from "lucide-react";
 import sekolah1 from "@/assets/sekolah1.jpeg";
 import sekolah2 from "@/assets/sekolah2.jpeg";
-import sekolah3 from "@/assets/sekolah3.jpg"
-import sekolah4 from "@/assets/sekolah4.webp"
-import sekolah5 from "@/assets/sekolah5.png"
-import keuangan from "@/assets/keuangan.jpg"
+import sekolah3 from "@/assets/sekolah3.jpg";
+import sekolah4 from "@/assets/sekolah4.webp";
+import sekolah5 from "@/assets/sekolah5.png";
+import keuangan from "@/assets/keuangan.jpg";
 
 import WebsiteNavbar from "@/components/common/public/WebsiteNavbar";
 import WebsiteFooter from "./components/MasjidkuWebFooter";
@@ -208,7 +208,7 @@ export default function SekolahIslamkuHome() {
       >
         {/* NAVBAR */}
         <WebsiteNavbar />
-        <div  />
+        <div />
 
         {/* HERO */}
         <div className="relative overflow-hidden">
@@ -240,7 +240,7 @@ export default function SekolahIslamkuHome() {
                   className="mt-4 text-4xl md:text-5xl xl:text-6xl font-bold leading-tight"
                   style={{ color: theme.black1 }}
                 >
-                  Kelola Sekolah{" "}
+                  Sekolah{" "}
                   <span style={{ color: theme.primary }}>Lebih Mudah</span>,
                   Cepat, & Transparan
                 </h1>
@@ -263,7 +263,7 @@ export default function SekolahIslamkuHome() {
                   </Link>
 
                   <Link
-                 to={"dukungan"}
+                    to={"dukungan"}
                     className="inline-flex items-center gap-2 rounded-full ring-1 px-5 py-2.5 text-sm transition hover:opacity-90"
                     style={supportBtnStyle}
                   >

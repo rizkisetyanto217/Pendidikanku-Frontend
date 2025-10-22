@@ -600,8 +600,6 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
       : mockTodaySchedule;
   }, [todaySessionsQ.data]);
 
-
-
   const topbarGregorianISO = toLocalNoonISO(new Date());
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -624,8 +622,7 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
           <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
             <ParentSidebar
               palette={palette}
-              mode="auto"
-              openMobile={mobileOpen}
+              // openMobile={mobileOpen}
               onCloseMobile={() => setMobileOpen(false)}
             />
           </aside>

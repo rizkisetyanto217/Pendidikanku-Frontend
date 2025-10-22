@@ -4,6 +4,9 @@ import { Link, To } from "react-router-dom";
 
 export type Palette = typeof colors.light;
 
+/* ======================================================
+   SectionCard — FIXED dark/light detection
+====================================================== */
 type SectionCardProps = React.HTMLAttributes<HTMLDivElement> & {
   palette: Palette;
   /** Paksa bg di semua mode: "white1" | "black1" | "auto" (default) */
@@ -19,34 +22,34 @@ export function SectionCard({
   style,
   bg = "auto",
   bgOnDark,
-  ...rest // <- tampung onClick, id, role, dsb
+  ...rest
 }: React.PropsWithChildren<SectionCardProps>) {
-  // Deteksi dark mode dari palette yang dikirim
-  const isDark =
-    palette === (colors as any).dark ||
-    (typeof palette.white1 === "string" &&
-      /^#/.test(palette.white1) &&
-      parseInt(palette.white1.slice(1, 3), 16) < 0x66);
+  // ✅ Deteksi dark mode berdasarkan objek palette langsung
+  const isDark = palette === colors.dark;
 
-  // Tentukan background final
-  let background = palette.white1;
-  if (bg === "black1") background = palette.black1;
-  if (bg === "white1") background = palette.white1;
+  // Tentukan background default
+  let background =
+    bg === "black1"
+      ? palette.black1
+      : bg === "white1"
+        ? palette.white1
+        : isDark
+          ? palette.black1
+          : palette.white1;
 
-  // Jika dark mode & ada override khusus
-  if (isDark && bgOnDark) {
-    background = palette[bgOnDark] as string;
-  }
+  // Override kalau dark mode + ada bgOnDark
+  if (isDark && bgOnDark) background = palette[bgOnDark] as string;
 
-  // Kontraskan warna teks & border
-  const isBgBlack = background === (palette.black1 as string);
-  const textColor = isBgBlack ? palette.white1 : palette.black1;
-  const borderColor = isBgBlack ? palette.white3 : palette.silver1;
+  // Warna teks dan border menyesuaikan
+  const isBgDark =
+    background === palette.black1 || background === palette.black2;
+  const textColor = isBgDark ? palette.white1 : palette.black1;
+  const borderColor = isBgDark ? palette.white3 : palette.silver1;
 
   return (
     <div
-      {...rest} // <- forward semua atribut/handler (onClick, onMouseEnter, dll)
-      className={`rounded-2xl border shadow-sm ${className}`}
+      {...rest}
+      className={`rounded-2xl border shadow-sm transition-colors duration-300 ${className}`}
       style={{
         background,
         borderColor,
@@ -58,8 +61,10 @@ export function SectionCard({
     </div>
   );
 }
-/* ---- Badge ---- */
-/* ---- Badge ---- */
+
+/* ======================================================
+   Badge
+====================================================== */
 export function Badge({
   children,
   variant = "default",
@@ -75,8 +80,8 @@ export function Badge({
     | "success"
     | "warning"
     | "info"
-    | "black1" // NEW
-    | "white1"; // NEW
+    | "black1"
+    | "white1";
   palette: Palette;
   className?: string;
 }) {
@@ -88,8 +93,6 @@ export function Badge({
     success: { background: palette.success1, color: palette.white1 },
     warning: { background: palette.warning1, color: palette.white1 },
     info: { background: palette.quaternary, color: palette.white1 },
-
-    // NEW
     black1: {
       background: palette.black1,
       color: palette.white1,
@@ -104,7 +107,7 @@ export function Badge({
 
   return (
     <span
-      className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${className}`}
+      className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium transition-colors duration-300 ${className}`}
       style={styleMap[variant]}
     >
       {children}
@@ -112,8 +115,9 @@ export function Badge({
   );
 }
 
-/* ---- Button ---- */
-/* ---- Button ---- */
+/* ======================================================
+   Button
+====================================================== */
 type BtnVariant =
   | "default"
   | "secondary"
@@ -122,8 +126,8 @@ type BtnVariant =
   | "ghost"
   | "destructive"
   | "success"
-  | "black1" // NEW
-  | "white1" // NEW
+  | "black1"
+  | "white1"
   | "silver";
 
 type BtnSize = "sm" | "md" | "lg" | "icon";
@@ -136,15 +140,14 @@ export function Btn({
   className = "",
   style,
   tone = "normal",
-  block = false, // NEW: full width
-  loading = false, // NEW: spinner + disabled
+  block = false,
+  loading = false,
   disabled,
   ...props
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: BtnVariant;
   size?: BtnSize;
   palette: Palette;
-  /** pakai saat tombol di atas surface gelap (black1) */
   tone?: "normal" | "inverted";
   block?: boolean;
   loading?: boolean;
@@ -158,7 +161,11 @@ export function Btn({
           ? "h-10 w-10 p-0"
           : "h-10 px-4 text-sm";
 
-  const baseStyle: React.CSSProperties = { borderRadius: 16, fontWeight: 600 };
+  const base: React.CSSProperties = {
+    borderRadius: 16,
+    fontWeight: 600,
+    transition: "all 0.2s ease",
+  };
 
   const variants: Record<BtnVariant, React.CSSProperties> = {
     default: {
@@ -171,14 +178,14 @@ export function Btn({
       color: palette.black1,
       border: `1px solid ${palette.silver1}`,
     },
-    quaternary: {
-      background: palette.quaternary,
-      color: palette.white1,
-      border: `1px solid ${palette.silver1}`,
-    },
     outline: {
       background: "transparent",
       color: palette.black1,
+      border: `1px solid ${palette.silver1}`,
+    },
+    quaternary: {
+      background: palette.quaternary,
+      color: palette.white1,
       border: `1px solid ${palette.silver1}`,
     },
     ghost: {
@@ -196,7 +203,6 @@ export function Btn({
       color: palette.white1,
       border: `1px solid ${palette.success1}`,
     },
-    // NEW variants
     black1: {
       background: palette.black1,
       color: palette.white1,
@@ -210,11 +216,10 @@ export function Btn({
     silver: {
       background: palette.silver1,
       color: palette.black1,
-      border: `1px solid ${palette.white1}`,
+      border: `1px solid ${palette.silver1}`,
     },
   };
 
-  // Override khusus saat di surface gelap
   const invertedOverrides: Partial<Record<BtnVariant, React.CSSProperties>> = {
     outline: { color: palette.white1, border: `1px solid ${palette.white3}` },
     secondary: {
@@ -230,7 +235,7 @@ export function Btn({
   };
 
   const computedStyle: React.CSSProperties = {
-    ...baseStyle,
+    ...base,
     ...variants[variant],
     ...(tone === "inverted" ? invertedOverrides[variant] : {}),
     ...(disabled || loading ? { opacity: 0.6, cursor: "not-allowed" } : {}),
@@ -239,9 +244,7 @@ export function Btn({
 
   return (
     <button
-      className={`${
-        block ? "w-full" : ""
-      } inline-flex items-center justify-center gap-1.5 font-medium transition-all hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 ${sizeCls} ${className}`}
+      className={`${block ? "w-full" : ""} inline-flex items-center justify-center gap-1.5 ${sizeCls} ${className}`}
       style={computedStyle}
       disabled={disabled || loading}
       {...props}
@@ -252,7 +255,6 @@ export function Btn({
           width="16"
           height="16"
           viewBox="0 0 24 24"
-          aria-hidden="true"
           style={{ color: "currentColor" }}
         >
           <circle
@@ -277,7 +279,9 @@ export function Btn({
   );
 }
 
-/* ---- ProgressBar ---- */
+/* ======================================================
+   ProgressBar
+====================================================== */
 export function ProgressBar({
   value,
   palette,
@@ -303,6 +307,9 @@ export function ProgressBar({
   );
 }
 
+/* ======================================================
+   Link Button
+====================================================== */
 export function LinkBtn({
   to,
   children,
@@ -331,8 +338,7 @@ export function LinkBtn({
     | "success"
     | "black1"
     | "white1"
-    | "silver"
-
+    | "silver";
   size?: "sm" | "md" | "lg" | "icon";
   tone?: "normal" | "inverted";
   block?: boolean;
@@ -351,7 +357,6 @@ export function LinkBtn({
           ? "h-10 w-10 p-0"
           : "h-10 px-4 text-sm";
 
-  // pakai helper style yang sama dengan Btn:
   const btnStyle = {
     borderRadius: 16,
     fontWeight: 600,
@@ -373,47 +378,23 @@ export function LinkBtn({
               color: palette.black1,
               border: `1px solid ${palette.silver1}`,
             }
-          : variant === "quaternary"
+          : variant === "black1"
             ? {
-                background: palette.quaternary,
+                background: palette.black1,
                 color: palette.white1,
-                border: `1px solid ${palette.silver1}`,
+                border: `1px solid ${palette.white3}`,
               }
-            : variant === "destructive"
+            : variant === "white1"
               ? {
-                  background: palette.error1,
-                  color: palette.white1,
-                  border: `1px solid ${palette.error1}`,
+                  background: palette.white1,
+                  color: palette.black1,
+                  border: `1px solid ${palette.silver1}`,
                 }
-              : variant === "success"
-                ? {
-                    background: palette.success1,
-                    color: palette.white1,
-                    border: `1px solid ${palette.success1}`,
-                  }
-                : variant === "black1"
-                  ? {
-                      background: palette.black1,
-                      color: palette.white1,
-                      border: `1px solid ${palette.white3}`,
-                    }
-                  : variant === "white1"
-                    ? {
-                        background: palette.white1,
-                        color: palette.black1,
-                        border: `1px solid ${palette.silver1}`,
-                      }
-                    : variant === "silver"
-                      ? {
-                          background: palette.silver1,
-                          color: palette.silver2,
-                          border: `1px solid ${palette.silver1}`,
-                        }
-                      : {
-                          background: palette.primary,
-                          color: palette.white1,
-                          border: `1px solid ${palette.primary}`,
-                        }),
+              : {
+                  background: palette.primary,
+                  color: palette.white1,
+                  border: `1px solid ${palette.primary}`,
+                }),
     ...(tone === "inverted" && variant === "outline"
       ? { color: palette.white1, border: `1px solid ${palette.white3}` }
       : {}),
@@ -427,7 +408,7 @@ export function LinkBtn({
       state={state}
       replace={replace}
       aria-disabled={disabled || undefined}
-      className={`${block ? "w-full" : ""} inline-flex items-center justify-center gap-1.5 font-medium transition-all hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 ${sizeCls} ${className}`}
+      className={`${block ? "w-full" : ""} inline-flex items-center justify-center gap-1.5 transition-all hover:brightness-95 focus-visible:outline-none ${sizeCls} ${className}`}
       style={btnStyle}
       {...rest}
     >

@@ -638,9 +638,9 @@ export default function AppRoutes() {
       />
       {/* === 🔒 Protected Dashboard Routes === */}
       <Route element={<ProtectedRoute />}>
-        <Route path="/masjid/:id/sekolah/*" element={<SchoolDashboard />} />
-        <Route path="/masjid/:id/murid/*" element={<StudentDashboard />} />
-        <Route path="/masjid/:id/guru/*" element={<TeacherDashboard />} />
+        <Route path="/:id/sekolah/*" element={<SchoolDashboard />} />
+        <Route path="/:id/murid/*" element={<StudentDashboard />} />
+        <Route path="/:id/guru/*" element={<TeacherDashboard />} />
       </Route>
       {/* ==== 404 ==== */}
       <Route path="/not-found" element={<NotFound />} />
