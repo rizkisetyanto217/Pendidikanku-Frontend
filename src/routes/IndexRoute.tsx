@@ -16,41 +16,19 @@ import MasjidProfile from "@/pages/linktree/profil/MasjidProfil";
 import MasjidDKMPengajarProfil from "@/pages/linktree/profil/MasjidDKMPengajarProfil";
 import MasjidDetailSpeech from "@/pages/linktree/profil/MasjidDetailSpeechProfil";
 import MasjidProfileDetail from "@/pages/linktree/profil/MasjidDetailProfil";
-import MasjidScheduleLecture from "@/pages/linktree/lecture/schedule/MasjidScheduleLectureSessions";
-import MasjidReportFinansial from "@/pages/linktree/finansial/report/MasjidReportFinansial";
-import MasjidDetailLecture from "@/pages/linktree/lecture/schedule/MasjidDetailScheduleLectureSessions";
 import MasjidDonationMotivation from "@/pages/linktree/finansial/donation/MasjidDonationMotivation";
-import MasjidLectureMaterial from "@/pages/linktree/lecture/material/lecture/main/MasjidLecture";
-import MasjidInformationLectureSessions from "@/pages/linktree/lecture/material/lecture-sessions/main/MasjidInformationLectureSessions";
-import MasjidQuizLectureSessions from "@/pages/linktree/lecture/material/lecture-sessions/quizzes/MasjidQuizLectureSessions";
-import MasjidFullTranscriptLectureSessions from "@/pages/linktree/lecture/material/lecture-sessions/materials/MasjidFullTranscriptLectureSessions";
-import MasjidSummaryLectureSessions from "@/pages/linktree/lecture/material/lecture-sessions/materials/MasjidSummaryLectureSessions";
-import MasjidDocsLectureSessions from "@/pages/linktree/lecture/material/lecture-sessions/assets/MasjidDocsLectureSessions";
-import MasjidResultQuizLectureSessions from "@/pages/linktree/lecture/material/lecture-sessions/quizzes/MasjidResultQuizLectureSessions";
-import MasjidVideoAudioLectureSessions from "@/pages/linktree/lecture/material/lecture-sessions/assets/MasjidVideoAudioLectureSessions";
-import MasjidMaterial from "@/pages/linktree/lecture/material/MasjidMaterial";
-import MasjidCertificateLecture from "@/pages/linktree/lecture/certificate/MasjidCertificate";
-import MasjidDocsLecture from "@/pages/linktree/lecture/material/lecture/assets/MasjidDocsLecture";
-import MasjidVideoAudioLecture from "@/pages/linktree/lecture/material/lecture/assets/MasjidVideoAudioLecture";
-import MasjidQuizLecture from "@/pages/linktree/lecture/material/lecture/quizzes/MasjidQuizLecture";
-import MasjidFullTransciptLecture from "@/pages/linktree/lecture/material/lecture/materials/MasjidFullTransciptLecture";
-import MasjidSummaryLecture from "@/pages/linktree/lecture/material/lecture/materials/MasjidSummaryLecture";
-import MasjidLectureSessions from "@/pages/linktree/lecture/material/lecture-sessions/main/MasjidLectureSessions";
-import MasjidExamLecture from "@/pages/linktree/lecture/material/lecture/exams/MasjidExamLecture";
-import MasjidResultExamLecture from "@/pages/linktree/lecture/material/lecture/exams/MasjidResultExamLecture";
-import MasjidMyActivity from "@/pages/linktree/activity/my-activity/MasjidMyActivity";
-import MasjidPost from "@/pages/linktree/post/main/MasjidPost";
-import MasjidDetailDonation from "@/pages/linktree/post/main/MasjidDetailMotivation";
+
+import MasjidQuizLectureSessions from "@/pages/sekolahislamku/quizzes/MasjidQuizLectureSessions";
+
+
+import MasjidResultQuizLectureSessions from "@/pages/sekolahislamku/quizzes/MasjidResultQuizLectureSessions";
+
 import MasjidMyDonation from "@/pages/linktree/finansial/report/MasjidMyDonation";
 
-import MasjidMyStats from "@/pages/linktree/activity/my-activity/MasjidMyStats";
-import MasjidInformationLecture from "@/pages/linktree/lecture/material/lecture/main/MasjidInformationLecture";
 import MasjidSholat from "@/pages/linktree/home/sholat/MasjidSholat";
-import MasjidAllMyLecture from "@/pages/linktree/activity/my-activity/MasjidAllMyLecture";
-import MasjidMyNotesLectureSessions from "@/pages/linktree/lecture/material/lecture-sessions/arsip/MasjidMyNotesLectureSessions";
+
 import MasjidkuHome from "@/pages/masjidku/MasjidkuHome";
-import MasjidMaterialByMonth from "@/pages/linktree/lecture/material/lecture-sessions-by-month/MasjidLectureSessionsByMonth";
-import MasjidDetailSummaryLecture from "@/pages/linktree/lecture/material/lecture/materials/MasjidDetailSummaryLecture";
+
 import MasjidDetailDKMPengajarMobile from "@/pages/linktree/profil/MasjidDetailDKMPengajarProfilMobile";
 import MasjidkuLayout from "@/layout/MasjidkuLayout";
 
@@ -125,18 +103,7 @@ export default function AppRoutes() {
           {/* Laporan Keuangan */}
           {/* <Route path="keuangan" element={<MasjidReportFinansial />} /> */}
           {/* Jadwal Kajian dan Detail */}
-          <Route path="jadwal-kajian" element={<MasjidScheduleLecture />} />
-          <Route path="jadwal-kajian/:id" element={<MasjidDetailLecture />} />
-          {/* Soal & Materi Kajian */}
-          <Route path="soal-materi" element={<MasjidMaterial />} />
-          <Route
-            path="soal-materi/:lecture_session_slug"
-            element={<MasjidLectureSessions />}
-          />
-          <Route
-            path="soal-materi/:lecture_session_slug/informasi"
-            element={<MasjidInformationLectureSessions />}
-          />
+
           <Route
             path="soal-materi/:lecture_session_slug/latihan-soal"
             element={<MasjidQuizLectureSessions />}
@@ -145,89 +112,6 @@ export default function AppRoutes() {
             path="soal-materi/:lecture_session_slug/latihan-soal/hasil"
             element={<MasjidResultQuizLectureSessions />}
           />
-          <Route
-            path="soal-materi/:lecture_session_slug/video-audio"
-            element={<MasjidVideoAudioLectureSessions />}
-          />
-          <Route
-            path="soal-materi/:lecture_session_slug/materi-lengkap"
-            element={<MasjidFullTranscriptLectureSessions />}
-          />
-          <Route
-            path="soal-materi/:lecture_session_slug/ringkasan"
-            element={<MasjidSummaryLectureSessions />}
-          />
-          <Route
-            path="soal-materi/:lecture_session_slug/catatanku"
-            element={<MasjidMyNotesLectureSessions />}
-          />
-          <Route
-            path="soal-materi/:lecture_session_slug/dokumen"
-            element={<MasjidDocsLectureSessions />}
-          />
-          {/* Materi per Bulan */}
-          <Route
-            path="materi-bulan/:month"
-            element={<MasjidMaterialByMonth />}
-          />
-          {/* Tema */}
-          <Route
-            path="tema/:lecture_slug"
-            element={<MasjidLectureMaterial />}
-          />
-          <Route
-            path="tema/:lecture_slug/informasi"
-            element={<MasjidInformationLecture />}
-          />
-          <Route
-            path="tema/:lecture_slug/certificate/:user_exam_id"
-            element={<MasjidCertificateLecture />}
-          />
-          <Route
-            path="tema/:lecture_slug/dokumen"
-            element={<MasjidDocsLecture />}
-          />
-          <Route
-            path="tema/:lecture_slug/video-audio"
-            element={<MasjidVideoAudioLecture />}
-          />
-          <Route
-            path="tema/:lecture_slug/ujian"
-            element={<MasjidExamLecture />}
-          />
-          <Route
-            path="tema/:lecture_slug/ujian/hasil"
-            element={<MasjidResultExamLecture />}
-          />
-          <Route
-            path="tema/:lecture_slug/latihan-soal"
-            element={<MasjidQuizLecture />}
-          />
-          <Route
-            path="tema/:lecture_slug/materi-lengkap"
-            element={<MasjidFullTransciptLecture />}
-          />
-          <Route
-            path="tema/:lecture_slug/ringkasan"
-            element={<MasjidSummaryLecture />}
-          />
-          <Route
-            path="tema/:lecture_slug/ringkasan/detail"
-            element={<MasjidDetailSummaryLecture />}
-          />{" "}
-          {/* detail */}
-          <Route path="post" element={<MasjidPost />} />
-          {/* <Route path="post/:postId" element={<MasjidDetailPost />} /> */}
-          <Route path="motivation/:id" element={<MasjidDetailDonation />} />
-          {/* Activity  */}
-          <Route path="aktivitas" element={<MasjidMyActivity />} />
-          {/* Menu Activity  */}
-          <Route
-            path="aktivitas/kajian-saya"
-            element={<MasjidAllMyLecture />}
-          />
-          <Route path="aktivitas/donasi-saya" element={<MasjidMyDonation />} />
-          <Route path="aktivitas/statistik-saya" element={<MasjidMyStats />} />
         </Route>
       </Route>
 

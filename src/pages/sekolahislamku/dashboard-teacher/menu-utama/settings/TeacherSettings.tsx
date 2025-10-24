@@ -193,7 +193,6 @@ const TeacherSettings: React.FC<TeacherSettingsProps> = ({
         title="Pengaturan"
         gregorianDate={TODAY_ISO}
         hijriDate={hijriWithWeekday(TODAY_ISO)}
-
         showBack
       />
 
@@ -201,7 +200,7 @@ const TeacherSettings: React.FC<TeacherSettingsProps> = ({
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Sidebar */}
           <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-            <ParentSidebar palette={palette} />
+            <ParentSidebar />
           </aside>
 
           <div className="flex-1 flex flex-col space-y-6 min-w-0">
