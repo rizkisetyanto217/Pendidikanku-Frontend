@@ -480,7 +480,7 @@ export default function TeacherGrading() {
       <main className="mx-auto max-w-7xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-6">
           {/* Sidebar */}
-          <ParentSidebar palette={palette} />
+          <ParentSidebar  />
 
           {/* Main Content */}
           <div className="flex-1 space-y-6">

@@ -149,7 +149,7 @@ const ManagementClass = () => {
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Sidebar */}
           <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-            <ParentSidebar palette={palette} />
+            <ParentSidebar />
           </aside>
 
           {/* Konten utama */}

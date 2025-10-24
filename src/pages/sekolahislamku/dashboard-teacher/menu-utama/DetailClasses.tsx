@@ -393,7 +393,7 @@ const ClassDetail: React.FC = () => {
 
       <main className="mx-auto max-w-7xl px-4 py-6 space-y-6">
         <div className="lg:flex lg:items-start lg:gap-6">
-          <ParentSidebar palette={palette} />
+          <ParentSidebar />
 
           <div className="flex-1 min-w-0 space-y-6">
             {/* Header */}

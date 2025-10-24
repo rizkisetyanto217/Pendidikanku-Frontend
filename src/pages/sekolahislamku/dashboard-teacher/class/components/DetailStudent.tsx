@@ -72,7 +72,7 @@ const DetailStudent: React.FC = () => {
         <div className="lg:flex lg:items-start lg:gap-6">
           {/* Sidebar */}
           <aside className="lg:w-64 mb-6 lg:mb-0">
-            <ParentSidebar palette={palette} />
+            <ParentSidebar />
           </aside>
 
           {/* Content */}

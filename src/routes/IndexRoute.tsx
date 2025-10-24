@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 // Halaman Auth
-import Login from "@/pages/dashboard/auth/Login";
+import Login from "@/pages/sekolahislamku/auth/Login";
 // import Register from "@/pages/dashboard/auth/Register";
 
 // Not Found
@@ -9,11 +9,7 @@ import NotFound from "@/pages/NotFound";
 
 // Auth Route Guard
 import RequireRoleRoute from "./RequireRoleRoute";
-import AuthorLayout from "@/layout/AuthorLayout";
-import TeacherLayout from "@/layout/TeacherLayout";
-import TreasurerLayout from "@/layout/TreasurerLayout";
 import AdminLayout from "@/layout/AdminLayout";
-import AdminHome from "@/pages/dashboard/admin/home/AdminHome";
 import MasjidLinkTree from "@/pages/linktree/MasjidLinkTreeHome";
 import MasjidDonationMasjid from "@/pages/linktree/finansial/donation/MasjidDonation";
 import MasjidLayout from "@/pages/linktree/MasjidLayout";
@@ -49,12 +45,10 @@ import MasjidMyProfile from "@/pages/linktree/activity/setting/MasjidMyProfile";
 import MasjidMyActivity from "@/pages/linktree/activity/my-activity/MasjidMyActivity";
 import MasjidPost from "@/pages/linktree/post/main/MasjidPost";
 import MasjidDetailDonation from "@/pages/linktree/post/main/MasjidDetailMotivation";
-import MasjidSettingLayout from "@/layout/masjid/MasjidSettingLayout";
 import MasjidAppereance from "@/pages/linktree/activity/setting/MasjidAppereance";
 import MasjidSupportUs from "@/pages/linktree/activity/setting/MasjidSupportUs";
 import MasjidPartnership from "@/pages/linktree/activity/setting/MasjidPartnership";
 import MasjidFaq from "@/pages/linktree/activity/setting/MasjidFaq";
-import MasjidSettingMenu from "@/layout/masjid/MasjidSettingMenu";
 import MasjidMyDonation from "@/pages/linktree/finansial/report/MasjidMyDonation";
 
 import MasjidMyStats from "@/pages/linktree/activity/my-activity/MasjidMyStats";
@@ -67,17 +61,11 @@ import MasjidMaterialByMonth from "@/pages/linktree/lecture/material/lecture-ses
 import MasjidDetailSummaryLecture from "@/pages/linktree/lecture/material/lecture/materials/MasjidDetailSummaryLecture";
 import MasjidDetailDKMPengajarMobile from "@/pages/linktree/profil/MasjidDetailDKMPengajarProfilMobile";
 import MasjidkuLayout from "@/layout/MasjidkuLayout";
-import MasjidkuFinancial from "@/pages/masjidku/financial/MasjidkuFinacial";
-import MasjidkuListMasjid from "@/pages/masjidku/masjid/MasjidkuListMasjid";
-import MasjidkuProfil from "@/pages/masjidku/profil/MasjidkuProfil";
-import MasjidkuProgram from "@/pages/masjidku/program/MasjidkuProgram";
-
 
 // School Routes
-import { financeRoutes } from "@/pages/masjidku/financial/routes";
 import MasjidkuWebHome from "@/pages/masjidku/website/MasjidkuWebHome";
-import RegisterAdminMasjid from "@/pages/dashboard/auth/register/RegisterAdminMasjid";
-import RegisterUser from "@/pages/dashboard/auth/register/RegisterUser";
+import RegisterAdminMasjid from "@/pages/sekolahislamku/auth/register/RegisterAdminMasjid";
+import RegisterUser from "@/pages/sekolahislamku/auth/register/RegisterUser";
 import SupportPage from "@/pages/masjidku/website/pages/navbar-page/support";
 import Panduan from "@/pages/masjidku/website/pages/navbar-page/panduan";
 import Fitur from "@/pages/masjidku/website/pages/navbar-page/fitur";
@@ -97,23 +85,13 @@ export default function AppRoutes() {
       {/* === Public Routes Masjidku === */}
       <Route element={<MasjidkuLayout />}>
         <Route index element={<MasjidkuHome />} />
-        <Route path="finansial" element={<MasjidkuFinancial />} />
-        <Route path="masjid" element={<MasjidkuListMasjid />} />
-        <Route path="profil" element={<MasjidkuProfil />} />
+
         <Route path="website" element={<MasjidkuWebHome />} />
         <Route path="website/dukungan" element={<SupportPage />} />
         <Route path="website/panduan" element={<Panduan />} />
         <Route path="website/fitur" element={<Fitur />} />
         <Route path="website/about" element={<About />} />
         <Route path="website/hubungi-kami" element={<Contact />} />
-        <Route path="program" element={<MasjidkuProgram />} />
-        {financeRoutes.map((route, index) => (
-          <Route
-            key={index}
-            path={route.path.replace("/masjidku/", "")} // Hapus prefix karena sudah di dalam MasjidkuLayout
-            element={route.element}
-          />
-        ))}
       </Route>
       {/* ==== Public Routes ==== */}
       <Route path="/login" element={<Login />} />
@@ -264,15 +242,6 @@ export default function AppRoutes() {
           />
           <Route path="aktivitas/donasi-saya" element={<MasjidMyDonation />} />
           <Route path="aktivitas/statistik-saya" element={<MasjidMyStats />} />
-          {/* Nested setting layout */}
-          <Route path="aktivitas/pengaturan" element={<MasjidSettingLayout />}>
-            <Route path="menu" element={<MasjidSettingMenu />} />
-            <Route path="profil-saya" element={<MasjidMyProfile />} />
-            <Route path="tampilan" element={<MasjidAppereance />} />
-            <Route path="dukung-kami" element={<MasjidSupportUs />} />
-            <Route path="kerjasama" element={<MasjidPartnership />} />
-            <Route path="tanya-jawab" element={<MasjidFaq />} />
-          </Route>
         </Route>
       </Route>
 
@@ -284,11 +253,11 @@ export default function AppRoutes() {
       </Route> */}
 
       {/* ==== Protected Routes - Teacher ==== */}
-      <Route element={<RequireRoleRoute allowedRoles={["admin"]} />}>
+      {/* <Route element={<RequireRoleRoute allowedRoles={["admin"]} />}>
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminHome />} />
         </Route>
-      </Route>
+      </Route> */}
 
       {/* === 🔒 Protected Dashboard Routes === */}
       <Route element={<ProtectedRoute />}>

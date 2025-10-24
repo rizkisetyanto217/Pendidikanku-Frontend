@@ -109,7 +109,7 @@ export default function DetailScheduleThreeDays() {
       <main className="w-full px-4 md:px-6  md:py-8">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
           <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-            <ParentSidebar palette={palette} />
+            <ParentSidebar />
           </aside>
 
           <div className="flex-1 min-w-0 space-y-4">

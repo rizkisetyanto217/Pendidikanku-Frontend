@@ -13,7 +13,7 @@ import {
 
 import AuthLayout from "@/layout/AuthLayout";
 import api, { setTokens } from "@/lib/axios";
-import LegalModal from "@/pages/dashboard/auth/components/LegalPrivacyModal";
+// import LegalModal from "@/pages/dashboard/auth/components/LegalPrivacyModal";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 
@@ -734,7 +734,7 @@ export default function Login() {
         onCreateMasjid={handleCreateMasjid}
         onJoinSekolah={handleJoinSekolah}
       />
-      <LegalModal open={false} initialTab="tos" onClose={() => {}} />
+      {/* <LegalModal open={false} initialTab="tos" onClose={() => {}} /> */}
     </AuthLayout>
   );
 }

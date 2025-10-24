@@ -5,7 +5,7 @@ import AuthLayout from "@/layout/AuthLayout";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import api from "@/lib/axios";
-import GoogleIdentityButton from "@/pages/dashboard/auth/components/GoogleIdentityButton"; // ⬅️
+// import GoogleIdentityButton from "@/pages/dashboard/auth/components/GoogleIdentityButton"; // ⬅️
 
 import {
   EyeIcon,
@@ -271,7 +271,7 @@ export default function RegisterUser() {
 
         {/* Google Sign-Up */}
         <div className="mb-6">
-          <div className="w-full flex justify-center">
+          {/* <div className="w-full flex justify-center">
             <GoogleIdentityButton
               clientId={GOOGLE_CLIENT_ID}
               onSuccess={handleGoogleSignup}
@@ -279,8 +279,8 @@ export default function RegisterUser() {
               size="large"
               text="signup_with"
               className="w-full max-w-sm"
-            />
-          </div>
+            /> */}
+          {/* </div> */}
 
           {/* Divider */}
           <div className="my-6 flex items-center gap-3">

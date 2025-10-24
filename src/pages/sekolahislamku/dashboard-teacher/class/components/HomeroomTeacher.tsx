@@ -296,7 +296,7 @@ const HomeroomTeacher: React.FC = () => {
         <div className="lg:flex lg:items-start lg:gap-8">
           {/* Sidebar */}
           <aside className="lg:w-64 mb-6 lg:mb-0 lg:sticky lg:top-20 shrink-0">
-            <ParentSidebar palette={palette} />
+            <ParentSidebar />
           </aside>
 
           {/* Konten utama */}

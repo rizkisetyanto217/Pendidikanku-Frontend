@@ -103,7 +103,7 @@ export default function StudentScore() {
       <main className="mx-auto Replace px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-6">
           <aside className="lg:w-64 mb-6 lg:mb-0">
-            <ParentSidebar palette={palette} />
+            <ParentSidebar />
           </aside>
 
           <div className="flex-1 space-y-6">

@@ -276,7 +276,7 @@ export default function AllAssignment() {
         <div className="lg:flex lg:items-start lg:gap-4">
           {/* Sidebar kiri */}
           <aside className="lg:w-64 mb-6 lg:mb-0 lg:sticky lg:top-16 shrink-0">
-            <ParentSidebar palette={palette} />
+            <ParentSidebar  />
           </aside>
 
           {/* Konten utama */}

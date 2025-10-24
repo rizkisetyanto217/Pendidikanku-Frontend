@@ -134,7 +134,6 @@ export default function SchoolBookDetail() {
         palette={palette}
         title="Detail Buku"
         gregorianDate={new Date().toISOString()}
-
         showBack
       />
 
@@ -142,7 +141,7 @@ export default function SchoolBookDetail() {
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
           {/* Sidebar */}
           <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-            <ParentSidebar palette={palette} />
+            <ParentSidebar />
           </aside>
 
           {/* Main */}
@@ -205,7 +204,6 @@ export default function SchoolBookDetail() {
                       value={book?.books_author ?? "—"}
                       palette={palette}
                     />
-                   
                   </div>
                   {book?.books_url && (
                     <a

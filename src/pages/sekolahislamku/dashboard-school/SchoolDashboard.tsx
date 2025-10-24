@@ -338,7 +338,6 @@ function useTodaySessions() {
   });
 }
 
-
 /* ============ Shared UI ============ */
 function Flash({
   palette,
@@ -601,8 +600,6 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
       : mockTodaySchedule;
   }, [todaySessionsQ.data]);
 
-
-
   const topbarGregorianISO = toLocalNoonISO(new Date());
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -680,7 +677,7 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
                 />
                 {(todaySessionsQ.isLoading || todaySessionsQ.isFetching) && (
                   <div className="px-4 pt-2 text-xs opacity-70">
-                    Memuat jadwal hari ini…
+                    Memuat jadwal hari ini juga…
                   </div>
                 )}
               </div>
