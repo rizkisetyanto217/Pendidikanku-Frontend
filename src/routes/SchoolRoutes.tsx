@@ -33,12 +33,12 @@ import RoomSchool from "@/pages/sekolahislamku/dashboard-school/menu-utama/compo
 import DetailRoomSchool from "@/pages/sekolahislamku/dashboard-school/menu-utama/components/DetailRoomSchool";
 import SchoolSpp from "@/pages/sekolahislamku/dashboard-school/spp/SchoolSpp";
 import SchoolSubject from "@/pages/sekolahislamku/dashboard-school/subject/SchoolSubject";
-import SchoolCertificate from "@/pages/sekolahislamku/dashboard-school/certificate/SchoolCertificate";
-import DetailCertificate from "@/pages/sekolahislamku/dashboard-school/certificate/components/DetailCertificate";
+import SchoolCertificate from "@/pages/sekolahislamku/dashboard-school/academic/certificate/SchoolCertificate";
+import DetailCertificate from "@/pages/sekolahislamku/dashboard-school/academic/certificate/components/DetailCertificate";
 import CalenderAcademic from "@/pages/sekolahislamku/dashboard-school/calender/CalenderAcademic";
 import SchoolStatistik from "@/pages/sekolahislamku/dashboard-school/statistik/SchoolStatistik";
 import SchoolSettings from "@/pages/sekolahislamku/dashboard-school/settings/SchoolSettings";
-import SchoolActiveClass from "@/pages/sekolahislamku/dashboard-school/active-class/SchoolActiveClass";
+import SchoolActiveClass from "@/pages/sekolahislamku/dashboard-school/class/active-class/SchoolActiveClass";
 
 export const SchoolRoutes = (
   <Route path="/:id/sekolah" element={<StudentLayout />}>

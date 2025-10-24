@@ -11,13 +11,13 @@ import {
   School,
 } from "lucide-react";
 
-/* ===================== Types ===================== */
+/** ===================== Types ===================== */
 export type NavItem = {
+  /** path relatif dari base; "" atau "." untuk root */
   path: "" | "." | string;
   label: string;
   icon: React.ComponentType<any>;
   end?: boolean;
-  to: string; // ✅ wajib ada, agar TS tidak error
 };
 
 export type NavDict = {
@@ -26,33 +26,33 @@ export type NavDict = {
   guru: NavItem[];
 };
 
-/* ===================== Default Navs ===================== */
+/** ===================== Default Navs ===================== */
 export const NAVS: NavDict = {
   sekolah: [
-    { path: "", label: "Dashboard", icon: LayoutDashboard, end: true, to: "" },
-    { path: "menu-utama", label: "Menu Utama", icon: ChartBar, to: "" },
-    { path: "guru", label: "Guru", icon: UserCog, to: "" },
-    { path: "kelas", label: "Kelas", icon: BookOpen, to: "" },
-    { path: "buku", label: "Buku", icon: BookOpen, to: "" },
-    { path: "keuangan", label: "Keuangan", icon: Wallet, to: "" },
-    { path: "academic", label: "Akademik", icon: FileSpreadsheet, to: "" },
-    { path: "profil-sekolah", label: "Profil", icon: School, to: "" },
+    { path: "", label: "Dashboard", icon: LayoutDashboard, end: true },
+    { path: "menu-utama", label: "Menu Utama", icon: ChartBar },
+    { path: "guru", label: "Guru", icon: UserCog },
+    { path: "kelas", label: "Kelas", icon: BookOpen },
+    { path: "buku", label: "Buku", icon: BookOpen },
+    { path: "keuangan", label: "Keuangan", icon: Wallet },
+    { path: "academic", label: "Akademik", icon: FileSpreadsheet },
+    { path: "profil-sekolah", label: "Profil", icon: School },
   ],
   murid: [
-    { path: "", label: "Dashboard", icon: LayoutDashboard, end: true, to: "" },
-    { path: "menu-utama", label: "Menu Utama", icon: ChartBar, to: "" },
-    { path: "progress", label: "Progress Anak", icon: ClipboardCheck, to: "" },
-    { path: "finance", label: "Pembayaran", icon: Wallet, to: "" },
-    { path: "jadwal", label: "Jadwal", icon: CalendarDays, to: "" },
-    { path: "tugas", label: "Tugas", icon: ClipboardCheck, to: "" },
-    { path: "profil-murid", label: "Profil", icon: Users, to: "" },
+    { path: "", label: "Dashboard", icon: LayoutDashboard, end: true },
+    { path: "menu-utama", label: "Menu Utama", icon: ChartBar },
+    { path: "progress", label: "Progress Anak", icon: ClipboardCheck },
+    { path: "finance", label: "Pembayaran", icon: Wallet },
+    { path: "jadwal", label: "Jadwal", icon: CalendarDays },
+    { path: "tugas", label: "Tugas", icon: ClipboardCheck },
+    { path: "profil-murid", label: "Profil", icon: Users },
   ],
   guru: [
-    { path: "", label: "Dashboard", icon: LayoutDashboard, end: true, to: "" },
-    { path: "menu-utama", label: "Menu Utama", icon: ChartBar, to: "" },
-    { path: "kelas", label: "Kelas Saya", icon: Users, to: "" },
-    { path: "guru-mapel", label: "Guru Mapel", icon: UserCog, to: "" },
-    { path: "jadwal", label: "Jadwal", icon: CalendarDays, to: "" },
-    { path: "profil-guru", label: "Profil", icon: Users, to: "" },
+    { path: "", label: "Dashboard", icon: LayoutDashboard, end: true },
+    { path: "menu-utama", label: "Menu Utama", icon: ChartBar },
+    { path: "kelas", label: "Kelas Saya", icon: Users },
+    { path: "guru-mapel", label: "Guru Mapel", icon: UserCog },
+    { path: "jadwal", label: "Jadwal", icon: CalendarDays },
+    { path: "profil-guru", label: "Profil", icon: Users },
   ],
 };

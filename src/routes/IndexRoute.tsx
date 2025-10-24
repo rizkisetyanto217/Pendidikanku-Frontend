@@ -8,8 +8,6 @@ import Login from "@/pages/sekolahislamku/auth/Login";
 import NotFound from "@/pages/NotFound";
 
 // Auth Route Guard
-import RequireRoleRoute from "./RequireRoleRoute";
-import AdminLayout from "@/layout/AdminLayout";
 import MasjidLinkTree from "@/pages/linktree/MasjidLinkTreeHome";
 import MasjidDonationMasjid from "@/pages/linktree/finansial/donation/MasjidDonation";
 import MasjidLayout from "@/pages/linktree/MasjidLayout";
@@ -23,7 +21,6 @@ import MasjidReportFinansial from "@/pages/linktree/finansial/report/MasjidRepor
 import MasjidDetailLecture from "@/pages/linktree/lecture/schedule/MasjidDetailScheduleLectureSessions";
 import MasjidDonationMotivation from "@/pages/linktree/finansial/donation/MasjidDonationMotivation";
 import MasjidLectureMaterial from "@/pages/linktree/lecture/material/lecture/main/MasjidLecture";
-import MasjidDetailLectureMaterial from "@/pages/linktree/lecture/schedule/MasjidDetailScheduleLectureSessions";
 import MasjidInformationLectureSessions from "@/pages/linktree/lecture/material/lecture-sessions/main/MasjidInformationLectureSessions";
 import MasjidQuizLectureSessions from "@/pages/linktree/lecture/material/lecture-sessions/quizzes/MasjidQuizLectureSessions";
 import MasjidFullTranscriptLectureSessions from "@/pages/linktree/lecture/material/lecture-sessions/materials/MasjidFullTranscriptLectureSessions";
@@ -41,14 +38,9 @@ import MasjidSummaryLecture from "@/pages/linktree/lecture/material/lecture/mate
 import MasjidLectureSessions from "@/pages/linktree/lecture/material/lecture-sessions/main/MasjidLectureSessions";
 import MasjidExamLecture from "@/pages/linktree/lecture/material/lecture/exams/MasjidExamLecture";
 import MasjidResultExamLecture from "@/pages/linktree/lecture/material/lecture/exams/MasjidResultExamLecture";
-import MasjidMyProfile from "@/pages/linktree/activity/setting/MasjidMyProfile";
 import MasjidMyActivity from "@/pages/linktree/activity/my-activity/MasjidMyActivity";
 import MasjidPost from "@/pages/linktree/post/main/MasjidPost";
 import MasjidDetailDonation from "@/pages/linktree/post/main/MasjidDetailMotivation";
-import MasjidAppereance from "@/pages/linktree/activity/setting/MasjidAppereance";
-import MasjidSupportUs from "@/pages/linktree/activity/setting/MasjidSupportUs";
-import MasjidPartnership from "@/pages/linktree/activity/setting/MasjidPartnership";
-import MasjidFaq from "@/pages/linktree/activity/setting/MasjidFaq";
 import MasjidMyDonation from "@/pages/linktree/finansial/report/MasjidMyDonation";
 
 import MasjidMyStats from "@/pages/linktree/activity/my-activity/MasjidMyStats";
@@ -77,8 +69,6 @@ import { TeacherRoutes } from "./TeacherRoutes";
 import { StudentRoutes } from "./StudentRoutes";
 import { SchoolRoutes } from "./SchoolRoutes";
 
-// import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/routes";
-
 export default function AppRoutes() {
   return (
     <Routes>
@@ -99,10 +89,6 @@ export default function AppRoutes() {
         path="/website/daftar-sekarang"
         element={<RegisterAdminMasjid />}
       />
-      {/* <Route
-        path="/register-detail-sekolah"
-        element={<RegisterDetailAdminMasjid />}
-      /> */}
       <Route path="/register-user" element={<RegisterUser />} />
       {/* 1. Tanpa layout untuk LinkTree */}
       <Route path="masjid/:slug" index element={<MasjidLinkTree />} />
@@ -244,20 +230,6 @@ export default function AppRoutes() {
           <Route path="aktivitas/statistik-saya" element={<MasjidMyStats />} />
         </Route>
       </Route>
-
-      {/* ==== Protected Routes - Teacher ==== */}
-      {/* <Route element={<RequireRoleRoute allowedRoles={["teacher"]} />}>
-        <Route path="/teacher" element={<TeacherLayout />}>
-          <Route index element={<TeacherHome />} />
-        </Route>
-      </Route> */}
-
-      {/* ==== Protected Routes - Teacher ==== */}
-      {/* <Route element={<RequireRoleRoute allowedRoles={["admin"]} />}>
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<AdminHome />} />
-        </Route>
-      </Route> */}
 
       {/* === 🔒 Protected Dashboard Routes === */}
       <Route element={<ProtectedRoute />}>

@@ -287,28 +287,6 @@ function useAnnouncements() {
     },
   });
 }
-function useAnnouncementThemes() {
-  return useQuery<AnnouncementTheme[]>({
-    queryKey: QK.THEMES,
-    queryFn: async () => {
-      const res = await axios.get<AnnouncementThemesListResponse>(
-        "/api/a/announcement-themes",
-        { params: { limit: 50, offset: 0 }, withCredentials: true }
-      );
-      return (
-        res.data?.data.map<AnnouncementTheme>((t) => ({
-          id: t.announcement_themes_id,
-          name: t.announcement_themes_name,
-          color: t.announcement_themes_color ?? undefined,
-          description: t.announcement_themes_description ?? undefined,
-          slug: t.announcement_themes_slug,
-          isActive: t.announcement_themes_is_active,
-          createdAt: t.announcement_themes_created_at,
-        })) ?? []
-      );
-    },
-  });
-}
 function useLembagaStats() {
   return useQuery<LembagaStats | null>({
     queryKey: QK.STATS,
@@ -441,129 +419,6 @@ function MiniStat({
   );
 }
 
-/* ============ AddThemeModal tetap ada ============ */
-function AddThemeModal({
-  open,
-  onClose,
-  onSubmit,
-  saving,
-  error,
-  palette,
-}: {
-  open: boolean;
-  onClose: () => void;
-  onSubmit: (v: {
-    name: string;
-    color?: string | null;
-    description?: string | null;
-  }) => void;
-  saving?: boolean;
-  error?: string | null;
-  palette: Palette;
-}) {
-  const [name, setName] = useState("");
-  const [color, setColor] = useState("#007074");
-  const [description, setDescription] = useState("");
-
-  useEffect(() => {
-    if (open) {
-      setName("");
-      setColor("#007074");
-      setDescription("");
-    }
-  }, [open]);
-  if (!open) return null;
-  const disabled = saving || !name.trim();
-
-  return (
-    <div
-      className="fixed inset-0 z-[70] grid place-items-center"
-      style={{ background: "rgba(0,0,0,.35)" }}
-    >
-      <div
-        className="w-[min(520px,92vw)] rounded-2xl p-4 shadow-xl ring-1"
-        style={{
-          background: palette.white1,
-          color: palette.black1,
-          borderColor: palette.silver1,
-        }}
-      >
-        <div className="mb-3 text-lg font-semibold">Tambah Tema Pengumuman</div>
-        <div className="grid gap-3">
-          <label className="grid gap-1 text-sm">
-            <span className="opacity-80">Nama Tema</span>
-            <input
-              className="w-full rounded-lg border px-3 py-2 text-sm"
-              style={{
-                borderColor: palette.silver2,
-                background: palette.white2,
-              }}
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Mis. 'Pengumuman', 'Peringatan', 'Sukses'"
-            />
-          </label>
-          <label className="grid gap-1 text-sm">
-            <span className="opacity-80">Deskripsi (opsional)</span>
-            <textarea
-              rows={3}
-              className="w-full rounded-lg border px-3 py-2 text-sm"
-              style={{
-                borderColor: palette.silver2,
-                background: palette.white2,
-              }}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Penjelasan singkat tema"
-            />
-          </label>
-          <label className="grid gap-1 text-sm">
-            <span className="opacity-80">Warna (opsional)</span>
-            <input
-              type="color"
-              className="h-9 w-16 rounded border"
-              style={{
-                borderColor: palette.silver2,
-                background: palette.white2,
-              }}
-              value={color}
-              onChange={(e) => setColor(e.target.value)}
-            />
-          </label>
-          {!!error && (
-            <div className="text-sm" style={{ color: palette.error1 }}>
-              {error}
-            </div>
-          )}
-        </div>
-        <div className="mt-4 flex items-center justify-end gap-2">
-          <Btn
-            palette={palette}
-            variant="ghost"
-            onClick={onClose}
-            disabled={saving}
-          >
-            Batal
-          </Btn>
-          <Btn
-            palette={palette}
-            onClick={() =>
-              onSubmit({
-                name: name.trim(),
-                color,
-                description: description.trim() || undefined,
-              })
-            }
-            disabled={disabled}
-          >
-            {saving ? "Menyimpan…" : "Tambah"}
-          </Btn>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 /* ================= Page ================= */
 const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
   showBack = false,
@@ -608,25 +463,11 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <ParentTopBar
-        palette={palette}
-        title="Dashboard Sekolah"
-        gregorianDate={topbarGregorianISO}
-        hijriDate={hijriLong(topbarGregorianISO)}
-      />
       <Flash palette={palette} flash={flash} />
 
       {/* Main */}
       <main className="w-full px-4 md:px-6 py-4 md:py-8">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
-          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-            <ParentSidebar
-              // palette={palette}
-              mode="auto"
-              // openMobile={mobileOpen}
-              onCloseMobile={() => setMobileOpen(false)}
-            />
-          </aside>
 
           <section className="flex-1 flex flex-col space-y-6 min-w-0">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 ">
@@ -677,7 +518,7 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
                 />
                 {(todaySessionsQ.isLoading || todaySessionsQ.isFetching) && (
                   <div className="px-4 pt-2 text-xs opacity-70">
-                    Memuat jadwal hari ini juga…
+                    Memuat jadwal hari ini juga. NNN…
                   </div>
                 )}
               </div>

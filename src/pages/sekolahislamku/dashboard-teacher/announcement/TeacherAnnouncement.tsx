@@ -341,10 +341,6 @@ export default function TeacherAnnouncements() {
 
       <main className="w-full px-4 md:px-6  md:py-8">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
-          {/* Sidebar */}
-          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-            <ParentSidebar />
-          </aside>
 
           {/* Main */}
           <div className="flex-1 space-y-6">

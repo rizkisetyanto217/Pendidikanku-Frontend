@@ -1,82 +1,81 @@
-import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
-import {
-  Btn,
-  type Palette,
-} from "@/pages/sekolahislamku/components/ui/Primitives";
-import PublicUserDropdown from "@/components/common/public/UserDropDown"; // ⬅️ import
+import { MoreVertical, Menu } from "lucide-react";
+import type { Palette } from "@/pages/sekolahislamku/components/ui/Primitives";
 
-type PageTopBarProps = {
+type ParentTopBarProps = {
   palette: Palette;
-  backTo?: string;
-  onBack?: () => void;
-  label?: React.ReactNode;
-  title?: React.ReactNode;
-  rightSlot?: React.ReactNode; // biarkan optional
-  sticky?: boolean;
-  className?: string;
+  title?: string;
+  gregorianDate?: string; // ISO
+  hijriDate?: string; // siap tampil
+  rightSlot?: React.ReactNode;
+  onMenuClick?: () => void; // ⬅️ NEW
 };
 
-export default function PageTopBar({
+const fmtID = (iso?: string) =>
+  iso
+    ? new Date(iso).toLocaleDateString("id-ID", {
+        weekday: "long",
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      })
+    : "-";
+
+export default function ParentTopBar({
   palette,
-  backTo = "/student",
-  onBack,
-  label,
-  title,
-  rightSlot = <PublicUserDropdown variant="icon" />, // ⬅️ default-nya dropdown
-  sticky = true,
-  className,
-}: PageTopBarProps) {
-  const navigate = useNavigate();
-
+  title = "Dashboard",
+  gregorianDate,
+  hijriDate,
+  rightSlot,
+  onMenuClick, // ⬅️ NEW
+}: ParentTopBarProps) {
   return (
-    <div
-      className={`${sticky ? "sticky top-0 z-40" : ""} border-b ${className ?? ""}`}
-      style={{
-        background: `${palette.white1}E6`,
-        borderColor: palette.silver1,
-      }}
+    <header
+      className="w-full sticky top-0 z-30"
+      style={{ background: palette.white1, color: palette.black1 }}
     >
-      <div className="mx-auto max-w-5xl px-4 py-3 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          {onBack ? (
-            <button onClick={onBack}>
-              <Btn variant="outline" size="sm" palette={palette}>
-                <ArrowLeft size={16} />
-              </Btn>
-            </button>
-          ) : (
-            <Link to={backTo}>
-              <Btn variant="outline" size="sm" palette={palette}>
-                <ArrowLeft size={16} />
-              </Btn>
-            </Link>
-          )}
+      <div
+        className="border-b"
+        style={{ borderColor: palette.silver1, background: palette.white1 }}
+      >
+        <div className="mx-auto max-w-screen-2xl px-4 md:px-6 py-3 flex items-center gap-3">
+          {/* Hamburger mobile */}
+          <button
+            className="lg:hidden p-2 rounded-lg"
+            style={{ background: palette.white3 }}
+            aria-label="Buka menu"
+            onClick={onMenuClick} // ⬅️ WIRE!
+          >
+            <Menu size={18} />
+          </button>
 
-          {(label || title) && (
-            <div className="pl-1 flex items-center gap-2 min-w-0">
-              {label && (
-                <>
-                  <span className="text-sm" style={{ color: palette.silver2 }}>
-                    {label}
-                  </span>
-                  <span
-                    className="hidden sm:inline-block w-1 h-1 rounded-full"
-                    style={{ background: palette.silver2 }}
-                  />
-                </>
-              )}
-              {title && (
-                <span className="font-semibold truncate max-w-[50vw]">
-                  {title}
-                </span>
-              )}
-            </div>
+          {/* Title */}
+          <div className="flex-1">
+            <h1 className="text-base md:text-lg font-semibold leading-tight">
+              {title}
+            </h1>
+          </div>
+
+          {/* Hijri pill */}
+          <div
+            className="hidden sm:flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium"
+            style={{ background: palette.white3 }}
+            title={fmtID(gregorianDate)}
+          >
+            <span>{hijriDate ?? "-"}</span>
+          </div>
+
+          {/* Right actions */}
+          {rightSlot ?? (
+            <button
+              className="ml-2 p-2 rounded-lg"
+              style={{ background: palette.white3 }}
+              aria-label="More"
+            >
+              <MoreVertical size={16} />
+            </button>
           )}
         </div>
-
-        {rightSlot /* akan default ke PublicUserDropdown kalau tidak diisi */}
       </div>
-    </div>
+    </header>
   );
 }

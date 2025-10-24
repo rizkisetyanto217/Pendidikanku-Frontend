@@ -334,13 +334,13 @@ export default function TeacherDashboard() {
       style={{ background: palette.white2, color: palette.black1 }}
     >
       {/* Topbar */}
-      <ParentTopBar
+      {/* <ParentTopBar
         palette={palette}
         title="Dashboard Pengajar"
         gregorianDate={normalizedGregorianISO} // ✅ ISO “siang lokal”
         hijriDate={hijriLong(normalizedGregorianISO)} // ✅ Umm al-Qura (stabil)
         // dateFmt={fmtLong} // ✅ formatter yang ada di file ini
-      />
+      /> */}
 
       {/* Modal: Tambah Jadwal */}
       <AddSchedule
@@ -373,7 +373,7 @@ export default function TeacherDashboard() {
       <main className="w-full px-4 md:px-6 py-4 md:py-8">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Sidebar */}
-          <ParentSidebar  />
+          {/* <ParentSidebar  /> */}
 
           {/* Main */}
           <div className="flex-1 flex flex-col space-y-6 min-w-0">

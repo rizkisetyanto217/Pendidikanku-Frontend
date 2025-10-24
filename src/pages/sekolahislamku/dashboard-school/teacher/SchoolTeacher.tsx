@@ -491,27 +491,10 @@ const TeachersPage: React.FC<SchoolTeacherProps> = ({ showBack = false }) => {
         palette={palette}
       />
 
-      {/* TopBar */}
-      <ParentTopBar
-        palette={palette}
-        title="Guru"
-        hijriDate={hijriWithWeekday(new Date().toISOString())}
-        showBack={isFromMenuUtama}
-        onMenuClick={() => setSidebarOpen(true)}
-      />
 
       {/* Container */}
       <main className="w-full px-4 md:px-6   md:py-8">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
-          {/* Sidebar */}
-          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-            <ParentSidebar
-              desktopOnly={false}
-              mode="mobile"
-              open={sidebarOpen}
-              onCloseMobile={() => setSidebarOpen(false)}
-            />
-          </aside>
 
           {/* Main Content */}
           <section className="flex-1 flex flex-col space-y-6 min-w-0">
