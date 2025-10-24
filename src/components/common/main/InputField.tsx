@@ -1,4 +1,4 @@
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import React from "react";
 
 interface InputFieldProps {

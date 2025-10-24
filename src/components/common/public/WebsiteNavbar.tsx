@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Menu, X, Sun, Moon } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { colors } from "@/constants/colorsThema";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import masjid from "@/assets/Gambar-Masjid.jpeg";
 
 /* ================= NAV ITEMS ================= */

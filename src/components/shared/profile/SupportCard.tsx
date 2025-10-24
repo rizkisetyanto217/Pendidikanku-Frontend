@@ -1,5 +1,5 @@
 import { ReactNode } from 'react'
-import useHtmlDarkMode from '@/hooks/userHTMLDarkMode'
+import useHtmlDarkMode from '@/hooks/useHTMLThema'
 import { colors } from '@/constants/colorsThema'
 
 interface SupportCardProps {
