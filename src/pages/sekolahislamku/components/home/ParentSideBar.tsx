@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Link,
   useMatch,
@@ -6,16 +6,13 @@ import {
   useResolvedPath,
   useNavigate,
 } from "react-router-dom";
-import { LogOut } from "lucide-react";
+import { LogOut, X } from "lucide-react";
 import api from "@/lib/axios";
 import { SectionCard } from "@/pages/sekolahislamku/components/ui/Primitives";
 import { NAVS, type NavItem } from "./navsConfig";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import { pickTheme, ThemeName, type Palette } from "@/constants/thema";
 
-/* ======================================================
-   TYPES & HELPERS
-====================================================== */
 type Kind = "sekolah" | "murid" | "guru";
 type UserProfile = {
   name: string;
@@ -28,16 +25,13 @@ function normalize(path: string) {
   return path.replace(/\/+$/, "");
 }
 
-function buildBase(id: string | undefined, kind: "sekolah" | "murid" | "guru") {
-  // ✅ sesuai struktur route di TeacherRoutes
+function buildBase(id: string | undefined, kind: Kind) {
   return id ? `/${id}/${kind}` : `/${kind}`;
 }
 
 function buildTo(base: string, path: string) {
-  // ✅ gunakan '.' atau '' untuk dashboard
   return normalize(path === "." || path === "" ? base : `${base}/${path}`);
 }
-
 
 const getInitials = (n?: string) =>
   n
@@ -48,110 +42,41 @@ const getInitials = (n?: string) =>
     .toUpperCase() || "U";
 
 const translateRole = (r: string) =>
-  ({
-    teacher: "Guru",
-    student: "Murid",
-    dkm: "Admin Sekolah",
-    admin: "Admin Sekolah",
-  })[r?.toLowerCase()] ?? "User";
+  ({ teacher: "Guru", student: "Murid", dkm: "Admin", admin: "Admin" })[
+    r?.toLowerCase()
+  ] ?? "User";
 
-/* ======================================================
-   SIDEBAR ITEM
-====================================================== */
-function SidebarItem({
-  palette,
-  to,
-  end,
-  icon: Icon,
-  label,
-  onClick,
-}: {
-  palette: Palette;
-  to: string;
-  end?: boolean;
-  icon: React.ComponentType<any>;
-  label: string;
-  onClick?: () => void;
-}) {
-  const resolved = useResolvedPath(to);
-  const location = window.location.pathname;
-  const current = normalize(location);
-  const target = normalize(resolved.pathname);
-  const isActive = end ? current === target : current.startsWith(target);
-
-  return (
-    <Link to={to} onClick={onClick} className="block focus:outline-none">
-      <div
-  className="flex items-center gap-3 rounded-xl px-3 py-2 border transition-all duration-200"
-  style={{
-    background: palette.white1,
-    borderColor: isActive ? palette.primary : palette.silver1,
-    color: palette.black1,
-  }}
->
-  <span
-    className="h-7 w-7 grid place-items-center rounded-lg border"
-    style={{
-      background: "transparent",
-      borderColor: isActive ? palette.primary : palette.silver1,
-      color: isActive ? palette.primary : palette.black1,
-    }}
-  >
-    <Icon size={16} />
-  </span>
-  <span
-    className={`truncate font-medium transition-colors ${
-      isActive ? "text-primary" : ""
-    }`}
-    style={{
-      color: isActive ? palette.primary : palette.black1,
-    }}
-  >
-    {label}
-  </span>
-</div>
-
-    </Link>
-  );
-}
-
-/* ======================================================
-   MAIN COMPONENT
-====================================================== */
 export default function ParentSidebar({
   kind = "auto",
   className = "",
   desktopOnly = true,
   mode = "auto",
+  open = true,
   onCloseMobile,
 }: {
   kind?: Kind | "auto";
   className?: string;
   desktopOnly?: boolean;
   mode?: "desktop" | "mobile" | "auto";
+  open?: boolean;
   onCloseMobile?: () => void;
 }) {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
   const params = useParams<{ id?: string }>();
-  const match = useMatch("/:id/*"); // ✅ perbaikan match pattern
+  const match = useMatch("/:id/*");
   const id = params.id ?? match?.params.id ?? "";
-
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [resolvedKind, setResolvedKind] = useState<Kind>("sekolah");
   const [loggingOut, setLoggingOut] = useState(false);
 
-  /* ======================================================
-     FETCH USER ROLE (tanpa loading UI)
-  ====================================================== */
   useEffect(() => {
-    async function fetchUser() {
-      try {
-        const res = await api.get("/auth/me/simple-context");
+    api
+      .get("/auth/me/simple-context")
+      .then((res) => {
         const data = res.data?.data ?? {};
         const memberships = data.memberships ?? [];
-
         let role = localStorage.getItem("active_role") || "user";
         if (memberships.length) {
           const roles = memberships.flatMap((m: any) => m.roles ?? []);
@@ -160,28 +85,25 @@ export default function ParentSidebar({
           else if (roles.includes("dkm") || roles.includes("admin"))
             role = "dkm";
         }
-
-        localStorage.setItem("active_role", role);
         setUserProfile({
           name: data.user_name || data.name || "User",
           email: data.email || "",
           avatar: data.avatar || data.profile_photo_url,
           role,
         });
-
-        if (["teacher", "guru"].includes(role)) setResolvedKind("guru");
-        else if (["student", "murid"].includes(role)) setResolvedKind("murid");
+        if (role === "teacher") setResolvedKind("guru");
+        else if (role === "student") setResolvedKind("murid");
         else setResolvedKind("sekolah");
-      } catch {
-        setUserProfile({ name: "User", email: "", role: "user" });
-      }
-    }
-    fetchUser();
+      })
+      .catch(() => setUserProfile({ name: "User", email: "", role: "user" }));
   }, []);
 
-  /* ======================================================
-     LOGOUT
-  ====================================================== */
+  const base = buildBase(id, resolvedKind);
+  const navs: (NavItem & { to: string })[] = useMemo(
+    () => NAVS[resolvedKind].map((n) => ({ ...n, to: buildTo(base, n.path) })),
+    [resolvedKind, base]
+  );
+
   const handleLogout = async () => {
     try {
       setLoggingOut(true);
@@ -191,109 +113,132 @@ export default function ParentSidebar({
       document.cookie =
         "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
       navigate("/login", { replace: true });
-      setLoggingOut(false);
     }
   };
 
-  /* ======================================================
-     NAVIGATION
-  ====================================================== */
-  const base = buildBase(id, resolvedKind);
-  const navs: (NavItem & { to: string })[] = useMemo(
-    () => NAVS[resolvedKind].map((n) => ({ ...n, to: buildTo(base, n.path) })),
-    [resolvedKind, base]
-  );
-
-  /* ======================================================
-     RENDER
-  ====================================================== */
   return (
-    <aside
-      className={`${desktopOnly ? "hidden lg:flex" : "flex"} flex-col border-r transition-colors duration-300 ${className}`}
-      style={{
-        width: "16rem",
-        background: palette.white1,
-        borderColor: palette.silver1,
-        color: palette.black1,
-      }}
-    >
-      {/* Scroll area */}
-      <div className="flex-1 overflow-y-auto p-2">
-        <SectionCard
-          palette={palette}
-          className="p-2 transition-colors duration-300"
-        >
-          <ul className="space-y-2">
-            {navs.map(({ to, icon, label, end }) => (
-              <li key={to}>
-                <SidebarItem
-                  palette={palette}
-                  to={to}
-                  end={end}
-                  icon={icon}
-                  label={label}
-                  onClick={mode !== "desktop" ? onCloseMobile : undefined}
-                />
-              </li>
-            ))}
-          </ul>
-        </SectionCard>
-      </div>
+    <>
+      {/* Overlay Mobile */}
+      {!desktopOnly && open && (
+        <div
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden"
+          onClick={onCloseMobile}
+        />
+      )}
 
-      {/* Footer */}
-      <div
-        className="p-3 border-t transition-colors duration-300"
-        style={{ borderColor: palette.silver1, background: palette.white2 }}
+      <aside
+        className={`${
+          desktopOnly
+            ? "hidden lg:flex"
+            : `fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 ${
+                open ? "translate-x-0" : "-translate-x-full"
+              }`
+        } flex-col border-r ${className}`}
+        style={{
+          width: "16rem",
+          background: palette.white1,
+          borderColor: palette.silver1,
+          color: palette.black1,
+        }}
       >
-        {userProfile && (
+        {/* Header Mobile */}
+        {!desktopOnly && (
           <div
-            className="mb-3 p-3 rounded-xl border flex items-center gap-3 transition-colors duration-300"
-            style={{ borderColor: palette.silver1, background: palette.white1 }}
+            className="flex items-center justify-between p-3 border-b lg:hidden"
+            style={{ borderColor: palette.silver1 }}
           >
-            <div
-              className="h-10 w-10 rounded-full flex items-center justify-center overflow-hidden text-white font-semibold"
-              style={{ background: palette.primary }}
+            <h2 className="font-semibold text-sm">Menu</h2>
+            <button
+              onClick={onCloseMobile}
+              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
             >
-              {userProfile.avatar ? (
-                <img
-                  src={userProfile.avatar}
-                  alt={userProfile.name}
-                  className="h-full w-full object-cover"
-                  onError={(e) => (e.currentTarget.style.display = "none")}
-                />
-              ) : (
-                getInitials(userProfile.name)
-              )}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold truncate">
-                {userProfile.name}
-              </p>
-              <p
-                className="text-xs truncate"
-                style={{ color: palette.silver2 }}
-              >
-                {translateRole(userProfile.role)}
-              </p>
-            </div>
+              <X size={18} />
+            </button>
           </div>
         )}
 
-        <button
-          onClick={handleLogout}
-          disabled={loggingOut}
-          className="w-full flex items-center justify-center gap-2 rounded-xl border py-2.5 font-medium transition-all"
-          style={{
-            borderColor: palette.silver1,
-            color: "#DC2626",
-            background: palette.white1,
-            opacity: loggingOut ? 0.7 : 1,
-          }}
+        {/* Scroll area */}
+        <div className="flex-1 overflow-y-auto p-2">
+          <SectionCard palette={palette} className="p-2">
+            <ul className="space-y-2">
+              {navs.map(({ to, icon: Icon, label, end }) => (
+                <li key={to}>
+                  <Link
+                    to={to}
+                    onClick={mode !== "desktop" ? onCloseMobile : undefined}
+                    className="flex items-center gap-3 rounded-xl px-3 py-2 border transition-all duration-200"
+                    style={{
+                      borderColor: palette.silver1,
+                      color: palette.black1,
+                    }}
+                  >
+                    <Icon size={16} />
+                    <span className="truncate font-medium">{label}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </SectionCard>
+        </div>
+
+        {/* Footer */}
+        <div
+          className="p-3 border-t"
+          style={{ borderColor: palette.silver1, background: palette.white2 }}
         >
-          <LogOut size={18} />
-          <span>{loggingOut ? "Logging out..." : "Logout"}</span>
-        </button>
-      </div>
-    </aside>
+          {userProfile && (
+            <div
+              className="mb-3 p-3 rounded-xl border flex items-center gap-3"
+              style={{
+                borderColor: palette.silver1,
+                background: palette.white1,
+              }}
+            >
+              <div
+                className="h-10 w-10 rounded-full flex items-center justify-center overflow-hidden text-white font-semibold"
+                style={{ background: palette.primary }}
+              >
+                {userProfile.avatar ? (
+                  <img
+                    src={userProfile.avatar}
+                    alt={userProfile.name}
+                    className="h-full w-full object-cover"
+                    onError={(e) => (e.currentTarget.style.display = "none")}
+                  />
+                ) : (
+                  getInitials(userProfile.name)
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold truncate">
+                  {userProfile.name}
+                </p>
+                <p
+                  className="text-xs truncate"
+                  style={{ color: palette.silver2 }}
+                >
+                  {translateRole(userProfile.role)}
+                </p>
+              </div>
+            </div>
+          )}
+
+          <button
+            onClick={handleLogout}
+            disabled={loggingOut}
+            className="w-full flex items-center justify-center gap-2 rounded-xl border py-2.5 font-medium transition-all"
+            style={{
+              borderColor: palette.silver1,
+              color: "#DC2626",
+              background: palette.white1,
+              opacity: loggingOut ? 0.7 : 1,
+            }}
+          >
+            <LogOut size={18} />
+            <span>{loggingOut ? "Logging out..." : "Logout"}</span>
+          </button>
+        </div>
+      </aside>
+    </>
   );
 }

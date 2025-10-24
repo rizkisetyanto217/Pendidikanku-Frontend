@@ -1,5 +1,5 @@
 // src/pages/sekolahislamku/pages/academic/SchoolActiveClass.tsx
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 
@@ -94,7 +94,7 @@ const SchoolActiveClass: React.FC = () => {
   });
 
   const rows = useMemo(() => classesQ.data?.list ?? [], [classesQ.data]);
-
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   return (
     <div
       className="min-h-screen w-full"
@@ -105,7 +105,6 @@ const SchoolActiveClass: React.FC = () => {
         title="Kelas Aktif"
         gregorianDate={gregorianISO}
         hijriDate={hijriLong(gregorianISO)}
-
         showBack={true}
       />
 
@@ -113,7 +112,12 @@ const SchoolActiveClass: React.FC = () => {
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Sidebar */}
           <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-            <ParentSidebar palette={palette} />
+            <ParentSidebar
+              desktopOnly={false}
+              mode="mobile"
+              open={sidebarOpen}
+              onCloseMobile={() => setSidebarOpen(false)}
+            />
           </aside>
 
           {/* Main */}
@@ -195,10 +199,7 @@ const SchoolActiveClass: React.FC = () => {
                     )}
                   </tbody>
                 </table>
-                <div
-                  className="pt-3 text-sm"
-                  style={{ color: palette.black2 }}
-                >
+                <div className="pt-3 text-sm" style={{ color: palette.black2 }}>
                   Menampilkan {rows.length} kelas
                 </div>
               </div>

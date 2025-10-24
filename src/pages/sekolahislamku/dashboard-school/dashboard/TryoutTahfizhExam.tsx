@@ -399,6 +399,7 @@ const TryoutTahfizhExam: React.FC = () => {
   };
 
   const currentDate = new Date().toISOString();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div
@@ -410,15 +411,21 @@ const TryoutTahfizhExam: React.FC = () => {
         palette={palette}
         gregorianDate={currentDate}
         title="Tryout Ujian Tahfiz"
+        onMenuClick={() => setSidebarOpen(true)}
       />
 
       {/* Content + Sidebar */}
       <main className="mx-auto max-w-7xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-6">
           {/* Sidebar kiri */}
-          <div className="lg:w-64 mb-6 lg:mb-0">
-            <ParentSidebar palette={palette} />
-          </div>
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
+            <ParentSidebar
+              desktopOnly={false}
+              mode="mobile"
+              open={sidebarOpen}
+              onCloseMobile={() => setSidebarOpen(false)}
+            />
+          </aside>
 
           {/* Konten utama */}
           <div className="flex-1 space-y-6">

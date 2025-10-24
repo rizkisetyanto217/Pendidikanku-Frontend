@@ -330,6 +330,7 @@ const SchoolSubject: React.FC = () => {
     if (!confirm("Yakin hapus mapel ini?")) return;
     setRows((prev) => prev.filter((x) => x.id !== id));
   };
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div className="min-h-screen w-full" style={{ background: palette.white2 }}>
@@ -338,14 +339,19 @@ const SchoolSubject: React.FC = () => {
         title="Mata Pelajaran"
         gregorianDate={gregorianISO}
         hijriDate={hijriLong(gregorianISO)}
-
+        onMenuClick={() => setSidebarOpen(true)}
         showBack
       />
 
       <main className="w-full px-4 md:px-6 py-4 md:py-8">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
           <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-            <ParentSidebar palette={palette} />
+            <ParentSidebar
+              desktopOnly={false}
+              mode="mobile"
+              open={sidebarOpen}
+              onCloseMobile={() => setSidebarOpen(false)}
+            />
           </aside>
 
           <section className="flex-1 flex flex-col space-y-6">

@@ -1,5 +1,5 @@
 // src/pages/sekolahislamku/pages/academic/DetailCertificate.tsx
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "@/lib/axios";
@@ -166,6 +166,7 @@ const DetailCertificate: React.FC = () => {
   // ====== Render guards: jangan timpa data dengan layar error kalau refetch gagal ======
   const showHardError = certQ.isError && !detail; // benar2 tidak ada data
   const showSoftError = certQ.isError && !!detail; // ada data, tapi refresh gagal
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div
@@ -177,14 +178,19 @@ const DetailCertificate: React.FC = () => {
         title="Detail Sertifikat"
         gregorianDate={gIso}
         hijriDate={hijriLong(gIso)}
-
+        onMenuClick={() => setSidebarOpen(true)}
       />
 
       <main className="mx-auto Replace px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Sidebar */}
-          <aside className="lg:col-span-3">
-            <ParentSidebar palette={palette} />
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
+            <ParentSidebar
+              desktopOnly={false}
+              mode="mobile"
+              open={sidebarOpen}
+              onCloseMobile={() => setSidebarOpen(false)}
+            />
           </aside>
 
           {/* Main */}

@@ -1,5 +1,5 @@
 // src/pages/sekolahislamku/school/SchoolMenuGrids.tsx
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
@@ -64,7 +64,7 @@ export default function SchoolMenuGrids() {
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
 
   const topbarISO = toLocalNoonISO(new Date());
-
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const items: MenuItem[] = useMemo(
     () => [
       {
@@ -137,16 +137,20 @@ export default function SchoolMenuGrids() {
       <ParentTopBar
         palette={palette}
         title="Menu Sekolah"
-  
         gregorianDate={topbarISO}
-
+        onMenuClick={() => setSidebarOpen(true)}
       />
 
       <main className="w-full px-4 md:px-6 py-4 md:py-8">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Sidebar */}
           <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-            <ParentSidebar palette={palette} />
+            <ParentSidebar
+              desktopOnly={false}
+              mode="mobile"
+              open={sidebarOpen}
+              onCloseMobile={() => setSidebarOpen(false)}
+            />
           </aside>
 
           {/* Main */}
@@ -176,7 +180,7 @@ function MenuTile({ item, palette }: { item: MenuItem; palette: Palette }) {
       style={{ borderColor: palette.silver1, background: palette.white1 }}
     >
       <span
-        className="h-12 w-12 md:h-14 md:w-14 grid place-items-center rounded-xl"    
+        className="h-12 w-12 md:h-14 md:w-14 grid place-items-center rounded-xl"
         style={{ color: palette.primary, background: palette.primary2 }}
         aria-hidden
       >

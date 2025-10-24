@@ -133,11 +133,24 @@ export default function SchoolAttendance() {
   const toggleOne = (id: string, checked: boolean) =>
     setSelected((p) => ({ ...p, [id]: checked }));
 
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
     <>
-      <ParentTopBar palette={palette} title="Kehadiran" />
+      <ParentTopBar
+        palette={palette}
+        title="Kehadiran"
+        onMenuClick={() => setSidebarOpen(true)}
+      />
       <div className="lg:flex lg:items-start lg:gap-4 lg:p-4 lg:pt-6">
-        <ParentSidebar palette={palette} className="hidden lg:block" />
+        <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
+          <ParentSidebar
+            desktopOnly={false}
+            mode="mobile"
+            open={sidebarOpen}
+            onCloseMobile={() => setSidebarOpen(false)}
+          />
+        </aside>
 
         <main className="flex-1 mx-auto max-w-5xl py-6 space-y-5 px-4 lg:px-0">
           {/* Header */}

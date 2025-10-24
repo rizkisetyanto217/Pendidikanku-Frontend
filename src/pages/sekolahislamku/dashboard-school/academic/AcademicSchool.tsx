@@ -135,8 +135,8 @@ const AcademicSchool: React.FC<SchoolAcademicProps> = ({
   const navigate = useNavigate();
   // State kecil untuk filter rooms
   const [filter, setFilter] = useState<"all" | "physical" | "virtual">("all");
- const isFromMenuUtama = location.pathname.includes("/menu-utama/");
- 
+  const isFromMenuUtama = location.pathname.includes("/menu-utama/");
+
   const rooms = useMemo(() => {
     if (filter === "physical")
       return DUMMY_ROOMS.filter((r) => !r.class_rooms_is_virtual);
@@ -157,6 +157,7 @@ const AcademicSchool: React.FC<SchoolAcademicProps> = ({
   };
 
   const topbarISO = toLocalNoonISO(new Date());
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div
@@ -167,7 +168,7 @@ const AcademicSchool: React.FC<SchoolAcademicProps> = ({
         palette={palette}
         title="Akademik"
         gregorianDate={topbarISO}
-
+        onMenuClick={() => setSidebarOpen(true)}
         showBack={isFromMenuUtama}
       />
 
@@ -175,7 +176,12 @@ const AcademicSchool: React.FC<SchoolAcademicProps> = ({
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Sidebar */}
           <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-            <ParentSidebar palette={palette} />
+            <ParentSidebar
+              desktopOnly={false}
+              mode="mobile"
+              open={sidebarOpen}
+              onCloseMobile={() => setSidebarOpen(false)}
+            />
           </aside>
 
           {/* Main */}

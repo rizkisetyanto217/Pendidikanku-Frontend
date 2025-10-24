@@ -505,6 +505,7 @@ export default function SchoolDetailStudent() {
     );
     downloadCsv(`absensi_${student?.name ?? "siswa"}_${semester}.csv`, csv);
   };
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div
@@ -516,12 +517,19 @@ export default function SchoolDetailStudent() {
         palette={palette}
         title="Detail Siswa"
         gregorianDate={new Date().toISOString()}
-
+        onMenuClick={() => setSidebarOpen(true)}
       />
 
       <main className="mx-auto Replace px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
-          <ParentSidebar palette={palette} />
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
+            <ParentSidebar
+              desktopOnly={false}
+              mode="mobile"
+              open={sidebarOpen}
+              onCloseMobile={() => setSidebarOpen(false)}
+            />
+          </aside>
 
           <div className="flex-1 space-y-6 min-w-0 lg:p-4">
             {/* Header */}
@@ -767,10 +775,7 @@ export default function SchoolDetailStudent() {
                   </tbody>
                 </table>
 
-                <div
-                  className="pt-3 text-sm"
-                  style={{ color: palette.black2 }}
-                >
+                <div className="pt-3 text-sm" style={{ color: palette.black2 }}>
                   Menampilkan {grades.length} baris nilai
                 </div>
               </div>

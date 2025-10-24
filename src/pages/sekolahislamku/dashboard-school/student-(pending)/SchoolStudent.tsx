@@ -298,6 +298,7 @@ const StudentsPage: React.FC<SchoolStudentProps> = () => {
     setStudents((prev) => prev.map((x) => (x.id === s.id ? { ...s } : x)));
   };
 
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   return (
     <div
       className="min-h-screen w-full"
@@ -335,6 +336,7 @@ const StudentsPage: React.FC<SchoolStudentProps> = () => {
         palette={palette}
         title="Siswa"
         hijriDate={hijriWithWeekday(new Date().toISOString())}
+        onMenuClick={() => setSidebarOpen(true)}
         showBack={true}
       />
 
@@ -343,7 +345,12 @@ const StudentsPage: React.FC<SchoolStudentProps> = () => {
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
           {/* Sidebar */}
           <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-            <ParentSidebar palette={palette} />
+            <ParentSidebar
+              desktopOnly={false}
+              mode="mobile"
+              open={sidebarOpen}
+              onCloseMobile={() => setSidebarOpen(false)}
+            />
           </aside>
 
           {/* Content */}

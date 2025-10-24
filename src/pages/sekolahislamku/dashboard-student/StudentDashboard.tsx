@@ -17,6 +17,7 @@ import {
 } from "@/pages/sekolahislamku/dashboard-school/types/TodaySchedule";
 import { BookOpen, GraduationCap, UserCog, Users } from "lucide-react";
 import { SectionCard } from "@/pages/sekolahislamku/components/ui/Primitives";
+import { useState } from "react";
 
 /* ---------- Types ---------- */
 interface ChildDetail {
@@ -223,6 +224,8 @@ export default function StudentDashboard() {
       )
     : mockTodaySchedule;
 
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
     <div
       className="min-h-screen w-full"
@@ -233,6 +236,7 @@ export default function StudentDashboard() {
         title={data?.parentName}
         gregorianDate={gregorianISO}
         hijriDate={hijriLong(gregorianISO)}
+        onMenuClick={() => setSidebarOpen(true)}
         //
       />
 
@@ -240,7 +244,12 @@ export default function StudentDashboard() {
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Sidebar */}
           <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-            <ParentSidebar palette={palette} />
+            <ParentSidebar
+              desktopOnly={false}
+              mode="mobile"
+              open={sidebarOpen}
+              onCloseMobile={() => setSidebarOpen(false)}
+            />
           </aside>
 
           <div className="flex-1 flex flex-col space-y-6 min-w-0">

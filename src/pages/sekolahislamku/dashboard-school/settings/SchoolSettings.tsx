@@ -91,6 +91,7 @@ const AttendanceDetailPage: React.FC = () => {
 
   const set = (k: keyof AttendanceDetail, v: any) =>
     setForm((s) => ({ ...(s || (q.data as any)), [k]: v }));
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div
@@ -102,7 +103,7 @@ const AttendanceDetailPage: React.FC = () => {
         title="Detail Kehadiran Santri"
         gregorianDate={new Date().toISOString()}
         hijriDate={new Date().toLocaleDateString("id-ID-u-ca-islamic-umalqura")}
-
+        onMenuClick={() => setSidebarOpen(true)}
         showBack
       />
 
@@ -110,7 +111,12 @@ const AttendanceDetailPage: React.FC = () => {
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Sidebar */}
           <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-            <ParentSidebar palette={palette} />
+            <ParentSidebar
+              desktopOnly={false}
+              mode="mobile"
+              open={sidebarOpen}
+              onCloseMobile={() => setSidebarOpen(false)}
+            />
           </aside>
 
           {/* Content */}

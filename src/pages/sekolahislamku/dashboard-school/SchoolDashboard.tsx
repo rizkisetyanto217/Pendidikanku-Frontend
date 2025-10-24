@@ -322,7 +322,7 @@ function useLembagaStats() {
   });
 }
 function useTodaySessions() {
-  const today = yyyyMmDdLocal();
+  const today = useMemo(() => yyyyMmDdLocal(), []); // <— ini bikin stabil
   return useQuery<SessionsItem[]>({
     queryKey: QK.TODAY_SESSIONS(today),
     queryFn: async () => {
@@ -337,6 +337,7 @@ function useTodaySessions() {
     },
   });
 }
+
 
 /* ============ Shared UI ============ */
 function Flash({

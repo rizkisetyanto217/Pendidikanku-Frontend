@@ -242,6 +242,7 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
 
   const total = booksQ.data?.pagination?.total ?? 0;
   const showing = items.length;
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const onPage = (dir: -1 | 1) => {
     const nextOffset = Math.max(offset + dir * limit, 0);
@@ -286,7 +287,7 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
             {b.books_author || "-"}
           </div>
           {!!b.books_desc && (
-            <div className="text-sm opacity-90 mt-1 line-clamp-2" >
+            <div className="text-sm opacity-90 mt-1 line-clamp-2">
               {b.books_desc}
             </div>
           )}
@@ -313,14 +314,7 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
         </div>
       );
 
-      return [
-        String(offset + idx + 1),
-        cover,
-        titleBlock,
-        "-",
-     
-        actions,
-      ];
+      return [String(offset + idx + 1), cover, titleBlock, "-", actions];
     });
   }, [items, palette, offset, deleteBook.isPending]);
 
@@ -421,7 +415,7 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
         title="Buku Pelajaran"
         gregorianDate={new Date().toISOString()}
         hijriDate={hijriWithWeekday(new Date().toISOString())}
-
+        onMenuClick={() => setSidebarOpen(true)}
         showBack={isFromMenuUtama}
       />
 
@@ -429,7 +423,12 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Sidebar */}
           <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-            <ParentSidebar palette={palette} />
+            <ParentSidebar
+              desktopOnly={false}
+              mode="mobile"
+              open={sidebarOpen}
+              onCloseMobile={() => setSidebarOpen(false)}
+            />
           </aside>
 
           {/* Main content */}
@@ -511,7 +510,7 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
                   "Cover",
                   "Judul & Penulis",
                   "Dipakai di",
-             
+
                   "Aksi",
                 ]}
                 rows={rows}

@@ -300,7 +300,7 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
   const [openTambah, setOpenTambah] = useState(false);
   const [openTambahLevel, setOpenTambahLevel] = useState(false);
   const { slug = "" } = useParams<{ slug: string }>();
- const isFromMenuUtama = location.pathname.includes("/menu-utama/");
+  const isFromMenuUtama = location.pathname.includes("/menu-utama/");
   const q = (sp.get("q") ?? "").trim();
   const status = (sp.get("status") ?? "all") as ClassStatus | "all";
   const shift = (sp.get("shift") ?? "all") as "Pagi" | "Sore" | "all";
@@ -423,6 +423,7 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
 
     setOpenTambah(false);
   };
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div
@@ -433,7 +434,7 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
         palette={palette}
         title="Kelas"
         gregorianDate={new Date().toISOString()}
-
+        onMenuClick={() => setSidebarOpen(true)}
         hijriDate={hijriWithWeekday(new Date().toISOString())}
         showBack={isFromMenuUtama}
       />
@@ -442,7 +443,12 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Sidebar */}
           <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-            <ParentSidebar palette={palette} />
+            <ParentSidebar
+              desktopOnly={false}
+              mode="mobile"
+              open={sidebarOpen}
+              onCloseMobile={() => setSidebarOpen(false)}
+            />
           </aside>
 
           {/* Main Content */}

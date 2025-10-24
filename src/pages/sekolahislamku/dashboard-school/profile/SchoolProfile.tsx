@@ -169,14 +169,14 @@ const SchoolProfile: React.FC<SchoolProfileProps> = ({
   });
 
   const [editOpen, setEditOpen] = useState(false);
- const isFromMenuUtama = location.pathname.includes("/menu-utama/");
+  const isFromMenuUtama = location.pathname.includes("/menu-utama/");
   const nowISO = toLocalNoonISO(new Date());
   const foundedYear = useMemo(() => {
     if (!data?.foundedAt) return "-";
     const d = new Date(data.foundedAt);
     return Number.isNaN(d.getTime()) ? "-" : d.getFullYear();
   }, [data?.foundedAt]);
-
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   return (
     <div
       className="min-h-screen w-full"
@@ -186,15 +186,20 @@ const SchoolProfile: React.FC<SchoolProfileProps> = ({
         palette={palette}
         title="Profil Sekolah"
         gregorianDate={nowISO}
-
         showBack={isFromMenuUtama}
+        onMenuClick={() => setSidebarOpen(true)}
       />
 
       <main className="w-full px-4 md:px-6 md:py-8">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Sidebar - hidden on mobile, show on tablet+ */}
           <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-            <ParentSidebar palette={palette} />
+            <ParentSidebar
+              desktopOnly={false}
+              mode="mobile"
+              open={sidebarOpen}
+              onCloseMobile={() => setSidebarOpen(false)}
+            />
           </aside>
 
           {/* Main Content */}
@@ -253,7 +258,7 @@ const SchoolProfile: React.FC<SchoolProfileProps> = ({
                           Akreditasi {data.accreditation}
                         </Badge>
                       )}
-                      <Badge palette={palette} variant="outline"  >
+                      <Badge palette={palette} variant="outline">
                         Berdiri {foundedYear}
                       </Badge>
                     </div>

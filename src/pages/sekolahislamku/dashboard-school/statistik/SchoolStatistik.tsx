@@ -1,5 +1,5 @@
 // src/pages/sekolahislamku/pages/academic/SchoolStatistik.tsx
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 
@@ -171,6 +171,8 @@ const SchoolStatistik: React.FC = () => {
     return arr.map((v, i) => ({ label: labels[i], val: v, h: (v / max) * 72 })); // max 72px
   }, [s]);
 
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
     <div
       className="min-h-screen w-full"
@@ -181,7 +183,7 @@ const SchoolStatistik: React.FC = () => {
         title="Statistik Sekolah"
         gregorianDate={gregorianISO}
         hijriDate={hijriLong(gregorianISO)}
-
+        onMenuClick={() => setSidebarOpen(true)}
         showBack
       />
 
@@ -189,7 +191,12 @@ const SchoolStatistik: React.FC = () => {
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Sidebar */}
           <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-            <ParentSidebar palette={palette} />
+            <ParentSidebar
+              desktopOnly={false}
+              mode="mobile"
+              open={sidebarOpen}
+              onCloseMobile={() => setSidebarOpen(false)}
+            />
           </aside>
 
           {/* Main */}

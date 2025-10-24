@@ -469,6 +469,7 @@ const TeachersPage: React.FC<SchoolTeacherProps> = ({ showBack = false }) => {
     }
     return list;
   }, [teachersAll, q]);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div
@@ -496,6 +497,7 @@ const TeachersPage: React.FC<SchoolTeacherProps> = ({ showBack = false }) => {
         title="Guru"
         hijriDate={hijriWithWeekday(new Date().toISOString())}
         showBack={isFromMenuUtama}
+        onMenuClick={() => setSidebarOpen(true)}
       />
 
       {/* Container */}
@@ -503,7 +505,12 @@ const TeachersPage: React.FC<SchoolTeacherProps> = ({ showBack = false }) => {
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Sidebar */}
           <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-            <ParentSidebar palette={palette} />
+            <ParentSidebar
+              desktopOnly={false}
+              mode="mobile"
+              open={sidebarOpen}
+              onCloseMobile={() => setSidebarOpen(false)}
+            />
           </aside>
 
           {/* Main Content */}

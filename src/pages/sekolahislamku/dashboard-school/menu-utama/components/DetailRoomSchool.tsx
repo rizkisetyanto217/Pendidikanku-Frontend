@@ -1,5 +1,5 @@
 // src/pages/sekolahislamku/dashboard-school/rooms/DetailRoomSchool.tsx
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
@@ -122,7 +122,7 @@ export default function DetailRoomSchool() {
       </div>
     );
   }
-
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   // Error or not found
   if (!room) {
     return (
@@ -135,6 +135,7 @@ export default function DetailRoomSchool() {
           title="Detail Ruangan"
           showBack
           gregorianDate={topbarGregorianISO}
+          onMenuClick={() => setSidebarOpen(true)}
           hijriDate={new Date(topbarGregorianISO).toLocaleDateString(
             "id-ID-u-ca-islamic-umalqura",
             { weekday: "long", day: "2-digit", month: "long", year: "numeric" }
@@ -153,7 +154,12 @@ export default function DetailRoomSchool() {
         <main className="px-4 md:px-6 md:py-8">
           <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
             <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-              <ParentSidebar palette={palette} />
+              <ParentSidebar
+                desktopOnly={false}
+                mode="mobile"
+                open={sidebarOpen}
+                onCloseMobile={() => setSidebarOpen(false)}
+              />
             </aside>
             <section className="flex-1">
               <SectionCard palette={palette} className="p-8 text-center">
@@ -205,7 +211,12 @@ export default function DetailRoomSchool() {
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
           {/* Sidebar */}
           <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-            <ParentSidebar palette={palette} />
+            <ParentSidebar
+              desktopOnly={false}
+              mode="mobile"
+              open={sidebarOpen}
+              onCloseMobile={() => setSidebarOpen(false)}
+            />
           </aside>
 
           {/* Content */}
@@ -427,7 +438,6 @@ export default function DetailRoomSchool() {
                           background: palette.white1,
                         }}
                       >
-                      
                         <div className="font-medium text-sm mb-1">
                           {s.label}
                         </div>

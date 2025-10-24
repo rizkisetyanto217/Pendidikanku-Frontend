@@ -71,12 +71,9 @@ import MasjidkuFinancial from "@/pages/masjidku/financial/MasjidkuFinacial";
 import MasjidkuListMasjid from "@/pages/masjidku/masjid/MasjidkuListMasjid";
 import MasjidkuProfil from "@/pages/masjidku/profil/MasjidkuProfil";
 import MasjidkuProgram from "@/pages/masjidku/program/MasjidkuProgram";
-import StudentDashboard from "@/pages/sekolahislamku/dashboard-student/StudentDashboard";
-import TeacherDashboard from "@/pages/sekolahislamku/dashboard-teacher/TeacherDashboard";
-import SchoolDashboard from "@/pages/sekolahislamku/dashboard-school/SchoolDashboard";
+
 
 // School Routes
-
 import { financeRoutes } from "@/pages/masjidku/financial/routes";
 import MasjidkuWebHome from "@/pages/masjidku/website/MasjidkuWebHome";
 import RegisterAdminMasjid from "@/pages/dashboard/auth/register/RegisterAdminMasjid";

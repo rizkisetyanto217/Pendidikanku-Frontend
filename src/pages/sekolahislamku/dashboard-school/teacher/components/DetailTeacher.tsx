@@ -1,5 +1,5 @@
 /* ================= Imports ================= */
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
@@ -108,6 +108,8 @@ const DetailTeacher: React.FC = () => {
     teachersFromApi.length > 0 ? teachersFromApi : DUMMY_TEACHERS;
   const teacher = teachers.find((t) => t.id === id);
 
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
     <div
       className="min-h-screen w-full"
@@ -117,6 +119,7 @@ const DetailTeacher: React.FC = () => {
         palette={palette}
         title="Detail Guru"
         hijriDate={hijriWithWeekday(new Date().toISOString())}
+        onMenuClick={() => setSidebarOpen(true)}
         showBack
       />
 
@@ -124,7 +127,12 @@ const DetailTeacher: React.FC = () => {
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
           {/* Sidebar */}
           <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0 hidden lg:block">
-            <ParentSidebar palette={palette} />
+            <ParentSidebar
+              desktopOnly={false}
+              mode="mobile"
+              open={sidebarOpen}
+              onCloseMobile={() => setSidebarOpen(false)}
+            />
           </aside>
 
           {/* Content */}

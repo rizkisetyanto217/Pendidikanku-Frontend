@@ -7,7 +7,7 @@ import {
 } from "react-router-dom";
 import { Menu, ArrowLeft } from "lucide-react";
 import PublicUserDropdown from "@/components/common/public/UserDropDown";
-import type { Palette } from "@/pages/sekolahislamku/components/ui/Primitives";
+import { type Palette } from "@/pages/sekolahislamku/components/ui/Primitives";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import { NAVS, type NavItem } from "./navsConfig";
 import api from "@/lib/axios";
@@ -22,6 +22,7 @@ interface ParentTopBarProps {
   gregorianDate?: string;
   showBack?: boolean;
   onBackClick?: () => void;
+  onMenuClick?: () => void; // 👈 tambahkan agar bisa buka sidebar mobile
   dateFmt?: (iso: string) => string;
 }
 
@@ -51,28 +52,27 @@ export default function ParentTopBar({
   title,
   showBack = false,
   onBackClick,
+  onMenuClick,
   dateFmt,
 }: ParentTopBarProps) {
   const { isDark } = useHtmlDarkMode();
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const params = useParams<{ id?: string }>();
-  const match = useMatch("/:id/*"); // ✅ sudah benar (tanpa /masjid/)
+  const match = useMatch("/:id/*");
   const id = params.id ?? match?.params.id ?? "";
 
-  /* ---------- STATE ---------- */
   const [masjidName, setMasjidName] = useState(
     getLocalMasjid().masjid_name || "SekolahIslamKu"
   );
   const [masjidIcon, setMasjidIcon] = useState(
     getLocalMasjid().masjid_icon_url || "/image/Gambar-Masjid.jpeg"
   );
-
   const isFetching = useRef(false);
   const lastFetchedId = useRef<string>("");
 
   /* ======================================================
-     FETCH MASJID CONTEXT (sekali saja per id)
+     FETCH MASJID CONTEXT
   ====================================================== */
   useEffect(() => {
     if (!id || isFetching.current || lastFetchedId.current === id) return;
@@ -83,29 +83,21 @@ export default function ParentTopBar({
         const res = await api.get("/auth/me/simple-context");
         const userData = res.data?.data;
         const memberships = userData?.memberships ?? [];
-
         const current =
           memberships.find((m: any) => m.masjid_id === id) || memberships[0];
         if (!current) return;
 
         const newMasjid = {
           masjid_id: current.masjid_id,
-          masjid_name: current.masjid_name || current.name || "Tanpa Nama",
+          masjid_name: current.masjid_name || "Tanpa Nama",
           masjid_icon_url:
-            current.masjid_icon_url ||
-            current.icon_url ||
-            "/image/Gambar-Masjid.jpeg",
+            current.masjid_icon_url || "/image/Gambar-Masjid.jpeg",
         };
 
         localStorage.setItem("active_masjid", JSON.stringify(newMasjid));
-        window.dispatchEvent(
-          new CustomEvent("activeMasjidUpdated", { detail: newMasjid })
-        );
-
         setMasjidName(newMasjid.masjid_name);
         setMasjidIcon(newMasjid.masjid_icon_url);
 
-        // Tentukan role & redirect jika di root
         const role = (
           localStorage.getItem("active_role") || "user"
         ).toLowerCase();
@@ -159,24 +151,14 @@ export default function ParentTopBar({
   }, [pathname, navs, title]);
 
   /* ======================================================
-     HIJRI DATE (fix)
+     HIJRI DATE
   ====================================================== */
   const [hijriLabel, setHijriLabel] = useState<string>("");
 
   useEffect(() => {
-    if (hijriDate) {
-      setHijriLabel(hijriDate);
-      return;
-    }
-
-    if (gregorianDate && dateFmt) {
-      setHijriLabel(dateFmt(gregorianDate));
-      return;
-    }
-
-    // fallback ke defaultFormatHijri()
-    const today = new Date();
-    setHijriLabel(defaultFormatHijri(today));
+    if (hijriDate) return setHijriLabel(hijriDate);
+    if (gregorianDate && dateFmt) return setHijriLabel(dateFmt(gregorianDate));
+    setHijriLabel(defaultFormatHijri(new Date()));
   }, [hijriDate, gregorianDate, dateFmt]);
 
   const handleBack = () => (onBackClick ? onBackClick() : navigate(-1));
@@ -187,11 +169,11 @@ export default function ParentTopBar({
   return (
     <div
       className="sticky top-0 z-40 backdrop-blur border-b transition-all duration-200"
-      style={{ borderColor: palette.silver1 }}
+      style={{ borderColor: palette.silver1, background: palette.white1 }}
     >
       <div className="mx-auto px-4 py-3 flex items-center justify-between">
         {/* === DESKTOP === */}
-        <div className="hidden md:flex items-center gap-3 transition-all duration-300">
+        <div className="hidden md:flex items-center gap-3">
           {showBack && (
             <button
               onClick={handleBack}
@@ -204,12 +186,12 @@ export default function ParentTopBar({
           <img
             src={masjidIcon}
             alt="Logo Masjid"
-            className="w-12 h-12 rounded-full object-cover border transition-all duration-300"
+            className="w-12 h-12 rounded-full object-cover border"
             style={{ borderColor: palette.primary }}
             onError={(e) => (e.currentTarget.src = "/image/Gambar-Masjid.jpeg")}
           />
           <span
-            className="text-base font-semibold transition-opacity duration-300"
+            className="text-base font-semibold"
             style={{ color: palette.primary }}
           >
             {masjidName}
@@ -243,7 +225,13 @@ export default function ParentTopBar({
               <ArrowLeft size={18} />
             </button>
           ) : (
-            <Menu size={20} />
+            <button
+              onClick={onMenuClick}
+              className="h-9 w-9 grid place-items-center rounded-xl border"
+              style={{ borderColor: palette.silver1 }}
+            >
+              <Menu size={18} />
+            </button>
           )}
           <span className="font-semibold text-base truncate flex-1 text-center">
             {activeLabel}

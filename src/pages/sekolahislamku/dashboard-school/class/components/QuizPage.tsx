@@ -139,6 +139,8 @@ const QuizPage: React.FC = () => {
     );
   }
 
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
     <div
       className="h-full w-full"
@@ -148,7 +150,6 @@ const QuizPage: React.FC = () => {
         palette={palette}
         title={`Kelola Quiz`}
         gregorianDate={new Date().toISOString()}
-
         showBack
       />
 
@@ -156,7 +157,12 @@ const QuizPage: React.FC = () => {
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
           {/* Sidebar */}
           <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-            <ParentSidebar palette={palette} />
+            <ParentSidebar
+              desktopOnly={false}
+              mode="mobile"
+              open={sidebarOpen}
+              onCloseMobile={() => setSidebarOpen(false)}
+            />
           </aside>
 
           {/* Content */}
@@ -263,7 +269,6 @@ const QuizPage: React.FC = () => {
                       <div className="flex gap-2">
                         <Btn
                           palette={palette}
-                     
                           variant="secondary"
                           onClick={() => handleEditQuestion(q.id)}
                         >
@@ -271,7 +276,6 @@ const QuizPage: React.FC = () => {
                         </Btn>
                         <Btn
                           palette={palette}
-                        
                           variant="destructive"
                           onClick={() => handleDeleteQuestion(q.id)}
                         >

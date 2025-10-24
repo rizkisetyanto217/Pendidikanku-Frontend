@@ -60,7 +60,7 @@ export default function DetailSchedule() {
     setItem({ title: p.title, time: p.time, room: p.room });
     setEditOpen(false);
   };
-
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   return (
     <div
       className="min-h-screen w-full"
@@ -70,6 +70,7 @@ export default function DetailSchedule() {
         palette={palette}
         title="Detail Jadwal"
         gregorianDate={new Date().toISOString()}
+        onMenuClick={() => setSidebarOpen(true)}
         showBack
       />
 
@@ -88,7 +89,12 @@ export default function DetailSchedule() {
       <main className="px-4 md:px-6  md:py-8">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
           <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-            <ParentSidebar palette={palette} />
+            <ParentSidebar
+              desktopOnly={false}
+              mode="mobile"
+              open={sidebarOpen}
+              onCloseMobile={() => setSidebarOpen(false)}
+            />
           </aside>
 
           <div className="flex-1 min-w-0 space-y-6">

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   EyeIcon,
@@ -12,13 +12,11 @@ import {
 } from "lucide-react";
 
 import AuthLayout from "@/layout/AuthLayout";
-import api from "@/lib/axios";
-import { setTokens } from "@/lib/axios";
+import api, { setTokens } from "@/lib/axios";
 import LegalModal from "@/pages/dashboard/auth/components/LegalPrivacyModal";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 
-/* =======================
-   Types
-======================= */
 type MasjidRole = "dkm" | "admin" | "teacher" | "student" | "user";
 type MasjidItem = {
   masjid_id: string;
@@ -27,9 +25,6 @@ type MasjidItem = {
   roles: MasjidRole[];
 };
 
-/* =======================
-   Modal Pilih Masjid & Role
-======================= */
 function ModalSelectRoleMasjid({
   open,
   onClose,
@@ -39,6 +34,8 @@ function ModalSelectRoleMasjid({
   onClose: () => void;
   onSelect: (masjidId: string, role: MasjidRole) => void;
 }) {
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette = pickTheme(themeName as ThemeName, isDark);
   const [masjids, setMasjids] = useState<MasjidItem[]>([]);
   const [selected, setSelected] = useState<{
     masjid_id: string;
@@ -46,7 +43,7 @@ function ModalSelectRoleMasjid({
   } | null>(null);
   const [loading, setLoading] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!open) return;
     setLoading(true);
     api
@@ -67,43 +64,78 @@ function ModalSelectRoleMasjid({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl w-full max-w-md p-8 shadow-2xl animate-in zoom-in-95 duration-200">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm animate-in fade-in duration-200"
+      style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+    >
+      <div
+        className="rounded-3xl w-full max-w-md p-8 shadow-2xl animate-in zoom-in-95 duration-200"
+        style={{ background: palette.white1, color: palette.black1 }}
+      >
         <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+          <div
+            className="w-10 h-10 rounded-full flex items-center justify-center"
+            style={{
+              background: `linear-gradient(to bottom right, ${palette.primary}, ${palette.quaternary})`,
+            }}
+          >
             <Building2 className="w-5 h-5 text-white" />
           </div>
-          <h2 className="text-xl font-bold text-gray-900">
+          <h2 className="text-xl font-bold" style={{ color: palette.black1 }}>
             Pilih Masjid & Role
           </h2>
         </div>
-        <p className="text-sm text-gray-600 mb-6">
+        <p className="text-sm mb-6" style={{ color: palette.silver2 }}>
           Pilih masjid dan peran yang ingin kamu gunakan untuk melanjutkan.
         </p>
 
         {loading ? (
           <div className="text-center py-12">
-            <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-3"></div>
-            <p className="text-gray-500 text-sm">Memuat data...</p>
+            <div
+              className="w-10 h-10 border-4 rounded-full animate-spin mx-auto mb-3"
+              style={{
+                borderColor: palette.primary2,
+                borderTopColor: palette.primary,
+              }}
+            ></div>
+            <p className="text-sm" style={{ color: palette.silver2 }}>
+              Memuat data...
+            </p>
           </div>
         ) : (
           <div className="max-h-80 overflow-y-auto space-y-3 pr-2">
             {masjids.map((m) => (
               <div
                 key={m.masjid_id}
-                className={`border-2 rounded-2xl p-4 transition-all duration-200 ${
-                  selected?.masjid_id === m.masjid_id
-                    ? "border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100/50 shadow-md"
-                    : "border-gray-200 hover:border-gray-300 hover:shadow-sm"
-                }`}
+                onClick={() =>
+                  setSelected({
+                    masjid_id: m.masjid_id,
+                    role: selected?.role || m.roles[0],
+                  })
+                }
+                className="border-2 rounded-2xl p-4 transition-all duration-200 cursor-pointer"
+                style={{
+                  borderColor:
+                    selected?.masjid_id === m.masjid_id
+                      ? palette.primary
+                      : palette.silver1,
+                  background:
+                    selected?.masjid_id === m.masjid_id
+                      ? palette.primary2
+                      : palette.white2,
+                }}
               >
                 <div className="flex items-center gap-3 mb-3">
                   <img
                     src={m.masjid_icon_url || "/image/Gambar-Masjid.jpeg"}
                     alt={m.masjid_name}
-                    className="w-12 h-12 rounded-xl object-cover border-2 border-white shadow-sm"
+                    className="w-12 h-12 rounded-xl object-cover border-2 shadow-sm"
+                    style={{ borderColor: palette.white3 }}
                   />
-                  <span className="font-semibold text-gray-800 text-base">
+                  <span
+                    className="font-semibold text-base"
+                    style={{ color: palette.black1 }}
+                  >
                     {m.masjid_name}
                   </span>
                 </div>
@@ -114,12 +146,24 @@ function ModalSelectRoleMasjid({
                       onClick={() =>
                         setSelected({ masjid_id: m.masjid_id, role: r })
                       }
-                      className={`px-4 py-1.5 text-xs font-medium rounded-lg border-2 transition-all duration-200 ${
-                        selected?.masjid_id === m.masjid_id &&
-                        selected?.role === r
-                          ? "bg-blue-600 text-white border-blue-600 shadow-sm"
-                          : "border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50"
-                      }`}
+                      className="px-4 py-1.5 text-xs font-medium rounded-lg border-2 transition-all duration-200"
+                      style={{
+                        background:
+                          selected?.masjid_id === m.masjid_id &&
+                          selected?.role === r
+                            ? palette.primary
+                            : "transparent",
+                        color:
+                          selected?.masjid_id === m.masjid_id &&
+                          selected?.role === r
+                            ? palette.white1
+                            : palette.black1,
+                        borderColor:
+                          selected?.masjid_id === m.masjid_id &&
+                          selected?.role === r
+                            ? palette.primary
+                            : palette.silver1,
+                      }}
                     >
                       {r.toUpperCase()}
                     </button>
@@ -133,7 +177,12 @@ function ModalSelectRoleMasjid({
         <div className="mt-6 flex gap-3">
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
+            className="flex-1 px-4 py-2.5 text-sm font-medium rounded-xl transition-colors"
+            style={{
+              background: palette.white2,
+              color: palette.black1,
+              border: `1px solid ${palette.silver1}`,
+            }}
           >
             Batal
           </button>
@@ -142,7 +191,12 @@ function ModalSelectRoleMasjid({
             onClick={() =>
               selected && onSelect(selected.masjid_id, selected.role)
             }
-            className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl px-4 py-2.5 text-sm font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg shadow-blue-500/30"
+            className="flex-1 rounded-xl px-4 py-2.5 text-sm font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            style={{
+              background: `linear-gradient(to right, ${palette.primary}, ${palette.quaternary})`,
+              color: palette.white1,
+              boxShadow: `0 4px 10px ${palette.primary2}`,
+            }}
           >
             <CheckCircle2 className="w-4 h-4" /> Pilih & Lanjutkan
           </button>
@@ -152,9 +206,6 @@ function ModalSelectRoleMasjid({
   );
 }
 
-/* =======================
-   Modal Pilih Tujuan
-======================= */
 function ModalPilihTujuan({
   open,
   onClose,
@@ -164,60 +215,96 @@ function ModalPilihTujuan({
   onClose: () => void;
   onPilih: (tujuan: "dkm" | "teacher" | "student") => void;
 }) {
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette = pickTheme(themeName as ThemeName, isDark);
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl p-8 w-full max-w-md text-center space-y-6 shadow-2xl animate-in zoom-in-95 duration-200">
-        <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto">
+    <div
+      className="fixed inset-0 flex items-center justify-center backdrop-blur-sm z-50 animate-in fade-in duration-200"
+      style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+    >
+      <div
+        className="rounded-3xl p-8 w-full max-w-md text-center space-y-6 shadow-2xl animate-in zoom-in-95 duration-200"
+        style={{ background: palette.white1, color: palette.black1 }}
+      >
+        <div
+          className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto"
+          style={{
+            background: `linear-gradient(to bottom right, ${palette.primary}, ${palette.quaternary})`,
+          }}
+        >
           <Sparkles className="w-8 h-8 text-white" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Apa peran Anda?
-          </h2>
-          <p className="text-sm text-gray-600">
+          <h2 className="text-2xl font-bold mb-2">Apa peran Anda?</h2>
+          <p className="text-sm" style={{ color: palette.silver2 }}>
             Pilih tujuan Anda bergabung di SekolahIslamKu
           </p>
         </div>
         <div className="space-y-3">
           <button
             onClick={() => onPilih("dkm")}
-            className="w-full py-4 border-2 border-gray-200 rounded-2xl flex items-center justify-center gap-3 hover:border-blue-500 hover:bg-blue-50 transition-all group"
+            className="w-full py-4 border-2 rounded-2xl flex items-center justify-center gap-3 transition-all group"
+            style={{
+              borderColor: palette.silver1,
+              background: palette.white2,
+              color: palette.black1,
+            }}
           >
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform"
+              style={{
+                background: `linear-gradient(to bottom right, ${palette.primary}, ${palette.secondary})`,
+              }}
+            >
               <Building2 className="w-5 h-5 text-white" />
             </div>
-            <span className="font-semibold text-gray-800">
-              Jadi DKM / Admin Masjid
-            </span>
+            <span className="font-semibold">Jadi DKM / Admin Masjid</span>
           </button>
           <button
             onClick={() => onPilih("teacher")}
-            className="w-full py-4 border-2 border-gray-200 rounded-2xl flex items-center justify-center gap-3 hover:border-green-500 hover:bg-green-50 transition-all group"
+            className="w-full py-4 border-2 rounded-2xl flex items-center justify-center gap-3 transition-all group"
+            style={{
+              borderColor: palette.silver1,
+              background: palette.white2,
+              color: palette.black1,
+            }}
           >
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform"
+              style={{
+                background: `linear-gradient(to bottom right, ${palette.success1}, ${palette.secondary})`,
+              }}
+            >
               <Users2 className="w-5 h-5 text-white" />
             </div>
-            <span className="font-semibold text-gray-800">
-              Gabung Sebagai Guru
-            </span>
+            <span className="font-semibold">Gabung Sebagai Guru</span>
           </button>
           <button
             onClick={() => onPilih("student")}
-            className="w-full py-4 border-2 border-gray-200 rounded-2xl flex items-center justify-center gap-3 hover:border-purple-500 hover:bg-purple-50 transition-all group"
+            className="w-full py-4 border-2 rounded-2xl flex items-center justify-center gap-3 transition-all group"
+            style={{
+              borderColor: palette.silver1,
+              background: palette.white2,
+              color: palette.black1,
+            }}
           >
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform"
+              style={{
+                background: `linear-gradient(to bottom right, ${palette.quaternary}, ${palette.secondary})`,
+              }}
+            >
               <GraduationCap className="w-5 h-5 text-white" />
             </div>
-            <span className="font-semibold text-gray-800">
-              Gabung Sebagai Murid
-            </span>
+            <span className="font-semibold">Gabung Sebagai Murid</span>
           </button>
         </div>
         <button
           onClick={onClose}
-          className="text-sm text-gray-500 hover:text-gray-700 font-medium transition-colors"
+          className="text-sm font-medium transition-colors"
+          style={{ color: palette.silver2 }}
         >
           Nanti Saja
         </button>
@@ -226,9 +313,6 @@ function ModalPilihTujuan({
   );
 }
 
-/* =======================
-   Modal Gabung / Buat Masjid
-======================= */
 function ModalJoinAtauBuat({
   open,
   mode,
@@ -242,6 +326,8 @@ function ModalJoinAtauBuat({
   onCreateMasjid: (data: { name: string; file?: File }) => void;
   onJoinSekolah: (code: string, role: "teacher" | "student") => void;
 }) {
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette = pickTheme(themeName as ThemeName, isDark);
   const [masjidName, setMasjidName] = useState("");
   const [iconFile, setIconFile] = useState<File | null>(null);
   const [accessCode, setAccessCode] = useState("");
@@ -250,26 +336,35 @@ function ModalJoinAtauBuat({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl p-8 w-full max-w-md space-y-6 shadow-2xl animate-in zoom-in-95 duration-200">
+    <div
+      className="fixed inset-0 flex items-center justify-center backdrop-blur-sm z-50 animate-in fade-in duration-200"
+      style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+    >
+      <div
+        className="rounded-3xl p-8 w-full max-w-md space-y-6 shadow-2xl animate-in zoom-in-95 duration-200"
+        style={{ background: palette.white1, color: palette.black1 }}
+      >
         {mode === "dkm" ? (
           <>
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+              <div
+                className="w-12 h-12 rounded-xl flex items-center justify-center"
+                style={{
+                  background: `linear-gradient(to bottom right, ${palette.primary}, ${palette.quaternary})`,
+                }}
+              >
                 <Building2 className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-gray-900">
-                  Buat Masjid Baru
-                </h2>
-                <p className="text-sm text-gray-600">
+                <h2 className="text-xl font-bold">Buat Masjid Baru</h2>
+                <p className="text-sm" style={{ color: palette.silver2 }}>
                   Daftarkan masjid Anda ke sistem
                 </p>
               </div>
             </div>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium mb-2">
                   Nama Masjid
                 </label>
                 <input
@@ -277,18 +372,23 @@ function ModalJoinAtauBuat({
                   placeholder="Contoh: Masjid Al-Ikhlas"
                   value={masjidName}
                   onChange={(e) => setMasjidName(e.target.value)}
-                  className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
+                  className="w-full rounded-xl px-4 py-3 outline-none transition-all"
+                  style={{
+                    background: palette.white2,
+                    border: `2px solid ${palette.silver1}`,
+                    color: palette.black1,
+                  }}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium mb-2">
                   Logo Masjid (Opsional)
                 </label>
                 <input
                   type="file"
                   accept="image/*"
                   onChange={(e) => setIconFile(e.target.files?.[0] || null)}
-                  className="w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 file:font-medium"
+                  className="w-full text-sm"
                 />
               </div>
             </div>
@@ -301,7 +401,12 @@ function ModalJoinAtauBuat({
                   file: iconFile || undefined,
                 });
               }}
-              className="w-full py-3.5 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:from-green-700 hover:to-green-800 transition-all shadow-lg shadow-green-500/30"
+              className="w-full py-3.5 rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              style={{
+                background: `linear-gradient(to right, ${palette.success1}, ${palette.secondary})`,
+                color: palette.white1,
+                boxShadow: `0 4px 10px ${palette.success2}`,
+              }}
             >
               {loading ? "Membuat Masjid..." : "Buat Masjid"}
             </button>
@@ -309,7 +414,12 @@ function ModalJoinAtauBuat({
         ) : (
           <>
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
+              <div
+                className="w-12 h-12 rounded-xl flex items-center justify-center"
+                style={{
+                  background: `linear-gradient(to bottom right, ${palette.quaternary}, ${palette.primary})`,
+                }}
+              >
                 {mode === "teacher" ? (
                   <Users2 className="w-6 h-6 text-white" />
                 ) : (
@@ -317,16 +427,14 @@ function ModalJoinAtauBuat({
                 )}
               </div>
               <div>
-                <h2 className="text-xl font-bold text-gray-900">
-                  Gabung ke Sekolah
-                </h2>
-                <p className="text-sm text-gray-600">
+                <h2 className="text-xl font-bold">Gabung ke Sekolah</h2>
+                <p className="text-sm" style={{ color: palette.silver2 }}>
                   Masukkan kode akses dari admin sekolah
                 </p>
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium mb-2">
                 Kode Akses Sekolah
               </label>
               <input
@@ -334,7 +442,12 @@ function ModalJoinAtauBuat({
                 placeholder="Masukkan kode akses"
                 value={accessCode}
                 onChange={(e) => setAccessCode(e.target.value)}
-                className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all font-mono text-center text-lg tracking-wider"
+                className="w-full rounded-xl px-4 py-3 text-center font-mono text-lg tracking-wider outline-none transition-all"
+                style={{
+                  background: palette.white2,
+                  border: `2px solid ${palette.silver1}`,
+                  color: palette.black1,
+                }}
               />
             </div>
             <button
@@ -343,7 +456,12 @@ function ModalJoinAtauBuat({
                 setLoading(true);
                 onJoinSekolah(accessCode, mode);
               }}
-              className="w-full py-3.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:from-purple-700 hover:to-purple-800 transition-all shadow-lg shadow-purple-500/30"
+              className="w-full py-3.5 rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              style={{
+                background: `linear-gradient(to right, ${palette.quaternary}, ${palette.primary})`,
+                color: palette.white1,
+                boxShadow: `0 4px 10px ${palette.primary2}`,
+              }}
             >
               {loading ? "Memproses..." : "Gabung Sekarang"}
             </button>
@@ -351,7 +469,8 @@ function ModalJoinAtauBuat({
         )}
         <button
           onClick={onClose}
-          className="w-full text-sm text-gray-500 hover:text-gray-700 font-medium transition-colors"
+          className="w-full text-sm font-medium transition-colors"
+          style={{ color: palette.silver2 }}
         >
           Batal
         </button>
@@ -360,11 +479,11 @@ function ModalJoinAtauBuat({
   );
 }
 
-/* =======================
-   MAIN COMPONENT
-======================= */
 export default function Login() {
   const navigate = useNavigate();
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette = pickTheme(themeName as ThemeName, isDark);
+
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -385,7 +504,6 @@ export default function Login() {
     try {
       const res = await api.post("/auth/login", { identifier, password });
       const { access_token, refresh_token } = res.data.data;
-
       setTokens(access_token, refresh_token);
 
       const ctx = await api.get("/auth/me/simple-context");
@@ -448,7 +566,7 @@ export default function Login() {
 
   async function handleJoinSekolah(code: string, role: "teacher" | "student") {
     try {
-      await api.post("/u/user-class-sections/join", { student_code: code });
+      await api.post("/u/student-class-sections/join", { student_code: code });
 
       const ctx = await api.get("/auth/me/simple-context");
       const memberships = ctx.data?.data?.memberships ?? [];
@@ -467,39 +585,53 @@ export default function Login() {
         navigate(`/${masjidId}/${path}`, { replace: true });
       }
     } catch (err: any) {
-      const msg = err?.response?.data?.message || "Gagal bergabung ke sekolah.";
-      alert(msg);
+      alert(err?.response?.data?.message || "Gagal bergabung ke sekolah.");
     }
   }
 
- function handleSelectMasjidRole(masjidId: string, role: MasjidRole) {
-   localStorage.setItem("active_role", role);
-   localStorage.setItem(
-     "active_masjid",
-     JSON.stringify({ masjid_id: masjidId })
-   );
+  function handleSelectMasjidRole(masjidId: string, role: MasjidRole) {
+    localStorage.setItem("active_role", role);
+    localStorage.setItem(
+      "active_masjid",
+      JSON.stringify({ masjid_id: masjidId })
+    );
 
-   const path =
-     role === "teacher" ? "guru" : role === "student" ? "murid" : "sekolah";
-
-   navigate(`/${masjidId}/${path}`, { replace: true });
- }
-
+    const path =
+      role === "teacher" ? "guru" : role === "student" ? "murid" : "sekolah";
+    navigate(`/${masjidId}/${path}`, { replace: true });
+  }
 
   return (
     <AuthLayout mode="login" fullWidth contentClassName="max-w-xl mx-auto">
-      <div className="bg-white rounded-3xl p-8 md:p-10 shadow-xl border border-gray-100">
+      <div
+        className="rounded-3xl p-8 md:p-10 shadow-xl border"
+        style={{
+          background: palette.white1,
+          color: palette.black1,
+          borderColor: palette.silver1,
+        }}
+      >
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Selamat Datang Kembali
-          </h1>
-          <p className="text-gray-600">Masuk ke akun Anda untuk melanjutkan</p>
+          <h1 className="text-3xl font-bold mb-2">Selamat Datang Kembali</h1>
+          <p style={{ color: palette.silver2 }}>
+            Masuk ke akun Anda untuk melanjutkan
+          </p>
         </div>
 
         {error && (
-          <div className="mb-6 text-red-700 text-sm bg-red-50 border-2 border-red-200 rounded-xl p-4 flex items-start gap-3 animate-in slide-in-from-top-2 duration-300">
-            <div className="w-5 h-5 rounded-full bg-red-200 flex items-center justify-center flex-shrink-0 mt-0.5">
-              <span className="text-red-700 text-xs font-bold">!</span>
+          <div
+            className="mb-6 text-sm rounded-xl p-4 flex items-start gap-3 animate-in slide-in-from-top-2 duration-300"
+            style={{
+              color: palette.error1,
+              background: palette.error2,
+              border: `2px solid ${palette.error1}`,
+            }}
+          >
+            <div
+              className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
+              style={{ background: palette.error1, color: palette.white1 }}
+            >
+              <span className="text-xs font-bold">!</span>
             </div>
             <span>{error}</span>
           </div>
@@ -507,35 +639,44 @@ export default function Login() {
 
         <form onSubmit={handleLogin} className="space-y-5">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-semibold mb-2">
               Email / Username
             </label>
             <input
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
-              className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition-all"
+              className="w-full rounded-xl px-4 py-3 outline-none transition-all"
               placeholder="Masukkan email atau username"
               required
+              style={{
+                background: palette.white2,
+                border: `2px solid ${palette.silver1}`,
+                color: palette.black1,
+              }}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Password
-            </label>
+            <label className="block text-sm font-semibold mb-2">Password</label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 pr-12 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition-all"
+                className="w-full rounded-xl px-4 py-3 pr-12 outline-none transition-all"
                 placeholder="Masukkan password"
                 required
+                style={{
+                  background: palette.white2,
+                  border: `2px solid ${palette.silver1}`,
+                  color: palette.black1,
+                }}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                className="absolute right-4 top-1/2 -translate-y-1/2 transition-colors"
+                style={{ color: palette.silver2 }}
               >
                 {showPassword ? (
                   <EyeOffIcon className="w-5 h-5" />
@@ -548,11 +689,22 @@ export default function Login() {
 
           <button
             disabled={loading}
-            className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3.5 rounded-xl font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg shadow-blue-500/30 mt-8"
+            className="w-full py-3.5 rounded-xl font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all mt-8"
+            style={{
+              background: `linear-gradient(to right, ${palette.primary}, ${palette.quaternary})`,
+              color: palette.white1,
+              boxShadow: `0 4px 10px ${palette.primary2}`,
+            }}
           >
             {loading ? (
               <>
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                <div
+                  className="w-5 h-5 border-2 rounded-full animate-spin"
+                  style={{
+                    borderColor: `${palette.white1}40`,
+                    borderTopColor: palette.white1,
+                  }}
+                ></div>
                 Memproses...
               </>
             ) : (
@@ -565,7 +717,6 @@ export default function Login() {
         </form>
       </div>
 
-      {/* MODALS */}
       <ModalSelectRoleMasjid
         open={openSelectMasjid}
         onClose={() => setOpenSelectMasjid(false)}

@@ -329,7 +329,9 @@ const Total = ({ data, palette }: { data: Tagihan[]; palette: Palette }) => {
       <h3 className="text-lg font-semibold mb-3">Ringkasan Tagihan</h3>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div className="p-3 rounded-lg" style={{ background: palette.white1 }}>
-          <p className="text-sm opacity-90" style={{color : palette.black2}}>Total Tagihan</p>
+          <p className="text-sm opacity-90" style={{ color: palette.black2 }}>
+            Total Tagihan
+          </p>
           <p className="text-xl font-bold">
             Rp {totalSemua.toLocaleString("id-ID")}
           </p>
@@ -367,7 +369,7 @@ export default function AllInvoices() {
   const [openAdd, setOpenAdd] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [selected, setSelected] = useState<BillItem | null>(null);
-
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const handleAdd = async (payload: Omit<BillItem, "id"> & { id?: string }) => {
     const created: BillItem = {
       id: payload.id ?? String(Date.now()),
@@ -446,7 +448,8 @@ export default function AllInvoices() {
         palette={palette}
         gregorianDate={currentDate}
         title={state?.heading ?? "Semua Tagihan"}
-        showBack  
+        onMenuClick={() => setSidebarOpen(true)}
+        showBack
       />
 
       {/* Modals */}
@@ -467,14 +470,18 @@ export default function AllInvoices() {
         defaultValue={selected ?? undefined}
         title={`Edit Tagihan${selected ? `: ${selected.title}` : ""}`}
         onSubmit={handleEdit}
-        
       />
 
       {/* Layout */}
       <main className="w-full px-4 md:px-6 py-4 md:py-8">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
           <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-            <ParentSidebar palette={palette} />
+            <ParentSidebar
+              desktopOnly={false}
+              mode="mobile"
+              open={sidebarOpen}
+              onCloseMobile={() => setSidebarOpen(false)}
+            />
           </aside>
 
           <section className="flex-1 flex flex-col space-y-6 min-w-0">

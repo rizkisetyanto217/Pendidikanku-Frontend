@@ -365,13 +365,26 @@ export default function SchoolAnnouncement() {
     setActionModal({ show: false, announcement: null });
   };
 
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
     <>
-      <ParentTopBar palette={palette} title="Pengumuman" />
+      <ParentTopBar
+        palette={palette}
+        title="Pengumuman"
+        onMenuClick={() => setSidebarOpen(true)}
+      />
 
       <div className="lg:flex lg:items-start lg:gap-4 lg:p-4 lg:pt-6">
         {/* Sidebar */}
-        <ParentSidebar palette={palette} className="hidden lg:block" />
+        <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
+          <ParentSidebar
+            desktopOnly={false}
+            mode="mobile"
+            open={sidebarOpen}
+            onCloseMobile={() => setSidebarOpen(false)}
+          />
+        </aside>
 
         {/* Main Content */}
         <main className="flex-1 mx-auto Replace px-4 py-6 space-y-6">
