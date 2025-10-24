@@ -6,7 +6,7 @@ import {
   SectionCard,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import InputField from "@/components/common/main/InputField";
 
 type MateriType = "pdf" | "doc" | "ppt" | "link" | "video";
