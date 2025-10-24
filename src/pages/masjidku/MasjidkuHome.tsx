@@ -18,7 +18,7 @@ import {
   ExternalLink,
   ChevronRight,
 } from "lucide-react";
-import MasjidkuHomePrayerCard from "@/components/pages/home/MasjidkuHomePrayerCard";
+// import MasjidkuHomePrayerCard from "@/components/pages/home/MasjidkuHomePrayerCard";
 import LinktreeNavbar from "@/components/common/public/LintreeNavbar";
 
 /* =========================================================
@@ -319,7 +319,7 @@ export default function MasjidkuHome() {
         <div className="pt-6" />
 
         {/* Prayer schedule */}
-        <MasjidkuHomePrayerCard location="DKI Jakarta" slug={slug || ""} />
+        {/* <MasjidkuHomePrayerCard location="DKI Jakarta" slug={slug || ""} /> */}
 
         {/* Menu Utama */}
         <section className="mt-6">

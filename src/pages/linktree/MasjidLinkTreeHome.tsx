@@ -24,7 +24,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import BorderLine from "@/components/common/main/Border";
 import CartLink from "@/components/common/main/CardLink";
 import FormattedDate from "@/constants/formattedDate";
-import SholatScheduleCard from "@/components/pages/home/SholatSchedule";
+// import SholatScheduleCard from "@/components/pages/home/SholatSchedule";
 import SocialMediaModal from "@/components/pages/home/SocialMediaModal";
 import ShimmerImage from "@/components/common/main/ShimmerImage";
 
@@ -611,7 +611,7 @@ export default function PublicLinktree() {
           <BorderLine />
 
           {/* Jadwal Sholat */}
-          <SholatScheduleCard location="DKI Jakarta" slug={slug || ""} />
+          {/* <SholatScheduleCard location="DKI Jakarta" slug={slug || ""} /> */}
 
           <BorderLine />
 

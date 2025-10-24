@@ -5,7 +5,7 @@ import AuthLayout from "@/layout/AuthLayout";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import api from "@/lib/axios";
-import GoogleIdentityButton from "@/pages/dashboard/auth/components/GoogleIdentityButton";
+// import GoogleIdentityButton from "@/pages/dashboard/auth/components/GoogleIdentityButton";
 import {
   EyeIcon,
   EyeOffIcon,

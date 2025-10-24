@@ -9,27 +9,14 @@ import NotFound from "@/pages/NotFound";
 
 // Auth Route Guard
 import MasjidLinkTree from "@/pages/linktree/MasjidLinkTreeHome";
-import MasjidDonationMasjid from "@/pages/linktree/finansial/donation/MasjidDonation";
 import MasjidLayout from "@/pages/linktree/MasjidLayout";
-import MasjidDonationConfirmDonation from "@/pages/linktree/finansial/donation/MasjidDonationConfirmFinansial";
-import MasjidProfile from "@/pages/linktree/profil/MasjidProfil";
-import MasjidDKMPengajarProfil from "@/pages/linktree/profil/MasjidDKMPengajarProfil";
-import MasjidDetailSpeech from "@/pages/linktree/profil/MasjidDetailSpeechProfil";
-import MasjidProfileDetail from "@/pages/linktree/profil/MasjidDetailProfil";
-import MasjidDonationMotivation from "@/pages/linktree/finansial/donation/MasjidDonationMotivation";
 
 import MasjidQuizLectureSessions from "@/pages/sekolahislamku/quizzes/MasjidQuizLectureSessions";
 
-
 import MasjidResultQuizLectureSessions from "@/pages/sekolahislamku/quizzes/MasjidResultQuizLectureSessions";
-
-import MasjidMyDonation from "@/pages/linktree/finansial/report/MasjidMyDonation";
-
-import MasjidSholat from "@/pages/linktree/home/sholat/MasjidSholat";
 
 import MasjidkuHome from "@/pages/masjidku/MasjidkuHome";
 
-import MasjidDetailDKMPengajarMobile from "@/pages/linktree/profil/MasjidDetailDKMPengajarProfilMobile";
 import MasjidkuLayout from "@/layout/MasjidkuLayout";
 
 // School Routes
@@ -76,33 +63,6 @@ export default function AppRoutes() {
           {/* ==== Public Routes ==== */}
           <Route path="login" element={<Login />} />
           <Route path="register-masjid" element={<RegisterAdminMasjid />} />
-          {/* Profil Masjid */}
-          <Route path="profil">
-            <Route index element={<MasjidProfile />} />
-            <Route path="dkm-pengajar" element={<MasjidDKMPengajarProfil />} />
-            <Route path="sambutan" element={<MasjidDetailSpeech />} />
-            {/* Group DKM & Pengajar */}
-            <Route path="dkm-pengajar">
-              <Route index element={<MasjidDKMPengajarProfil />} />
-              <Route
-                path="detail/:id"
-                element={<MasjidDetailDKMPengajarMobile />}
-              />
-            </Route>
-            <Route path="detail" element={<MasjidProfileDetail />} />
-          </Route>
-          {/* Home  */}
-          <Route path="sholat" element={<MasjidSholat />} />
-          {/* Donasi */}
-          <Route path="donasi" element={<MasjidDonationMasjid />} />
-          <Route
-            path="donasi/konfirmasi"
-            element={<MasjidDonationConfirmDonation />}
-          />
-          <Route path="donasi/pesan" element={<MasjidDonationMotivation />} />
-          {/* Laporan Keuangan */}
-          {/* <Route path="keuangan" element={<MasjidReportFinansial />} /> */}
-          {/* Jadwal Kajian dan Detail */}
 
           <Route
             path="soal-materi/:lecture_session_slug/latihan-soal"
