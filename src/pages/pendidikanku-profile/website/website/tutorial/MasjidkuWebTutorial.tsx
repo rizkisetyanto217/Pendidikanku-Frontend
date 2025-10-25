@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 
 import WebsiteNavbar from "@/components/common/public/WebsiteNavbar";
-import WebsiteFooter from "@/pages/pendidikanku-profile/masjidku/website/components/MasjidkuWebFooter";
+import WebsiteFooter from "@/pages/pendidikanku-profile/website/website/components/MasjidkuWebFooter";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 

@@ -965,15 +965,6 @@ const AllAnnouncement: React.FC = () => {
       className="min-h-screen w-full transition-colors duration-200"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      {/* Top Bar */}
-      <ParentTopBar
-        palette={palette}
-        gregorianDate={currentDate}
-        title="Semua Pengumuman"
-        onMenuClick={() => setSidebarOpen(true)}
-        showBack
-      />
-
       {/* Modal Add */}
       <AnnouncementModal
         open={openAdd}
@@ -998,16 +989,6 @@ const AllAnnouncement: React.FC = () => {
       {/* Content + Sidebar */}
       <main className="w-full px-4 py-4 md:py-8">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
-          {/* Sidebar */}
-          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-            <ParentSidebar
-              desktopOnly={false}
-              mode="mobile"
-              open={sidebarOpen}
-              onCloseMobile={() => setSidebarOpen(false)}
-            />
-          </aside>
-
           {/* Konten utama */}
           <div className="flex-1 flex flex-col space-y-6 min-w-0">
             {/* Header + Add Button */}

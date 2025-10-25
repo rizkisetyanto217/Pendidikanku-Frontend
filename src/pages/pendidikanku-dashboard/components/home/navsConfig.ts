@@ -37,6 +37,7 @@ export const NAVS: NavDict = {
     { path: "keuangan", label: "Keuangan", icon: Wallet },
     { path: "academic", label: "Akademik", icon: FileSpreadsheet },
     { path: "profil-sekolah", label: "Profil", icon: School },
+    
   ],
   murid: [
     { path: "", label: "Dashboard", icon: LayoutDashboard, end: true },

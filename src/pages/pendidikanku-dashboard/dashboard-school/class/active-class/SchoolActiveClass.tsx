@@ -100,26 +100,8 @@ const SchoolActiveClass: React.FC = () => {
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <ParentTopBar
-        palette={palette}
-        title="Kelas Aktif"
-        gregorianDate={gregorianISO}
-        hijriDate={hijriLong(gregorianISO)}
-        showBack={true}
-      />
-
       <main className="w-full px-4 md:px-6  md:py-8">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
-          {/* Sidebar */}
-          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-            <ParentSidebar
-              desktopOnly={false}
-              mode="mobile"
-              open={sidebarOpen}
-              onCloseMobile={() => setSidebarOpen(false)}
-            />
-          </aside>
-
           {/* Main */}
 
           <section className="flex-1 flex flex-col space-y-6 min-w-0">

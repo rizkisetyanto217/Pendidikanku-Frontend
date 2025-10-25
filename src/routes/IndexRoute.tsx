@@ -15,19 +15,19 @@ import MasjidQuizLectureSessions from "@/pages/pendidikanku-dashboard/quizzes/Ma
 
 import MasjidResultQuizLectureSessions from "@/pages/pendidikanku-dashboard/quizzes/MasjidResultQuizLectureSessions";
 
-import MasjidkuHome from "@/pages/pendidikanku-profile/masjidku/MasjidkuHome";
+import MasjidkuHome from "@/pages/pendidikanku-profile/website/MasjidkuHome";
 
 import MasjidkuLayout from "@/layout/MasjidkuLayout";
 
 // School Routes
-import MasjidkuWebHome from "@/pages/pendidikanku-profile/masjidku/website/MasjidkuWebHome";
+import MasjidkuWebHome from "@/pages/pendidikanku-profile/website/website/MasjidkuWebHome";
 import RegisterAdminMasjid from "@/pages/pendidikanku-dashboard/auth/register/RegisterAdminMasjid";
 import RegisterUser from "@/pages/pendidikanku-dashboard/auth/register/RegisterUser";
-import SupportPage from "@/pages/pendidikanku-profile/masjidku/website/pages/navbar-page/support";
-import Panduan from "@/pages/pendidikanku-profile/masjidku/website/pages/navbar-page/panduan";
-import Fitur from "@/pages/pendidikanku-profile/masjidku/website/pages/navbar-page/fitur";
-import About from "@/pages/pendidikanku-profile/masjidku/website/pages/navbar-page/about";
-import Contact from "@/pages/pendidikanku-profile/masjidku/website/pages/navbar-page/contact";
+import SupportPage from "@/pages/pendidikanku-profile/website/website/pages/navbar-page/support";
+import Panduan from "@/pages/pendidikanku-profile/website/website/pages/navbar-page/panduan";
+import Fitur from "@/pages/pendidikanku-profile/website/website/pages/navbar-page/fitur";
+import About from "@/pages/pendidikanku-profile/website/website/pages/navbar-page/about";
+import Contact from "@/pages/pendidikanku-profile/website/website/pages/navbar-page/contact";
 import Unauthorized from "./UnAuthorized";
 import ProtectedRoute from "./ProtectedRoutes";
 import { TeacherRoutes } from "./TeacherRoutes";
