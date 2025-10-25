@@ -5,7 +5,7 @@ import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 
 // ⬇️ Import modal pilihan pendaftaran (bukan role)
-import RegisterChoiceModal from "@/pages/sekolahislamku/auth/components/RegisterModalChoice";
+import RegisterChoiceModal from "@/pages/pendidikanku-dashboard/auth/components/RegisterModalChoice";
 
 type AuthLayoutProps = {
   children: React.ReactNode;

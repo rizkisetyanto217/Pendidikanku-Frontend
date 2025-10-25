@@ -2,9 +2,9 @@
 import { Outlet } from "react-router-dom";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
-import type { Palette } from "@/pages/sekolahislamku/components/ui/Primitives";
+import type { Palette } from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
 
-import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar";
+import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/ParentSideBar";
 
 export default function SchoolLayout() {
   const { isDark, themeName } = useHtmlDarkMode();

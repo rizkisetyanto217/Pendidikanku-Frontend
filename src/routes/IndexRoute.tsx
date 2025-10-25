@@ -1,33 +1,33 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 // Halaman Auth
-import Login from "@/pages/sekolahislamku/auth/Login";
+import Login from "@/pages/pendidikanku-dashboard/auth/Login";
 // import Register from "@/pages/dashboard/auth/Register";
 
 // Not Found
 import NotFound from "@/pages/NotFound";
 
 // Auth Route Guard
-import MasjidLinkTree from "@/pages/linktree/MasjidLinkTreeHome";
-import MasjidLayout from "@/pages/linktree/MasjidLayout";
+import MasjidLinkTree from "@/pages/pendidikanku-profile/linktree/MasjidLinkTreeHome";
+import MasjidLayout from "@/pages/pendidikanku-profile/linktree/MasjidLayout";
 
-import MasjidQuizLectureSessions from "@/pages/sekolahislamku/quizzes/MasjidQuizLectureSessions";
+import MasjidQuizLectureSessions from "@/pages/pendidikanku-dashboard/quizzes/MasjidQuizLectureSessions";
 
-import MasjidResultQuizLectureSessions from "@/pages/sekolahislamku/quizzes/MasjidResultQuizLectureSessions";
+import MasjidResultQuizLectureSessions from "@/pages/pendidikanku-dashboard/quizzes/MasjidResultQuizLectureSessions";
 
-import MasjidkuHome from "@/pages/masjidku/MasjidkuHome";
+import MasjidkuHome from "@/pages/pendidikanku-profile/masjidku/MasjidkuHome";
 
 import MasjidkuLayout from "@/layout/MasjidkuLayout";
 
 // School Routes
-import MasjidkuWebHome from "@/pages/masjidku/website/MasjidkuWebHome";
-import RegisterAdminMasjid from "@/pages/sekolahislamku/auth/register/RegisterAdminMasjid";
-import RegisterUser from "@/pages/sekolahislamku/auth/register/RegisterUser";
-import SupportPage from "@/pages/masjidku/website/pages/navbar-page/support";
-import Panduan from "@/pages/masjidku/website/pages/navbar-page/panduan";
-import Fitur from "@/pages/masjidku/website/pages/navbar-page/fitur";
-import About from "@/pages/masjidku/website/pages/navbar-page/about";
-import Contact from "@/pages/masjidku/website/pages/navbar-page/contact";
+import MasjidkuWebHome from "@/pages/pendidikanku-profile/masjidku/website/MasjidkuWebHome";
+import RegisterAdminMasjid from "@/pages/pendidikanku-dashboard/auth/register/RegisterAdminMasjid";
+import RegisterUser from "@/pages/pendidikanku-dashboard/auth/register/RegisterUser";
+import SupportPage from "@/pages/pendidikanku-profile/masjidku/website/pages/navbar-page/support";
+import Panduan from "@/pages/pendidikanku-profile/masjidku/website/pages/navbar-page/panduan";
+import Fitur from "@/pages/pendidikanku-profile/masjidku/website/pages/navbar-page/fitur";
+import About from "@/pages/pendidikanku-profile/masjidku/website/pages/navbar-page/about";
+import Contact from "@/pages/pendidikanku-profile/masjidku/website/pages/navbar-page/contact";
 import Unauthorized from "./UnAuthorized";
 import ProtectedRoute from "./ProtectedRoutes";
 import { TeacherRoutes } from "./TeacherRoutes";
