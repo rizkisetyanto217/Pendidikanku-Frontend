@@ -28,15 +28,15 @@ import SchoolBooks from "@/pages/pendidikanku-dashboard/dashboard-school/books/S
 import SchoolDetailBook from "@/pages/pendidikanku-dashboard/dashboard-school/books/detail/SchoolDetailBook";
 
 // 🧭 Menu Utama
-import SchoolMenuGrids from "@/pages/pendidikanku-dashboard/dashboard-school/menu-utama/SchoolMenuGrids";
-import RoomSchool from "@/pages/pendidikanku-dashboard/dashboard-school/menu-utama/components/RoomSchool";
-import DetailRoomSchool from "@/pages/pendidikanku-dashboard/dashboard-school/menu-utama/components/DetailRoomSchool";
+import SchoolMenuGrids from "@/pages/pendidikanku-dashboard/dashboard-school/menu/SchoolMenuGrids";
+import RoomSchool from "@/pages/pendidikanku-dashboard/dashboard-school/menu/components/RoomSchool";
+import DetailRoomSchool from "@/pages/pendidikanku-dashboard/dashboard-school/menu/components/DetailRoomSchool";
 import SchoolSpp from "@/pages/pendidikanku-dashboard/dashboard-school/spp/SchoolSpp";
 import SchoolSubject from "@/pages/pendidikanku-dashboard/dashboard-school/subject/SchoolSubject";
 import SchoolCertificate from "@/pages/pendidikanku-dashboard/dashboard-school/academic/certificate/SchoolCertificate";
 import DetailCertificate from "@/pages/pendidikanku-dashboard/dashboard-school/academic/certificate/components/DetailCertificate";
 import CalenderAcademic from "@/pages/pendidikanku-dashboard/dashboard-school/calender/CalenderAcademic";
-import SchoolStatistik from "@/pages/pendidikanku-dashboard/dashboard-school/statistik/SchoolStatistik";
+import SchoolStatistik from "@/pages/pendidikanku-dashboard/dashboard-school/statistic/SchoolStatistic";
 import SchoolSettings from "@/pages/pendidikanku-dashboard/dashboard-school/settings/SchoolSettings";
 import SchoolActiveClass from "@/pages/pendidikanku-dashboard/dashboard-school/class/active-class/SchoolActiveClass";
 
@@ -49,17 +49,18 @@ export const SchoolRoutes = (
     <Route path="murid" element={<SchoolStudent />} />
 
     {/* === Jadwal === */}
-    <Route path="all-schedule" element={<AllSchedule />} />
-    <Route
-      path="all-schedule/detail/:scheduleId"
-      element={<DetailSchedule />}
-    />
+    {/*^ Belum diimplementasikan  */}
+    <Route path="jadwal" element={<AllSchedule />} />
+    {/*^ Belum diimplementasikan  */}
+    <Route path="jadwal/detail/:scheduleId" element={<DetailSchedule />} />
 
     {/* === Profil Sekolah === */}
     <Route path="profil-sekolah" element={<SchoolProfile />} />
 
     {/* === Keuangan === */}
     <Route path="keuangan" element={<SchoolFinance />} />
+
+    {/* Halaman belum bisa */}
     <Route path="keuangan/detail/:id" element={<DetailBill />} />
 
     {/* === Guru === */}
@@ -69,7 +70,8 @@ export const SchoolRoutes = (
     </Route>
 
     {/* === Akademik === */}
-    <Route path="academic">
+    <Route path="akademik
+    ">
       <Route index element={<AcademicSchool />} />
       <Route path="detail" element={<DetailAcademic />} />
       <Route path="manage" element={<ManagementAcademic />} />

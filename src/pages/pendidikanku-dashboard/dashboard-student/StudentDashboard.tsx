@@ -231,7 +231,7 @@ export default function StudentDashboard() {
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <main className="w-full px-4 md:px-6 py-4   md:py-8">
+      <main className="w-full">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           <div className="flex-1 flex flex-col space-y-6 min-w-0">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

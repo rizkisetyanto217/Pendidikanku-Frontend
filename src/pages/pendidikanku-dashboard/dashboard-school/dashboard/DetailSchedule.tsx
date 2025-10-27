@@ -66,14 +66,6 @@ export default function DetailSchedule() {
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <ParentTopBar
-        palette={palette}
-        title="Detail Jadwal"
-        gregorianDate={new Date().toISOString()}
-        onMenuClick={() => setSidebarOpen(true)}
-        showBack
-      />
-
       {/* Modal Edit */}
       <ModalEditSchedule
         open={editOpen}
@@ -88,15 +80,6 @@ export default function DetailSchedule() {
 
       <main className="px-4 md:px-6  md:py-8">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
-          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-            <ParentSidebar
-              desktopOnly={false}
-              mode="mobile"
-              open={sidebarOpen}
-              onCloseMobile={() => setSidebarOpen(false)}
-            />
-          </aside>
-
           <div className="flex-1 min-w-0 space-y-6">
             {/* Header */}
             <div className="flex items-center justify-between gap-2">

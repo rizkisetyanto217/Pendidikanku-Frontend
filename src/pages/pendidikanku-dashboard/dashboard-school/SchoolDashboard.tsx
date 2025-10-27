@@ -466,8 +466,8 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
       <Flash palette={palette} flash={flash} />
 
       {/* Main */}
-      <main className="w-full px-4 md:px-6 py-4 md:py-8">
-        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
+      <main className="w-full">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-2">
           <section className="flex-1 flex flex-col space-y-6 min-w-0">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 ">
               {[
@@ -594,4 +594,6 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
     </div>
   );
 };
+
+
 export default SchoolDashboard;

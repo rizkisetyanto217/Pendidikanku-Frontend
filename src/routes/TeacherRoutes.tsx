@@ -29,12 +29,12 @@ import ClassMateri from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/
 import AssignmentClass from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/components/AssignmentClass";
 import DetailAssignmentClass from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/components/DetailAssignmentClass";
 import StudentScore from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/components/StudentScore";
-import TeacherMenuGrids from "@/pages/pendidikanku-dashboard/dashboard-teacher/menu-utama/TeacherMenuGrids";
-import AllClasses from "@/pages/pendidikanku-dashboard/dashboard-teacher/menu-utama/AllClasses";
-import ClassDetail from "@/pages/pendidikanku-dashboard/dashboard-teacher/menu-utama/DetailClasses";
-import TeacherSettings from "@/pages/pendidikanku-dashboard/dashboard-teacher/menu-utama/settings/TeacherSettings";
-import TeacherAssignment from "@/pages/pendidikanku-dashboard/dashboard-teacher/menu-utama/assignments/TeacherAssignment";
-import TeacherCertificate from "@/pages/pendidikanku-dashboard/dashboard-teacher/menu-utama/certificate/Certificate";
+import TeacherMenuGrids from "@/pages/pendidikanku-dashboard/dashboard-teacher/menu/TeacherMenuGrids";
+import AllClasses from "@/pages/pendidikanku-dashboard/dashboard-teacher/menu/AllClasses";
+import ClassDetail from "@/pages/pendidikanku-dashboard/dashboard-teacher/menu/DetailClasses";
+import TeacherSettings from "@/pages/pendidikanku-dashboard/dashboard-teacher/menu/settings/TeacherSettings";
+import TeacherAssignment from "@/pages/pendidikanku-dashboard/dashboard-teacher/menu/assignments/TeacherAssignment";
+import TeacherCertificate from "@/pages/pendidikanku-dashboard/dashboard-teacher/menu/certificate/Certificate";
 
 export const TeacherRoutes = (
   <Route path="/:id/guru" element={<StudentLayout />}>

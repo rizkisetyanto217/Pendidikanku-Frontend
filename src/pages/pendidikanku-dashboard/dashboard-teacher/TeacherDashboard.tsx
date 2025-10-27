@@ -370,7 +370,7 @@ export default function TeacherDashboard() {
       />
 
       {/* Content + Sidebar */}
-      <main className="w-full px-4 md:px-6 py-4 md:py-8">
+      <main className="w-full">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Sidebar */}
           {/* <ParentSidebar  /> */}

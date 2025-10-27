@@ -18,7 +18,7 @@ import StudentAnnouncement from "@/pages/pendidikanku-dashboard/dashboard-studen
 import StudentDetailAnnouncement from "@/pages/pendidikanku-dashboard/dashboard-student/announcement/StudentDetailAnnouncement";
 import StudentAbsence from "@/pages/pendidikanku-dashboard/dashboard-student/progress/absence/StudentAbsence";
 import StudentNotesSummary from "@/pages/pendidikanku-dashboard/dashboard-student/progress/notes-summary/StudentNotesSummary";
-import StudentMenuGrids from "@/pages/pendidikanku-dashboard/dashboard-student/menu-utama/StudentMenuGrids";
+import StudentMenuGrids from "@/pages/pendidikanku-dashboard/dashboard-student/menu/StudentMenuGrids";
 import MyClass from "@/pages/pendidikanku-dashboard/dashboard-student/class/MyClass";
 import StudentMateri from "@/pages/pendidikanku-dashboard/dashboard-student/class/StudentMateri";
 import StudentAssignment from "@/pages/pendidikanku-dashboard/dashboard-student/class/StudentAssignment";

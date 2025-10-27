@@ -86,6 +86,7 @@ export default function AppRoutes() {
       <Route path="/not-found" element={<NotFound />} />
       <Route path="*" element={<NotFound />} />
       <Route path="/unauthorized" element={<Unauthorized />} />
+      <Route path="/test" element={<Unauthorized />} />
     </Routes>
   );
 }
