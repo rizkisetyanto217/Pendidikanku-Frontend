@@ -15,7 +15,7 @@ import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentT
 import {
   mockTodaySchedule,
   type TodayScheduleItem,
-} from "../types/TodaySchedule";
+} from "../calender/TodaySchedule";
 
 // Edit (ubah item yang ada)
 import ModalEditSchedule from "./SchoolModalEditSchedule";

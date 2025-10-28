@@ -153,14 +153,7 @@ export default function DetailRoomSchool() {
         />
         <main className="px-4 md:px-6 md:py-8">
           <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
-            <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-              <ParentSidebar
-                desktopOnly={false}
-                mode="mobile"
-                open={sidebarOpen}
-                onCloseMobile={() => setSidebarOpen(false)}
-              />
-            </aside>
+    
             <section className="flex-1">
               <SectionCard palette={palette} className="p-8 text-center">
                 <Building2 size={48} className="mx-auto mb-4 opacity-30" />

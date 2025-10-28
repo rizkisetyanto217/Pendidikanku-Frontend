@@ -512,15 +512,9 @@ export default function SchoolDetailStudent() {
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      {/* Topbar */}
-      <ParentTopBar
-        palette={palette}
-        title="Detail Siswa"
-        gregorianDate={new Date().toISOString()}
-        onMenuClick={() => setSidebarOpen(true)}
-      />
 
-      <main className="mx-auto Replace px-4 py-6">
+
+      <main className="mx-auto">
         <div className="lg:flex lg:items-start lg:gap-4">
           <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
             <ParentSidebar

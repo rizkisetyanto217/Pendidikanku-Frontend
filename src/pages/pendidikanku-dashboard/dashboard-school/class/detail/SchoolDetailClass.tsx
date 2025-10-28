@@ -51,7 +51,6 @@ type ApiSection = {
   class_sections_is_active: boolean;
   teacher?: ApiTeacherLite | null;
 };
-type ApiListSections = { data: ApiSection[]; message: string };
 type ApiOneSection = { data: ApiSection; message: string };
 
 type ApiParticipant = {
@@ -306,9 +305,7 @@ export default function SchoolDetailClass() {
   );
 
   const semesterRange = SEMESTER_RANGES[semester];
-  const lessonsInSemester = lessons.filter(
-    (l) => l.date && inRange(l.date, semesterRange.start, semesterRange.end)
-  );
+
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -324,7 +321,7 @@ export default function SchoolDetailClass() {
         onMenuClick={() => setSidebarOpen(true)}
         showBack
       />
-      <main className="px-4  md:px-6  md:py-8">
+      <main className="px-4">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
           {/* Sidebar */}
           <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">

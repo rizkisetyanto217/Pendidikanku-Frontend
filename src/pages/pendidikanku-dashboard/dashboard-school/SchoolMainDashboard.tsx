@@ -33,7 +33,7 @@ import {
   TodayScheduleItem,
   mapSessionsToTodaySchedule,
   mockTodaySchedule,
-} from "./types/TodaySchedule";
+} from "./calender/TodaySchedule";
 
 /* ================= Types (API & UI) ================ */
 export type AnnouncementUI = {

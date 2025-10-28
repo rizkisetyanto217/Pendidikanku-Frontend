@@ -32,7 +32,7 @@ import {
   MoreVertical,
   Edit,
 } from "lucide-react";
-import ParentSidebar from "../../components/home/ParentSideBar";
+import ParentSidebar from "../../../components/home/ParentSideBar";
 
 /* ================= Types ================ */
 export type Audience = "all" | "students" | "teachers";

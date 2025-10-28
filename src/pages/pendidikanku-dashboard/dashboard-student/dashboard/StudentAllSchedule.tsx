@@ -17,7 +17,7 @@ import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/Parent
 import {
   TodayScheduleItem,
   mockTodaySchedule,
-} from "@/pages/pendidikanku-dashboard/dashboard-school/types/TodaySchedule";
+} from "@/pages/pendidikanku-dashboard/dashboard-school/calender/TodaySchedule";
 
 type LocationState = {
   items?: TodayScheduleItem[];

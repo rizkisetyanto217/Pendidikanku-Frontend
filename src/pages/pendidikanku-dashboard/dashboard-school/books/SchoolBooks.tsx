@@ -73,25 +73,7 @@ const yyyyMmDdLocal = (d = new Date()) => {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 };
 
-const dateLong = (iso?: string) =>
-  iso
-    ? new Date(iso).toLocaleDateString("id-ID", {
-        weekday: "long",
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      })
-    : "";
 
-const hijriWithWeekday = (iso?: string) =>
-  iso
-    ? new Date(iso).toLocaleDateString("id-ID-u-ca-islamic-umalqura", {
-        weekday: "long",
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      })
-    : "-";
 
 /* ============== Data Hook: /api/a/books ============== */
 function useBooksList(params: { limit: number; offset: number }) {
@@ -410,7 +392,7 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <main className="w-full px-4 md:px-6  md:py-8">
+      <main className="w-full">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Main content */}
           <section className="flex-1 flex flex-col space-y-6 min-w-0">

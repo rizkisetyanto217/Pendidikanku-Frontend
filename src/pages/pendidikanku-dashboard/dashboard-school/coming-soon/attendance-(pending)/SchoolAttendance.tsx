@@ -16,7 +16,7 @@ import {
 import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
 
 import { CalendarDays, Users, UserCog, Search } from "lucide-react";
-import ParentSidebar from "../../components/home/ParentSideBar";
+import ParentSidebar from "../../../components/home/ParentSideBar";
 
 /* ================= Types ================ */
 export type AttendeeType = "siswa" | "guru";

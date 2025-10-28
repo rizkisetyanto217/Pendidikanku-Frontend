@@ -660,7 +660,7 @@ export default function RoomSchool() {
     >
       <Flash palette={palette} flash={flash} />
 
-      <main className="w-full px-4 md:px-6 md:py-8">
+      <main className="w-full">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
           <section className="flex-1 min-w-0 space-y-6">
             <div className="mx-auto md:flex hidden items-center gap-3">

@@ -14,7 +14,7 @@ import {
   TodayScheduleItem,
   mapSessionsToTodaySchedule,
   mockTodaySchedule,
-} from "@/pages/pendidikanku-dashboard/dashboard-school/types/TodaySchedule";
+} from "@/pages/pendidikanku-dashboard/dashboard-school/calender/TodaySchedule";
 import { BookOpen, GraduationCap, UserCog, Users } from "lucide-react";
 import { SectionCard } from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
 import { useState } from "react";

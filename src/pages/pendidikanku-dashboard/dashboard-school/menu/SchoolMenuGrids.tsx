@@ -92,7 +92,7 @@ export default function SchoolMenuGrids() {
         note: "Cari Murid",
       },
       { key: "profil", label: "Profil", to: "profil-sekolah", icon: IdCard },
-      { key: "website", label: "Website", to: "/website", icon: Globe },
+      // { key: "website", label: "Website", to: "/website", icon: Globe },
       { key: "buku", label: "Buku", to: "buku", icon: BookOpen },
       {
         key: "pelajaran",
@@ -100,31 +100,31 @@ export default function SchoolMenuGrids() {
         to: "pelajaran",
         icon: LibraryBig,
       },
-      {
-        key: "pengumuman",
-        label: "Pengumuman",
-        to: "all-announcement",
-        icon: Bell,
-      },
-      { key: "sertifikat", label: "Sertifikat", to: "sertifikat", icon: Award },
+      // {
+      //   key: "pengumuman",
+      //   label: "Pengumuman",
+      //   to: "all-announcement",
+      //   icon: Bell,
+      // },
+      // { key: "sertifikat", label: "Sertifikat", to: "sertifikat", icon: Award },
       {
         key: "kalender",
         label: "Kalender Akademik",
         to: "kalender",
         icon: CalendarRange,
       },
-      {
-        key: "statistik",
-        label: "Statistik",
-        to: "statistik",
-        icon: BarChart2,
-      },
-      {
-        key: "pengaturan",
-        label: "Pengaturan",
-        to: "pengaturan",
-        icon: Settings,
-      },
+      // {
+      //   key: "statistik",
+      //   label: "Statistik",
+      //   to: "statistik",
+      //   icon: BarChart2,
+      // },
+      // {
+      //   key: "pengaturan",
+      //   label: "Pengaturan",
+      //   to: "pengaturan",
+      //   icon: Settings,
+      // },
     ],
     []
   );
@@ -134,7 +134,7 @@ export default function SchoolMenuGrids() {
       className="min-h-screen w-full "
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <main className="w-full px-4 md:px-6 py-4 md:py-8">
+      <main className="w-full">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Main */}
           <section className="flex-1 flex flex-col space-y-6 min-w-0">
