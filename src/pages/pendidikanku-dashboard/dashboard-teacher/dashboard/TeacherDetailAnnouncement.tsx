@@ -11,14 +11,14 @@ import {
 import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
 import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/ParentSideBar";
 import { ArrowLeft } from "lucide-react";
-import type { Pengumuman } from "./AllAnnouncementTeacher";
+import type { Pengumuman } from "./TeacherAllAnnouncement";
 
 // import badge komponen yg sama
 import {
   CategoryType,
   PriorityLevel,
   StatusType,
-} from "./AllAnnouncementTeacher";
+} from "./TeacherAllAnnouncement";
 
 // === Badge helper (boleh ekstrak ke file utils) ===
 const PriorityBadge = ({ prioritas }: { prioritas: PriorityLevel }) => {

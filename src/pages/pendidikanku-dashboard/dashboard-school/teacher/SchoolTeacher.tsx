@@ -26,8 +26,8 @@ import {
   ArrowLeft,
 } from "lucide-react";
 
-import TambahGuru from "./components/AddTeacher";
-import UploadFileGuru from "./components/UploadFileTeacher";
+import TambahGuru from "./components/SchoolAddTeacher";
+import UploadFileGuru from "./components/SchoolUploadFileTeacher";
 
 /* ================= Types ================= */
 export interface TeacherItem {

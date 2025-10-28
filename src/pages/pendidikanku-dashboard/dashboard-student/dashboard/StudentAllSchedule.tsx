@@ -32,7 +32,7 @@ const topbarDateFmt = (iso: string) =>
     day: "numeric",
   });
 
-export default function AllScheduleStudent() {
+export default function StudentAllSchedule() {
   const { state } = useLocation() as { state?: LocationState };
   const navigate = useNavigate();
   const { isDark, themeName } = useHtmlDarkMode();

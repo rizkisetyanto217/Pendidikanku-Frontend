@@ -35,7 +35,7 @@ export const NAVS: NavDict = {
     { path: "kelas", label: "Kelas", icon: BookOpen },
     { path: "buku", label: "Buku", icon: BookOpen },
     { path: "keuangan", label: "Keuangan", icon: Wallet },
-    { path: "academic", label: "Akademik", icon: FileSpreadsheet },
+    { path: "akademik", label: "Akademik", icon: FileSpreadsheet },
     { path: "profil-sekolah", label: "Profil", icon: School },
     
   ],
@@ -43,7 +43,7 @@ export const NAVS: NavDict = {
     { path: "", label: "Dashboard", icon: LayoutDashboard, end: true },
     { path: "menu-utama", label: "Menu Utama", icon: ChartBar },
     { path: "progress", label: "Progress Anak", icon: ClipboardCheck },
-    { path: "finance", label: "Pembayaran", icon: Wallet },
+    { path: "keuangan", label: "Pembayaran", icon: Wallet },
     { path: "jadwal", label: "Jadwal", icon: CalendarDays },
     { path: "tugas", label: "Tugas", icon: ClipboardCheck },
     { path: "profil-murid", label: "Profil", icon: Users },

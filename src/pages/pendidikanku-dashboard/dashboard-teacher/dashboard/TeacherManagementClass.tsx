@@ -14,8 +14,8 @@ import ParentTopBar from "../../components/home/ParentTopBar";
 import ParentSidebar from "../../components/home/ParentSideBar";
 import ModalEditManagementClass, {
   ClassInfo,
-} from "./ModalEditManagementClass";
-import AddStudent from "./AddStudent";
+} from "./TeacherModalEditManagementClass";
+import AddStudent from "./TeacherAddStudent";
 import Swal from "sweetalert2";
 
 const ManagementClass = () => {

@@ -29,8 +29,8 @@ import {
 } from "lucide-react";
 
 // Modals
-import Export from "./modal/Export";
-import Pembayaran from "./modal/Payment";
+import Export from "./modal/SchoolExport";
+import Pembayaran from "./modal/SchoolPayment";
 import CreateInvoiceModal from "./modal/SchoolBill";
 
 /* ================== Date helpers ================== */

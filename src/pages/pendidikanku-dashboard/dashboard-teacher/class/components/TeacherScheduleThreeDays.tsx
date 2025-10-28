@@ -16,7 +16,7 @@ import { Calendar, Clock, MapPin, Plus, ArrowLeft } from "lucide-react";
 import { fetchTeacherHome } from "../types/teacher";
 import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
 import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/ParentSideBar";
-import AddSchedule from "../../dashboard/AddSchedule";
+import AddSchedule from "../../dashboard/TeacherAddSchedule";
 
 /* ================= Types ================= */
 type ScheduleItem = {

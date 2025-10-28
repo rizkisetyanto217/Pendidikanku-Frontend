@@ -16,7 +16,7 @@ import {
   Badge,
   type Palette,
 } from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
-import ModalEditSchedule from "@/pages/pendidikanku-dashboard/dashboard-school/dashboard/ModalEditSchedule";
+import ModalEditSchedule from "@/pages/pendidikanku-dashboard/dashboard-school/dashboard/SchoolModalEditSchedule";
 import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
 import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/ParentSideBar";
 

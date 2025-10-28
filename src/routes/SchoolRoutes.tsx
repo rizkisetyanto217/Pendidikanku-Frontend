@@ -4,24 +4,24 @@ import StudentLayout from "@/layout/StudentLayout";
 // 📚 Pages
 import SchoolDashboard from "@/pages/pendidikanku-dashboard/dashboard-school/SchoolDashboard";
 import SchoolStudent from "@/pages/pendidikanku-dashboard/dashboard-school/student-(pending)/SchoolStudent";
-import AllSchedule from "@/pages/pendidikanku-dashboard/dashboard-school/dashboard/AllSchedule";
+import AllSchedule from "@/pages/pendidikanku-dashboard/dashboard-school/dashboard/SchoolAllSchedule";
 import SchoolProfile from "@/pages/pendidikanku-dashboard/dashboard-school/profile/SchoolProfile";
 import SchoolFinance from "@/pages/pendidikanku-dashboard/dashboard-school/finance/SchoolFinance";
-import DetailBill from "@/pages/pendidikanku-dashboard/dashboard-school/finance/DetailBill";
+import DetailBill from "@/pages/pendidikanku-dashboard/dashboard-school/finance/SchoolDetailBill";
 import SchoolTeacher from "@/pages/pendidikanku-dashboard/dashboard-school/teacher/SchoolTeacher";
-import DetailTeacher from "@/pages/pendidikanku-dashboard/dashboard-school/teacher/components/DetailTeacher";
-import AcademicSchool from "@/pages/pendidikanku-dashboard/dashboard-school/academic/AcademicSchool";
-import DetailAcademic from "@/pages/pendidikanku-dashboard/dashboard-school/academic/components/DetailAcademic";
-import ManagementAcademic from "@/pages/pendidikanku-dashboard/dashboard-school/academic/components/ManagementAcademic";
-import DetailSchedule from "@/pages/pendidikanku-dashboard/dashboard-school/dashboard/DetailSchedule";
-import AllInvoices from "@/pages/pendidikanku-dashboard/dashboard-school/dashboard/AllInvoices";
-import Bill from "@/pages/pendidikanku-dashboard/dashboard-school/finance/Bill";
-import TryoutTahfizhExam from "@/pages/pendidikanku-dashboard/dashboard-school/dashboard/TryoutTahfizhExam";
-import AllAnnouncement from "@/pages/pendidikanku-dashboard/dashboard-school/dashboard/AllAnnouncement";
+import DetailTeacher from "@/pages/pendidikanku-dashboard/dashboard-school/teacher/components/SchoolDetailTeacher";
+import AcademicSchool from "@/pages/pendidikanku-dashboard/dashboard-school/academic/SchoolAcademic";
+import DetailAcademic from "@/pages/pendidikanku-dashboard/dashboard-school/academic/components/SchoolDetailAcademic";
+import ManagementAcademic from "@/pages/pendidikanku-dashboard/dashboard-school/academic/components/SchoolManagementAcademic";
+import DetailSchedule from "@/pages/pendidikanku-dashboard/dashboard-school/dashboard/SchoolDetailSchedule";
+import AllInvoices from "@/pages/pendidikanku-dashboard/dashboard-school/dashboard/SchoolAllInvoices";
+import Bill from "@/pages/pendidikanku-dashboard/dashboard-school/finance/SchoolBill";
+import TryoutTahfizhExam from "@/pages/pendidikanku-dashboard/dashboard-school/dashboard/SchoolTryoutTahfizhExam";
+import AllAnnouncement from "@/pages/pendidikanku-dashboard/dashboard-school/dashboard/SchoolAllAnnouncement";
 import SchoolClasses from "@/pages/pendidikanku-dashboard/dashboard-school/class/SchoolClass";
 import SchoolManageClass from "@/pages/pendidikanku-dashboard/dashboard-school/class/detail/SchoolDetailClass";
-import QuizPage from "@/pages/pendidikanku-dashboard/dashboard-school/class/components/QuizPage";
-import QuizDetailPage from "@/pages/pendidikanku-dashboard/dashboard-school/class/components/QuizDetailPage";
+import QuizPage from "@/pages/pendidikanku-dashboard/dashboard-school/class/components/SchoolQuizPage";
+import QuizDetailPage from "@/pages/pendidikanku-dashboard/dashboard-school/class/components/SchoolQuizDetailPage";
 import SchoolAttendance from "@/pages/pendidikanku-dashboard/dashboard-school/attendance-(pending)/SchoolAttendance";
 import SchoolAnnouncement from "@/pages/pendidikanku-dashboard/dashboard-school/announcement/SchoolAnnouncement";
 import SchoolBooks from "@/pages/pendidikanku-dashboard/dashboard-school/books/SchoolBooks";
@@ -29,13 +29,13 @@ import SchoolDetailBook from "@/pages/pendidikanku-dashboard/dashboard-school/bo
 
 // 🧭 Menu Utama
 import SchoolMenuGrids from "@/pages/pendidikanku-dashboard/dashboard-school/menu/SchoolMenuGrids";
-import RoomSchool from "@/pages/pendidikanku-dashboard/dashboard-school/menu/components/RoomSchool";
-import DetailRoomSchool from "@/pages/pendidikanku-dashboard/dashboard-school/menu/components/DetailRoomSchool";
+import RoomSchool from "@/pages/pendidikanku-dashboard/dashboard-school/menu/components/SchoolRoom";
+import DetailRoomSchool from "@/pages/pendidikanku-dashboard/dashboard-school/menu/components/SchoolDetailRoom";
 import SchoolSpp from "@/pages/pendidikanku-dashboard/dashboard-school/spp/SchoolSpp";
 import SchoolSubject from "@/pages/pendidikanku-dashboard/dashboard-school/subject/SchoolSubject";
 import SchoolCertificate from "@/pages/pendidikanku-dashboard/dashboard-school/academic/certificate/SchoolCertificate";
-import DetailCertificate from "@/pages/pendidikanku-dashboard/dashboard-school/academic/certificate/components/DetailCertificate";
-import CalenderAcademic from "@/pages/pendidikanku-dashboard/dashboard-school/calender/CalenderAcademic";
+import DetailCertificate from "@/pages/pendidikanku-dashboard/dashboard-school/academic/certificate/components/SchoolDetailCertificate";
+import CalenderAcademic from "@/pages/pendidikanku-dashboard/dashboard-school/calender/SchoolCalenderAcademic";
 import SchoolStatistik from "@/pages/pendidikanku-dashboard/dashboard-school/statistic/SchoolStatistic";
 import SchoolSettings from "@/pages/pendidikanku-dashboard/dashboard-school/settings/SchoolSettings";
 import SchoolActiveClass from "@/pages/pendidikanku-dashboard/dashboard-school/class/active-class/SchoolActiveClass";
@@ -70,8 +70,7 @@ export const SchoolRoutes = (
     </Route>
 
     {/* === Akademik === */}
-    <Route path="akademik
-    ">
+    <Route path="akademik">
       <Route index element={<AcademicSchool />} />
       <Route path="detail" element={<DetailAcademic />} />
       <Route path="manage" element={<ManagementAcademic />} />

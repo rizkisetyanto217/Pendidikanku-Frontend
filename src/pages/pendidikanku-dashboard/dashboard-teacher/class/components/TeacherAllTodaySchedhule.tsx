@@ -1,6 +1,6 @@
 // src/pages/sekolahislamku/dashboard-teacher/class/components/AllTodaySchedule.tsx
 import React, { useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
@@ -10,7 +10,16 @@ import {
   Badge,
   type Palette,
 } from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
-import { Plus, Calendar, Clock, MapPin, ArrowLeft } from "lucide-react";
+import {
+  CalendarDays,
+  Plus,
+  Calendar,
+  Clock,
+  MapPin,
+  Pencil,
+  Trash2,
+  ArrowLeft,
+} from "lucide-react";
 
 // API & Types
 import {
@@ -21,9 +30,9 @@ import {
   type UpcomingClass,
 } from "../types/teacher";
 
+import TambahJadwal from "../../dashboard/TeacherAddSchedule";
 import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
 import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/ParentSideBar";
-import AddSchedule from "../../dashboard/AddSchedule";
 
 /* =========================
    Types (UI normalized)
@@ -32,7 +41,7 @@ type ScheduleItem = {
   id?: string;
   time: string; // "07:30"
   title: string; // "TPA A — Tahsin"
-  room?: string; // "22 Agu • Aula 1" atau "Aula 1"
+  room?: string; // bisa "22 Agu • Aula 1" atau "Aula 1"
   dateISO: string; // ISO tanggal (00:00)
 };
 
@@ -73,15 +82,6 @@ const getPureLocation = (room?: string) => {
   return parts.length > 1 ? parts.slice(1).join(" • ") : parts[0];
 };
 
-/** Buat slug/id untuk navigasi detail (stabil & URL-safe) */
-const makeScheduleSlug = (it: ScheduleItem) => {
-  const raw =
-    it.id && String(it.id).trim()
-      ? String(it.id).trim()
-      : `${it.dateISO}|${it.time}|${it.title}`;
-  return encodeURIComponent(raw);
-};
-
 /** Normalisasi dari tipe API ke tipe UI (ScheduleItem) */
 const normalizeItem = (
   c: UpcomingClass | TodayClass,
@@ -105,7 +105,7 @@ const normalizeItem = (
 /* =========================
    Component
 ========================= */
-export default function ScheduleSevenDays() {
+export default function AllTodaySchedule() {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const qc = useQueryClient();
@@ -122,7 +122,9 @@ export default function ScheduleSevenDays() {
   const today = startOfDay(new Date());
   const end = startOfDay(addDays(today, DAYS - 1));
 
-  // Sumber data: upcoming (7 hari) → fallback todayClasses
+  // Susun sumber data:
+  // - utamakan upcomingClasses yang berada pada rentang 7 hari
+  // - jika kosong, pakai todayClasses (difallback jadi hari ini)
   const rawItems: ScheduleItem[] = useMemo(() => {
     const upcoming = (data?.upcomingClasses ?? []).filter((u) => {
       const d = startOfDay(new Date(u.dateISO));
@@ -195,7 +197,7 @@ export default function ScheduleSevenDays() {
     title: string;
     room?: string;
   }) => {
-    // sinkronisasi cache "teacher-home" → todayClasses (optimistic)
+    // Sinkronkan cache "teacher-home" → todayClasses (optimistic)
     qc.setQueryData(TEACHER_HOME_QK, (prev: any) => {
       if (!prev) return prev;
       const [classNameRaw = "", subjectRaw = ""] = item.title.split(" — ");
@@ -217,13 +219,22 @@ export default function ScheduleSevenDays() {
     setShowTambahJadwal(false);
   };
 
+  const handleEdit = (s: ScheduleItem) => {
+    // TODO: sambungkan ke modal edit versi kamu
+    alert(
+      `Edit jadwal:\n${fmtLong(s.dateISO)} • ${s.time}\n${s.title}\n${
+        getPureLocation(s.room) || "-"
+      }`
+    );
+  };
+
   const [editingId, setEditingId] = useState<string | null>(null);
   const openEdit = (it: ScheduleItem) => {
     setEditingId(it.id ?? `${it.dateISO}-${it.time}-${it.title}`);
     setTargetDateISO(it.dateISO);
     setShowTambahJadwal(true);
   };
-
+  // ganti fungsi lama ini
   const handleDelete = (it: ScheduleItem) => {
     if (!confirm(`Hapus jadwal "${it.title}" pada ${it.time}?`)) return;
 
@@ -273,7 +284,7 @@ export default function ScheduleSevenDays() {
       />
 
       {/* Modal: Tambah Jadwal */}
-      <AddSchedule
+      <TambahJadwal
         open={showTambahJadwal}
         onClose={() => setShowTambahJadwal(false)}
         palette={palette}
@@ -391,69 +402,52 @@ export default function ScheduleSevenDays() {
                       className="divide-y"
                       style={{ borderColor: palette.silver1 }}
                     >
-                      {items.map((s, i) => {
-                        const slug = makeScheduleSlug(s);
-                        return (
-                          <div
-                            key={`${s.id ?? i}-${s.time}`}
-                            className="px-4 py-3 flex items-center justify-between gap-4"
-                            style={{ background: palette.white1 }}
-                          >
-                            <div className="min-w-0">
-                              <div className="font-medium truncate">
-                                {s.title}
-                              </div>
-                              <div
-                                className="text-sm mt-1 flex flex-wrap gap-3"
-                                style={{ color: palette.black2 }}
-                              >
-                                <span className="flex items-center gap-1">
-                                  <Calendar size={16} /> {fmtLong(dateISO)}
-                                </span>
-                                {getPureLocation(s.room) && (
-                                  <span className="flex items-center gap-1">
-                                    <MapPin size={16} />{" "}
-                                    {getPureLocation(s.room)}
-                                  </span>
-                                )}
-                                <span className="flex items-center gap-1">
-                                  <Clock size={16} /> {s.time}
-                                </span>
-                              </div>
+                      {items.map((s, i) => (
+                        <div
+                          key={`${s.id ?? i}-${s.time}`}
+                          className="px-4 py-3 flex items-center justify-between gap-4"
+                          style={{ background: palette.white1 }}
+                        >
+                          <div className="min-w-0">
+                            <div className="font-medium truncate">
+                              {s.title}
                             </div>
-
-                            {/* Aksi */}
-                            <div className="flex items-center gap-2 shrink-0">
-                              <Btn
-                                palette={palette}
-                                size="sm"
-                                variant="white1"
-                                onClick={() => openEdit(s)}
-                              >
-                                Edit
-                              </Btn>
-                              {/* Link ke detail + kirim state item */}
-                              <Link to={`./${slug}`} state={{ item: s }}>
-                                <Btn
-                                  palette={palette}
-                                  size="sm"
-                                  variant="ghost"
-                                >
-                                  Detail
-                                </Btn>
-                              </Link>
-                              <Btn
-                                palette={palette}
-                                size="sm"
-                                variant="destructive"
-                                onClick={() => handleDelete(s)}
-                              >
-                                Hapus
-                              </Btn>
+                            <div
+                              className="text-sm mt-1 flex flex-wrap gap-3"
+                              style={{ color: palette.black2 }}
+                            >
+                              {getPureLocation(s.room) && (
+                                <span className="flex items-center gap-1">
+                                  <MapPin size={16} /> {getPureLocation(s.room)}
+                                </span>
+                              )}
+                              <span className="flex items-center gap-1">
+                                <Clock size={16} /> {s.time}
+                              </span>
                             </div>
                           </div>
-                        );
-                      })}
+
+                          {/* Aksi */}
+                          <div className="flex items-center gap-2 shrink-0">
+                            <Btn
+                              palette={palette}
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => openEdit(s)}
+                            >
+                              Edit
+                            </Btn>
+                            <Btn
+                              palette={palette}
+                              size="sm"
+                              variant="quaternary"
+                              onClick={() => handleDelete(s)}
+                            >
+                              Hapus
+                            </Btn>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </SectionCard>

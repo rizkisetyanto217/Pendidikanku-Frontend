@@ -27,8 +27,8 @@ import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentT
 import ParentSidebar from "../../components/home/ParentSideBar";
 import TambahKelas, {
   type ClassRow as NewClassRow,
-} from "./components/AddClass";
-import TambahLevel from "./components/AddLevel";
+} from "./components/SchoolAddClass";
+import TambahLevel from "./components/SchoolAddLevel";
 import axios from "@/lib/axios";
 
 /* ================= Types ================= */

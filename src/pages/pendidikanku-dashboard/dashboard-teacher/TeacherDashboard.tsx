@@ -13,7 +13,7 @@ import {
 } from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
 import TodayScheduleCard from "@/pages/pendidikanku-dashboard/components/card/TodayScheduleCard";
 import AnnouncementsList from "@/pages/pendidikanku-dashboard/components/card/AnnouncementsListCard";
-import ListJadwal from "./schedule/components/ListSchedule";
+import ListJadwal from "./schedule/components/TeacherListSchedule";
 import TeacherAddEditAnnouncement, {
   type TeacherAnnouncementForm,
 } from "./announcement/TeacherAddEditAnnouncement";
@@ -26,7 +26,7 @@ import {
 } from "./class/types/teacher";
 import ParentTopBar from "../components/home/ParentTopBar";
 import ParentSidebar from "../components/home/ParentSideBar";
-import AddSchedule from "./dashboard/AddSchedule";
+import AddSchedule from "./dashboard/TeacherAddSchedule";
 import { useNavigate, useParams } from "react-router-dom";
 
 /* ================= Date/Time Utils (timezone-safe) ================ */

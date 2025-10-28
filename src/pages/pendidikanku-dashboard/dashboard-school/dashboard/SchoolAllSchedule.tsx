@@ -18,9 +18,9 @@ import {
 } from "../types/TodaySchedule";
 
 // Edit (ubah item yang ada)
-import ModalEditSchedule from "./ModalEditSchedule";
+import ModalEditSchedule from "./SchoolModalEditSchedule";
 import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/ParentSideBar";
-import AddSchedule from "@/pages/pendidikanku-dashboard/dashboard-teacher/dashboard/AddSchedule";
+import AddSchedule from "@/pages/pendidikanku-dashboard/dashboard-teacher/dashboard/TeacherAddSchedule";
 
 /** State yang dikirim dari komponen lain via <Link state={...}> */
 type LocationState = {

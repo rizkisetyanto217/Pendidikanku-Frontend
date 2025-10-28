@@ -18,8 +18,8 @@ import {
 import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
 import ParentSidebar from "../../components/home/ParentSideBar";
 
-import TambahSiswa from "./modal/AddStudent";
-import UploadFileSiswa from "./modal/UploadFileStudent";
+import TambahSiswa from "./modal/SchoolAddStudent";
+import UploadFileSiswa from "./modal/SchoolUploadFileStudent";
 
 import {
   UserPlus,

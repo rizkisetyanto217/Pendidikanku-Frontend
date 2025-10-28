@@ -30,8 +30,8 @@ import {
 
 import ParentTopBar from "../../components/home/ParentTopBar";
 import ParentSidebar from "../../components/home/ParentSideBar";
-import ModalGrading from "./components/ModalGrading";
-import ModalExportResult from "./components/ModalExportResult";
+import ModalGrading from "./components/TeacherModalGrading";
+import ModalExportResult from "./components/TeacherModalExportResult";
 
 /* ================= Types ================ */
 type Assignment = {

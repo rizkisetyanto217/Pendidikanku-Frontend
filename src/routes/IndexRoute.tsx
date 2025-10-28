@@ -11,9 +11,9 @@ import NotFound from "@/pages/NotFound";
 import MasjidLinkTree from "@/pages/pendidikanku-profile/linktree/MasjidLinkTreeHome";
 import MasjidLayout from "@/pages/pendidikanku-profile/linktree/MasjidLayout";
 
-import MasjidQuizLectureSessions from "@/pages/pendidikanku-dashboard/quizzes/MasjidQuizLectureSessions";
+import MasjidQuizLectureSessions from "@/pages/pendidikanku-dashboard/quizzes/TeacherMasjidQuizLectureSessions";
 
-import MasjidResultQuizLectureSessions from "@/pages/pendidikanku-dashboard/quizzes/MasjidResultQuizLectureSessions";
+import MasjidResultQuizLectureSessions from "@/pages/pendidikanku-dashboard/quizzes/TeacherMasjidResultQuizLectureSessions";
 
 import MasjidkuHome from "@/pages/pendidikanku-profile/website/MasjidkuHome";
 

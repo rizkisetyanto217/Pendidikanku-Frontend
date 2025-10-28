@@ -14,7 +14,7 @@ import {
 import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
 import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/ParentSideBar";
 import { ArrowLeft, Loader2, Building2, MapPin, Users } from "lucide-react";
-import { seed, Room } from "./RoomSchool";
+import { seed, Room } from "./SchoolRoom";
 
 /* ===================== CONFIG ===================== */
 const USE_DUMMY = true;

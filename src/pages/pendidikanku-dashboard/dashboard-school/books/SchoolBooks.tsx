@@ -23,7 +23,7 @@ import {
 import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
 import SimpleTable from "@/components/common/main/SimpleTable";
 import ActionEditDelete from "@/components/common/main/MainActionEditDelete";
-import BookModal from "./components/BookModal";
+import BookModal from "./components/SchoolBookModal";
 import ParentSidebar from "../../components/home/ParentSideBar";
 
 /* ============== Types API ============== */
