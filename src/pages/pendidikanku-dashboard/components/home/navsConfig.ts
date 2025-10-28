@@ -42,7 +42,7 @@ export const NAVS: NavDict = {
   murid: [
     { path: "", label: "Dashboard", icon: LayoutDashboard, end: true },
     { path: "menu-utama", label: "Menu Utama", icon: ChartBar },
-    { path: "progress", label: "Progress Anak", icon: ClipboardCheck },
+    { path: "progress", label: "Progress", icon: ClipboardCheck },
     { path: "keuangan", label: "Pembayaran", icon: Wallet },
     { path: "jadwal", label: "Jadwal", icon: CalendarDays },
     { path: "tugas", label: "Tugas", icon: ClipboardCheck },

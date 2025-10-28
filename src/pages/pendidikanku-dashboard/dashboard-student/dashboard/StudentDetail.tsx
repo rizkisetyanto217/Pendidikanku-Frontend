@@ -9,8 +9,7 @@ import {
   Badge,
   type Palette,
 } from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
-import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/ParentSideBar";
+
 
 // Hanya tipe untuk state yang dibawa dari StudentDashboard
 type LocationState = {
@@ -54,25 +53,11 @@ export default function StudentDetail() {
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <ParentTopBar
-        palette={palette}
-        title="Detail Siswa"
-        gregorianDate={new Date().toISOString()}
-        dateFmt={(iso) =>
-          new Date(iso).toLocaleDateString("id-ID", {
-            weekday: "long",
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-          })
-        }
-      />
+      
 
       <main className="w-full px-4 md:px-6 py-4   md:py-8">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
-          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-            <ParentSidebar />
-          </aside>
+          
 
           <div className="flex-1 flex flex-col space-y-6 min-w-0">
             <div className="md:flex hidden items-center gap-3">

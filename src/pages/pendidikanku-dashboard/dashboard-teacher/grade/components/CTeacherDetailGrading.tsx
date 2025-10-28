@@ -13,7 +13,7 @@ import {
 } from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
 import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
 import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/ParentSideBar";
-import ModalGrading from "./TeacherModalGrading";
+import ModalGrading from "./CTeacherModalGrading";
 
 type Submission = {
   id: string;

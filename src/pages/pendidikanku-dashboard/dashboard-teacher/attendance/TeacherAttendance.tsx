@@ -389,12 +389,7 @@ export default function TeacherAttendance() {
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <ParentTopBar
-        palette={palette}
-        title="Kehadiran"
-        gregorianDate={qDate} // sudah local-noon safe
-        hijriDate={hijriLong(qDate)} // ⬅️ paksa pakai Umm al-Qura, anti-geser
-      />
+
 
       <main className="mx-auto Replace px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">

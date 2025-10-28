@@ -415,18 +415,11 @@ export default function StudentFinance() {
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <main className="w-full px-4 md:px-6 py-4   md:py-8">
+      <main className="w-full">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           <div className="flex-1 flex flex-col space-y-6 min-w-0">
             <div className="md:flex hidden items-center gap-3">
-              <Btn
-                palette={palette}
-                onClick={() => navigate(-1)}
-                variant="ghost"
-                className="cursor-pointer flex items-center gap-2"
-              >
-                <ArrowLeft size={20} />
-              </Btn>
+            
 
               <h1 className="text-lg font-semibold">Pembayaran</h1>
             </div>

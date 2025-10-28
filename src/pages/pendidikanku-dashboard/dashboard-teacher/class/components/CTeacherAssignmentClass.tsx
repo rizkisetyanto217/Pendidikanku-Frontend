@@ -30,12 +30,12 @@ import {
   type Assignment,
   type AssignmentStatus,
 } from "../types/assignments";
-import ModalEditAssignmentClass from "./TeacherModalEditAssignmentClass";
-import { EditAssignmentPayload } from "./TeacherModalEditAssignment";
+import ModalEditAssignmentClass from "./CTeacherModalEditAssignmentClass";
+import { EditAssignmentPayload } from "./CTeacherModalEditAssignment";
 import Swal from "sweetalert2";
 import ModalAddAssignmentClass, {
   AddAssignmentClassPayload,
-} from "./TeacherModalAddAssignmentClass";
+} from "./CTeacherModalAddAssignmentClass";
 
 /* ========= Dummy teacher classes ========= */
 type AttendanceStatus = "hadir" | "sakit" | "izin" | "alpa" | "online";

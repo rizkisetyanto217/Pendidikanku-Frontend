@@ -1,6 +1,6 @@
 import { Route } from "react-router-dom";
 import StudentLayout from "@/layout/StudentLayout";
-import StudentDashboard from "@/pages/pendidikanku-dashboard/dashboard-student/StudentDashboard";
+import StudentDashboard from "@/pages/pendidikanku-dashboard/dashboard-student/StudentMainDashboard";
 import StudentProgressDetail from "@/pages/pendidikanku-dashboard/dashboard-student/progress/StudentProgress";
 import StudentAllSchedule from "@/pages/pendidikanku-dashboard/dashboard-student/dashboard/StudentAllSchedule";
 import StudentProfil from "@/pages/pendidikanku-dashboard/dashboard-student/profil/StudentProfil";
@@ -28,14 +28,14 @@ import StudentExam from "@/pages/pendidikanku-dashboard/dashboard-student/class/
 import StudentCertificate from "@/pages/pendidikanku-dashboard/dashboard-student/certificate/StudentCertificate";
 
 export const StudentRoutes = (
-  <Route path="/:id/murid" element={<StudentLayout />}>
+  <Route path="murid" element={<StudentLayout />}>
     <Route index element={<StudentDashboard />} />
     <Route path="progress" element={<StudentProgressDetail />} />
-    <Route path="all-schedule" element={<StudentAllSchedule />} />
+    <Route path="semua-jadwal" element={<StudentAllSchedule />} />
     <Route path="profil-murid" element={<StudentProfil />} />
     <Route path="tugas" element={<StudentAssignmentClass />} />
     <Route
-      path="all-schedule/detail/:scheduleId"
+      path="semua-jadwal/:id"
       element={<DetailScheduleStudent />}
     />
     {/* <Route path="announcements" element={<AnnouncementsStudent />} />
@@ -45,25 +45,25 @@ export const StudentRoutes = (
     <Route path="detail" element={<StudentDetail />} />
     <Route path="keuangan" element={<StudentFInance />} />
     <Route path="jadwal" element={<StudentSchedule />} />
-    <Route path="finnance-list" element={<ListFinance />} />
-    <Route path="finnance-list/:id" element={<InvoiceTagihan />} />
-    <Route path="pengumuman">
+    <Route path="keuangan-list" element={<ListFinance />} />
+    <Route path="keuangan-list/:id" element={<InvoiceTagihan />} />
+    {/* <Route path="pengumuman">
       <Route index element={<StudentAnnouncement />} />
       <Route path="detail/:id" element={<StudentDetailAnnouncement />} />
-    </Route>
+    </Route> */}
     <Route path="progress/absensi" element={<StudentAbsence />} />
     <Route path="progress/catatan-hasil" element={<StudentNotesSummary />} />
     <Route path="menu-utama">
       <Route index element={<StudentMenuGrids />} />
-      <Route path="my-class" element={<MyClass />} />
-      <Route path="my-class/:id/materi" element={<StudentMateri />} />
-      <Route path="my-class/:id/tugas" element={<StudentAssignment />} />
-      <Route path="my-class/:id/quiz" element={<StudentQuizPage />} />
+      <Route path="kelas-saya" element={<MyClass />} />
+      <Route path="kelas-saya/:id/materi" element={<StudentMateri />} />
+      <Route path="kelas-saya/:id/tugas" element={<StudentAssignment />} />
+      <Route path="kelas-saya/:id/quiz" element={<StudentQuizPage />} />
       <Route
-        path="my-class/:id/kehadiran"
+        path="kelas-saya/:id/kehadiran"
         element={<StudentAttandenceClass />}
       />
-      <Route path="my-class/:id/ujian" element={<StudentExam />} />
+      <Route path="kelas-saya/:id/ujian" element={<StudentExam />} />
       <Route path="profil-murid" element={<StudentProfil />} />
       <Route path="sertifikat-murid" element={<StudentCertificate />} />
     </Route>

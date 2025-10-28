@@ -10,7 +10,7 @@ import {
 } from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
 
 import { ArrowLeft, Calendar, Paperclip } from "lucide-react";
-import ModalEditMateri, { EditMateriPayload } from "./TeacherModalEditMateri";
+import ModalEditMateri, { EditMateriPayload } from "./CTeacherModalEditMateri";
 import Swal from "sweetalert2";
 import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
 import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/ParentSideBar";

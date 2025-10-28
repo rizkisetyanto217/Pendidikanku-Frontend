@@ -22,8 +22,8 @@ import {
 
 import ModalAddAssignment, {
   type AddAssignmentPayload,
-} from "./TeacherModalAddAssignment";
-import ModalEditAssignment from "./TeacherModalEditAssignment";
+} from "./CTeacherModalAddAssignment";
+import ModalEditAssignment from "./CTeacherModalEditAssignment";
 import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
 import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/ParentSideBar";
 

@@ -13,7 +13,7 @@ import {
 } from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
 import TodayScheduleCard from "@/pages/pendidikanku-dashboard/components/card/TodayScheduleCard";
 import AnnouncementsList from "@/pages/pendidikanku-dashboard/components/card/AnnouncementsListCard";
-import ListJadwal from "./schedule/components/TeacherListSchedule";
+import ListJadwal from "./schedule/components/CTeacherListSchedule";
 import TeacherAddEditAnnouncement, {
   type TeacherAnnouncementForm,
 } from "./announcement/TeacherAddEditAnnouncement";

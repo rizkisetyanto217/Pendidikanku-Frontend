@@ -30,8 +30,8 @@ import {
 
 import ParentTopBar from "../../components/home/ParentTopBar";
 import ParentSidebar from "../../components/home/ParentSideBar";
-import ModalGrading from "./components/TeacherModalGrading";
-import ModalExportResult from "./components/TeacherModalExportResult";
+import ModalGrading from "./components/CTeacherModalGrading";
+import ModalExportResult from "./components/CTeacherModalExportResult";
 
 /* ================= Types ================ */
 type Assignment = {
@@ -430,18 +430,7 @@ export default function TeacherGrading() {
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <ParentTopBar
-        palette={palette}
-        title="Penilaian"
-        gregorianDate={
-          normalizeISOToLocalNoon(data?.gregorianDate) ??
-          toLocalNoonISO(new Date())
-        }
-        hijriDate={hijriLong(
-          normalizeISOToLocalNoon(data?.gregorianDate) ??
-            toLocalNoonISO(new Date())
-        )}
-      />
+      
 
       {/* Modal Grading */}
       <ModalGrading
@@ -475,8 +464,7 @@ export default function TeacherGrading() {
 
       <main className="mx-auto max-w-7xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-6">
-          {/* Sidebar */}
-          <ParentSidebar />
+        
 
           {/* Main Content */}
           <div className="flex-1 space-y-6">

@@ -9,8 +9,7 @@ import {
   SectionCard,
   type Palette,
 } from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
-import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/ParentSideBar";
+
 
 // Icons
 import {
@@ -55,7 +54,7 @@ export default function TeacherMenuGrids() {
       {
         key: "kelas-all",
         label: "Seluruh Kelas",
-        to: "all-classes",
+        to: "seluruh-kelas",
         icon: <Layers />,
       },
       {
@@ -103,7 +102,7 @@ export default function TeacherMenuGrids() {
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <main className="w-full px-4 md:px-6 py-4  md:py-8">
+      <main className="w-full">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Main */}
           <section className="flex-1 flex flex-col space-y-6 min-w-0">

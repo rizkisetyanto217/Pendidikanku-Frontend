@@ -2,7 +2,7 @@ import { Route } from "react-router-dom";
 import StudentLayout from "@/layout/StudentLayout";
 
 // 📚 Pages
-import SchoolDashboard from "@/pages/pendidikanku-dashboard/dashboard-school/SchoolDashboard";
+import SchoolDashboard from "@/pages/pendidikanku-dashboard/dashboard-school/SchoolMainDashboard";
 import SchoolStudent from "@/pages/pendidikanku-dashboard/dashboard-school/student-(pending)/SchoolStudent";
 import AllSchedule from "@/pages/pendidikanku-dashboard/dashboard-school/dashboard/SchoolAllSchedule";
 import SchoolProfile from "@/pages/pendidikanku-dashboard/dashboard-school/profile/SchoolProfile";
@@ -41,7 +41,7 @@ import SchoolSettings from "@/pages/pendidikanku-dashboard/dashboard-school/sett
 import SchoolActiveClass from "@/pages/pendidikanku-dashboard/dashboard-school/class/active-class/SchoolActiveClass";
 
 export const SchoolRoutes = (
-  <Route path="/:id/sekolah" element={<StudentLayout />}>
+  <Route path="sekolah" element={<StudentLayout />}>
     {/* === Dashboard Utama === */}
     <Route index element={<SchoolDashboard />} />
 
@@ -111,7 +111,7 @@ export const SchoolRoutes = (
       <Route path="keuangan" element={<SchoolFinance showBack />} />
       <Route path="keuangan/detail/:id" element={<DetailBill />} />
       <Route path="guru" element={<SchoolTeacher showBack />} />
-      <Route path="all-announcement" element={<AllAnnouncement />} />
+      {/* <Route path="all-announcement" element={<AllAnnouncement />} /> */}
       <Route path="sekolah" element={<SchoolDashboard showBack />} />
       <Route path="room-school" element={<RoomSchool />} />
       <Route path="room-school/:id" element={<DetailRoomSchool />} />
@@ -119,7 +119,7 @@ export const SchoolRoutes = (
       <Route path="pelajaran" element={<SchoolSubject />} />
       <Route path="sertifikat" element={<SchoolCertificate />} />
       <Route path="kalender" element={<CalenderAcademic />} />
-      <Route path="statistik" element={<SchoolStatistik />} />
+      {/* <Route path="statistik" element={<SchoolStatistik />} /> */}
       <Route path="pengaturan" element={<SchoolSettings />} />
       <Route path="kelas-aktif" element={<SchoolActiveClass />} />
       <Route

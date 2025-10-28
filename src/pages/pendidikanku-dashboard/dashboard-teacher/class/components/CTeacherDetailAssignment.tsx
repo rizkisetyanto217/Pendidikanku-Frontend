@@ -11,8 +11,8 @@ import {
   type Palette,
 } from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
 
-import ModalAddAssignmentClass from "./TeacherModalAddAssignmentClass";
-import ModalEditAssignmentClass from "./TeacherModalEditAssignmentClass";
+import ModalAddAssignmentClass from "./CTeacherModalAddAssignmentClass";
+import ModalEditAssignmentClass from "./CTeacherModalEditAssignmentClass";
 import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
 import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/ParentSideBar";
 
