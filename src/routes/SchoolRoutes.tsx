@@ -1,7 +1,7 @@
 import { Route } from "react-router-dom";
-import StudentLayout from "@/layout/StudentLayout";
+import MainLayout from "@/layout/MainLayout";
 
-// 📚 Pages
+// Pages
 import SchoolDashboard from "@/pages/pendidikanku-dashboard/dashboard-school/SchoolMainDashboard";
 import SchoolStudent from "@/pages/pendidikanku-dashboard/dashboard-school/coming-soon/student-(pending)/SchoolStudent";
 import AllSchedule from "@/pages/pendidikanku-dashboard/dashboard-school/dashboard/SchoolAllSchedule";
@@ -27,7 +27,7 @@ import SchoolAnnouncement from "@/pages/pendidikanku-dashboard/dashboard-school/
 import SchoolBooks from "@/pages/pendidikanku-dashboard/dashboard-school/books/SchoolBooks";
 import SchoolDetailBook from "@/pages/pendidikanku-dashboard/dashboard-school/books/detail/SchoolDetailBook";
 
-// 🧭 Menu Utama
+// Menu Utama
 import SchoolMenuGrids from "@/pages/pendidikanku-dashboard/dashboard-school/menu/SchoolMenuGrids";
 import RoomSchool from "@/pages/pendidikanku-dashboard/dashboard-school/academic/rooms/SchoolRoom";
 import DetailRoomSchool from "@/pages/pendidikanku-dashboard/dashboard-school/academic/rooms/SchoolDetailRoom";
@@ -40,8 +40,9 @@ import SchoolStatistik from "@/pages/pendidikanku-dashboard/dashboard-school/com
 import SchoolSettings from "@/pages/pendidikanku-dashboard/dashboard-school/coming-soon/settings-(pending)/SchoolSettings";
 import SchoolActiveClass from "@/pages/pendidikanku-dashboard/dashboard-school/class/active-class/SchoolActiveClass";
 
+
 export const SchoolRoutes = (
-  <Route path="sekolah" element={<StudentLayout />}>
+  <Route path="sekolah" element={<MainLayout />}>
     {/* === Dashboard Utama === */}
     <Route index element={<SchoolDashboard />} />
 

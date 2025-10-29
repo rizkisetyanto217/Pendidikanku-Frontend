@@ -1,5 +1,5 @@
 import { Route } from "react-router-dom";
-import StudentLayout from "@/layout/StudentLayout";
+import MainLayout from "@/layout/MainLayout";
 import StudentDashboard from "@/pages/pendidikanku-dashboard/dashboard-student/StudentMainDashboard";
 import StudentProgressDetail from "@/pages/pendidikanku-dashboard/dashboard-student/progress/StudentProgress";
 import StudentAllSchedule from "@/pages/pendidikanku-dashboard/dashboard-student/dashboard/StudentAllSchedule";
@@ -27,35 +27,79 @@ import StudentAttandenceClass from "@/pages/pendidikanku-dashboard/dashboard-stu
 import StudentExam from "@/pages/pendidikanku-dashboard/dashboard-student/class/StudentExam";
 import StudentCertificate from "@/pages/pendidikanku-dashboard/dashboard-student/certificate/StudentCertificate";
 
+
+// ======================
+// Routing untuk halaman MURID (Student Dashboard)
+// ======================
+
 export const StudentRoutes = (
-  <Route path="murid" element={<StudentLayout />}>
+  // Route utama: semua path di bawah "/murid"
+  <Route path="murid" element={<MainLayout />}>
+    {/* =====================
+        DASHBOARD UTAMA
+    ===================== */}
+    {/* Halaman utama dashboard murid */}
     <Route index element={<StudentDashboard />} />
+
+    {/* =====================
+        PROGRESS AKADEMIK
+    ===================== */}
+    {/* Detail perkembangan belajar murid */}
     <Route path="progress" element={<StudentProgressDetail />} />
-    <Route path="semua-jadwal" element={<StudentAllSchedule />} />
-    <Route path="profil-murid" element={<StudentProfil />} />
-    <Route path="tugas" element={<StudentAssignmentClass />} />
-    <Route
-      path="semua-jadwal/:id"
-      element={<DetailScheduleStudent />}
-    />
-    {/* <Route path="announcements" element={<AnnouncementsStudent />} />
-    <Route path="announcements/:id" element={<DetailAnnouncementStudent />} /> */}
-    <Route path="tagihan/:id" element={<InvoiceTagihan />} />
+    {/* Halaman raport */}
     <Route path="progress/raport" element={<StudentRaport />} />
-    <Route path="detail" element={<StudentDetail />} />
-    <Route path="keuangan" element={<StudentFInance />} />
-    <Route path="jadwal" element={<StudentSchedule />} />
-    <Route path="keuangan-list" element={<ListFinance />} />
-    <Route path="keuangan-list/:id" element={<InvoiceTagihan />} />
-    {/* <Route path="pengumuman">
-      <Route index element={<StudentAnnouncement />} />
-      <Route path="detail/:id" element={<StudentDetailAnnouncement />} />
-    </Route> */}
+    {/* Halaman absensi */}
     <Route path="progress/absensi" element={<StudentAbsence />} />
+    {/* Halaman catatan hasil belajar */}
     <Route path="progress/catatan-hasil" element={<StudentNotesSummary />} />
+
+    {/* =====================
+        JADWAL & DETAILNYA
+    ===================== */}
+    {/* Halaman semua jadwal */}
+    <Route path="semua-jadwal" element={<StudentAllSchedule />} />
+    {/* Detail jadwal tertentu berdasarkan ID */}
+    <Route path="semua-jadwal/:id" element={<DetailScheduleStudent />} />
+    {/* Jadwal utama (khusus tampilan kelas saya / tab jadwal) */}
+    <Route path="jadwal" element={<StudentSchedule />} />
+
+    {/* =====================
+        PROFIL & MENU LAINNYA
+    ===================== */}
+    {/* Profil murid */}
+    <Route path="profil-murid" element={<StudentProfil />} />
+    {/* Detail umum murid */}
+    <Route path="detail" element={<StudentDetail />} />
+
+    {/* =====================
+        TUGAS / ASSIGNMENT
+    ===================== */}
+    {/* Daftar tugas */}
+    <Route path="tugas" element={<StudentAssignmentClass />} />
+
+    {/* =====================
+        KEUANGAN / TAGIHAN
+    ===================== */}
+    {/* Halaman keuangan ringkas */}
+    <Route path="keuangan" element={<StudentFInance />} />
+    {/* Daftar seluruh tagihan */}
+    <Route path="keuangan-list" element={<ListFinance />} />
+    {/* Detail tagihan berdasarkan ID */}
+    <Route path="keuangan-list/:id" element={<InvoiceTagihan />} />
+    {/* Tagihan langsung dari route lain */}
+    <Route path="tagihan/:id" element={<InvoiceTagihan />} />
+
+    {/* =====================
+        MENU UTAMA KELAS SAYA
+    ===================== */}
     <Route path="menu-utama">
+      {/* Halaman utama menu grid murid */}
       <Route index element={<StudentMenuGrids />} />
+
+      {/* Halaman daftar kelas */}
       <Route path="kelas-saya" element={<MyClass />} />
+
+      {/* Detail per kelas (dengan dynamic :id) */}
       <Route path="kelas-saya/:id/materi" element={<StudentMateri />} />
       <Route path="kelas-saya/:id/tugas" element={<StudentAssignment />} />
       <Route path="kelas-saya/:id/quiz" element={<StudentQuizPage />} />
@@ -64,8 +108,22 @@ export const StudentRoutes = (
         element={<StudentAttandenceClass />}
       />
       <Route path="kelas-saya/:id/ujian" element={<StudentExam />} />
+
+      {/* Profil murid dari menu utama */}
       <Route path="profil-murid" element={<StudentProfil />} />
-      <Route path="sertifikat-murid" element={<StudentCertificate />} />
+
+      {/* Sertifikat murid (sementara dinonaktifkan)
+      <Route path="sertifikat-murid" element={<StudentCertificate />} /> */}
     </Route>
+
+    {/* =====================
+        PENGUMUMAN (sementara dinonaktifkan)
+    ===================== */}
+    {/* <Route path="announcements" element={<AnnouncementsStudent />} />
+    <Route path="announcements/:id" element={<DetailAnnouncementStudent />} /> */}
+    {/* <Route path="pengumuman">
+      <Route index element={<StudentAnnouncement />} />
+      <Route path="detail/:id" element={<StudentDetailAnnouncement />} />
+    </Route> */}
   </Route>
 );

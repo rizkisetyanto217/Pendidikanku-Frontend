@@ -455,37 +455,7 @@ export default function TeacherDashboard() {
               </div>
             </section>
 
-            {/* ===== Row 3: Pengumuman ===== */}
-            <section>
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="font-medium">Pengumuman</h3>
-              </div>
-
-              <AnnouncementsList
-                palette={palette}
-                items={announcements}
-                dateFmt={(iso) => fmtLong(normalizeISOToLocalNoon(iso))}
-                seeAllState={{ announcements }} // ⬅️ ini yang dibaca komponen di atas
-                seeAllPath="all-announcement-teacher"
-                getDetailHref={(a) =>
-                  `/${slug}/guru/all-announcement-teacher/detail/${a.id}`
-                }
-                // showActions
-                canAdd={false}
-                onEdit={(a) => {
-                  setAnnounceInitial({
-                    id: a.id,
-                    title: a.title,
-                    date: a.date,
-                    body: a.body,
-                  });
-                  setAnnounceOpen(true);
-                }}
-                onDelete={handleDeleteAnnouncement}
-                deletingId={deletingId}
-              />
-            </section>
-
+           
             {isLoading && (
               <div className="text-sm" style={{ color: palette.silver2 }}>
                 Memuat data dashboard…

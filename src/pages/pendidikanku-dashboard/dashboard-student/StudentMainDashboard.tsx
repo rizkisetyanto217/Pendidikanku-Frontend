@@ -93,36 +93,7 @@ const hijriLong = (iso?: string) =>
       })
     : "-";
 
-function KpiTile({
-  palette,
-  label,
-  value,
-  icon,
-}: {
-  palette: Palette;
-  label: string;
-  value: number | string;
-  icon?: React.ReactNode;
-}) {
-  return (
-    <SectionCard palette={palette}>
-      <div className="p-4 md:p-5 flex items-center gap-3">
-        <span
-          className="h-10 w-10 grid place-items-center rounded-xl"
-          style={{ background: palette.primary2, color: palette.primary }}
-        >
-          {icon}
-        </span>
-        <div>
-          <div className="text-sm" style={{ color: palette.black2 }}>
-            {label}
-          </div>
-          <div className="text-xl font-semibold">{value}</div>
-        </div>
-      </div>
-    </SectionCard>
-  );
-}
+
 
 /* ---------- Fake API ---------- */
 async function fetchParentHome() {
@@ -234,26 +205,7 @@ export default function StudentDashboard() {
       <main className="w-full">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           <div className="flex-1 flex flex-col space-y-6 min-w-0">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {[
-                { label: "Guru", value: 26, icon: <UserCog size={18} /> },
-                { label: "Siswa", value: 342, icon: <Users size={18} /> },
-                {
-                  label: "Program",
-                  value: 12,
-                  icon: <GraduationCap size={18} />,
-                },
-                { label: "Kelas", value: 18, icon: <BookOpen size={18} /> },
-              ].map((k) => (
-                <KpiTile
-                  key={k.label}
-                  palette={palette}
-                  label={k.label}
-                  value={k.value}
-                  icon={k.icon}
-                />
-              ))}
-            </div>
+            
             <section>
               <ChildSummaryCard
                 child={data?.child}
@@ -290,7 +242,7 @@ export default function StudentDashboard() {
               </div>
             </section>
 
-            <section>
+            {/* <section>
               <AnnouncementsList
                 palette={palette}
                 items={data?.announcements ?? []}
@@ -302,7 +254,7 @@ export default function StudentDashboard() {
                 getDetailHref={(a) => `/murid/pengumuman/detail/${a.id}`}
                 showActions={false}
               />
-            </section>
+            </section> */}
           </div>
         </div>
       </main>

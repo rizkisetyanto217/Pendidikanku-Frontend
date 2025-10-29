@@ -53,8 +53,8 @@ export default function TeacherMenuGrids() {
       },
       {
         key: "kelas-all",
-        label: "Seluruh Kelas",
-        to: "seluruh-kelas",
+        label: "Guru mapel",
+        to: "guru-mapel",
         icon: <Layers />,
       },
       {
@@ -63,12 +63,12 @@ export default function TeacherMenuGrids() {
         to: "profil-guru",
         icon: <IdCard />,
       },
-      {
-        key: "pengumuman",
-        label: "Pengumuman",
-        to: "all-announcement-teacher",
-        icon: <Megaphone />,
-      },
+      // {
+      //   key: "pengumuman",
+      //   label: "Pengumuman",
+      //   to: "all-announcement-teacher",
+      //   icon: <Megaphone />,
+      // },
       {
         key: "jadwal",
         label: "Jadwal",
@@ -87,12 +87,12 @@ export default function TeacherMenuGrids() {
         to: "tugas",
         icon: <NotebookPen />,
       },
-      {
-        key: "sertifikat",
-        label: "Sertifikat",
-        to: "sertifikat",
-        icon: <Award />,
-      },
+      // {
+      //   key: "sertifikat",
+      //   label: "Sertifikat",
+      //   to: "sertifikat",
+      //   icon: <Award />,
+      // },
     ],
     []
   );

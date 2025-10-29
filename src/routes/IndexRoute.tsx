@@ -25,6 +25,7 @@ import { StudentRoutes } from "./StudentRoutes";
 import { SchoolRoutes } from "./SchoolRoutes";
 import Login from "@/pages/pendidikanku-dashboard/auth/Login";
 
+
 export default function AppRoutes() {
   return (
     <Routes>
@@ -75,5 +76,7 @@ export default function AppRoutes() {
       <Route path="*" element={<NotFound />} />
       <Route path="/unauthorized" element={<Unauthorized />} />
     </Routes>
+
+    
   );
 } 

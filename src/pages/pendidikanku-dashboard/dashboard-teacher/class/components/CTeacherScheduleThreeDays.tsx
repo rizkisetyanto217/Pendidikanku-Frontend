@@ -349,20 +349,7 @@ export default function ScheduleThreeDays() {
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <ParentTopBar
-        palette={palette}
-        gregorianDate={new Date().toISOString()}
-        title="Jadwal 3 Hari Kedepan"
-        showBack
-        dateFmt={(iso) =>
-          new Date(iso).toLocaleDateString("id-ID", {
-            weekday: "long",
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-          })
-        }
-      />
+      
 
       {/* Modal Tambah/Edit Jadwal */}
       <AddSchedule
@@ -372,11 +359,9 @@ export default function ScheduleThreeDays() {
         onSubmit={handleSubmitSchedule}
       />
 
-      <main className="w-full px-4 md:px-6  md:py-8">
+      <main className="w-full">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
-          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-            <ParentSidebar />
-          </aside>
+          
 
           <div className="flex-1 min-w-0 space-y-4">
             {/* Header actions */}

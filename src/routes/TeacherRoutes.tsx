@@ -1,6 +1,6 @@
 // src/routes/TeacherRoutes.tsx
 import { Route, Navigate } from "react-router-dom";
-import StudentLayout from "@/layout/StudentLayout";
+import MainLayout from "@/layout/MainLayout";
 
 // Dashboard & Profil
 import TeacherDashboard from "@/pages/pendidikanku-dashboard/dashboard-teacher/TeacherMainDashboard";
@@ -14,10 +14,6 @@ import AttendanceDetail from "@/pages/pendidikanku-dashboard/dashboard-teacher/a
 import TeacherGrading from "@/pages/pendidikanku-dashboard/dashboard-teacher/grade/TeacherGrade";
 import DetailGrading from "@/pages/pendidikanku-dashboard/dashboard-teacher/grade/components/CTeacherDetailGrading";
 
-// Announcement
-import TeacherAnnouncements from "@/pages/pendidikanku-dashboard/dashboard-teacher/announcement/TeacherAnnouncement";
-import AllAnnouncementTeacher from "@/pages/pendidikanku-dashboard/dashboard-teacher/dashboard/TeacherAllAnnouncement";
-import DetailAnnouncementTeacher from "@/pages/pendidikanku-dashboard/dashboard-teacher/dashboard/TeacherDetailAnnouncement";
 
 // Class & Assignments
 import TeacherClass from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/TeacherClass";
@@ -45,14 +41,16 @@ import DetailScheduleSevenDays from "@/pages/pendidikanku-dashboard/dashboard-te
 
 // Menu utama guru
 import TeacherMenuGrids from "@/pages/pendidikanku-dashboard/dashboard-teacher/menu/TeacherMenuGrids";
-import AllClasses from "@/pages/pendidikanku-dashboard/dashboard-teacher/menu/TeacherAllClasses";
+
 import ClassDetail from "@/pages/pendidikanku-dashboard/dashboard-teacher/menu/TeacherDetailClasses";
 import TeacherSettings from "@/pages/pendidikanku-dashboard/dashboard-teacher/menu/settings/TeacherSettings";
 import TeacherAssignment from "@/pages/pendidikanku-dashboard/dashboard-teacher/menu/assignments/TeacherAssignment";
 import TeacherCertificate from "@/pages/pendidikanku-dashboard/dashboard-teacher/menu/certificate/TeacherCertificate";
+import TeacherSubjectsList from "@/pages/pendidikanku-dashboard/dashboard-teacher/TeacherSubject/TeacherSubjectsList";
+
 
 export const TeacherRoutes = (
-  <Route path="guru" element={<StudentLayout />}>
+  <Route path="guru" element={<MainLayout />}>
     {/* Dashboard */}
     <Route index element={<TeacherDashboard />} />
 
@@ -70,11 +68,11 @@ export const TeacherRoutes = (
     </Route>
 
     {/* Pengumuman */}
-    <Route path="pengumuman" element={<TeacherAnnouncements />} />
+    {/* <Route path="pengumuman" element={<TeacherAnnouncements />} />
     <Route path="all-announcement-teacher">
       <Route index element={<AllAnnouncementTeacher />} />
       <Route path="detail" element={<DetailAnnouncementTeacher />} />
-    </Route>
+    </Route> */}
 
     {/* Jadwal */}
     <Route path="jadwal" element={<TeacherSchedule />} />
@@ -117,15 +115,23 @@ export const TeacherRoutes = (
     {/* Menu Utama Guru */}
     <Route path="menu-utama">
       <Route index element={<TeacherMenuGrids />} />
-      <Route path="seluruh-kelas">
-        <Route index element={<AllClasses />} />
-        <Route path=":id" element={<ClassDetail />} />
+      <Route path="kelas">
+        <Route index element={<TeacherClass />} />
+        <Route path=":id" element={<DetailClass />} />
+      </Route>
+      <Route path="guru-mapel">
+        <Route index element={<TeacherSubjectsList />} />
       </Route>
       <Route path="jadwal" element={<TeacherSchedule showBack />} />
       <Route path="profil-guru" element={<TeacherProfil />} />
       <Route path="pengaturan" element={<TeacherSettings />} />
       <Route path="tugas" element={<TeacherAssignment />} />
-      <Route path="sertifikat" element={<TeacherCertificate />} />
+      {/* <Route path="sertifikat" element={<TeacherCertificate />} /> */}
+    </Route>
+
+    {/* Guru Mapel */}
+    <Route path="guru-mapel">
+      <Route index element={<TeacherSubjectsList />} />
     </Route>
   </Route>
 );

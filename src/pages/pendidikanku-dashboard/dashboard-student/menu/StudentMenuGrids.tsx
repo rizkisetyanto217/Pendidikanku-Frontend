@@ -50,12 +50,12 @@ export default function StudentMenuGrids() {
         to: "my-class",
         icon: <BookOpen />,
       },
-      {
-        key: "pengumuman",
-        label: "Pengumuman",
-        to: "announcements",
-        icon: <Megaphone />,
-      },
+      // {
+      //   key: "pengumuman",
+      //   label: "Pengumuman",
+      //   to: "announcements",
+      //   icon: <Megaphone />,
+      // },
       {
         key: "pembayaran",
         label: "Pembayaran",
@@ -68,12 +68,12 @@ export default function StudentMenuGrids() {
         to: "jadwal",
         icon: <CalendarDays />,
       },
-      {
-        key: "sertifikat",
-        label: "Sertifikat",
-        to: "sertifikat-murid",
-        icon: <Award />,
-      },
+      // {
+      //   key: "sertifikat",
+      //   label: "Sertifikat",
+      //   to: "sertifikat-murid",
+      //   icon: <Award />,
+      // },
       {
         key: "profil",
         label: "Profil Murid",

@@ -383,16 +383,10 @@ const ClassDetail: React.FC = () => {
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <ParentTopBar
-        palette={palette}
-        title="Detail Kelas"
-        gregorianDate={TODAY_ISO}
-        hijriDate={hijriLong(TODAY_ISO)}
-      />
-
+      
       <main className="mx-auto max-w-7xl px-4 py-6 space-y-6">
         <div className="lg:flex lg:items-start lg:gap-6">
-          <ParentSidebar />
+         
 
           <div className="flex-1 min-w-0 space-y-6">
             {/* Header */}

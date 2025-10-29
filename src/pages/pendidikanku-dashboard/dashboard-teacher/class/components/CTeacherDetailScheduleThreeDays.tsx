@@ -88,12 +88,7 @@ export default function DetailScheduleThreeDays() {
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <ParentTopBar
-        palette={palette}
-        title="Detail Jadwal (3 Hari)"
-        gregorianDate={new Date().toISOString()}
-        showBack
-      />
+      
 
       <ModalEditSchedule
         open={editOpen}
@@ -106,11 +101,9 @@ export default function DetailScheduleThreeDays() {
         onDelete={handleDelete}
       />
 
-      <main className="w-full px-4 md:px-6  md:py-8">
+      <main className="w-full">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
-          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-            <ParentSidebar />
-          </aside>
+          
 
           <div className="flex-1 min-w-0 space-y-4">
             <div className="mx-auto  md:flex hidden items-center gap-3">

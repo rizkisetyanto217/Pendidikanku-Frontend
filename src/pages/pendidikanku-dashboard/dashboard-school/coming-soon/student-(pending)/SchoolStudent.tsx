@@ -15,8 +15,7 @@ import {
   Badge,
   type Palette,
 } from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
-import ParentSidebar from "../../components/home/ParentSideBar";
+
 
 import TambahSiswa from "./modal/SchoolAddStudent";
 import UploadFileSiswa from "./modal/SchoolUploadFileStudent";
