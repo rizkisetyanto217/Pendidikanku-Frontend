@@ -1,7 +1,7 @@
-import React, { useMemo } from "react";
-import { Link, useParams, useNavigate } from "react-router-dom";
+import React, { useMemo, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Wallet, FileText, CheckCircle2, ArrowLeft } from "lucide-react";
+import { Wallet, CheckCircle2, Clock, ArrowLeft } from "lucide-react";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import {
@@ -9,11 +9,9 @@ import {
   Btn,
   type Palette,
 } from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
-import ParentTopBar from "../../components/home/ParentTopBar";
-import ParentSidebar from "../../components/home/ParentSideBar";
 
 /* =========================
-   Types
+   Types & Helpers
 ========================= */
 type BillStatus = "unpaid" | "paid" | "overdue";
 type BillItem = { id: string; name: string; qty?: number; amount: number };
@@ -22,8 +20,8 @@ interface BillDetail {
   id: string;
   title: string;
   invoiceNo: string;
-  createdAt: string; // ISO
-  dueDate: string; // ISO
+  createdAt: string;
+  dueDate: string;
   status: BillStatus;
   student: { name: string; className: string };
   items: BillItem[];
@@ -32,16 +30,6 @@ interface BillDetail {
   total: number;
   payment?: { date: string; method: string; ref: string };
 }
-
-/* =========================
-   Date helpers (timezone-safe)
-========================= */
-const atLocalNoon = (d: Date) => {
-  const x = new Date(d);
-  x.setHours(12, 0, 0, 0);
-  return x;
-};
-const toLocalNoonISO = (d: Date) => atLocalNoon(d).toISOString();
 
 const dateLong = (iso?: string) =>
   iso
@@ -53,19 +41,6 @@ const dateLong = (iso?: string) =>
       })
     : "—";
 
-const hijriLong = (iso?: string) =>
-  iso
-    ? new Date(iso).toLocaleDateString("id-ID-u-ca-islamic-umalqura", {
-        weekday: "long",
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      })
-    : "—";
-
-/* =========================
-   Currency
-========================= */
 const formatIDR = (n: number) =>
   new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -74,325 +49,75 @@ const formatIDR = (n: number) =>
   }).format(n);
 
 /* =========================
-   Fake API (dummy)
+   Dummy Fetch Data
 ========================= */
 async function fetchBillDetail(billId: string): Promise<BillDetail> {
   const now = new Date();
   const iso = (d: Date) => d.toISOString();
 
-  const datasets: Record<string, Omit<BillDetail, "total">> = {
-    "paid-example": {
-      id: "paid-example",
-      title: "SPP Juli 2025",
-      invoiceNo: "INV-2025-07-014",
-      createdAt: iso(new Date(now.getFullYear(), 6, 1)),
-      dueDate: iso(new Date(now.getFullYear(), 6, 10)),
-      status: "paid",
-      student: { name: "Ahmad", className: "TPA A" },
-      items: [
-        { id: "i1", name: "SPP Bulanan", amount: 150_000 },
-        { id: "i2", name: "Infaq Kegiatan", amount: 10_000 },
-      ],
-      discount: 0,
-      adminFee: 2_500,
-      payment: {
-        date: iso(new Date(now.getFullYear(), 6, 5, 9, 12)),
-        method: "Midtrans (VA BSI)",
-        ref: "MID-VA-7F3K2Q",
-      },
-    },
-    "overdue-example": {
-      id: "overdue-example",
-      title: "SPP Juni 2025",
-      invoiceNo: "INV-2025-06-098",
-      createdAt: iso(new Date(now.getFullYear(), 5, 1)),
-      dueDate: iso(new Date(now.getFullYear(), 5, 10)),
-      status: "overdue",
-      student: { name: "Ahmad", className: "TPA A" },
-      items: [
-        { id: "i1", name: "SPP Bulanan", amount: 150_000 },
-        { id: "i2", name: "Denda Keterlambatan", amount: 5_000 },
-      ],
-      discount: 0,
-      adminFee: 0,
-    },
-    default: {
-      id: billId || "b1",
-      title: "SPP Agustus 2025",
-      invoiceNo: "INV-2025-08-001",
-      createdAt: iso(new Date(now.getFullYear(), 7, 1)),
-      dueDate: iso(new Date(now.getFullYear(), 7, 17)),
-      status: "unpaid",
-      student: { name: "Ahmad", className: "TPA A" },
-      items: [
-        { id: "i1", name: "SPP Bulanan", amount: 150_000 },
-        { id: "i2", name: "Buku Panduan Iqra", qty: 1, amount: 20_000 },
-      ],
-      discount: 10_000,
-      adminFee: 2_500,
-    },
+  return {
+    id: billId || "default",
+    title: "SPP Agustus 2025",
+    invoiceNo: "INV-2025-08-001",
+    createdAt: iso(new Date(now.getFullYear(), 7, 1)),
+    dueDate: iso(new Date(now.getFullYear(), 7, 17)),
+    status: "unpaid",
+    student: { name: "Ahmad", className: "TPA A" },
+    items: [
+      { id: "i1", name: "SPP Bulanan", amount: 150_000 },
+      { id: "i2", name: "Buku Panduan Iqra", qty: 1, amount: 20_000 },
+    ],
+    discount: 10_000,
+    adminFee: 2_500,
+    total: 162_500,
   };
-
-  const data = datasets[billId] ?? datasets.default;
-  const subtotal = data.items.reduce(
-    (acc, it) => acc + it.amount * (it.qty ?? 1),
-    0
-  );
-  const total = subtotal - (data.discount ?? 0) + (data.adminFee ?? 0);
-  return { ...data, total };
 }
 
 /* =========================
-   Small bits
+   Tabs Header Component
 ========================= */
-function Row({
-  left,
-  right,
+function TabsHeader({
+  activeTab,
+  setActiveTab,
   palette,
-  boldRight,
-  className,
-  style,
-  ...rest
 }: {
-  left: React.ReactNode;
-  right: React.ReactNode;
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
   palette: Palette;
-  boldRight?: boolean;
-} & React.HTMLAttributes<HTMLDivElement>) {
-  // default teks hitam; masih bisa dioverride
-  const mergedStyle: React.CSSProperties = {
-    color: palette.black2,
-    ...(style || {}),
-  };
+}) {
+  const tabs = [
+    { key: "today", label: "Tagihan Hari Ini", icon: <Clock size={16} /> },
+    { key: "history", label: "Riwayat Pembayaran", icon: <CheckCircle2 size={16} /> },
+  ];
 
   return (
-    <div
-      className={`flex items-center justify-between py-1 text-sm ${className ?? ""}`}
-      style={mergedStyle}
-      {...rest}
-    >
-      <span style={{ color: palette.black2 }}>{left}</span>
-      <span style={{ fontWeight: boldRight ? 700 : 500 }}>{right}</span>
+    <div className="flex gap-3 border-b mb-4" style={{ borderColor: palette.silver1 }}>
+      {tabs.map((t) => {
+        const isActive = activeTab === t.key;
+        return (
+          <button
+            key={t.key}
+            onClick={() => setActiveTab(t.key)}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-t-lg transition-all"
+            style={{
+              background: isActive ? palette.white1 : "transparent",
+              color: isActive ? palette.primary : palette.silver2,
+              borderBottom: isActive
+                ? `2px solid ${palette.primary}`
+                : "2px solid transparent",
+            }}
+          >
+            {t.icon}
+            {t.label}
+          </button>
+        );
+      })}
     </div>
   );
 }
 
-function FinanceHeaderCard({
-  palette,
-  data,
-}: {
-  palette: Palette;
-  data?: BillDetail;
-}) {
-  return (
-    <SectionCard palette={palette} className="p-4 md:p-5">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div
-            className="h-10 w-10 rounded-full flex items-center justify-center"
-            style={{ background: palette.primary2 }}
-          >
-            <Wallet size={18} color={palette.primary} />
-          </div>
-          <div>
-            <div className="font-semibold">{data?.title ?? "—"}</div>
-            <div className="text-sm" style={{ color: palette.black2 }}>
-              {data
-                ? `Invoice ${data.invoiceNo} • Jatuh tempo ${dateLong(data.dueDate)}`
-                : "—"}
-            </div>
-          </div>
-        </div>
-
-        {data && (
-          <div className="flex flex-col gap-2 sm:flex-row">
-            {data.status !== "paid" ? (
-              <Link
-                to={`/tagihan/${data.id}/bayar`}
-                className="w-full sm:w-auto"
-              >
-                <Btn palette={palette} className="w-full sm:w-auto">
-                  Bayar Sekarang
-                </Btn>
-              </Link>
-            ) : (
-              <div className="flex gap-2">
-                <Btn variant="success" palette={palette}>
-                  <CheckCircle2 size={16} /> Lunas
-                </Btn>
-              </div>
-            )}
-            <Btn variant="outline" palette={palette}>
-              <FileText size={16} /> Unduh Invoice
-            </Btn>
-          </div>
-        )}
-      </div>
-    </SectionCard>
-  );
-}
-
-function ItemsTable({
-  palette,
-  items,
-  loading,
-}: {
-  palette: Palette;
-  items?: BillItem[];
-  loading?: boolean;
-}) {
-  return (
-    <SectionCard palette={palette} className="p-4 md:p-5 lg:col-span-2">
-      <div className="font-medium mb-2">Rincian Tagihan</div>
-      <div
-        className="rounded-xl border"
-        style={{ borderColor: palette.silver1, background: palette.white2 }}
-      >
-        <div
-          className="grid grid-cols-12 px-3 py-2 text-sm"
-          style={{ color: palette.black2 }}
-        >
-          <div className="col-span-7">Item</div>
-          <div className="col-span-2 text-right">Qty</div>
-          <div className="col-span-3 text-right">Jumlah</div>
-        </div>
-
-        {loading && (
-          <div
-            className="px-3 py-3 text-sm"
-            style={{ color: palette.black2 }}
-            aria-live="polite"
-          >
-            Memuat...
-          </div>
-        )}
-
-        {!loading &&
-          (items ?? []).map((it) => (
-            <div
-              key={it.id}
-              className="grid grid-cols-12 px-3 py-2 border-t"
-              style={{ borderColor: palette.silver1 }}
-            >
-              <div className="col-span-7">{it.name}</div>
-              <div className="col-span-2 text-right">{it.qty ?? 1}x</div>
-              <div className="col-span-3 text-right">
-                {formatIDR(it.amount)}
-              </div>
-            </div>
-          ))}
-
-        {!loading && (!items || items.length === 0) && (
-          <div className="px-3 py-3 text-sm" style={{ color: palette.black2 }}>
-            Tidak ada item.
-          </div>
-        )}
-      </div>
-    </SectionCard>
-  );
-}
-
-function SummaryCard({
-  palette,
-  data,
-}: {
-  palette: Palette;
-  data?: BillDetail;
-}) {
-  const subtotal = useMemo(
-    () => (data?.items ?? []).reduce((a, b) => a + b.amount * (b.qty ?? 1), 0),
-    [data?.items]
-  );
-
-  return (
-    <SectionCard palette={palette} className="p-4 md:p-5">
-      <div className="font-medium mb-2">Ringkasan</div>
-      <div
-        className="rounded-xl border p-3"
-        style={{
-          borderColor: palette.silver1,
-          background: palette.white2,
-          color: palette.black2,
-        }}
-      >
-        <Row
-          left="Siswa"
-          right={`${data?.student.name ?? "—"} • ${data?.student.className ?? "—"}`}
-          palette={palette}
-        />
-        <Row
-          left="Tanggal dibuat"
-          right={data ? dateLong(data.createdAt) : "—"}
-          palette={palette}
-        />
-        <Row
-          left="Jatuh tempo"
-          right={data ? dateLong(data.dueDate) : "—"}
-          palette={palette}
-        />
-
-        <div
-          className="my-2 border-t"
-          style={{ borderColor: palette.silver1 }}
-        />
-
-        <Row left="Subtotal" right={formatIDR(subtotal)} palette={palette} />
-        {data?.discount ? (
-          <Row
-            left="Diskon"
-            right={`- ${formatIDR(data.discount)}`}
-            palette={palette}
-          />
-        ) : null}
-        {data?.adminFee ? (
-          <Row
-            left="Biaya admin"
-            right={formatIDR(data.adminFee)}
-            palette={palette}
-          />
-        ) : null}
-
-        <div
-          className="mt-2 border-t"
-          style={{ borderColor: palette.silver1 }}
-        />
-
-        <Row
-          left={<span className="font-semibold">Total</span>}
-          right={formatIDR(data?.total ?? 0)}
-          palette={palette}
-          boldRight
-        />
-      </div>
-
-      {data?.payment && (
-        <div className="mt-3">
-          <div className="text-sm font-medium mb-1">Pembayaran</div>
-          <div
-            className="rounded-xl border p-3 text-sm"
-            style={{ borderColor: palette.silver1, background: palette.white2 }}
-          >
-            <div style={{ color: palette.black2 }}>Tanggal</div>
-            <div className="font-medium">{dateLong(data.payment.date)}</div>
-
-            <div className="mt-2" style={{ color: palette.black2 }}>
-              Metode
-            </div>
-            <div className="font-medium">{data.payment.method}</div>
-
-            <div className="mt-2" style={{ color: palette.black2 }}>
-              Ref
-            </div>
-            <div className="font-medium">{data.payment.ref}</div>
-          </div>
-        </div>
-      )}
-    </SectionCard>
-  );
-}
-
 /* =========================
-   Page
+   Main Page
 ========================= */
 export default function StudentFinance() {
   const { billId: billIdParam } = useParams();
@@ -400,7 +125,8 @@ export default function StudentFinance() {
   const navigate = useNavigate();
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
-  const isFromMenuUtama = location.pathname.includes("/menu-utama/");
+
+  const [activeTab, setActiveTab] = useState("today");
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["bill-detail", billId],
@@ -408,44 +134,167 @@ export default function StudentFinance() {
     staleTime: 60_000,
   });
 
-  const topbarGregorianISO = useMemo(() => toLocalNoonISO(new Date()), []);
+  const paidList: BillDetail[] = [
+    {
+      id: "paid-1",
+      title: "SPP Juli 2025",
+      invoiceNo: "INV-2025-07-014",
+      createdAt: new Date(2025, 6, 1).toISOString(),
+      dueDate: new Date(2025, 6, 10).toISOString(),
+      status: "paid",
+      student: { name: "Ahmad", className: "TPA A" },
+      items: [
+        { id: "i1", name: "SPP Bulanan", amount: 150_000 },
+        { id: "i2", name: "Infaq Kegiatan", amount: 10_000 },
+      ],
+      total: 160_000,
+      payment: {
+        date: new Date(2025, 6, 5).toISOString(),
+        method: "VA BSI",
+        ref: "MID-VA-7F3K2Q",
+      },
+    },
+  ];
 
   return (
     <div
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <main className="w-full">
-        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
-          <div className="flex-1 flex flex-col space-y-6 min-w-0">
-            <div className="md:flex hidden items-center gap-3">
-            
+      <main className="max-w-screen-2xl mx-auto p-4 space-y-6">
+        {/* Header dengan tombol back icon */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate(-1)}
+              className="p-2 rounded-lg border transition hover:bg-opacity-70"
+              style={{
+                borderColor: palette.silver1,
+                background: palette.white1,
+                color: palette.black1,
+              }}
+              title="Kembali"
+            >
+              <ArrowLeft size={18} />
+            </button>
 
-              <h1 className="text-lg font-semibold">Pembayaran</h1>
-            </div>
+            <h1 className="text-lg font-semibold" style={{ color: palette.black1 }}>
+              Pembayaran
+            </h1>
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <TabsHeader activeTab={activeTab} setActiveTab={setActiveTab} palette={palette} />
+
+        {/* Tab: Tagihan Hari Ini */}
+        {activeTab === "today" && (
+          <>
             {error ? (
               <SectionCard palette={palette} className="p-4">
-                <div style={{ color: palette.primary }}>
-                  Gagal memuat data tagihan.
-                </div>
+                <div style={{ color: palette.error1 }}>Gagal memuat data tagihan.</div>
               </SectionCard>
             ) : (
               <>
-                <FinanceHeaderCard palette={palette} data={data} />
+                <SectionCard palette={palette} className="p-4 md:p-5">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Wallet size={18} color={palette.primary} />
+                    <div className="font-medium" style={{ color: palette.black1 }}>
+                      Tagihan Aktif
+                    </div>
+                  </div>
+                  <div style={{ color: palette.black2 }}>
+                    Berikut tagihan Anda yang masih belum dibayar.
+                  </div>
+                </SectionCard>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                  <ItemsTable
-                    palette={palette}
-                    items={data?.items}
-                    loading={isLoading}
-                  />
-                  <SummaryCard palette={palette} data={data} />
-                </div>
+                {!isLoading && data && (
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    {/* Rincian Item */}
+                    <SectionCard palette={palette} className="p-4 md:p-5 lg:col-span-2">
+                      <div className="font-medium mb-2" style={{ color: palette.black1 }}>
+                        Rincian Tagihan
+                      </div>
+                      <div
+                        className="rounded-xl border"
+                        style={{
+                          borderColor: palette.silver1,
+                          background: palette.white1,
+                        }}
+                      >
+                        {(data.items ?? []).map((it) => (
+                          <div
+                            key={it.id}
+                            className="grid grid-cols-12 px-3 py-2 border-b last:border-none"
+                            style={{ borderColor: palette.silver1, color: palette.black2 }}
+                          >
+                            <div className="col-span-7">{it.name}</div>
+                            <div className="col-span-2 text-right">{it.qty ?? 1}x</div>
+                            <div className="col-span-3 text-right">{formatIDR(it.amount)}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </SectionCard>
+
+                    {/* Ringkasan */}
+                    <SectionCard palette={palette} className="p-4 md:p-5">
+                      <div className="font-medium mb-2" style={{ color: palette.black1 }}>
+                        Ringkasan
+                      </div>
+                      <div style={{ color: palette.black2 }}>
+                        Total:{" "}
+                        <span className="font-semibold" style={{ color: palette.primary }}>
+                          {formatIDR(data.total ?? 0)}
+                        </span>
+                      </div>
+                      <Btn palette={palette} className="mt-4 w-full">
+                        Bayar Sekarang
+                      </Btn>
+                    </SectionCard>
+                  </div>
+                )}
               </>
             )}
-          </div>
-        </div>
+          </>
+        )}
+
+        {/* Tab: Riwayat Pembayaran */}
+        {activeTab === "history" && (
+          <SectionCard palette={palette} className="p-4 md:p-5">
+            <div className="font-medium mb-3" style={{ color: palette.black1 }}>
+              Riwayat Pembayaran
+            </div>
+            {paidList.map((b) => (
+              <div
+                key={b.id}
+                className="border rounded-xl p-3 mb-3 transition"
+                style={{
+                  borderColor: palette.silver1,
+                  background: palette.white1,
+                }}
+              >
+                <div className="flex justify-between items-center">
+                  <div>
+                    <div className="font-medium" style={{ color: palette.black1 }}>
+                      {b.title}
+                    </div>
+                    <div className="text-sm" style={{ color: palette.black2 }}>
+                      Dibayar pada {dateLong(b.payment?.date)} via {b.payment?.method}
+                    </div>
+                  </div>
+                  <div
+                    className="font-semibold"
+                    style={{ color: palette.success1 }}
+                  >
+                    {formatIDR(b.total)}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </SectionCard>
+        )}
       </main>
     </div>
   );
 }
+  

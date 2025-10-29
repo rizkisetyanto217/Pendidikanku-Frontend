@@ -444,13 +444,7 @@ export default function AllInvoices() {
       className="min-h-screen w-full transition-colors duration-200"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <ParentTopBar
-        palette={palette}
-        gregorianDate={currentDate}
-        title={state?.heading ?? "Semua Tagihan"}
-        onMenuClick={() => setSidebarOpen(true)}
-        showBack
-      />
+      
 
       {/* Modals */}
       <InvoiceModal
@@ -473,16 +467,9 @@ export default function AllInvoices() {
       />
 
       {/* Layout */}
-      <main className="w-full px-4 md:px-6 py-4 md:py-8">
+      <main className="w-full">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
-          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-            <ParentSidebar
-              desktopOnly={false}
-              mode="mobile"
-              open={sidebarOpen}
-              onCloseMobile={() => setSidebarOpen(false)}
-            />
-          </aside>
+          
 
           <section className="flex-1 flex flex-col space-y-6 min-w-0">
             <div className="flex items-center justify-between">

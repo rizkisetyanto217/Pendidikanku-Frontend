@@ -47,7 +47,7 @@ export default function StudentMenuGrids() {
       {
         key: "kelas-saya",
         label: "Kelas Saya",
-        to: "my-class",
+        to: "kelas-saya",
         icon: <BookOpen />,
       },
       // {
@@ -57,9 +57,9 @@ export default function StudentMenuGrids() {
       //   icon: <Megaphone />,
       // },
       {
-        key: "pembayaran",
+        key: "keuangan",
         label: "Pembayaran",
-        to: "finance",
+        to: "keuangan",
         icon: <Wallet />,
       },
       {

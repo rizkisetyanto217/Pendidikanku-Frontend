@@ -108,9 +108,15 @@ function ModalSelectRoleMasjid({
               <div
                 key={m.masjid_id}
                 onClick={() =>
-                  setSelected({
-                    masjid_id: m.masjid_id,
-                    role: selected?.role || m.roles[0],
+                  setSelected((prev) => {
+                    const keepCurrentRole =
+                      prev?.masjid_id === m.masjid_id && prev?.role
+                        ? prev.role
+                        : undefined;
+                    return {
+                      masjid_id: m.masjid_id,
+                      role: keepCurrentRole ?? (m.roles[0] as MasjidRole),
+                    };
                   })
                 }
                 className="border-2 rounded-2xl p-4 transition-all duration-200 cursor-pointer"
@@ -143,9 +149,10 @@ function ModalSelectRoleMasjid({
                   {m.roles.map((r) => (
                     <button
                       key={r}
-                      onClick={() =>
-                        setSelected({ masjid_id: m.masjid_id, role: r })
-                      }
+                      onClick={(e) => {
+                        e.stopPropagation(); // <— tambahkan ini
+                        setSelected({ masjid_id: m.masjid_id, role: r });
+                      }}
                       className="px-4 py-1.5 text-xs font-medium rounded-lg border-2 transition-all duration-200"
                       style={{
                         background:

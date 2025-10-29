@@ -99,6 +99,12 @@ export const StudentRoutes = (
       {/* Halaman daftar kelas */}
       <Route path="kelas-saya" element={<MyClass />} />
 
+      {/* Halaman keuangan ringkas */}
+      <Route path="keuangan" element={<StudentFInance />} />
+      
+      {/* Jadwal utama (khusus tampilan kelas saya / tab jadwal) */}
+    <Route path="jadwal" element={<StudentSchedule />} />
+
       {/* Detail per kelas (dengan dynamic :id) */}
       <Route path="kelas-saya/:id/materi" element={<StudentMateri />} />
       <Route path="kelas-saya/:id/tugas" element={<StudentAssignment />} />
