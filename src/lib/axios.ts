@@ -14,6 +14,12 @@ const api: AxiosInstance = axiosLib.create({
   timeout: 60_000,
 });
 
+const apiNoAuth = axiosLib.create({
+  baseURL: API_BASE,
+  withCredentials: true,
+  timeout: 60_000,
+});
+
 /* ==========================================
    🧰 UTIL
 ========================================== */
@@ -58,16 +64,14 @@ async function doRefresh(): Promise<string | null> {
   isRefreshing = true;
 
   const xsrf = getCookie("XSRF-TOKEN") || "";
-  refreshPromise = api
+  refreshPromise = apiNoAuth
     .post(
       "/auth/refresh-token",
-      {}, // body kosong, supaya Content-Type: application/json
+      {},
       {
         headers: {
-          "Content-Type": "application/json", // enforceCSRF butuh JSON
-          "X-CSRF-Token": xsrf, // harus identik dgn cookie XSRF-TOKEN
-          // ⛔️ pastikan TIDAK ada Authorization di panggilan refresh
-          Authorization: undefined as any,
+          "Content-Type": "application/json",
+          "X-CSRF-Token": xsrf,
         },
       }
     )
