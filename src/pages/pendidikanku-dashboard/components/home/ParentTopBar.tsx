@@ -12,9 +12,7 @@ import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import { NAVS, type NavItem } from "./navsConfig";
 import api from "@/lib/axios";
 
-/* ======================================================
-   TYPES & HELPERS
-====================================================== */
+/* ================== TYPES & HELPERS ================== */
 interface ParentTopBarProps {
   palette: Palette;
   title?: ReactNode;
@@ -22,8 +20,12 @@ interface ParentTopBarProps {
   gregorianDate?: string;
   showBack?: boolean;
   onBackClick?: () => void;
-  onMenuClick?: () => void; // 👈 tambahkan agar bisa buka sidebar mobile
+  onMenuClick?: () => void; // mobile hamburger
   dateFmt?: (iso: string) => string;
+
+  // 🔽 baru untuk toggle sidebar desktop
+  sidebarOpen?: boolean;
+  onToggleSidebar?: () => void;
 }
 
 const defaultFormatHijri = (d: Date) =>
@@ -42,9 +44,7 @@ const getLocalMasjid = () => {
   }
 };
 
-/* ======================================================
-   COMPONENT
-====================================================== */
+/* ================== COMPONENT ================== */
 export default function ParentTopBar({
   palette,
   hijriDate,
@@ -54,6 +54,8 @@ export default function ParentTopBar({
   onBackClick,
   onMenuClick,
   dateFmt,
+  sidebarOpen = true, // 👈 default open
+  onToggleSidebar, // 👈 handler dari MainLayout
 }: ParentTopBarProps) {
   const { isDark } = useHtmlDarkMode();
   const navigate = useNavigate();
@@ -71,14 +73,12 @@ export default function ParentTopBar({
   const isFetching = useRef(false);
   const lastFetchedId = useRef<string>("");
 
-  /* ======================================================
-     FETCH MASJID CONTEXT
-  ====================================================== */
+  /* ================== FETCH MASJID CONTEXT ================== */
   useEffect(() => {
     if (!id || isFetching.current || lastFetchedId.current === id) return;
     isFetching.current = true;
 
-    async function fetchContext() {
+    (async () => {
       try {
         const res = await api.get("/auth/me/simple-context");
         const userData = res.data?.data;
@@ -118,14 +118,10 @@ export default function ParentTopBar({
       } finally {
         isFetching.current = false;
       }
-    }
-
-    fetchContext();
+    })();
   }, [id, pathname, navigate]);
 
-  /* ======================================================
-     PAGE TITLE
-  ====================================================== */
+  /* ================== PAGE TITLE ================== */
   const pageKind: "sekolah" | "murid" | "guru" = pathname.includes("/sekolah")
     ? "sekolah"
     : pathname.includes("/guru")
@@ -150,11 +146,8 @@ export default function ParentTopBar({
     return found?.label ?? "";
   }, [pathname, navs, title]);
 
-  /* ======================================================
-     HIJRI DATE
-  ====================================================== */
+  /* ================== HIJRI DATE ================== */
   const [hijriLabel, setHijriLabel] = useState<string>("");
-
   useEffect(() => {
     if (hijriDate) return setHijriLabel(hijriDate);
     if (gregorianDate && dateFmt) return setHijriLabel(dateFmt(gregorianDate));
@@ -163,26 +156,50 @@ export default function ParentTopBar({
 
   const handleBack = () => (onBackClick ? onBackClick() : navigate(-1));
 
-  /* ======================================================
-     RENDER
-  ====================================================== */
+  /* ================== RENDER ================== */
   return (
     <div
-      className="sticky top-0 z-40 backdrop-blur border-b transition-all duration-200"
+      className="sticky top-0 z-50 backdrop-blur border-b transition-all duration-200"
       style={{ borderColor: palette.silver1, background: palette.white1 }}
     >
       <div className="mx-auto px-4 py-3 flex items-center justify-between">
-        {/* === DESKTOP === */}
+        {/* === DESKTOP LEFT === */}
         <div className="hidden md:flex items-center gap-3">
+          {/* 👉 Toggle Sidebar diletakkan di sebelah nama lembaga */}
+          {onToggleSidebar && (
+            <button
+              onClick={onToggleSidebar}
+              className="ml-1 h-9 w-9 grid place-items-center rounded-xl border"
+              style={{
+                borderColor: palette.silver1,
+                background: palette.white1,
+                color: palette.black1,
+              }}
+              title={sidebarOpen ? "Sembunyikan sidebar" : "Tampilkan sidebar"}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.background = palette.white2)
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.background = palette.white1)
+              }
+            >
+              <Menu
+                size={18}
+                className={`transition-transform duration-300 ${sidebarOpen ? "rotate-180" : "rotate-0"}`}
+              />
+            </button>
+          )}
           {showBack && (
             <button
               onClick={handleBack}
               className="h-9 w-9 grid place-items-center rounded-xl border"
               style={{ borderColor: palette.silver1 }}
+              title="Kembali"
             >
               <ArrowLeft size={18} />
             </button>
           )}
+
           <img
             src={masjidIcon}
             alt="Logo Masjid"
@@ -190,6 +207,7 @@ export default function ParentTopBar({
             style={{ borderColor: palette.primary }}
             onError={(e) => (e.currentTarget.src = "/image/Gambar-Masjid.jpeg")}
           />
+
           <span
             className="text-base font-semibold"
             style={{ color: palette.primary }}
@@ -198,7 +216,7 @@ export default function ParentTopBar({
           </span>
         </div>
 
-        {/* === RIGHT SIDE === */}
+        {/* === DESKTOP RIGHT === */}
         <div className="hidden md:flex items-center gap-3 text-sm">
           {hijriLabel && (
             <span
@@ -214,13 +232,14 @@ export default function ParentTopBar({
           <PublicUserDropdown variant="icon" withBg={false} />
         </div>
 
-        {/* === MOBILE === */}
+        {/* === MOBILE BAR === */}
         <div className="flex md:hidden items-center justify-between w-full">
           {showBack ? (
             <button
               onClick={handleBack}
               className="h-9 w-9 grid place-items-center rounded-xl border"
               style={{ borderColor: palette.silver1 }}
+              title="Kembali"
             >
               <ArrowLeft size={18} />
             </button>
@@ -229,6 +248,7 @@ export default function ParentTopBar({
               onClick={onMenuClick}
               className="h-9 w-9 grid place-items-center rounded-xl border"
               style={{ borderColor: palette.silver1 }}
+              title="Buka menu"
             >
               <Menu size={18} />
             </button>
@@ -242,3 +262,6 @@ export default function ParentTopBar({
     </div>
   );
 }
+
+
+

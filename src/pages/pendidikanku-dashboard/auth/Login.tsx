@@ -25,6 +25,9 @@ type MasjidItem = {
   roles: MasjidRole[];
 };
 
+/* =========================
+   Modal: Pilih Masjid & Role
+========================= */
 function ModalSelectRoleMasjid({
   open,
   onClose,
@@ -44,21 +47,33 @@ function ModalSelectRoleMasjid({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    let mounted = true;
     if (!open) return;
     setLoading(true);
     api
       .get("/auth/me/simple-context")
       .then((res) => {
+        if (!mounted) return;
         const memberships = res.data?.data?.memberships ?? [];
-        const mapped = memberships.map((m: any) => ({
+        const mapped: MasjidItem[] = memberships.map((m: any) => ({
           masjid_id: m.masjid_id,
           masjid_name: m.masjid_name,
           masjid_icon_url: m.masjid_icon_url,
-          roles: m.roles ?? [],
+          roles: (m.roles ?? []) as MasjidRole[],
         }));
         setMasjids(mapped);
       })
-      .finally(() => setLoading(false));
+      .catch(() => {
+        if (!mounted) return;
+        setMasjids([]);
+      })
+      .finally(() => {
+        if (!mounted) return;
+        setLoading(false);
+      });
+    return () => {
+      mounted = false;
+    };
   }, [open]);
 
   if (!open) return null;
@@ -67,6 +82,9 @@ function ModalSelectRoleMasjid({
     <div
       className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm animate-in fade-in duration-200"
       style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Pilih Masjid dan Role"
     >
       <div
         className="rounded-3xl w-full max-w-md p-8 shadow-2xl animate-in zoom-in-95 duration-200"
@@ -97,7 +115,7 @@ function ModalSelectRoleMasjid({
                 borderColor: palette.primary2,
                 borderTopColor: palette.primary,
               }}
-            ></div>
+            />
             <p className="text-sm" style={{ color: palette.silver2 }}>
               Memuat data...
             </p>
@@ -113,10 +131,9 @@ function ModalSelectRoleMasjid({
                       prev?.masjid_id === m.masjid_id && prev?.role
                         ? prev.role
                         : undefined;
-                    return {
-                      masjid_id: m.masjid_id,
-                      role: keepCurrentRole ?? (m.roles[0] as MasjidRole),
-                    };
+                    const fallbackRole: MasjidRole =
+                      keepCurrentRole ?? (m.roles?.[0] as MasjidRole) ?? "user";
+                    return { masjid_id: m.masjid_id, role: fallbackRole };
                   })
                 }
                 className="border-2 rounded-2xl p-4 transition-all duration-200 cursor-pointer"
@@ -146,35 +163,42 @@ function ModalSelectRoleMasjid({
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {m.roles.map((r) => (
-                    <button
-                      key={r}
-                      onClick={(e) => {
-                        e.stopPropagation(); // <— tambahkan ini
-                        setSelected({ masjid_id: m.masjid_id, role: r });
-                      }}
-                      className="px-4 py-1.5 text-xs font-medium rounded-lg border-2 transition-all duration-200"
-                      style={{
-                        background:
+                  {(m.roles?.length ? m.roles : (["user"] as MasjidRole[])).map(
+                    (r) => (
+                      <button
+                        key={r}
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelected({ masjid_id: m.masjid_id, role: r });
+                        }}
+                        className="px-4 py-1.5 text-xs font-medium rounded-lg border-2 transition-all duration-200"
+                        style={{
+                          background:
+                            selected?.masjid_id === m.masjid_id &&
+                            selected?.role === r
+                              ? palette.primary
+                              : "transparent",
+                          color:
+                            selected?.masjid_id === m.masjid_id &&
+                            selected?.role === r
+                              ? palette.white1
+                              : palette.black1,
+                          borderColor:
+                            selected?.masjid_id === m.masjid_id &&
+                            selected?.role === r
+                              ? palette.primary
+                              : palette.silver1,
+                        }}
+                        aria-pressed={
                           selected?.masjid_id === m.masjid_id &&
                           selected?.role === r
-                            ? palette.primary
-                            : "transparent",
-                        color:
-                          selected?.masjid_id === m.masjid_id &&
-                          selected?.role === r
-                            ? palette.white1
-                            : palette.black1,
-                        borderColor:
-                          selected?.masjid_id === m.masjid_id &&
-                          selected?.role === r
-                            ? palette.primary
-                            : palette.silver1,
-                      }}
-                    >
-                      {r.toUpperCase()}
-                    </button>
-                  ))}
+                        }
+                      >
+                        {r.toUpperCase()}
+                      </button>
+                    )
+                  )}
                 </div>
               </div>
             ))}
@@ -183,6 +207,7 @@ function ModalSelectRoleMasjid({
 
         <div className="mt-6 flex gap-3">
           <button
+            type="button"
             onClick={onClose}
             className="flex-1 px-4 py-2.5 text-sm font-medium rounded-xl transition-colors"
             style={{
@@ -194,6 +219,7 @@ function ModalSelectRoleMasjid({
             Batal
           </button>
           <button
+            type="button"
             disabled={!selected}
             onClick={() =>
               selected && onSelect(selected.masjid_id, selected.role)
@@ -213,7 +239,10 @@ function ModalSelectRoleMasjid({
   );
 }
 
-function ModalPilihTujuan({
+/* =========================
+   Modal: Pilih Tujuan
+========================= */
+function ModalChooseRole({
   open,
   onClose,
   onPilih,
@@ -230,6 +259,9 @@ function ModalPilihTujuan({
     <div
       className="fixed inset-0 flex items-center justify-center backdrop-blur-sm z-50 animate-in fade-in duration-200"
       style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Pilih Peran"
     >
       <div
         className="rounded-3xl p-8 w-full max-w-md text-center space-y-6 shadow-2xl animate-in zoom-in-95 duration-200"
@@ -251,6 +283,7 @@ function ModalPilihTujuan({
         </div>
         <div className="space-y-3">
           <button
+            type="button"
             onClick={() => onPilih("dkm")}
             className="w-full py-4 border-2 rounded-2xl flex items-center justify-center gap-3 transition-all group"
             style={{
@@ -270,6 +303,7 @@ function ModalPilihTujuan({
             <span className="font-semibold">Jadi DKM / Admin Masjid</span>
           </button>
           <button
+            type="button"
             onClick={() => onPilih("teacher")}
             className="w-full py-4 border-2 rounded-2xl flex items-center justify-center gap-3 transition-all group"
             style={{
@@ -289,6 +323,7 @@ function ModalPilihTujuan({
             <span className="font-semibold">Gabung Sebagai Guru</span>
           </button>
           <button
+            type="button"
             onClick={() => onPilih("student")}
             className="w-full py-4 border-2 rounded-2xl flex items-center justify-center gap-3 transition-all group"
             style={{
@@ -309,6 +344,7 @@ function ModalPilihTujuan({
           </button>
         </div>
         <button
+          type="button"
           onClick={onClose}
           className="text-sm font-medium transition-colors"
           style={{ color: palette.silver2 }}
@@ -320,7 +356,10 @@ function ModalPilihTujuan({
   );
 }
 
-function ModalJoinAtauBuat({
+/* =========================
+   Modal: Buat / Join Sekolah
+========================= */
+function ModalJoinOrCreate({
   open,
   mode,
   onClose,
@@ -330,8 +369,11 @@ function ModalJoinAtauBuat({
   open: boolean;
   mode: "dkm" | "teacher" | "student";
   onClose: () => void;
-  onCreateMasjid: (data: { name: string; file?: File }) => void;
-  onJoinSekolah: (code: string, role: "teacher" | "student") => void;
+  onCreateMasjid: (data: { name: string; file?: File }) => Promise<void> | void;
+  onJoinSekolah: (
+    code: string,
+    role: "teacher" | "student"
+  ) => Promise<void> | void;
 }) {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette = pickTheme(themeName as ThemeName, isDark);
@@ -346,6 +388,9 @@ function ModalJoinAtauBuat({
     <div
       className="fixed inset-0 flex items-center justify-center backdrop-blur-sm z-50 animate-in fade-in duration-200"
       style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+      role="dialog"
+      aria-modal="true"
+      aria-label={mode === "dkm" ? "Buat Masjid Baru" : "Gabung ke Sekolah"}
     >
       <div
         className="rounded-3xl p-8 w-full max-w-md space-y-6 shadow-2xl animate-in zoom-in-95 duration-200"
@@ -400,13 +445,18 @@ function ModalJoinAtauBuat({
               </div>
             </div>
             <button
+              type="button"
               disabled={!masjidName.trim() || loading}
-              onClick={() => {
+              onClick={async () => {
                 setLoading(true);
-                onCreateMasjid({
-                  name: masjidName,
-                  file: iconFile || undefined,
-                });
+                try {
+                  await onCreateMasjid({
+                    name: masjidName,
+                    file: iconFile || undefined,
+                  });
+                } finally {
+                  setLoading(false);
+                }
               }}
               className="w-full py-3.5 rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               style={{
@@ -458,10 +508,15 @@ function ModalJoinAtauBuat({
               />
             </div>
             <button
+              type="button"
               disabled={!accessCode.trim() || loading}
-              onClick={() => {
+              onClick={async () => {
                 setLoading(true);
-                onJoinSekolah(accessCode, mode);
+                try {
+                  await onJoinSekolah(accessCode.trim(), mode);
+                } finally {
+                  setLoading(false);
+                }
               }}
               className="w-full py-3.5 rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               style={{
@@ -475,6 +530,7 @@ function ModalJoinAtauBuat({
           </>
         )}
         <button
+          type="button"
           onClick={onClose}
           className="w-full text-sm font-medium transition-colors"
           style={{ color: palette.silver2 }}
@@ -486,6 +542,9 @@ function ModalJoinAtauBuat({
   );
 }
 
+/* =========================
+   Halaman Login
+========================= */
 export default function Login() {
   const navigate = useNavigate();
   const { isDark, themeName } = useHtmlDarkMode();
@@ -510,16 +569,23 @@ export default function Login() {
     setError("");
     try {
       const res = await api.post("/auth/login", { identifier, password });
-      const { access_token, refresh_token } = res.data.data;
-      setTokens(access_token, refresh_token);
+      // Back-end mengirim refresh via HttpOnly cookie; FE cukup ambil access_token saja
+      const { access_token } = res.data?.data ?? {};
+      if (!access_token) throw new Error("Token tidak ditemukan.");
+
+      setTokens(access_token);
 
       const ctx = await api.get("/auth/me/simple-context");
       const memberships = ctx.data?.data?.memberships ?? [];
 
-      if (memberships.length === 0) return setOpenPilihTujuan(true);
+      if (memberships.length === 0) {
+        setOpenPilihTujuan(true);
+        return;
+      }
+
       if (memberships.length === 1) {
         const m = memberships[0];
-        const role = m.roles?.[0] ?? "user";
+        const role: MasjidRole = (m.roles?.[0] as MasjidRole) ?? "user";
         handleSelectMasjidRole(m.masjid_id, role);
         return;
       }
@@ -527,13 +593,13 @@ export default function Login() {
       setOpenSelectMasjid(true);
     } catch (err: any) {
       console.error(err);
-      setError(err?.response?.data?.message || "Login gagal.");
+      setError(err?.response?.data?.message || err?.message || "Login gagal.");
     } finally {
       setLoading(false);
     }
   }
 
-  function handlePilihTujuan(tujuan: "dkm" | "teacher" | "student") {
+  function handleChooseRole(tujuan: "dkm" | "teacher" | "student") {
     setSelectedTujuan(tujuan);
     setOpenPilihTujuan(false);
     setOpenJoinAtauBuat(true);
@@ -567,7 +633,9 @@ export default function Login() {
       setOpenJoinAtauBuat(false);
       navigate(`/${masjidId}/sekolah`, { replace: true });
     } catch (err: any) {
-      alert(err?.response?.data?.message || "Gagal membuat masjid.");
+      alert(
+        err?.response?.data?.message || err?.message || "Gagal membuat masjid."
+      );
     }
   }
 
@@ -592,7 +660,11 @@ export default function Login() {
         navigate(`/${masjidId}/${path}`, { replace: true });
       }
     } catch (err: any) {
-      alert(err?.response?.data?.message || "Gagal bergabung ke sekolah.");
+      alert(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Gagal bergabung ke sekolah."
+      );
     }
   }
 
@@ -637,10 +709,11 @@ export default function Login() {
             <div
               className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
               style={{ background: palette.error1, color: palette.white1 }}
+              aria-hidden
             >
               <span className="text-xs font-bold">!</span>
             </div>
-            <span>{error}</span>
+            <span role="alert">{error}</span>
           </div>
         )}
 
@@ -655,6 +728,7 @@ export default function Login() {
               className="w-full rounded-xl px-4 py-3 outline-none transition-all"
               placeholder="Masukkan email atau username"
               required
+              autoComplete="username"
               style={{
                 background: palette.white2,
                 border: `2px solid ${palette.silver1}`,
@@ -673,6 +747,7 @@ export default function Login() {
                 className="w-full rounded-xl px-4 py-3 pr-12 outline-none transition-all"
                 placeholder="Masukkan password"
                 required
+                autoComplete="current-password"
                 style={{
                   background: palette.white2,
                   border: `2px solid ${palette.silver1}`,
@@ -684,6 +759,9 @@ export default function Login() {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-4 top-1/2 -translate-y-1/2 transition-colors"
                 style={{ color: palette.silver2 }}
+                aria-label={
+                  showPassword ? "Sembunyikan password" : "Tampilkan password"
+                }
               >
                 {showPassword ? (
                   <EyeOffIcon className="w-5 h-5" />
@@ -695,6 +773,7 @@ export default function Login() {
           </div>
 
           <button
+            type="submit"
             disabled={loading}
             className="w-full py-3.5 rounded-xl font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all mt-8"
             style={{
@@ -711,7 +790,7 @@ export default function Login() {
                     borderColor: `${palette.white1}40`,
                     borderTopColor: palette.white1,
                   }}
-                ></div>
+                />
                 Memproses...
               </>
             ) : (
@@ -729,12 +808,12 @@ export default function Login() {
         onClose={() => setOpenSelectMasjid(false)}
         onSelect={handleSelectMasjidRole}
       />
-      <ModalPilihTujuan
+      <ModalChooseRole
         open={openPilihTujuan}
         onClose={() => setOpenPilihTujuan(false)}
-        onPilih={handlePilihTujuan}
+        onPilih={handleChooseRole}
       />
-      <ModalJoinAtauBuat
+      <ModalJoinOrCreate
         open={openJoinAtauBuat}
         mode={selectedTujuan || "dkm"}
         onClose={() => setOpenJoinAtauBuat(false)}

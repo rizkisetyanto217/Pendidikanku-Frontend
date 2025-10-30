@@ -8,15 +8,13 @@ import ParentSidebar from "../components/home/ParentSideBar";
 import ChildSummaryCard from "@/pages/pendidikanku-dashboard/components/card/ChildSummaryCard";
 import BillsSectionCard from "@/pages/pendidikanku-dashboard/components/card/BillsSectionCard";
 import TodayScheduleCard from "@/pages/pendidikanku-dashboard/components/card/TodayScheduleCard";
-import AnnouncementsList from "@/pages/pendidikanku-dashboard/components/card/AnnouncementsListCard";
+// import AnnouncementsList from "@/pages/pendidikanku-dashboard/components/card/AnnouncementsListCard";
 
 import {
   TodayScheduleItem,
   mapSessionsToTodaySchedule,
   mockTodaySchedule,
 } from "@/pages/pendidikanku-dashboard/dashboard-school/calender/TodaySchedule";
-import { BookOpen, GraduationCap, UserCog, Users } from "lucide-react";
-import { SectionCard } from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
 import { useState } from "react";
 
 /* ---------- Types ---------- */
@@ -61,7 +59,6 @@ interface TodaySummary {
 }
 
 /* ---------- Date helpers (timezone-safe) ---------- */
-// jadikan Date ke pukul 12:00 waktu lokal
 const atLocalNoon = (d: Date) => {
   const x = new Date(d);
   x.setHours(12, 0, 0, 0);
@@ -71,7 +68,6 @@ const toLocalNoonISO = (d: Date) => atLocalNoon(d).toISOString();
 const normalizeISOToLocalNoon = (iso?: string) =>
   iso ? toLocalNoonISO(new Date(iso)) : undefined;
 
-// formatter tampilan (pakai ISO yang sudah “siang lokal”)
 const dateFmt = (iso?: string) =>
   iso
     ? new Date(iso).toLocaleDateString("id-ID", {
@@ -81,8 +77,6 @@ const dateFmt = (iso?: string) =>
         day: "numeric",
       })
     : "-";
-
-// hijriah (Umm al-Qura)
 const hijriLong = (iso?: string) =>
   iso
     ? new Date(iso).toLocaleDateString("id-ID-u-ca-islamic-umalqura", {
@@ -93,18 +87,15 @@ const hijriLong = (iso?: string) =>
       })
     : "-";
 
-
-
 /* ---------- Fake API ---------- */
 async function fetchParentHome() {
   const now = new Date();
-  const todayISO = toLocalNoonISO(now); // ✅ “siang lokal”
+  const todayISO = toLocalNoonISO(now);
   const inDays = (n: number) =>
     toLocalNoonISO(new Date(now.getTime() + n * 864e5));
 
   return Promise.resolve({
     parentName: "Bapak/Ibu",
-    // hijri dari server opsional — kita tetap hitung sendiri agar konsisten
     hijriDate: hijriLong(todayISO),
     gregorianDate: todayISO,
     child: {
@@ -131,30 +122,30 @@ async function fetchParentHome() {
       {
         id: "a1",
         title: "Ujian Tahfiz Pekan Depan",
-        date: todayISO, // ✅
-        body: "Mohon dampingi anak dalam muraja'ah surat Al-Balad s.d. Asy-Syams.",
+        date: todayISO,
+        body: "Mohon dampingi anak ...",
         type: "info",
       },
-    ] as Announcement[],
+    ],
     bills: [
       {
         id: "b1",
         title: "SPP Agustus 2025",
         amount: 150000,
-        dueDate: inDays(5), // ✅
+        dueDate: inDays(5),
         status: "unpaid",
       },
-    ] as BillItem[],
+    ],
     sessionsToday: [
       {
         class_attendance_sessions_title: "Tahsin Kelas",
         class_attendance_sessions_general_info: "Aula 1",
-        class_attendance_sessions_date: todayISO, // ✅
+        class_attendance_sessions_date: todayISO,
       },
       {
         class_attendance_sessions_title: "Hafalan Juz 30",
         class_attendance_sessions_general_info: "R. Tahfiz",
-        class_attendance_sessions_date: todayISO, // ✅
+        class_attendance_sessions_date: todayISO,
       },
     ],
   });
@@ -179,13 +170,10 @@ export default function StudentDashboard() {
     staleTime: 60_000,
   });
 
-  // normalisasi dulu (jaga-jaga kalau nanti dari API nyata)
   const gregorianISO =
     normalizeISOToLocalNoon(data?.gregorianDate) ?? toLocalNoonISO(new Date());
-
   const todayScheduleItems: TodayScheduleItem[] = data?.sessionsToday?.length
     ? mapSessionsToTodaySchedule(
-        // kalau mapper butuh ISO, pastikan “siang lokal”
         data.sessionsToday.map((s) => ({
           ...s,
           class_attendance_sessions_date: normalizeISOToLocalNoon(
@@ -199,32 +187,35 @@ export default function StudentDashboard() {
 
   return (
     <div
-      className="min-h-screen w-full"
+      // ❗ Mobile-only: tutup overflow horizontal, kasih safe-area padding
+      className="min-h-screen w-full overflow-x-hidden sm:overflow-x-visible"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <main className="w-full">
-        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
+      {/* (Optional) TopBar/Sidebar tetap seperti semula jika sudah berfungsi baik */}
+      <main className="w-full pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
+        <div
+          // ❗ Mobile padding agar konten tak “nempel tepi” & tak memicu scroll horizontal
+          className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6 px-4 sm:px-6"
+        >
           <div className="flex-1 flex flex-col space-y-6 min-w-0">
-            
-            <section>
+            <section className="min-w-0 overflow-hidden">
               <ChildSummaryCard
                 child={data?.child}
                 today={data?.today}
                 palette={palette}
                 detailPath="detail"
-                detailState={{
-                  child: data?.child,
-                  today: data?.today,
-                }}
+                detailState={{ child: data?.child, today: data?.today }}
                 todayDisplay="compact"
               />
             </section>
 
-            <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:items-stretch">
-              <div className="lg:col-span-8">
+            <section
+              // ❗ Jaga grid tidak melebar di mobile
+              className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 lg:items-stretch min-w-0"
+            >
+              <div className="lg:col-span-8 min-w-0 overflow-hidden">
                 <BillsSectionCard
                   palette={palette}
-                  // bills={homeQ.data?.finance.outstandingBills ?? []}
                   dateFmt={dateFmt}
                   formatIDR={formatIDR}
                   seeAllPath="all-invoices"
@@ -232,7 +223,7 @@ export default function StudentDashboard() {
                 />
               </div>
 
-              <div className="lg:col-span-4">
+              <div className="lg:col-span-4 min-w-0 overflow-hidden">
                 <TodayScheduleCard
                   palette={palette}
                   title="Jadwal Hari Ini"
@@ -241,20 +232,6 @@ export default function StudentDashboard() {
                 />
               </div>
             </section>
-
-            {/* <section>
-              <AnnouncementsList
-                palette={palette}
-                items={data?.announcements ?? []}
-                seeAllPath="announcements"
-                seeAllState={{
-                  items: data?.announcements,
-                  heading: "Semua Pengumuman",
-                }}
-                getDetailHref={(a) => `/murid/pengumuman/detail/${a.id}`}
-                showActions={false}
-              />
-            </section> */}
           </div>
         </div>
       </main>

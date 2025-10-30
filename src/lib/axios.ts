@@ -1,129 +1,175 @@
-import axiosLib, { AxiosError, AxiosInstance } from "axios";
-import Cookies from "js-cookie";
+// src/lib/axios.ts
+import axiosLib, { AxiosError, AxiosInstance, AxiosRequestConfig } from "axios";
 
 /* ==========================================
-   🔧 KONFIGURASI DASAR
+   🔧 BASE
 ========================================== */
 export const API_BASE =
   import.meta.env.VITE_API_BASE_URL ??
   "https://masjidkubackend4-production.up.railway.app/api";
 
-const axios: AxiosInstance = axiosLib.create({
+const api: AxiosInstance = axiosLib.create({
   baseURL: API_BASE,
-  withCredentials: true,
+  withCredentials: true, // penting utk cookie HttpOnly (refresh_token, XSRF-TOKEN)
   timeout: 60_000,
 });
 
 /* ==========================================
-   🔐 TOKEN UTIL (COOKIE BASED)
+   🧰 UTIL
 ========================================== */
-const ACCESS_KEY = "access_token";
-const REFRESH_KEY = "refresh_token";
-const COOKIE_OPTS = { expires: 7, sameSite: "Lax" as const };
-
-export function getAccessToken(): string | null {
-  return Cookies.get(ACCESS_KEY) || null;
+function getCookie(name: string): string | null {
+  const m = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]+)`));
+  return m ? decodeURIComponent(m[1]) : null;
 }
+const isFormData = (d: any) =>
+  typeof FormData !== "undefined" && d instanceof FormData;
 
-export function getRefreshToken(): string | null {
-  return Cookies.get(REFRESH_KEY) || null;
+/* ==========================================
+   🔐 ACCESS TOKEN — IN MEMORY ONLY
+========================================== */
+let accessToken: string | null = null;
+
+export function setTokens(access: string) {
+  accessToken = access;
+  (api.defaults.headers.common as any).Authorization = `Bearer ${access}`;
+  // Beri tahu app kalau sudah authorized (dipakai useCurrentUser invalidate)
+  window.dispatchEvent(new CustomEvent("auth:authorized"));
 }
-
-export function setTokens(access: string, refresh?: string) {
-  if (access) {
-    Cookies.set(ACCESS_KEY, access, COOKIE_OPTS);
-    (axios.defaults.headers.common as any).Authorization = `Bearer ${access}`;
-  }
-  if (refresh) Cookies.set(REFRESH_KEY, refresh, COOKIE_OPTS);
+export function getAccessToken() {
+  return accessToken;
 }
-
 export function clearTokens() {
-  Cookies.remove(ACCESS_KEY);
-  Cookies.remove(REFRESH_KEY);
-  delete (axios.defaults.headers.common as any).Authorization;
+  accessToken = null;
+  delete (api.defaults.headers.common as any).Authorization;
 }
 
 /* ==========================================
-   🔄 REFRESH TOKEN MEKANISME
+   🔄 REFRESH (cookie HttpOnly + XSRF)
 ========================================== */
 let isRefreshing = false;
-let subscribers: ((token: string) => void)[] = [];
+let refreshPromise: Promise<string | null> | null = null;
+const waiters: Array<(t: string | null) => void> = [];
+const notifyWaiters = (t: string | null) => {
+  while (waiters.length) waiters.shift()!(t);
+};
 
-function subscribeTokenRefresh(cb: (token: string) => void) {
-  subscribers.push(cb);
-}
+async function doRefresh(): Promise<string | null> {
+  if (isRefreshing && refreshPromise) return refreshPromise;
+  isRefreshing = true;
 
-function onRefreshed(token: string) {
-  subscribers.forEach((cb) => cb(token));
-  subscribers = [];
-}
-
-async function refreshToken(): Promise<string> {
-  const refresh = getRefreshToken();
-  if (!refresh) throw new Error("Refresh token tidak ditemukan");
-
-  try {
-    const res = await axiosLib.post(`${API_BASE}/auth/refresh-token`, {
-      refresh_token: refresh,
+  const xsrf = getCookie("XSRF-TOKEN") || "";
+  refreshPromise = api
+    .post(
+      "/auth/refresh-token",
+      {}, // body kosong, supaya Content-Type: application/json
+      {
+        headers: {
+          "Content-Type": "application/json", // enforceCSRF butuh JSON
+          "X-CSRF-Token": xsrf, // harus identik dgn cookie XSRF-TOKEN
+          // ⛔️ pastikan TIDAK ada Authorization di panggilan refresh
+          Authorization: undefined as any,
+        },
+      }
+    )
+    .then((res) => {
+      const newAT = res.data?.data?.access_token ?? null;
+      if (newAT) setTokens(newAT);
+      return newAT;
+    })
+    .catch((err) => {
+      console.warn("[axios] refresh failed:", err?.response || err);
+      clearTokens();
+      window.dispatchEvent(new CustomEvent("auth:unauthorized"));
+      return null;
+    })
+    .finally(() => {
+      isRefreshing = false;
+      const p = refreshPromise;
+      refreshPromise = null;
+      return p;
     });
 
-    const newAccess = res.data?.data?.access_token;
-    const newRefresh = res.data?.data?.refresh_token || refresh;
-
-    if (!newAccess) throw new Error("Response refresh token tidak valid");
-
-    setTokens(newAccess, newRefresh);
-    console.info("🔁 Token berhasil diperbarui");
-    return newAccess;
-  } catch (err) {
-    console.error("❌ Gagal refresh token:", err);
-    clearTokens();
-    window.dispatchEvent(new CustomEvent("auth:unauthorized"));
-    throw err;
-  }
+  return refreshPromise;
 }
 
 /* ==========================================
-   🧩 INTERCEPTOR REQUEST & RESPONSE
+   🧩 INTERCEPTORS
 ========================================== */
-axios.interceptors.request.use((config) => {
-  const token = getAccessToken();
-  if (token) (config.headers as any).Authorization = `Bearer ${token}`;
+api.interceptors.request.use((config) => {
+  const url = config.url || "";
+  const isLogin = url.endsWith("/auth/login");
+  const isRefresh = url.endsWith("/auth/refresh-token");
+
+  // ------ Authorization: jangan kirim untuk login/refresh ------
+  if (!isLogin && !isRefresh) {
+    const at = getAccessToken();
+    if (at) {
+      config.headers = config.headers ?? {};
+      (config.headers as any).Authorization = `Bearer ${at}`;
+    }
+  }
+
+  // ------ X-CSRF-Token: perlu untuk endpoint cookie-based (refresh/logout) ------
+  // aman juga dikirim global, tapi kita explicit saja saat bukan login
+  if (!isLogin) {
+    const xsrf = getCookie("XSRF-TOKEN");
+    if (xsrf) {
+      config.headers = config.headers ?? {};
+      (config.headers as any)["X-CSRF-Token"] = xsrf;
+    }
+  }
+
+  // ------ Content-Type: set JSON hanya jika tidak FormData & belum diset ------
+  if (
+    !isFormData((config as any).data) &&
+    !(config.headers && "Content-Type" in (config.headers as any))
+  ) {
+    config.headers = config.headers ?? {};
+    (config.headers as any)["Content-Type"] = "application/json";
+  }
+
   return config;
 });
 
-axios.interceptors.response.use(
+type RetriableConfig = AxiosRequestConfig & { _retry?: boolean };
+
+api.interceptors.response.use(
   (res) => res,
   async (error: AxiosError) => {
-    const originalRequest = error.config as any;
+    const original = (error?.config || {}) as RetriableConfig;
+    const status = error?.response?.status;
+    const url = (original.url || "") + "";
+    const isRefreshCall = url.includes("/auth/refresh-token");
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      // Jika sudah ada refresh in progress → tunggu
-      if (isRefreshing) {
-        return new Promise((resolve) => {
-          subscribeTokenRefresh((token) => {
-            originalRequest.headers.Authorization = `Bearer ${token}`;
-            resolve(axios(originalRequest));
+    // 401 → coba refresh sekali (kecuali request refresh itu sendiri)
+    if (status === 401 && !original._retry && !isRefreshCall) {
+      original._retry = true;
+
+      if (isRefreshing && refreshPromise) {
+        return new Promise((resolve, reject) => {
+          waiters.push((t) => {
+            if (!t) return reject(error);
+            original.headers = original.headers ?? {};
+            (original.headers as any).Authorization = `Bearer ${t}`;
+            resolve(api(original));
           });
         });
       }
 
-      // Mulai proses refresh
-      originalRequest._retry = true;
-      isRefreshing = true;
+      const newToken = await doRefresh();
+      notifyWaiters(newToken);
 
-      try {
-        const newToken = await refreshToken();
-        onRefreshed(newToken);
-        originalRequest.headers.Authorization = `Bearer ${newToken}`;
-        return axios(originalRequest);
-      } catch (err) {
-        clearTokens();
-        window.dispatchEvent(new CustomEvent("auth:unauthorized"));
-        throw err;
-      } finally {
-        isRefreshing = false;
+      if (newToken) {
+        original.headers = original.headers ?? {};
+        (original.headers as any).Authorization = `Bearer ${newToken}`;
+        return api(original);
       }
+    }
+
+    // Refresh gagal dengan 4xx/403 → anggap sesi habis
+    if (isRefreshCall && (status === 400 || status === 401 || status === 403)) {
+      clearTokens();
+      window.dispatchEvent(new CustomEvent("auth:unauthorized"));
     }
 
     return Promise.reject(error);
@@ -131,35 +177,25 @@ axios.interceptors.response.use(
 );
 
 /* ==========================================
-   🚪 LOGOUT HELPER
+   🚪 LOGOUT
 ========================================== */
 export async function apiLogout() {
   try {
-    // Coba hit endpoint logout jika tersedia (abaikan error)
-    await axiosLib.post(`${API_BASE}/auth/logout`).catch(() => {});
-
+    const xsrf = getCookie("XSRF-TOKEN") || "";
+    await api.post(
+      "/auth/logout",
+      {},
+      { headers: { "Content-Type": "application/json", "X-CSRF-Token": xsrf } }
+    );
+  } catch {
+    // ignore
+  } finally {
     clearTokens();
-
     window.dispatchEvent(
       new CustomEvent("auth:logout", { detail: { source: "axios" } })
     );
-
-    console.log("✅ Logout berhasil, token dibersihkan");
-  } catch (err) {
-    console.warn("⚠️ Logout gagal tapi token sudah dihapus:", err);
+    console.log("✅ Logout: access token dibersihkan");
   }
 }
 
-/* ==========================================
-   🧠 BOOTSTRAP DI AWAL APP
-========================================== */
-export function bootstrapAuth() {
-  const token = getAccessToken();
-  if (token)
-    (axios.defaults.headers.common as any).Authorization = `Bearer ${token}`;
-}
-
-/* ==========================================
-   🔚 EXPORT DEFAULT
-========================================== */
-export default axios;
+export default api;

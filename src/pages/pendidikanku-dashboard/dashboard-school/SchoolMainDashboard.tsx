@@ -517,7 +517,7 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
                 />
                 {(todaySessionsQ.isLoading || todaySessionsQ.isFetching) && (
                   <div className="px-4 pt-2 text-xs opacity-70">
-                    Memuat jadwal hari ini juga. NNN…
+                    Memuat jadwal hari ini juga
                   </div>
                 )}
               </div>
@@ -565,7 +565,7 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
               </div>
 
               {/* Pengumuman */}
-              <div className="lg:col-span-12">
+              {/* <div className="lg:col-span-12">
                 <AnnouncementsList
                   palette={palette}
                   dateFmt={dateFmt}
@@ -586,7 +586,7 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
                     Gagal memuat pengumuman. Menampilkan data sementara.
                   </div>
                 )}
-              </div>
+              </div> */}
             </section>
           </section>
         </div>
