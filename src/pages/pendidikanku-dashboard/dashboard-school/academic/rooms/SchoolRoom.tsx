@@ -1,34 +1,31 @@
+// src/pages/.../RoomSchool.tsx
 import React, { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import { pickTheme, ThemeName } from "@/constants/thema";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   SectionCard,
   Badge,
   Btn,
   type Palette,
 } from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
-import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/ParentSideBar";
-import Swal from "sweetalert2";
-
 import {
   Building2,
   MapPin,
-  Plus,
-  Edit3,
-  Trash2,
   Loader2,
   Eye,
   ArrowLeft,
+  Edit3,
+  Trash2,
+  Plus,
 } from "lucide-react";
 
 /* ===================== CONFIG ===================== */
-const USE_DUMMY = true;
+const USE_DUMMY = false;
 
-/* ===================== TYPES ====================== */
+/* ===================== TYPES (UI) ================= */
 export type Room = {
   id: string;
   masjid_id?: string;
@@ -55,32 +52,57 @@ export type Room = {
     date?: string;
     from: string;
     to: string;
-    group: string;
+    group?: string;
   }[];
 
-  notes?: {
-    ts: string;
-    text: string;
-    author_id?: string;
-  }[];
-
+  notes?: any[];
   created_at?: string;
   updated_at?: string;
   deleted_at?: string | null;
 };
 
-type RoomsResponse = {
-  data: Room[];
-  pagination: { limit: number; offset: number; total: number };
+/* ========== TYPES (payload dari API publik) ========= */
+type ClassRoomApi = {
+  class_room_id: string;
+  class_room_masjid_id: string;
+  class_room_name: string;
+  class_room_code?: string | null;
+  class_room_slug?: string | null;
+  class_room_location?: string | null;
+  class_room_capacity: number;
+  class_room_description?: string | null;
+  class_room_is_virtual: boolean;
+  class_room_is_active: boolean;
+
+  class_room_image_url?: string | null;
+
+  class_room_platform?: string | null;
+  class_room_join_url?: string | null;
+  class_room_meeting_id?: string | null;
+  class_room_passcode?: string | null;
+
+  class_room_features?: string[] | null;
+  class_room_schedule?: any[] | null; // bisa {from,to,day} atau {start,end,weekday}
+  class_room_notes?: any[] | null;
+
+  class_room_created_at?: string;
+  class_room_updated_at?: string;
+  class_room_deleted_at?: string | null;
 };
 
-type RoomStats = {
-  total: number;
-  active: number;
-  inUseNow: number;
-  availableToday: number;
+type PublicRoomsResponse = {
+  pagination: {
+    page: number;
+    per_page: number;
+    total: number;
+    total_pages: number;
+    has_next: boolean;
+    has_prev: boolean;
+  };
+  data: ClassRoomApi[];
 };
 
+/* ========== Admin payload (create/update) ========= */
 type ApiRoomPayload = {
   room_name: string;
   room_capacity: number;
@@ -90,228 +112,95 @@ type ApiRoomPayload = {
 
 /* ===================== QK ========================= */
 const QK = {
-  ROOMS: (q: string, limit: number, offset: number) =>
-    ["rooms", q, limit, offset] as const,
-  ROOM: (id: string) => ["room", id] as const,
-  ROOM_STATS: ["room-stats"] as const,
+  ROOMS_PUBLIC: (masjidId: string, q: string, page: number, perPage: number) =>
+    ["public-rooms", masjidId, q, page, perPage] as const,
 };
 
-/* ===================== UTILS ====================== */
-const atLocalNoonISO = (d: Date) => {
-  const x = new Date(d);
-  x.setHours(12, 0, 0, 0);
-  return x.toISOString();
-};
-
-const emptyRooms = (limit: number, offset: number): RoomsResponse => ({
-  data: [] as Room[],
-  pagination: { limit, offset, total: 0 },
-});
-
-const ensureRoomsResponse = (
-  x: RoomsResponse | undefined,
-  limit: number,
-  offset: number
-): RoomsResponse => x ?? emptyRooms(limit, offset);
-
-/* ============== DUMMY IN-MEMORY STORE ============= */
-export const seed: Room[] = [
-  {
-    id: "d44c6e58-5a6a-4f76-9d2e-8e3f2f5b1c11",
-    masjid_id: "3a7f5b8e-2f20-4a81-9d04-6a7d1b7d9c22",
-    name: "Virtual Room — Kelas 7",
-    code: "V-7",
-    slug: "virtual-room-kelas-7",
-    location: "Online",
-    capacity: 90,
-    description: "Ruang virtual untuk Kelas 7.",
-    is_virtual: true,
-    is_active: true,
-    features: ["virtual", "recording", "waiting-room"],
-    platform: "zoom",
-    join_url: "https://zoom.us/j/111?pwd=pg",
-    meeting_id: "111-111-111",
-    passcode: "pg07",
-    schedule: [
-      {
-        label: "Kelas 7A - Pagi",
-        day: "mon",
-        from: "07:00",
-        to: "09:00",
-        group: "7A",
-      },
-      {
-        label: "Kelas 7B - Siang",
-        day: "wed",
-        from: "13:00",
-        to: "15:00",
-        group: "7B",
-      },
-      {
-        label: "Tryout Spesial",
-        date: "2025-10-03",
-        from: "08:00",
-        to: "10:00",
-        group: "7C",
-      },
-    ],
-    notes: [
-      {
-        ts: "2025-09-25T10:00:00Z",
-        text: "Uji bandwidth berhasil (100 Mbps up/down).",
-      },
-      {
-        ts: "2025-09-26T02:00:00Z",
-        text: "Host pindah ke akun Zoom baru.",
-        author_id: "b1a2c3d4",
-      },
-    ],
-    created_at: "2025-09-10T03:30:00Z",
-    updated_at: "2025-09-27T03:30:00Z",
-  },
-  {
-    id: "8b9c2fcb-7c0c-4a7c-a2b3-3d7c1d9e2a10",
-    masjid_id: "3a7f5b8e-2f20-4a81-9d04-6a7d1b7d9c22",
-    name: "Ruang Kelas A1",
-    code: "A1",
-    slug: "ruang-kelas-a1",
-    location: "Lantai 2, Gedung Utama",
-    capacity: 30,
-    description: "Ruang kelas utama.",
-    is_virtual: false,
-    is_active: true,
-    features: ["ac", "whiteboard"],
-    schedule: [
-      {
-        label: "Tahfizh Pagi",
-        day: "mon",
-        from: "06:30",
-        to: "08:00",
-        group: "A1",
-      },
-      { label: "Fiqih", day: "thu", from: "09:00", to: "10:30", group: "A1" },
-    ],
-    notes: [],
-    created_at: "2025-09-20T02:00:00Z",
-    updated_at: "2025-09-27T02:00:00Z",
-  },
-];
-
-function useDummyRooms() {
-  const [rooms, setRooms] = useState<Room[]>(seed);
-
-  const list = (q: string, limit: number, offset: number): RoomsResponse => {
-    const kw = q.trim().toLowerCase();
-    const filtered = kw
-      ? rooms.filter(
-          (r) =>
-            r.name.toLowerCase().includes(kw) ||
-            (r.location ?? "").toLowerCase().includes(kw)
-        )
-      : rooms;
-    const total = filtered.length;
-    const data = filtered.slice(offset, offset + limit);
-    return { data, pagination: { limit, offset, total } };
-  };
-
-  const create = (v: Omit<Room, "id" | "created_at" | "updated_at">) => {
-    const now = new Date().toISOString();
-    const item: Room = {
-      ...v,
-      id: `r-${Date.now()}`,
-      created_at: now,
-      updated_at: now,
+/* ===================== HELPERS ==================== */
+function normalizeSchedule(s: any[] | null | undefined): Room["schedule"] {
+  if (!s || !Array.isArray(s)) return [];
+  return s.map((it: any) => {
+    if (it.from || it.to) {
+      return {
+        label: it.label ?? "",
+        day: it.day,
+        date: it.date,
+        from: it.from ?? it.start ?? "",
+        to: it.to ?? it.end ?? "",
+        group: it.group,
+      };
+    }
+    return {
+      label: it.label ?? "",
+      day: it.weekday?.toLowerCase?.(),
+      from: it.start ?? "",
+      to: it.end ?? "",
     };
-    setRooms((prev) => [item, ...prev]);
-    return item;
-  };
-
-  const update = (id: string, v: Partial<Room>) => {
-    const now = new Date().toISOString();
-    setRooms((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, ...v, updated_at: now } : r))
-    );
-  };
-
-  const remove = (id: string) =>
-    setRooms((prev) => prev.filter((r) => r.id !== id));
-
-  const stats = (): RoomStats => {
-    const total = rooms.length;
-    const active = rooms.filter((r) => r.is_active).length;
-    const inUseNow = Math.min(active, Math.floor(active / 3));
-    const availableToday = Math.max(0, active - inUseNow);
-    return { total, active, inUseNow, availableToday };
-  };
-
-  return { list, create, update, remove, stats };
-}
-
-/* ================== API QUERIES =================== */
-function useRoomsQuery(search: string, limit: number, offset: number) {
-  return useQuery<RoomsResponse>({
-    queryKey: QK.ROOMS(search, limit, offset),
-    queryFn: async () => {
-      const res = await axios.get<RoomsResponse>("/api/a/rooms", {
-        params: { q: search || undefined, limit, offset },
-        withCredentials: true,
-      });
-      return ensureRoomsResponse(res.data, limit, offset);
-    },
-    enabled: !USE_DUMMY,
-    staleTime: 60_000,
-    gcTime: 10 * 60 * 1000,
-    refetchOnWindowFocus: false,
-    retry: 0,
   });
 }
 
-function useRoomStatsQuery() {
-  return useQuery<RoomStats>({
-    queryKey: QK.ROOM_STATS,
+function mapApiRoomToRoom(x: ClassRoomApi): Room {
+  return {
+    id: x.class_room_id,
+    masjid_id: x.class_room_masjid_id,
+    name: x.class_room_name,
+    code: x.class_room_code ?? undefined,
+    slug: x.class_room_slug ?? undefined,
+    description: x.class_room_description ?? undefined,
+    capacity: x.class_room_capacity,
+    location: x.class_room_location ?? null,
+    is_virtual: x.class_room_is_virtual,
+    is_active: x.class_room_is_active,
+
+    image_url: x.class_room_image_url ?? null,
+
+    features: x.class_room_features ?? undefined,
+    platform: x.class_room_platform ?? null,
+    join_url: x.class_room_join_url ?? null,
+    meeting_id: x.class_room_meeting_id ?? null,
+    passcode: x.class_room_passcode ?? null,
+
+    schedule: normalizeSchedule(x.class_room_schedule),
+    notes: x.class_room_notes ?? [],
+
+    created_at: x.class_room_created_at,
+    updated_at: x.class_room_updated_at,
+    deleted_at: x.class_room_deleted_at ?? null,
+  };
+}
+
+/* ================== API QUERY (public) ============ */
+function usePublicRoomsQuery(
+  masjidId: string,
+  q: string,
+  page: number,
+  perPage: number
+) {
+  return useQuery<PublicRoomsResponse>({
+    queryKey: QK.ROOMS_PUBLIC(masjidId, q, page, perPage),
+    enabled: !!masjidId && !USE_DUMMY,
+    staleTime: 60_000,
+    retry: 1,
     queryFn: async () => {
-      const res = await axios.get<{ data: RoomStats; found: boolean }>(
-        "/api/a/rooms/stats",
-        { withCredentials: true }
+      const res = await axios.get<PublicRoomsResponse>(
+        `/public/${masjidId}/class-rooms/list`,
+        { params: { q: q || undefined, page, per_page: perPage } }
       );
-      return res.data?.found
-        ? res.data.data
-        : { total: 0, active: 0, inUseNow: 0, availableToday: 0 };
+      return res.data;
     },
-    enabled: !USE_DUMMY,
-    staleTime: 60_000,
-    gcTime: 10 * 60 * 1000,
-    refetchOnWindowFocus: false,
-    retry: 0,
   });
 }
 
-/* ================== FLASH BANNER ================== */
-interface FlashProps {
-  palette: Palette;
-  flash: { type: "success" | "error"; msg: string } | null;
-}
-
-function Flash({ palette, flash }: FlashProps) {
-  if (!flash) return null;
-  const isOk = flash.type === "success";
-  return (
-    <div className="mx-auto px-4">
-      <div
-        className="mb-3 rounded-lg px-3 py-2 text-sm"
-        style={{
-          background: isOk ? palette.success2 : palette.error2,
-          color: isOk ? palette.success1 : palette.error1,
-        }}
-      >
-        {flash.msg}
-      </div>
-    </div>
-  );
-}
-
-/* ================== MODAL UPSERT ================== */
-interface RoomModalProps {
+/* ================= Modal Upsert Room =============== */
+function RoomModal({
+  open,
+  onClose,
+  initial,
+  onSubmit,
+  saving,
+  palette,
+  error,
+}: {
   open: boolean;
   onClose: () => void;
   initial: Room | null;
@@ -325,38 +214,21 @@ interface RoomModalProps {
   saving?: boolean;
   error?: string | null;
   palette: Palette;
-}
-
-function RoomModal({
-  open,
-  onClose,
-  initial,
-  onSubmit,
-  saving = false,
-  error = null,
-  palette,
-}: RoomModalProps) {
+}) {
   const isEdit = Boolean(initial);
-  const [name, setName] = useState("");
-  const [capacity, setCapacity] = useState<number>(30);
-  const [location, setLocation] = useState("");
-  const [active, setActive] = useState(true);
+  const [name, setName] = useState(initial?.name ?? "");
+  const [capacity, setCapacity] = useState<number>(initial?.capacity ?? 30);
+  const [location, setLocation] = useState<string>(initial?.location ?? "");
+  const [active, setActive] = useState<boolean>(initial?.is_active ?? true);
   const [touched, setTouched] = useState(false);
 
   useEffect(() => {
     if (!open) return;
     setTouched(false);
-    if (initial) {
-      setName(initial.name);
-      setCapacity(initial.capacity);
-      setLocation(initial.location ?? "");
-      setActive(initial.is_active);
-    } else {
-      setName("");
-      setCapacity(30);
-      setLocation("");
-      setActive(true);
-    }
+    setName(initial?.name ?? "");
+    setCapacity(initial?.capacity ?? 30);
+    setLocation(initial?.location ?? "");
+    setActive(initial?.is_active ?? true);
   }, [open, initial]);
 
   if (!open) return null;
@@ -365,8 +237,8 @@ function RoomModal({
   const capErr = touched && capacity <= 0 ? "Kapasitas harus > 0." : "";
   const disabled = saving || !name.trim() || capacity <= 0;
 
-  const handleSubmit = () => {
-    if (disabled) return;
+  const submit = () =>
+    !disabled &&
     onSubmit({
       id: initial?.id,
       name: name.trim(),
@@ -374,7 +246,6 @@ function RoomModal({
       location: location.trim() || undefined,
       is_active: active,
     });
-  };
 
   return (
     <div
@@ -437,30 +308,16 @@ function RoomModal({
 
           <label className="grid gap-1 text-sm">
             <span className="opacity-80">Lokasi (opsional)</span>
-            <div className="relative">
-              <select
-                className="w-full h-10 rounded-lg border px-3 pr-8 text-sm outline-none appearance-none"
-                style={{
-                  borderColor: palette.black2,
-                  background: palette.white2,
-                  color: palette.black1,
-                }}
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-              >
-                <option value="">Pilih Lokasi</option>
-                <option value="Lantai 1">Lantai 1</option>
-                <option value="Lantai 2">Lantai 2</option>
-                <option value="Gedung A">Gedung A</option>
-                <option value="Gedung B">Gedung B</option>
-                <option value="Perpustakaan">Perpustakaan</option>
-                <option value="Lab Komputer">Lab Komputer</option>
-              </select>
-
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
-                
-              </span>
-            </div>
+            <input
+              className="w-full rounded-lg border px-3 py-2 text-sm"
+              style={{
+                borderColor: palette.black2,
+                background: palette.white2,
+              }}
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="Gedung A, Lt. 2"
+            />
           </label>
 
           <label className="flex items-center gap-2 text-sm">
@@ -472,7 +329,7 @@ function RoomModal({
             <span>Aktif digunakan</span>
           </label>
 
-          {error && !USE_DUMMY && (
+          {error && (
             <div className="text-sm" style={{ color: palette.error1 }}>
               {error}
             </div>
@@ -488,7 +345,7 @@ function RoomModal({
           >
             Batal
           </Btn>
-          <Btn palette={palette} onClick={handleSubmit} disabled={disabled}>
+          <Btn palette={palette} onClick={submit} disabled={disabled}>
             {saving ? "Menyimpan…" : isEdit ? "Simpan" : "Tambah"}
           </Btn>
         </div>
@@ -509,36 +366,37 @@ export default function RoomSchool({
   backTo,
   backLabel = "Kembali",
 }: RoomSchoolProps) {
+  const { masjid_id } = useParams<{ masjid_id?: string }>();
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
-  const qc = useQueryClient();
   const navigate = useNavigate();
-  const [flash, setFlash] = useState<{
-    type: "success" | "error";
-    msg: string;
-  } | null>(null);
+  const qc = useQueryClient();
 
+  const [q, setQ] = useState("");
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
 
+  const roomsQ = usePublicRoomsQuery(masjid_id ?? "", q, page, perPage);
 
-  useEffect(() => {
-    if (flash) {
-      const t = setTimeout(() => setFlash(null), 3000);
-      return () => clearTimeout(t);
-    }
-  }, [flash]);
+  // Data ter-normalisasi untuk UI
+  const rooms: Room[] = useMemo(
+    () => (roomsQ.data?.data ?? []).map(mapApiRoomToRoom),
+    [roomsQ.data]
+  );
+  const total = roomsQ.data?.pagination.total ?? 0;
+  const totalPages = roomsQ.data?.pagination.total_pages ?? 1;
 
-  const [search, setSearch] = useState("");
-  const [limit, setLimit] = useState(10);
-  const [offset, setOffset] = useState(0);
-
-  const dummy = useDummyRooms();
-  const roomsQ = useRoomsQuery(search, limit, offset);
-  const statsQ = useRoomStatsQuery();
-
+  // ======= Upsert/Delete state =======
   const [modalOpen, setModalOpen] = useState(false);
   const [modalInitial, setModalInitial] = useState<Room | null>(null);
 
-  const upsertMutation = useMutation({
+  const closeModal = () => {
+    setModalOpen(false);
+    setModalInitial(null);
+  };
+
+  // ======= Mutations (admin endpoints) =======
+  const createOrUpdate = useMutation({
     mutationFn: async (form: {
       id?: string;
       name: string;
@@ -546,25 +404,6 @@ export default function RoomSchool({
       location?: string;
       is_active: boolean;
     }) => {
-      if (USE_DUMMY) {
-        if (form.id) {
-          dummy.update(form.id, {
-            name: form.name,
-            capacity: form.capacity,
-            location: form.location ?? null,
-            is_active: form.is_active,
-          });
-        } else {
-          dummy.create({
-            name: form.name,
-            capacity: form.capacity,
-            location: form.location ?? null,
-            is_active: form.is_active,
-          });
-        }
-        return;
-      }
-
       const payload: ApiRoomPayload = {
         room_name: form.name,
         room_capacity: form.capacity,
@@ -577,152 +416,77 @@ export default function RoomSchool({
           withCredentials: true,
         });
       } else {
-        await axios.post(`/api/a/rooms`, payload, { withCredentials: true });
+        await axios.post(`/api/a/rooms`, payload, {
+          withCredentials: true,
+        });
       }
     },
-    onSuccess: async (_d, vars) => {
-      setFlash({
-        type: "success",
-        msg: vars.id ? "Ruangan diperbarui." : "Ruangan ditambahkan.",
+    onSuccess: async () => {
+      closeModal();
+      await qc.invalidateQueries({
+        queryKey: QK.ROOMS_PUBLIC(masjid_id ?? "", q, page, perPage),
       });
-      setModalOpen(false);
-      setModalInitial(null);
-      if (!USE_DUMMY) {
-        await Promise.all([
-          qc.invalidateQueries({ queryKey: QK.ROOMS(search, limit, offset) }),
-          qc.invalidateQueries({ queryKey: QK.ROOM_STATS }),
-        ]);
-      }
     },
-    onError: () => setFlash({ type: "error", msg: "Gagal menyimpan ruangan." }),
   });
 
-  const deleteMutation = useMutation({
+  const delRoom = useMutation({
     mutationFn: async (id: string) => {
-      if (USE_DUMMY) {
-        dummy.remove(id);
-        return;
-      }
       await axios.delete(`/api/a/rooms/${id}`, { withCredentials: true });
     },
     onSuccess: async () => {
-      setFlash({ type: "success", msg: "Ruangan dihapus." });
-      if (!USE_DUMMY) {
-        await Promise.all([
-          qc.invalidateQueries({ queryKey: QK.ROOMS(search, limit, offset) }),
-          qc.invalidateQueries({ queryKey: QK.ROOM_STATS }),
-        ]);
-      }
-    },
-    onError: () => setFlash({ type: "error", msg: "Gagal menghapus ruangan." }),
-  });
-
-  const listResp: RoomsResponse = USE_DUMMY
-    ? dummy.list(search, limit, offset)
-    : ensureRoomsResponse(roomsQ.data, limit, offset);
-
-  const topbarGregorianISO = useMemo(() => atLocalNoonISO(new Date()), []);
-  const total = listResp.pagination.total;
-  const pageCount = Math.max(1, Math.ceil(total / limit));
-  const page = Math.min(Math.floor(offset / limit) + 1, pageCount);
-
-  const isFromMenuUtama = location.pathname.includes("/menu-utama/");
-
-  const gotoPage = (p: number) => {
-    const np = Math.min(Math.max(1, p), pageCount);
-    setOffset((np - 1) * limit);
-  };
-
-  const handleSearchChange = (value: string) => {
-    setSearch(value);
-    setOffset(0);
-  };
-
-  const handleLimitChange = (value: number) => {
-    setLimit(value);
-    setOffset(0);
-  };
-
-  const handleAddRoom = () => {
-    setModalInitial(null);
-    setModalOpen(true);
-  };
-
-  const handleEditRoom = (room: Room) => {
-    setModalInitial(room);
-    setModalOpen(true);
-  };
-
-  const handleDeleteRoom = (room: Room) => {
-  if (deleteMutation.isPending) return;
-
-  Swal.fire({
-    title: "Hapus ruangan?",
-    text: `Data ruangan "${room.name}" akan dihapus permanen.`,
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonText: "Ya, hapus",
-    cancelButtonText: "Batal",
-    reverseButtons: true,
-    confirmButtonColor: "#d33",
-    cancelButtonColor: "#6c757d",
-    buttonsStyling: true,
-    customClass: {
-      popup: "rounded-2xl shadow-xl",
-      title: "text-lg font-semibold mt-2",
-      confirmButton:
-        "px-4 py-2 rounded-lg font-medium bg-red-600 text-white hover:bg-red-700 transition",
-      cancelButton:
-        "px-4 py-2 rounded-lg font-medium bg-gray-500 text-white hover:bg-gray-600 transition",
-    },
-  }).then((res) => {
-    if (res.isConfirmed) {
-      deleteMutation.mutate(room.id);
-      Swal.fire({
-        icon: "success",
-        title: "Terhapus",
-        text: `Ruangan "${room.name}" berhasil dihapus.`,
-        timer: 1400,
-        showConfirmButton: false,
+      await qc.invalidateQueries({
+        queryKey: QK.ROOMS_PUBLIC(masjid_id ?? "", q, page, perPage),
       });
-    }
+    },
   });
-};
 
-  const closeModal = () => {
-    setModalOpen(false);
-    setModalInitial(null);
-  };
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  // Guard path
+  if (!masjid_id) {
+    return (
+      <div className="p-4 text-sm">
+        <b>masjid_id</b> tidak ada di path. Contoh:
+        <code className="ml-1">/MASJID_ID/sekolah/menu-utama/ruangan</code>
+      </div>
+    );
+  }
 
   return (
     <div
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <Flash palette={palette} flash={flash} />
-
       <main className="w-full">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
           <section className="flex-1 min-w-0 space-y-6">
             <div className="flex items-center justify-between">
               <div className="font-semibold text-lg flex items-center">
-                <div className="items-center md:flex">
-                  {showBack && (
-                    <Btn
-                      palette={palette}
-                      onClick={() => (backTo ? navigate(backTo) : navigate(-1))}
-                      variant="ghost"
-                      className="cursor-pointer mr-3"
-                    >
-                      <ArrowLeft aria-label={backLabel} size={20} />
-                    </Btn>
-                  )}
-                </div>
-                <h1 className="items-center md:flex">Ruangan</h1>
+                {showBack && (
+                  <Btn
+                    palette={palette}
+                    onClick={() => (backTo ? navigate(backTo) : navigate(-1))}
+                    variant="ghost"
+                    className="cursor-pointer mr-3"
+                  >
+                    <ArrowLeft aria-label={backLabel} size={20} />
+                  </Btn>
+                )}
+                <h1>Ruangan</h1>
               </div>
+
+              {/* Tambah */}
+              <Btn
+                palette={palette}
+                onClick={() => {
+                  setModalInitial(null);
+                  setModalOpen(true);
+                }}
+              >
+                <Plus size={16} className="mr-2" />
+                Tambah
+              </Btn>
             </div>
 
+            {/* Filter & page size */}
             <SectionCard palette={palette}>
               <div className="p-3 md:p-4 flex flex-col md:flex-row md:items-center gap-3">
                 <div className="flex-1 flex gap-2">
@@ -734,8 +498,11 @@ export default function RoomSchool({
                       color: palette.black1,
                     }}
                     placeholder="Cari ruangan… (nama/lokasi)"
-                    value={search}
-                    onChange={(e) => handleSearchChange(e.target.value)}
+                    value={q}
+                    onChange={(e) => {
+                      setQ(e.target.value);
+                      setPage(1);
+                    }}
                   />
                   <select
                     className="rounded-lg border px-2 py-2 text-sm"
@@ -743,8 +510,11 @@ export default function RoomSchool({
                       borderColor: palette.black2,
                       background: palette.white2,
                     }}
-                    value={limit}
-                    onChange={(e) => handleLimitChange(Number(e.target.value))}
+                    value={perPage}
+                    onChange={(e) => {
+                      setPerPage(Number(e.target.value));
+                      setPage(1);
+                    }}
                   >
                     {[10, 20, 50].map((n) => (
                       <option key={n} value={n}>
@@ -753,160 +523,177 @@ export default function RoomSchool({
                     ))}
                   </select>
                 </div>
-                <Btn palette={palette} onClick={handleAddRoom}>
-                  <Plus size={16} className="mr-2" />
-                </Btn>
               </div>
             </SectionCard>
 
+            {/* List */}
             <SectionCard palette={palette}>
-  <div className="p-4 pb-1 font-medium flex items-center justify-between">
-    <div className="flex items-center gap-2">
-      <div
-        className="h-9 w-9 rounded-xl flex items-center justify-center"
-        style={{
-          background: palette.white3,
-          color: palette.primary,
-        }}
-      >
-        <Building2 size={18} />
-      </div>
-      <h1 className="text-base font-semibold">Daftar Ruangan</h1>
-    </div>
-    <Btn palette={palette} variant="default" onClick={handleAddRoom}>
-      <Plus size={16} className="mr-2" /> Tambah
-    </Btn>
-  </div>
+              <div className="p-4 pb-1 font-medium flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div
+                    className="h-9 w-9 rounded-xl flex items-center justify-center"
+                    style={{
+                      background: palette.white3,
+                      color: palette.primary,
+                    }}
+                  >
+                    <Building2 size={18} />
+                  </div>
+                  <h2 className="text-base font-semibold">Daftar Ruangan</h2>
+                </div>
+              </div>
 
-  <div className="px-4 pb-4 space-y-3">
-    {/* Loading / Error Handling */}
-    {!USE_DUMMY && roomsQ.isLoading && (
-      <div className="text-sm opacity-70 flex items-center gap-2">
-        <Loader2 className="animate-spin" size={16} /> Memuat ruangan…
-      </div>
-    )}
-    {!USE_DUMMY && roomsQ.isError && (
-      <div className="text-sm opacity-70">Gagal memuat ruangan.</div>
-    )}
+              <div className="px-4 pb-4 space-y-3">
+                {roomsQ.isLoading && (
+                  <div className="text-sm opacity-70 flex items-center gap-2">
+                    <Loader2 className="animate-spin" size={16} /> Memuat
+                    ruangan…
+                  </div>
+                )}
 
-    {/* List Ruangan */}
-    {listResp.data.length > 0 ? (
-      listResp.data.map((r) => (
-        <div
-          key={r.id}
-          className="rounded-xl border p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between hover:shadow transition-all duration-200"
-          style={{
-            borderColor: palette.silver1,
-            background: palette.white1,
-          }}
-        >
-          <div className="flex flex-col">
-            <span className="font-semibold text-sm">{r.name}</span>
-            <div
-              className="flex items-center gap-2 text-sm mt-1"
-              style={{ color: palette.black2 }}
-            >
-              <MapPin size={14} />
-              {r.location ?? "Lokasi tidak tersedia"}
-            </div>
-            <div
-              className="text-sm opacity-80 mt-1"
-              style={{ color: palette.black2 }}
-            >
-              Kapasitas: {r.capacity} orang
-            </div>
-          </div>
+                {roomsQ.isError && (
+                  <div className="text-sm opacity-70">
+                    Gagal memuat ruangan.
+                  </div>
+                )}
 
-          <div className="flex items-center gap-2 mt-3 sm:mt-0">
-            <Badge
-              palette={palette}
-              variant={r.is_active ? "success" : "outline"}
-            >
-              {r.is_active ? "Aktif" : "Nonaktif"}
-            </Badge>
+                {!roomsQ.isLoading && rooms.length > 0
+                  ? rooms.map((r) => (
+                      <div
+                        key={r.id}
+                        className="rounded-xl border p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between hover:shadow transition-all duration-200"
+                        style={{
+                          borderColor: palette.silver1,
+                          background: palette.white1,
+                        }}
+                      >
+                        <div className="flex flex-col">
+                          <span className="font-semibold text-sm">
+                            {r.name}
+                          </span>
+                          <div
+                            className="flex items-center gap-2 text-sm mt-1"
+                            style={{ color: palette.black2 }}
+                          >
+                            <MapPin size={14} />
+                            {r.location ?? "Lokasi tidak tersedia"}
+                          </div>
+                          <div
+                            className="text-sm opacity-80 mt-1"
+                            style={{ color: palette.black2 }}
+                          >
+                            Kapasitas: {r.capacity} orang
+                            {r.is_virtual ? " • Virtual" : ""}
+                            {r.platform ? ` • ${r.platform}` : ""}
+                          </div>
+                        </div>
 
-            <Btn
-              palette={palette}
-              variant="ghost"
-              title="Detail"
-              onClick={() => navigate(`./${r.id}`)}
-            >
-              <Eye size={16} />
-            </Btn>
-            <Btn
-              palette={palette}
-              variant="ghost"
-              title="Edit"
-              onClick={() => handleEditRoom(r)}
-            >
-              <Edit3 size={16} />
-            </Btn>
-            <Btn
-              palette={palette}
-              variant="ghost"
-              title="Hapus"
-              onClick={() => handleDeleteRoom(r)}
-              disabled={deleteMutation.isPending}
-            >
-              <Trash2 size={16} />
-            </Btn>
-          </div>
-        </div>
-      ))
-    ) : (
-      <div
-        className="text-sm text-center py-6"
-        style={{ color: palette.black2 }}
-      >
-        Belum ada ruangan yang cocok.
-      </div>
-    )}
+                        <div className="flex items-center gap-2 mt-3 sm:mt-0">
+                          <Badge
+                            palette={palette}
+                            variant={r.is_active ? "success" : "outline"}
+                          >
+                            {r.is_active ? "Aktif" : "Nonaktif"}
+                          </Badge>
 
-    {/* Pagination */}
-    {total > 0 && (
-      <div className="mt-3 flex items-center justify-between text-sm">
-        <div className="opacity-90">
-          Total: {total} • Halaman {page}/{pageCount}
-        </div>
-        <div className="flex items-center gap-2">
-          <Btn
-            palette={palette}
-            variant="default"
-            onClick={() => gotoPage(page - 1)}
-            disabled={page <= 1}
-          >
-            ‹ Prev
-          </Btn>
-          <Btn
-            palette={palette}
-            variant="default"
-            onClick={() => gotoPage(page + 1)}
-            disabled={page >= pageCount}
-          >
-            Next ›
-          </Btn>
-        </div>
-      </div>
-    )}
-  </div>
-</SectionCard>
+                          <Btn
+                            palette={palette}
+                            variant="ghost"
+                            title="Detail"
+                            onClick={() => navigate(`./${r.id}`)}
+                          >
+                            <Eye size={16} />
+                          </Btn>
 
+                          <Btn
+                            palette={palette}
+                            variant="ghost"
+                            title="Edit"
+                            onClick={() => {
+                              setModalInitial(r);
+                              setModalOpen(true);
+                            }}
+                            disabled={createOrUpdate.isPending}
+                          >
+                            <Edit3 size={16} />
+                          </Btn>
+
+                          <Btn
+                            palette={palette}
+                            variant="ghost"
+                            title="Hapus"
+                            onClick={() => {
+                              if (
+                                confirm(
+                                  `Hapus ruangan "${r.name}"? Tindakan ini tidak dapat dibatalkan.`
+                                )
+                              ) {
+                                delRoom.mutate(r.id);
+                              }
+                            }}
+                            disabled={delRoom.isPending}
+                          >
+                            <Trash2 size={16} />
+                          </Btn>
+                        </div>
+                      </div>
+                    ))
+                  : !roomsQ.isLoading && (
+                      <div
+                        className="text-sm text-center py-6"
+                        style={{ color: palette.black2 }}
+                      >
+                        Belum ada ruangan yang cocok.
+                      </div>
+                    )}
+
+                {/* Pagination (pakai dari server) */}
+                {total > 0 && (
+                  <div className="mt-3 flex items-center justify-between text-sm">
+                    <div className="opacity-90">
+                      Total: {total} • Halaman {page}/{totalPages}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Btn
+                        palette={palette}
+                        variant="default"
+                        onClick={() => setPage((p) => Math.max(1, p - 1))}
+                        disabled={page <= 1 || roomsQ.isFetching}
+                      >
+                        ‹ Prev
+                      </Btn>
+                      <Btn
+                        palette={palette}
+                        variant="default"
+                        onClick={() =>
+                          setPage((p) => Math.min(totalPages, p + 1))
+                        }
+                        disabled={page >= totalPages || roomsQ.isFetching}
+                      >
+                        Next ›
+                      </Btn>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </SectionCard>
           </section>
         </div>
       </main>
 
+      {/* Modal Upsert */}
       <RoomModal
         open={modalOpen}
         onClose={closeModal}
         initial={modalInitial}
-        palette={palette}
-        onSubmit={(form) => upsertMutation.mutate(form)}
-        saving={upsertMutation.isPending && !USE_DUMMY}
+        onSubmit={(form) => createOrUpdate.mutate(form)}
+        saving={createOrUpdate.isPending}
         error={
-          (upsertMutation.error as any)?.response?.data?.message ??
-          (upsertMutation.error as any)?.message ??
+          (createOrUpdate.error as any)?.response?.data?.message ??
+          (createOrUpdate.error as any)?.message ??
           null
         }
+        palette={palette}
       />
     </div>
   );

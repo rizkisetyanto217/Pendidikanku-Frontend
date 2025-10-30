@@ -312,50 +312,41 @@ export default function SchoolDetailClass() {
   return (
     <div
       className="h-full w-full"
-      style={{ background: palette.white2, color: palette.black1 }}
-    >
-      <ParentTopBar
-        palette={palette}
-        title="Kelas"
-        gregorianDate={new Date().toISOString()}
-        onMenuClick={() => setSidebarOpen(true)}
-        showBack
-      />
-      <main className="px-4">
+      style={{ background: palette.white2, color: palette.black1 }}>
+      <main className="">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
-          {/* Sidebar */}
-          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-            <ParentSidebar
-              desktopOnly={false}
-              mode="mobile"
-              open={sidebarOpen}
-              onCloseMobile={() => setSidebarOpen(false)}
-            />
-          </aside>
-
           {/* Content */}
           <div className="flex-1 min-w-0 space-y-6">
-            <section className="flex items-center justify-between ">
-              <div className=" md:flex hidden items-center gap-3">
-                <Btn
-                  palette={palette}
-                  variant="ghost"
-                  onClick={() => navigate(-1)}
-                >
-                  <ArrowLeft className="cursor-pointer" size={20} />
-                </Btn>
-
-                <h1 className="font-semibold text-lg">Detail Kelas</h1>
+            <section className="flex items-center justify-between">
+              <div className="font-semibold text-lg flex items-center">
+                <div className="items-center md:flex">
+                  <Btn
+                    palette={palette}
+                    variant="ghost"
+                    onClick={() => navigate(-1)}
+                    className="cursor-pointer mr-3"
+                  >
+                    <ArrowLeft aria-label="Kembali" size={20} />
+                  </Btn>
+                </div>
+                <h1 className="items-center md:flex">Kelola Kelas</h1>
               </div>
+
               <select
                 value={semester}
                 onChange={(e) => setSemester(e.target.value as SemesterKey)}
-                className="border rounded px-2 py-1"
+                className="border rounded px-2 py-1 text-sm"
+                style={{
+                  borderColor: palette.black2,
+                  background: palette.white2,
+                  color: palette.black1,
+                }}
               >
                 <option value="2025-Ganjil">2025 Ganjil</option>
                 <option value="2025-Genap">2025 Genap</option>
               </select>
             </section>
+
 
             {/* Ringkasan */}
             <SectionCard palette={palette}>
@@ -439,7 +430,7 @@ export default function SchoolDetailClass() {
             </SectionCard>
 
             {/* Peserta */}
-            <SectionCard palette={palette}>
+            {/* <SectionCard palette={palette}>
               <div className="p-4 font-medium flex items-center gap-2">
                 <Users size={18} /> Peserta
               </div>
@@ -501,7 +492,7 @@ export default function SchoolDetailClass() {
                   </tbody>
                 </table>
               </div>
-            </SectionCard>
+            </SectionCard> */}
 
             {/* Mata Pelajaran & Tugas */}
             <SectionCard palette={palette}>
@@ -537,53 +528,95 @@ export default function SchoolDetailClass() {
                     </div>
 
                     {/* Tabel tugas */}
-                    {/* Tabel tugas */}
-                    <div className="mt-3 overflow-x-auto">
-                      <table className="min-w-[500px] w-full text-sm">
-                        <thead
-                          className="text-left border-b"
+                    {/* Daftar tugas per mapel */}
+                    <div className="mt-4 space-y-3">
+                      {DUMMY_TASKS.filter((t) => t.subjectId === subj.id).map((t) => (
+                        <div
+                          key={t.id}
+                          className="border rounded-xl p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between"
                           style={{
-                            color: palette.black2,
                             borderColor: palette.silver1,
+                            background: palette.white1,
                           }}
                         >
-                          <tr>
-                            <th className="py-2 pr-4">Judul</th>
-                            <th className="py-2 pr-4">Deadline</th>
-                            <th className="py-2 pr-4">Status</th>
-                          </tr>
-                        </thead>
-                        <tbody
-                          className="divide-y"
-                          style={{ borderColor: palette.silver1 }}
-                        >
-                          {DUMMY_TASKS.filter(
-                            (t) => t.subjectId === subj.id
-                          ).map((t) => (
-                            <tr key={t.id}>
-                              <td className="py-3 pr-4 text-sm">{t.title}</td>
-                              <td className="py-3 pr-4">
-                                {dateLong(t.dueDate)}
-                              </td>
-                              <td className="py-3 pr-4 text-sm">
+                          <div className="flex-1 space-y-1">
+                            <div className="font-medium">{t.title}</div>
+                            <div
+                              className="text-sm flex items-center gap-1"
+                              style={{ color: palette.black2 }}
+                            >
+                              <CalendarDays size={14} /> {dateLong(t.dueDate)}
+                            </div>
+                          </div>
+                          <div className="mt-2 sm:mt-0">
+                            <Badge
+                              palette={palette}
+                              variant={
+                                t.status === "graded"
+                                  ? "success"
+                                  : t.status === "submitted"
+                                  ? "secondary"
+                                  : "outline"
+                              }
+                            >
+                              {t.status}
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
+
+                      {/* Bagian Quiz */}
+                      <div className="mt-5">
+                        <div className="font-medium mb-2 flex items-center gap-2">
+                          <BookOpen size={16} /> Quiz
+                        </div>
+                        <div className="space-y-3">
+                          {DUMMY_QUIZZES.filter((q) => q.subjectId === subj.id).map((q) => (
+                            <div
+                              key={q.id}
+                              className="border rounded-xl p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between"
+                              style={{
+                                borderColor: palette.silver1,
+                                background: palette.white1,
+                              }}
+                            >
+                              <div className="flex-1 space-y-1">
+                                <div className="font-medium">{q.title}</div>
+                                <div
+                                  className="text-sm"
+                                  style={{ color: palette.black2 }}
+                                >
+                                  Status: {q.status}
+                                </div>
+                              </div>
+                              <div className="mt-2 sm:mt-0 flex items-center gap-2">
                                 <Badge
                                   palette={palette}
                                   variant={
-                                    t.status === "graded"
+                                    q.status === "graded"
                                       ? "success"
-                                      : t.status === "submitted"
-                                        ? "secondary"
-                                        : "outline"
+                                      : q.status === "open"
+                                      ? "secondary"
+                                      : "outline"
                                   }
                                 >
-                                  {t.status}
+                                  {q.status}
                                 </Badge>
-                              </td>
-                            </tr>
+                                <Btn
+                                  palette={palette}
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => navigate(`../quiz/${q.id}`)}
+                                >
+                                  Detail
+                                </Btn>
+                              </div>
+                            </div>
                           ))}
-                        </tbody>
-                      </table>
+                        </div>
+                      </div>
                     </div>
+
 
                     {/* Bagian Quiz */}
                     <div className="mt-5">

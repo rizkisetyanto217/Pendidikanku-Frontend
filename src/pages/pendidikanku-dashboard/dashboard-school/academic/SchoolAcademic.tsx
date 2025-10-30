@@ -1,8 +1,10 @@
 // src/pages/sekolahislamku/academic/AcademicSchool.tsx
 import React, { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
-import { useNavigate } from "react-router-dom";
+import axios from "@/lib/axios";
+import { useNavigate, useParams, Link } from "react-router-dom";
 
 import {
   SectionCard,
@@ -11,35 +13,33 @@ import {
   type Palette,
 } from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
 
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
-import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/ParentSideBar";
-
 import {
   CalendarDays,
-  School,
   CheckCircle2,
-  Clock,
   Users,
   MapPin,
   Link as LinkIcon,
-  MonitorPlay,
   Building2,
   Layers,
-  Grid,
   Info,
   ArrowLeft,
+  Loader2,
 } from "lucide-react";
-import { Link } from "react-router-dom";
 
 /* ===================== Types ===================== */
+// UI type (dipakai komponen)
 type AcademicTerm = {
-  academic_terms_masjid_id: string;
-  academic_terms_academic_year: string; // "2025/2026"
-  academic_terms_name: string; // "Ganjil"
-  academic_terms_start_date: string; // ISO with TZ
-  academic_terms_end_date: string; // ISO with TZ
-  academic_terms_is_active: boolean;
-  academic_terms_angkatan: number; // 2025
+  id: string;
+  masjid_id: string;
+  academic_year: string; // "2029/2030" atau "2029/2030 Kuartal 1"
+  name: string; // "Ganjil" / "Genap"
+  start_date: string; // ISO
+  end_date: string; // ISO
+  is_active: boolean;
+  angkatan: number;
+  slug?: string;
+  created_at?: string;
+  updated_at?: string;
 };
 
 type ClassRoom = {
@@ -57,23 +57,39 @@ type ClassRoom = {
 
 type SchoolAcademicProps = {
   showBack?: boolean; // default: false
-  backTo?: string; // optional: kalau diisi, navigate ke path ini, kalau tidak pakai nav(-1)
-  backLabel?: string; // teks tombol
+  backTo?: string;
+  backLabel?: string;
 };
 
-/* ===================== Dummy Data ===================== */
-// Term aktif (sesuai contoh)
-const DUMMY_TERM: AcademicTerm = {
-  academic_terms_masjid_id: "e9876a6e-ab91-4226-84f7-cda296ec747e",
-  academic_terms_academic_year: "2025/2026",
-  academic_terms_name: "Ganjil",
-  academic_terms_start_date: "2025-07-15T00:00:00+07:00",
-  academic_terms_end_date: "2026-01-10T23:59:59+07:00",
-  academic_terms_is_active: true,
-  academic_terms_angkatan: 2025,
+/* ========== API types (sesuai payload server) ========= */
+type AcademicTermApi = {
+  academic_term_id: string;
+  academic_term_masjid_id: string;
+  academic_term_academic_year: string;
+  academic_term_name: string;
+  academic_term_start_date: string;
+  academic_term_end_date: string;
+  academic_term_is_active: boolean;
+  academic_term_angkatan: number;
+  academic_term_slug?: string;
+  academic_term_period?: string;
+  academic_term_created_at?: string;
+  academic_term_updated_at?: string;
 };
 
-// Dua contoh ruang (fisik & virtual)
+type PublicTermsResponse = {
+  data: AcademicTermApi[];
+  pagination: {
+    page: number;
+    per_page: number;
+    total: number;
+    total_pages: number;
+    has_next: boolean;
+    has_prev: boolean;
+  };
+};
+
+/* ===================== Dummy Rooms ===================== */
 const DUMMY_ROOMS: ClassRoom[] = [
   {
     class_rooms_masjid_id: "e9876a6e-ab91-4226-84f7-cda296ec747e",
@@ -101,20 +117,6 @@ const DUMMY_ROOMS: ClassRoom[] = [
 ];
 
 /* ===================== Helpers ===================== */
-const toLocalNoonISO = (d: Date) => {
-  const x = new Date(d);
-  x.setHours(12, 0, 0, 0);
-  return x.toISOString();
-};
-const dateLong = (iso?: string) =>
-  iso
-    ? new Date(iso).toLocaleDateString("id-ID", {
-        weekday: "long",
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      })
-    : "-";
 const dateShort = (iso?: string) =>
   iso
     ? new Date(iso).toLocaleDateString("id-ID", {
@@ -124,19 +126,68 @@ const dateShort = (iso?: string) =>
       })
     : "-";
 
+/* ===== Map API → UI ===== */
+function mapApiTermToUI(x: AcademicTermApi): AcademicTerm {
+  return {
+    id: x.academic_term_id,
+    masjid_id: x.academic_term_masjid_id,
+    academic_year: x.academic_term_academic_year,
+    name: x.academic_term_name,
+    start_date: x.academic_term_start_date,
+    end_date: x.academic_term_end_date,
+    is_active: x.academic_term_is_active,
+    angkatan: x.academic_term_angkatan,
+    slug: x.academic_term_slug,
+    created_at: x.academic_term_created_at,
+    updated_at: x.academic_term_updated_at,
+  };
+}
+
+/* ===== React Query: get public terms ===== */
+function usePublicAcademicTerms(masjidId?: string) {
+  return useQuery<PublicTermsResponse>({
+    queryKey: ["public-academic-terms", masjidId],
+    enabled: !!masjidId,
+    staleTime: 60_000,
+    retry: 1,
+    queryFn: async () => {
+      // NOTE: mengikuti pola endpoint public lain di project-mu (tanpa "/api" eksplisit)
+      const res = await axios.get<PublicTermsResponse>(
+        `/public/${masjidId}/academic-terms/list`,
+        { params: { page: 1, per_page: 50 } }
+      );
+      return res.data;
+    },
+  });
+}
+
 /* ===================== Page ===================== */
 const AcademicSchool: React.FC<SchoolAcademicProps> = ({
   showBack = false,
   backTo,
   backLabel = "Kembali",
 }) => {
+  const { masjid_id } = useParams<{ masjid_id?: string }>();
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
-  // State kecil untuk filter rooms
-  const [filter, setFilter] = useState<"all" | "physical" | "virtual">("all");
-  const isFromMenuUtama = location.pathname.includes("/menu-utama/");
 
+  const [filter, setFilter] = useState<"all" | "physical" | "virtual">("all");
+
+  // ====== Fetch academic terms (public) ======
+  const termsQ = usePublicAcademicTerms(masjid_id);
+  const terms: AcademicTerm[] = useMemo(
+    () => (termsQ.data?.data ?? []).map(mapApiTermToUI),
+    [termsQ.data]
+  );
+  // pilih term aktif; fallback ke term pertama
+  const activeTerm: AcademicTerm | null = useMemo(() => {
+    if (!terms.length) return null;
+    const actives = terms.filter((t) => t.is_active);
+    return actives[0] ?? terms[0] ?? null;
+  }, [terms]);
+
+  // Rooms masih dummy (belum ada endpoint rooms untuk halaman ini)
   const rooms = useMemo(() => {
     if (filter === "physical")
       return DUMMY_ROOMS.filter((r) => !r.class_rooms_is_virtual);
@@ -144,20 +195,6 @@ const AcademicSchool: React.FC<SchoolAcademicProps> = ({
       return DUMMY_ROOMS.filter((r) => r.class_rooms_is_virtual);
     return DUMMY_ROOMS;
   }, [filter]);
-
-  // KPI kecil
-  const kpIs = {
-    totalRooms: DUMMY_ROOMS.length,
-    physical: DUMMY_ROOMS.filter((r) => !r.class_rooms_is_virtual).length,
-    virtual: DUMMY_ROOMS.filter((r) => r.class_rooms_is_virtual).length,
-    capacitySum: DUMMY_ROOMS.reduce(
-      (s, r) => s + (r.class_rooms_capacity || 0),
-      0
-    ),
-  };
-
-  const topbarISO = toLocalNoonISO(new Date());
-  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div
@@ -168,71 +205,99 @@ const AcademicSchool: React.FC<SchoolAcademicProps> = ({
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Main */}
           <section className="flex-1 flex flex-col space-y-6 min-w-0">
+            {/* Header */}
             <div className="flex items-center justify-between ">
               <div className="font-semibold text-lg flex items-center ">
-                <div className=" items-center md:flex">
-                  {showBack && (
-                    <Btn
-                      palette={palette}
-                      onClick={() => navigate(-1)}
-                      variant="ghost"
-                      className="cursor-pointer mr-3"
-                    >
-                      <ArrowLeft
-                        aria-label={backLabel}
-                        // title={backLabel}
-
-                        size={20}
-                      />
-                    </Btn>
-                  )}
-                </div>
-                <h1 className=" items-center md:flex">
-                  Periode Akademik Aktif
-                </h1>
+                {showBack && (
+                  <Btn
+                    palette={palette}
+                    onClick={() => (backTo ? navigate(backTo) : navigate(-1))}
+                    variant="ghost"
+                    className="cursor-pointer mr-3"
+                  >
+                    <ArrowLeft aria-label={backLabel} size={20} />
+                  </Btn>
+                )}
+                <h1 className="items-center md:flex">Periode Akademik Aktif</h1>
               </div>
             </div>
+
             {/* ===== Periode Akademik (active term) ===== */}
             <SectionCard palette={palette} className="overflow-hidden ">
-              <div className="p-5 grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <div className="text-sm" style={{ color: palette.black2 }}>
-                    Tahun Ajaran
+              <div className="p-5">
+                {termsQ.isLoading ? (
+                  <div className="flex items-center gap-2 text-sm opacity-70">
+                    <Loader2 className="animate-spin" size={16} />
+                    Memuat periode akademik…
                   </div>
-                  <div className="text-xl font-semibold">
-                    {DUMMY_TERM.academic_terms_academic_year} —{" "}
-                    {DUMMY_TERM.academic_terms_name}
-                  </div>
+                ) : termsQ.isError ? (
                   <div
-                    className="text-sm flex items-center gap-2"
-                    style={{ color: palette.black2 }}
+                    className="rounded-xl border p-4 text-sm flex items-center gap-2"
+                    style={{
+                      borderColor: palette.silver1,
+                      color: palette.silver2,
+                    }}
                   >
-                    <CalendarDays size={16} />
-                    {dateShort(DUMMY_TERM.academic_terms_start_date)} s/d{" "}
-                    {dateShort(DUMMY_TERM.academic_terms_end_date)}
+                    <Info size={16} />
+                    Gagal memuat periode akademik.
                   </div>
-                </div>
+                ) : !activeTerm ? (
+                  <div
+                    className="rounded-xl border p-4 text-sm flex items-center gap-2"
+                    style={{
+                      borderColor: palette.silver1,
+                      color: palette.silver2,
+                    }}
+                  >
+                    <Info size={16} />
+                    Belum ada periode akademik.
+                  </div>
+                ) : (
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <div
+                        className="text-sm"
+                        style={{ color: palette.black2 }}
+                      >
+                        Tahun Ajaran
+                      </div>
+                      <div className="text-xl font-semibold">
+                        {activeTerm.academic_year} — {activeTerm.name}
+                      </div>
+                      <div
+                        className="text-sm flex items-center gap-2"
+                        style={{ color: palette.black2 }}
+                      >
+                        <CalendarDays size={16} />
+                        {dateShort(activeTerm.start_date)} s/d{" "}
+                        {dateShort(activeTerm.end_date)}
+                      </div>
+                    </div>
 
-                <div className="space-y-2">
-                  <div className="text-sm" style={{ color: palette.black2 }}>
-                    Angkatan
+                    <div className="space-y-2">
+                      <div
+                        className="text-sm"
+                        style={{ color: palette.black2 }}
+                      >
+                        Angkatan
+                      </div>
+                      <div className="text-xl font-semibold">
+                        {activeTerm.angkatan}
+                      </div>
+                      <div
+                        className="text-sm flex items-center gap-2"
+                        style={{ color: palette.black2 }}
+                      >
+                        <CheckCircle2 size={16} />
+                        Status: {activeTerm.is_active ? "Aktif" : "Nonaktif"}
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-xl font-semibold">
-                    {DUMMY_TERM.academic_terms_angkatan}
-                  </div>
-                  <div
-                    className="text-sm flex items-center gap-2"
-                    style={{ color: palette.black2 }}
-                  >
-                    <CheckCircle2 size={16} />
-                    Status:{" "}
-                    {DUMMY_TERM.academic_terms_is_active ? "Aktif" : "Nonaktif"}
-                  </div>
-                </div>
+                )}
               </div>
             </SectionCard>
 
-            {/* ===== Daftar Rooms ===== */}
+            {/* ===== Daftar Rooms (dummy) ===== */}
             <SectionCard palette={palette}>
               {/* Header + filters */}
               <div
@@ -300,37 +365,6 @@ const AcademicSchool: React.FC<SchoolAcademicProps> = ({
 };
 
 /* ===================== Small UI ===================== */
-function MiniKPI({
-  palette,
-  icon,
-  label,
-  value,
-}: {
-  palette: Palette;
-  icon: React.ReactNode;
-  label: string;
-  value: number | string;
-}) {
-  return (
-    <SectionCard palette={palette} className="p-4">
-      <div className="flex items-center gap-3">
-        <span
-          className="h-10 w-10 grid place-items-center rounded-xl"
-          style={{ background: palette.primary2, color: palette.primary }}
-        >
-          {icon}
-        </span>
-        <div>
-          <div className="text-sm" style={{ color: palette.black2 }}>
-            {label}
-          </div>
-          <div className="text-xl font-semibold">{value}</div>
-        </div>
-      </div>
-    </SectionCard>
-  );
-}
-
 function RoomCard({ room, palette }: { room: ClassRoom; palette: Palette }) {
   const isVirtual = room.class_rooms_is_virtual;
 
@@ -390,12 +424,12 @@ function RoomCard({ room, palette }: { room: ClassRoom; palette: Palette }) {
       )}
 
       <div className="pt-1 mt-auto flex items-center justify-end gap-2">
-        <Link to="detail" state={{ term: DUMMY_TERM }}>
+        <Link to="detail" state={{ room }}>
           <Btn palette={palette} variant="secondary" size="sm">
             Detail
           </Btn>
         </Link>
-        <Link to={"manage"} state={{ room }}>
+        <Link to="manage" state={{ room }}>
           <Btn palette={palette} size="sm">
             Kelola
           </Btn>
@@ -404,4 +438,5 @@ function RoomCard({ room, palette }: { room: ClassRoom; palette: Palette }) {
     </div>
   );
 }
+
 export default AcademicSchool;

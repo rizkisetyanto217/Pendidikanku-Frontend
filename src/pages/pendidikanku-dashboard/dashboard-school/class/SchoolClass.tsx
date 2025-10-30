@@ -297,51 +297,17 @@ function ClassCard({
           <div className="text-sm">{r.studentCount}</div>
         </div>
       </div>
-
       <div className="min-w-0">
         <div className="text-sm opacity-70">Jadwal</div>
         <div className="text-sm break-words">{r.schedule || "-"}</div>
       </div>
-
-      <div className="pt-1 flex justify-end">
-        <Link to={`/${slug}/sekolah/kelas/detail/${r.id}`}>
-          <Btn palette={palette} variant="outline" size="sm">
+      <div className="pt-1 flex justify-end gap-2">
+        <Link to="manage" state={{ classData: r }}>
+          <Btn palette={palette} size="sm">
             Kelola
           </Btn>
         </Link>
       </div>
-    </div>
-  );
-}
-
-/* ================= UI ================= */
-function SelectBox({
-  value,
-  onChange,
-  children,
-  palette,
-  className = "",
-}: {
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  children: React.ReactNode;
-  palette: Palette;
-  className?: string;
-}) {
-  return (
-    <div className={`relative ${className}`}>
-      <select
-        value={value}
-        onChange={onChange}
-        className="w-full h-11 rounded-lg border pl-3 pr-10 bg-transparent text-sm appearance-none"
-        style={{ borderColor: palette.silver1, color: palette.black1 }}
-      >
-        {children}
-      </select>
-      <ChevronDown
-        size={16}
-        className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
-      />
     </div>
   );
 }
@@ -525,10 +491,9 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
                 </div>
                 <Btn
                   palette={palette}
-                  variant="outline"
-                  onClick={() => setOpenTambahLevel(true)}
-                >
-                  <Layers size={16} className="mr-2" /> Tambah Level
+                  
+                  onClick={() => setOpenTambahLevel(true)}>
+                  <Plus size={16} className="mr-2" /> Tambah Level
                 </Btn>
               </div>
 
