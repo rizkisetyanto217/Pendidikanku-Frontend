@@ -517,7 +517,7 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
                 />
                 {(todaySessionsQ.isLoading || todaySessionsQ.isFetching) && (
                   <div className="px-4 pt-2 text-xs opacity-70">
-                    Memuat jadwal hari ini juga
+                    Memuat jadwal hari ini juga. NNN…
                   </div>
                 )}
               </div>
@@ -594,6 +594,5 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
     </div>
   );
 };
-
 
 export default SchoolDashboard;

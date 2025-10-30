@@ -179,38 +179,12 @@ export default function DetailRoomSchool() {
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <ParentTopBar
-        palette={palette}
-        title="Detail Ruangan"
-        showBack
-        gregorianDate={topbarGregorianISO}
-        hijriDate={new Date(topbarGregorianISO).toLocaleDateString(
-          "id-ID-u-ca-islamic-umalqura",
-          { weekday: "long", day: "2-digit", month: "long", year: "numeric" }
-        )}
-        dateFmt={(iso) =>
-          iso
-            ? new Date(iso).toLocaleDateString("id-ID", {
-                weekday: "long",
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })
-            : "-"
-        }
-      />
+      
 
-      <main className="w-full px-4 md:px-6 md:py-8">
+      <main className="w-full">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
-          {/* Sidebar */}
-          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-            <ParentSidebar
-              desktopOnly={false}
-              mode="mobile"
-              open={sidebarOpen}
-              onCloseMobile={() => setSidebarOpen(false)}
-            />
-          </aside>
+         
+        
 
           {/* Content */}
           <section className="flex-1 min-w-0 space-y-6">

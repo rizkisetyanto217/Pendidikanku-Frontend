@@ -114,7 +114,7 @@ function BillCard({
               if (isPaid) e.preventDefault();
             }}
           >
-            <Btn
+            {/* <Btn
               size="sm"
               variant="outline"
               palette={palette}
@@ -122,7 +122,7 @@ function BillCard({
               disabled={isPaid}
             >
               {isPaid ? "Sudah dibayar" : "Detail"}
-            </Btn>
+            </Btn> */}
           </Link>
         </div>
       </div>

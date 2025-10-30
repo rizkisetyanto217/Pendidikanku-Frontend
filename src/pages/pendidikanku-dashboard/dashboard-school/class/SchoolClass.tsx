@@ -253,6 +253,67 @@ async function fetchLevels(): Promise<Level[]> {
   return (res.data?.data ?? []).map(mapLevelRow);
 }
 
+function ClassCard({
+  r,
+  slug,
+  palette,
+}: {
+  r: ClassRow;
+  slug: string;
+  palette: Palette;
+}) {
+  return (
+    <div
+      className="rounded-xl border p-3 space-y-2"
+      style={{ borderColor: palette.silver1, background: palette.white1 }}
+    >
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <div className="text-sm opacity-70">Kode • Tingkat</div>
+          <div className="font-semibold text-sm truncate">
+            {r.code} • {r.grade}
+          </div>
+        </div>
+        <Badge
+          palette={palette}
+          variant={r.status === "active" ? "success" : "outline"}
+        >
+          {r.status === "active" ? "Aktif" : "Nonaktif"}
+        </Badge>
+      </div>
+
+      <div className="min-w-0">
+        <div className="text-sm opacity-70">Nama Kelas</div>
+        <div className="text-sm font-medium truncate">{r.name}</div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div className="min-w-0">
+          <div className="text-sm opacity-70">Wali Kelas</div>
+          <div className="text-sm truncate">{r.homeroom}</div>
+        </div>
+        <div>
+          <div className="text-sm opacity-70">Siswa</div>
+          <div className="text-sm">{r.studentCount}</div>
+        </div>
+      </div>
+
+      <div className="min-w-0">
+        <div className="text-sm opacity-70">Jadwal</div>
+        <div className="text-sm break-words">{r.schedule || "-"}</div>
+      </div>
+
+      <div className="pt-1 flex justify-end">
+        <Link to={`/${slug}/sekolah/kelas/detail/${r.id}`}>
+          <Btn palette={palette} variant="outline" size="sm">
+            Kelola
+          </Btn>
+        </Link>
+      </div>
+    </div>
+  );
+}
+
 /* ================= UI ================= */
 function SelectBox({
   value,
@@ -300,7 +361,6 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
   const [openTambah, setOpenTambah] = useState(false);
   const [openTambahLevel, setOpenTambahLevel] = useState(false);
   const { slug = "" } = useParams<{ slug: string }>();
-  const isFromMenuUtama = location.pathname.includes("/menu-utama/");
   const q = (sp.get("q") ?? "").trim();
   const status = (sp.get("status") ?? "all") as ClassStatus | "all";
   const shift = (sp.get("shift") ?? "all") as "Pagi" | "Sore" | "all";
@@ -310,17 +370,21 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
     queryKey: ["levels"],
     queryFn: fetchLevels,
     staleTime: 60_000,
+    placeholderData: DUMMY_LEVELS, // ⬅️ langsung pakai dummy di awal
+    refetchOnWindowFocus: false,
   });
+  // Class sections
   const {
-    data: apiItems,
-    isLoading,
-    refetch,
+    data: apiItems = [], // ⬅️ default array kosong
     isFetching,
+    refetch,
   } = useQuery({
     queryKey: ["class-sections", q, status, levelId],
     queryFn: () =>
       fetchClassSections({ q, status, classId: levelId || undefined }),
     staleTime: 60_000,
+    placeholderData: [], // ⬅️ tampilkan dummy via fallback di bawah
+    refetchOnWindowFocus: false,
   });
 
   useEffect(() => {
@@ -366,7 +430,6 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
     v ? next.set(k, v) : next.delete(k);
     setSp(next, { replace: true });
   };
-
   const items = filteredRows.length > 0 ? filteredRows : DUMMY_CLASSES;
   const levels =
     levelsQ.data && levelsQ.data.length > 0 ? levelsQ.data : DUMMY_LEVELS;
@@ -423,17 +486,20 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
 
     setOpenTambah(false);
   };
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div
-      className="h-full w-full"
+      className="h-full w-full overflow-x-hidden"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <main className="w-full">
+      <main className="w-full overflow-x-hidden">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Main Content */}
           <section className="flex-1 flex flex-col space-y-6 min-w-0">
+            {" "}
+            {/* ⬅️ min-w-0 penting */}
             {/* Header */}
             <div className="md:flex hidden gap-3 items-center">
               {showBack && (
@@ -448,7 +514,7 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
               )}
               <h1 className="text-lg font-semibold">Seluruh Kelas</h1>
             </div>
-
+            {/* Panel Tingkat */}
             {/* Panel Tingkat */}
             <SectionCard palette={palette}>
               <div className="flex p-4 md:p-5 pb-2 items-center justify-between">
@@ -463,87 +529,60 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
                   <Layers size={16} className="mr-2" /> Tambah Level
                 </Btn>
               </div>
-              <div className="px-4 md:px-5 pb-4 flex flex-wrap gap-2">
-                <button
-                  className={`px-3 py-1.5 rounded-lg border text-sm ${!levelId ? "font-semibold" : ""}`}
-                  style={{
-                    borderColor: palette.silver1,
-                    background: !levelId ? palette.primary2 : palette.white1,
-                    color: !levelId ? palette.primary : palette.quaternary,
-                  }}
-                  onClick={() => setParam("level_id", "")}
-                >
-                  Semua Tingkat
-                </button>
-                {levels.map((lv) => {
-                  const cnt = sectionCountByLevel.get(lv.id) ?? 0;
-                  const active = levelId === lv.id;
-                  return (
+
+              {/* HANYA chip yang bisa scroll di mobile; desktop wrap */}
+              <div className="pb-4">
+                {/* hilangkan padding agar scrollbar stay di area chip */}
+                <div className="-mx-4 md:-mx-5 overflow-x-auto md:overflow-x-visible">
+                  {/* kembalikan padding + atur layout chip */}
+                  <div className="px-4 md:px-5 flex items-center gap-2 w-max md:w-auto md:flex-wrap min-w-0">
                     <button
-                      key={lv.id}
-                      className={`px-3 py-1.5 rounded-lg border text-sm ${active ? "font-semibold" : ""}`}
+                      className={`px-3 py-1.5 rounded-lg border text-sm ${!levelId ? "font-semibold" : ""}`}
                       style={{
                         borderColor: palette.silver1,
-                        background: active ? palette.primary2 : palette.white1,
-                        color: active ? palette.primary : palette.quaternary,
+                        background: !levelId
+                          ? palette.primary2
+                          : palette.white1,
+                        color: !levelId ? palette.primary : palette.quaternary,
                       }}
-                      onClick={() => setParam("level_id", lv.id)}
+                      onClick={() => setParam("level_id", "")}
                     >
-                      {lv.name}{" "}
-                      <span style={{ color: palette.black2 }}>({cnt})</span>
+                      Semua Tingkat
                     </button>
-                  );
-                })}
+
+                    {levels.map((lv) => {
+                      const cnt = sectionCountByLevel.get(lv.id) ?? 0;
+                      const active = levelId === lv.id;
+                      return (
+                        <button
+                          key={lv.id}
+                          className={`px-3 py-1.5 rounded-lg border text-sm ${active ? "font-semibold" : ""} shrink-0`}
+                          style={{
+                            borderColor: palette.silver1,
+                            background: active
+                              ? palette.primary2
+                              : palette.white1,
+                            color: active
+                              ? palette.primary
+                              : palette.quaternary,
+                          }}
+                          onClick={() => setParam("level_id", lv.id)}
+                        >
+                          {lv.name}{" "}
+                          <span style={{ color: palette.black2 }}>({cnt})</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             </SectionCard>
-
             {/* Filter */}
-            <SectionCard palette={palette}>
-              <div className="p-4 md:p-5 pb-2 font-medium flex items-center gap-2">
-                <FilterIcon size={18} /> Filter
-              </div>
-              <div className="px-4 md:px-5 pb-4 grid grid-cols-1 md:grid-cols-5 gap-4">
-                <div className="md:col-span-2">
-                  <div className="text-sm mb-1">Pencarian</div>
-                  <input
-                    placeholder="Cari slug/nama/kode…"
-                    defaultValue={sp.get("q") ?? ""}
-                    onKeyDown={(e) => {
-                      if ((e as any).key === "Enter")
-                        setParam("q", (e.target as HTMLInputElement).value);
-                    }}
-                    className="w-full h-11 rounded-lg border px-3 bg-transparent text-sm"
-                    style={{ borderColor: palette.silver1 }}
-                  />
-                </div>
-                <div>
-                  <div className="text-sm mb-1">Shift</div>
-                  <SelectBox
-                    value={shift}
-                    onChange={(e) => setParam("shift", e.target.value)}
-                    palette={palette}
-                  >
-                    <option value="all">Semua</option>
-                    <option value="Pagi">Pagi</option>
-                    <option value="Sore">Sore</option>
-                  </SelectBox>
-                </div>
-                <div>
-                  <div className="text-sm mb-1">Status</div>
-                  <SelectBox
-                    value={status}
-                    onChange={(e) => setParam("status", e.target.value)}
-                    palette={palette}
-                  >
-                    <option value="all">Semua</option>
-                    <option value="active">Aktif</option>
-                    <option value="inactive">Nonaktif</option>
-                  </SelectBox>
-                </div>
-              </div>
-            </SectionCard>
-
-            {/* Tabel */}
+            {/* Tabel / Cards */}
+            {/* Tabel / Cards */}
+            {/* Tabel / Cards */}
+            {/* Daftar Kelas (FULL CARDS) */}
+            {/* Daftar Kelas (FULL CARDS) */}
             <SectionCard palette={palette}>
               <div className="p-4 md:p-5 pb-2 flex items-center justify-between">
                 <div className="font-medium">Daftar Kelas</div>
@@ -552,89 +591,41 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
                 </Btn>
               </div>
 
-              <div className="px-4 md:px-5 pb-4 overflow-x-auto">
-                <table className="min-w-[800px] w-full text-sm">
-                  <thead
-                    className="text-left border-b"
-                    style={{
-                      color: palette.black2,
-                      borderColor: palette.silver1,
-                    }}
-                  >
-                    <tr>
-                      <th className="py-2 pr-4">Kode</th>
-                      <th className="py-2 pr-4">Nama Kelas</th>
-                      <th className="py-2 pr-4">Tingkat</th>
-                      <th className="py-2 pr-4">Wali Kelas</th>
-                      <th className="py-2 pr-4">Siswa</th>
-                      <th className="py-2 pr-4">Jadwal</th>
-                      <th className="py-2 pr-4">Status</th>
-                      <th className="py-2 pr-2 text-right">Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody
-                    className="divide-y"
-                    style={{ borderColor: palette.silver1 }}
-                  >
-                    {isLoading || isFetching ? (
-                      <tr>
-                        <td colSpan={8} className="py-6 text-center">
-                          Memuat data…
-                        </td>
-                      </tr>
-                    ) : items.length === 0 ? (
-                      <tr>
-                        <td colSpan={8} className="py-6 text-center">
-                          Tidak ada data yang cocok.
-                        </td>
-                      </tr>
-                    ) : (
-                      items.map((r) => (
-                        <tr key={r.id} className="align-middle">
-                          <td className="py-3 pr-4 font-medium">{r.code}</td>
-                          <td className="py-3 pr-4">{r.name}</td>
-                          <td className="py-3 pr-4">{r.grade}</td>
-                          <td className="py-3 pr-4">{r.homeroom}</td>
-                          <td className="py-3 pr-4">{r.studentCount}</td>
-                          <td className="py-3 pr-4">{r.schedule}</td>
-                          <td className="py-3 pr-4">
-                            <Badge
-                              palette={palette}
-                              variant={
-                                r.status === "active" ? "success" : "outline"
-                              }
-                            >
-                              {r.status === "active" ? "Aktif" : "Nonaktif"}
-                            </Badge>
-                          </td>
-                          <td className="py-3 pr-2">
-                            <div className="flex justify-end gap-2">
-                              <Link
-                                to={`/${slug}/sekolah/kelas/detail/${r.id}`}
-                              >
-                                <Btn
-                                  palette={palette}
-                                  variant="outline"
-                                  size="sm"
-                                >
-                                  Kelola
-                                </Btn>
-                              </Link>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
+              <div className="px-4 md:px-5 pb-4">
+                {items.length === 0 ? (
+                  <div className="py-6 text-center">
+                    Tidak ada data yang cocok.
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-3 md:gap-4">
+                    {items.map((r) => (
+                      <ClassCard
+                        key={r.id}
+                        r={r}
+                        slug={slug}
+                        palette={palette}
+                      />
+                    ))}
+                  </div>
+                )}
 
                 <div
                   className="pt-3 flex items-center justify-between text-sm"
                   style={{ color: palette.black2 }}
                 >
-                  <div>Menampilkan {items.length} kelas</div>
-                  <button onClick={() => refetch()} className="underline">
-                    Refresh
+                  <div className="flex items-center gap-2">
+                    <span>Menampilkan {items.length} kelas</span>
+                    {isFetching && (
+                      <span className="opacity-70">• Menyegarkan…</span>
+                    )}{" "}
+                    {/* ⬅️ indikator ringan */}
+                  </div>
+                  <button
+                    onClick={() => refetch()}
+                    className="underline"
+                    disabled={isFetching}
+                  >
+                    {isFetching ? "Menyegarkan…" : "Refresh"}
                   </button>
                 </div>
               </div>

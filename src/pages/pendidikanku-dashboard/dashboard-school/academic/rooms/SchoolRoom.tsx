@@ -12,6 +12,7 @@ import {
 } from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
 import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
 import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/ParentSideBar";
+import Swal from "sweetalert2";
 
 import {
   Building2,
@@ -641,11 +642,40 @@ export default function RoomSchool() {
   };
 
   const handleDeleteRoom = (room: Room) => {
-    if (deleteMutation.isPending) return;
-    const ok = confirm(`Hapus ruangan "${room.name}"?`);
-    if (!ok) return;
-    deleteMutation.mutate(room.id);
-  };
+  if (deleteMutation.isPending) return;
+
+  Swal.fire({
+    title: "Hapus ruangan?",
+    text: `Data ruangan "${room.name}" akan dihapus permanen.`,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Ya, hapus",
+    cancelButtonText: "Batal",
+    reverseButtons: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#6c757d",
+    buttonsStyling: true,
+    customClass: {
+      popup: "rounded-2xl shadow-xl",
+      title: "text-lg font-semibold mt-2",
+      confirmButton:
+        "px-4 py-2 rounded-lg font-medium bg-red-600 text-white hover:bg-red-700 transition",
+      cancelButton:
+        "px-4 py-2 rounded-lg font-medium bg-gray-500 text-white hover:bg-gray-600 transition",
+    },
+  }).then((res) => {
+    if (res.isConfirmed) {
+      deleteMutation.mutate(room.id);
+      Swal.fire({
+        icon: "success",
+        title: "Terhapus",
+        text: `Ruangan "${room.name}" berhasil dihapus.`,
+        timer: 1400,
+        showConfirmButton: false,
+      });
+    }
+  });
+};
 
   const closeModal = () => {
     setModalOpen(false);

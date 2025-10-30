@@ -170,7 +170,7 @@ const AcademicSchool: React.FC<SchoolAcademicProps> = ({
           <section className="flex-1 flex flex-col space-y-6 min-w-0">
             <div className="flex items-center justify-between ">
               <div className="font-semibold text-lg flex items-center ">
-                <div className=" items-center hidden md:flex">
+                <div className=" items-center md:flex">
                   {showBack && (
                     <Btn
                       palette={palette}
@@ -187,7 +187,7 @@ const AcademicSchool: React.FC<SchoolAcademicProps> = ({
                     </Btn>
                   )}
                 </div>
-                <h1 className=" items-center hidden md:flex">
+                <h1 className=" items-center md:flex">
                   Periode Akademik Aktif
                 </h1>
               </div>

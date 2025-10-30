@@ -65,6 +65,44 @@ type ApiActiveClassResp = {
   list: ClassRow[];
 };
 
+function ActiveClassCard({ r, palette }: { r: ClassRow; palette: Palette }) {
+  return (
+    <div
+      className="rounded-xl border p-3 space-y-2"
+      style={{ borderColor: palette.silver1, background: palette.white1 }}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="text-xs opacity-70">Nama Kelas</div>
+          <div className="font-semibold truncate">{r.name}</div>
+        </div>
+        <Badge
+          palette={palette}
+          variant={r.status === "active" ? "success" : "outline"}
+        >
+          {r.status === "active" ? "Aktif" : "Nonaktif"}
+        </Badge>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div className="min-w-0">
+          <div className="text-xs opacity-70">Wali Kelas</div>
+          <div className="text-sm truncate">{r.homeroom_teacher}</div>
+        </div>
+        <div>
+          <div className="text-xs opacity-70">Tahun Ajaran</div>
+          <div className="text-sm">{r.academic_year}</div>
+        </div>
+      </div>
+
+      <div>
+        <div className="text-xs opacity-70">Jumlah Siswa</div>
+        <div className="text-sm">{r.student_count}</div>
+      </div>
+    </div>
+  );
+}
+
 /* ============== Page ============== */
 const SchoolActiveClass: React.FC = () => {
   const { isDark, themeName } = useHtmlDarkMode();
@@ -123,64 +161,29 @@ const SchoolActiveClass: React.FC = () => {
             </section>
 
             {/* Table */}
+            {/* Cards (all devices) */}
             <SectionCard palette={palette}>
               <div className="p-4 md:p-5 pb-2 font-medium flex items-center gap-2">
                 <FilterIcon size={18} /> Daftar Kelas
               </div>
 
-              <div className="px-4 md:px-5 pb-4 overflow-x-auto">
-                <table className="w-full text-sm min-w-[760px]">
-                  <thead
-                    className="text-left"
+              <div className="px-4 md:px-5 pb-4">
+                {rows.length === 0 ? (
+                  <div
+                    className="py-8 text-center"
                     style={{ color: palette.black2 }}
                   >
-                    <tr
-                      className="border-b"
-                      style={{ borderColor: palette.silver1 }}
-                    >
-                      <th className="py-2 pr-4">Nama Kelas</th>
-                      <th className="py-2 pr-4">Wali Kelas</th>
-                      <th className="py-2 pr-4">Tahun Ajaran</th>
-                      <th className="py-2 pr-4">Jumlah Siswa</th>
-                      <th className="py-2 pr-4">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody
-                    className="divide-y"
-                    style={{ borderColor: palette.silver1 }}
-                  >
-                    {rows.length === 0 ? (
-                      <tr>
-                        <td
-                          colSpan={5}
-                          className="py-8 text-center"
-                          style={{ color: palette.black2 }}
-                        >
-                          Tidak ada data kelas.
-                        </td>
-                      </tr>
-                    ) : (
-                      rows.map((r) => (
-                        <tr key={r.id}>
-                          <td className="py-3 pr-4 font-medium">{r.name}</td>
-                          <td className="py-3 pr-4">{r.homeroom_teacher}</td>
-                          <td className="py-3 pr-4">{r.academic_year}</td>
-                          <td className="py-3 pr-4">{r.student_count}</td>
-                          <td className="py-3 pr-4">
-                            <Badge
-                              palette={palette}
-                              variant={
-                                r.status === "active" ? "success" : "outline"
-                              }
-                            >
-                              {r.status === "active" ? "Aktif" : "Nonaktif"}
-                            </Badge>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
+                    Tidak ada data kelas.
+                  </div>
+                ) : (
+                  // responsive: 1 / 2 kolom
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                    {rows.map((r) => (
+                      <ActiveClassCard key={r.id} r={r} palette={palette} />
+                    ))}
+                  </div>
+                )}
+
                 <div className="pt-3 text-sm" style={{ color: palette.black2 }}>
                   Menampilkan {rows.length} kelas
                 </div>
