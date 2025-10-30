@@ -1,3 +1,4 @@
+// src/pages/auth/Login.tsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -12,11 +13,11 @@ import {
 } from "lucide-react";
 
 import AuthLayout from "@/layout/AuthLayout";
-import api, { setTokens } from "@/lib/axios";
-// import LegalModal from "@/pages/dashboard/auth/components/LegalPrivacyModal";
+import api, { setTokens, setActiveMasjidContext } from "@/lib/axios";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 
+/* ===================== Types ===================== */
 type MasjidRole = "dkm" | "admin" | "teacher" | "student" | "user";
 type MasjidItem = {
   masjid_id: string;
@@ -569,16 +570,18 @@ export default function Login() {
     setError("");
     try {
       const res = await api.post("/auth/login", { identifier, password });
-      // Back-end mengirim refresh via HttpOnly cookie; FE cukup ambil access_token saja
       const { access_token } = res.data?.data ?? {};
       if (!access_token) throw new Error("Token tidak ditemukan.");
 
+      // Set AT in-memory; RT sudah di-cookie HttpOnly oleh backend
       setTokens(access_token);
 
+      // Ambil konteks membership
       const ctx = await api.get("/auth/me/simple-context");
       const memberships = ctx.data?.data?.memberships ?? [];
 
       if (memberships.length === 0) {
+        // Belum punya masjid → tanya tujuan
         setOpenPilihTujuan(true);
         return;
       }
@@ -590,6 +593,7 @@ export default function Login() {
         return;
       }
 
+      // Multi membership → pilih
       setOpenSelectMasjid(true);
     } catch (err: any) {
       console.error(err);
@@ -619,16 +623,8 @@ export default function Login() {
       if (!item) throw new Error("Masjid gagal dibuat.");
 
       const masjidId = item.masjid_id;
-      const name = item.masjid_name || data.name;
-      const iconUrl = item.masjid_icon_url || "/image/Gambar-Masjid.jpeg";
-
-      const activeMasjid = {
-        masjid_id: masjidId,
-        masjid_name: name,
-        masjid_icon_url: iconUrl,
-      };
-      localStorage.setItem("active_masjid", JSON.stringify(activeMasjid));
-      localStorage.setItem("active_role", "dkm");
+      // set context via cookie
+      setActiveMasjidContext(masjidId, "dkm");
 
       setOpenJoinAtauBuat(false);
       navigate(`/${masjidId}/sekolah`, { replace: true });
@@ -647,17 +643,10 @@ export default function Login() {
       const memberships = ctx.data?.data?.memberships ?? [];
       if (memberships.length > 0) {
         const m = memberships[0];
-        const masjidId = m.masjid_id;
-        const masjidData = {
-          masjid_id: masjidId,
-          masjid_name: m.masjid_name || "Masjid",
-          masjid_icon_url: m.masjid_icon_url || "/image/Gambar-Masjid.jpeg",
-        };
-        localStorage.setItem("active_masjid", JSON.stringify(masjidData));
-        localStorage.setItem("active_role", role);
+        setActiveMasjidContext(m.masjid_id, role);
 
         const path = role === "teacher" ? "guru" : "murid";
-        navigate(`/${masjidId}/${path}`, { replace: true });
+        navigate(`/${m.masjid_id}/${path}`, { replace: true });
       }
     } catch (err: any) {
       alert(
@@ -669,12 +658,7 @@ export default function Login() {
   }
 
   function handleSelectMasjidRole(masjidId: string, role: MasjidRole) {
-    localStorage.setItem("active_role", role);
-    localStorage.setItem(
-      "active_masjid",
-      JSON.stringify({ masjid_id: masjidId })
-    );
-
+    setActiveMasjidContext(masjidId, role);
     const path =
       role === "teacher" ? "guru" : role === "student" ? "murid" : "sekolah";
     navigate(`/${masjidId}/${path}`, { replace: true });
@@ -820,7 +804,6 @@ export default function Login() {
         onCreateMasjid={handleCreateMasjid}
         onJoinSekolah={handleJoinSekolah}
       />
-      {/* <LegalModal open={false} initialTab="tos" onClose={() => {}} /> */}
     </AuthLayout>
   );
 }

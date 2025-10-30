@@ -1,50 +1,67 @@
 // src/routes/ProtectedRoute.tsx
-import React from "react";
-import { Navigate, Outlet, useLocation, useParams } from "react-router-dom";
-import { getAccessToken } from "@/lib/axios";
+import React, { useEffect, useState } from "react";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { getAccessToken, restoreSession } from "@/lib/axios";
 
-// helper: parse masjidId dari params atau fallback dari pathname segmen-1
-function useMasjidId() {
-  const params = useParams();
-  const fromParams =
-    (params as any).masjidId ??
-    (params as any).masjid_id ??
-    (params as any).tenantId ??
-    (params as any).mosqueId;
-
-  if (fromParams) return String(fromParams);
-
-  // fallback: /:id/xxx → ambil segmen pertama
-  const first = location.pathname.split("/").filter(Boolean)[0];
-  return first || undefined;
-}
+const PUBLIC_PREFIXES = ["/login", "/register", "/forgot-password"];
 
 export default function ProtectedRoute() {
   const location = useLocation();
-  const masjidId = useMasjidId();
-  const accessToken = getAccessToken(); // in-memory
+  const isPublic = PUBLIC_PREFIXES.some((p) => location.pathname.startsWith(p));
+  if (isPublic) return <Outlet />;
 
-  // UUID v4 regex
-  const uuidV4 =
-    /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  const [checking, setChecking] = useState(() => !getAccessToken());
+  const [ok, setOk] = useState(() => Boolean(getAccessToken()));
 
-  // ⚠️ Kebijakan validasi:
-  // - Jika route TIDAK punya param masjid → jangan blokir (biarkan lewat).
-  // - Jika ADA param masjid → boleh UUID v4 ATAU slug (jangan paksa 404 di guard).
-  const hasMasjidParam = typeof masjidId === "string" && masjidId.length > 0;
-  const isUuid = hasMasjidParam ? uuidV4.test(masjidId!) : true;
+  useEffect(() => {
+    let cancelled = false;
 
-  // Debug bila perlu
-  // console.log("[ProtectedRoute]", { accessToken, masjidId, hasMasjidParam, isUuid, path: location.pathname });
+    // Kalau sudah ada AT in-memory, tidak perlu restore
+    if (getAccessToken()) {
+      setOk(true);
+      setChecking(false);
+      return;
+    }
 
-  if (!accessToken) {
-    return <Navigate to="/login" replace state={{ from: location }} />;
+    (async () => {
+      try {
+        setChecking(true);
+        const success = await restoreSession(); // ← akan resolve true/false, tidak throw
+        if (cancelled) return;
+        setOk(Boolean(success));
+      } finally {
+        if (!cancelled) setChecking(false); // ← PASTIKAN keluar dari “checking”
+      }
+    })();
+
+    // Jaga-jaga: kalau token di-set dari tempat lain, hentikan loading
+    const onAuth = () => {
+      if (!cancelled) {
+        setOk(true);
+        setChecking(false);
+      }
+    };
+    window.addEventListener("auth:authorized", onAuth);
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener("auth:authorized", onAuth);
+    };
+  }, []);
+
+  if (checking) {
+    return (
+      <div className="min-h-[40vh] grid place-items-center">
+        <div className="flex items-center gap-3 text-sm opacity-70">
+          <span className="w-4 h-4 inline-block rounded-full border-2 border-current border-t-transparent animate-spin" />
+          <span>Menyambungkan sesi…</span>
+        </div>
+      </div>
+    );
   }
 
-  // Kalau param ada tapi jelas-jelas bukan UUID/slug yang kamu kenal (mis input aneh),
-  // barulah arahkan ke not-found. Jika kamu juga mendukung slug, guard TIDAK perlu menolak di sini.
-  if (hasMasjidParam && masjidId!.length < 6 && !isUuid) {
-    return <Navigate to="/not-found" replace />;
+  if (!ok) {
+    return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
   return <Outlet />;

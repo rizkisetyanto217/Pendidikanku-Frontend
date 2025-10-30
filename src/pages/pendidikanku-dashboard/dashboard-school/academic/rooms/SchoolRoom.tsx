@@ -412,13 +412,9 @@ export default function RoomSchool({
       };
 
       if (form.id) {
-        await axios.put(`/api/a/rooms/${form.id}`, payload, {
-          withCredentials: true,
-        });
+        await axios.put(`/a/${masjid_id}/class-rooms/${form.id}`, payload);
       } else {
-        await axios.post(`/api/a/rooms`, payload, {
-          withCredentials: true,
-        });
+        await axios.post(`/a/${masjid_id}/class-rooms`, payload);
       }
     },
     onSuccess: async () => {
@@ -431,7 +427,8 @@ export default function RoomSchool({
 
   const delRoom = useMutation({
     mutationFn: async (id: string) => {
-      await axios.delete(`/api/a/rooms/${id}`, { withCredentials: true });
+      // baseURL sudah .../api, jadi pathnya mulai dari /a/...
+      await axios.delete(`/a/${masjid_id}/class-rooms/${id}`);
     },
     onSuccess: async () => {
       await qc.invalidateQueries({
