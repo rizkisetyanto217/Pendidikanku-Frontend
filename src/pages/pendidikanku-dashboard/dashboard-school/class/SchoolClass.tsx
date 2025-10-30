@@ -498,21 +498,23 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Main Content */}
           <section className="flex-1 flex flex-col space-y-6 min-w-0">
-            {" "}
-            {/* ⬅️ min-w-0 penting */}
-            {/* Header */}
-            <div className="md:flex hidden gap-3 items-center">
-              {showBack && (
-                <Btn
-                  palette={palette}
-                  variant="ghost"
-                  onClick={() => (backTo ? navigate(backTo) : navigate(-1))}
-                  className="inline-flex items-center gap-2"
-                >
-                  <ArrowLeft size={20} />
-                </Btn>
-              )}
-              <h1 className="text-lg font-semibold">Seluruh Kelas</h1>
+            {/* ================= Header dengan tombol Back ================= */}
+            <div className="flex items-center justify-between">
+              <div className="font-semibold text-lg flex items-center">
+                <div className="items-center md:flex">
+                  {showBack && (
+                    <Btn
+                      palette={palette}
+                      onClick={() => (backTo ? navigate(backTo) : navigate(-1))}
+                      variant="ghost"
+                      className="cursor-pointer mr-3"
+                    >
+                      <ArrowLeft aria-label={backLabel} size={20} />
+                    </Btn>
+                  )}
+                </div>
+                <h1>Seluruh Kelas</h1>
+              </div>
             </div>
             {/* Panel Tingkat */}
             {/* Panel Tingkat */}
@@ -537,7 +539,7 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
                   {/* kembalikan padding + atur layout chip */}
                   <div className="px-4 md:px-5 flex items-center gap-2 w-max md:w-auto md:flex-wrap min-w-0">
                     <button
-                      className={`px-3 py-1.5 rounded-lg border text-sm ${!levelId ? "font-semibold" : ""}`}
+                      className={`px-3 py-1.5 ml-2 rounded-lg border text-sm ${!levelId ? "font-semibold" : ""}`}
                       style={{
                         borderColor: palette.silver1,
                         background: !levelId

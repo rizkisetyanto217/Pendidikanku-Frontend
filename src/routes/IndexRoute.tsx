@@ -65,7 +65,7 @@ export default function AppRoutes() {
       </Route>
 
       {/* === Protected Routes dengan masjidId === */}
-      <Route path=":masjidId" element={<ProtectedRoute />}>
+      <Route path=":masjid_id" element={<ProtectedRoute />}>
         {TeacherRoutes}
         {StudentRoutes}
         {SchoolRoutes}

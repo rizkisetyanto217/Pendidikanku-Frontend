@@ -114,7 +114,7 @@ export const SchoolRoutes = (
       <Route path="guru" element={<SchoolTeacher showBack />} />
       {/* <Route path="all-announcement" element={<AllAnnouncement />} /> */}
       <Route path="sekolah" element={<SchoolDashboard showBack />} />
-      <Route path="room-school" element={<RoomSchool />} />
+      <Route path="room-school" element={<RoomSchool showBack />} />
       <Route path="room-school/:id" element={<DetailRoomSchool />} />
       <Route path="spp" element={<SchoolSpp />} />
       <Route path="pelajaran" element={<SchoolSubject />} />
@@ -134,7 +134,7 @@ export const SchoolRoutes = (
       </Route>
       <Route path="kelas">
         <Route index element={<SchoolClasses showBack />} />
-        <Route path="detail/:id" element={<SchoolManageClass />} />
+        <Route path="manage" element={<SchoolManageClass />} />
       </Route>
       <Route path="academic">
         <Route index element={<AcademicSchool showBack />} />

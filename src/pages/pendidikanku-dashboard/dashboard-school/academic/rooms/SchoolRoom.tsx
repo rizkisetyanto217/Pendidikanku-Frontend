@@ -458,7 +458,7 @@ function RoomModal({
               </select>
 
               <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
-                ▼
+                
               </span>
             </div>
           </label>
@@ -498,7 +498,17 @@ function RoomModal({
 }
 
 /* ===================== PAGE ======================= */
-export default function RoomSchool() {
+type RoomSchoolProps = {
+  showBack?: boolean;
+  backTo?: string;
+  backLabel?: string;
+};
+
+export default function RoomSchool({
+  showBack = false,
+  backTo,
+  backLabel = "Kembali",
+}: RoomSchoolProps) {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const qc = useQueryClient();
@@ -507,6 +517,8 @@ export default function RoomSchool() {
     type: "success" | "error";
     msg: string;
   } | null>(null);
+
+
 
   useEffect(() => {
     if (flash) {
@@ -693,16 +705,22 @@ export default function RoomSchool() {
       <main className="w-full">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
           <section className="flex-1 min-w-0 space-y-6">
-            <div className="mx-auto md:flex hidden items-center gap-3">
-              <Btn
-                palette={palette}
-                variant="ghost"
-                onClick={() => navigate(-1)}
-              >
-                <ArrowLeft className="cursor-pointer" size={20} />
-              </Btn>
-
-              <h1 className="font-semibold text-lg">Ruangan</h1>
+            <div className="flex items-center justify-between">
+              <div className="font-semibold text-lg flex items-center">
+                <div className="items-center md:flex">
+                  {showBack && (
+                    <Btn
+                      palette={palette}
+                      onClick={() => (backTo ? navigate(backTo) : navigate(-1))}
+                      variant="ghost"
+                      className="cursor-pointer mr-3"
+                    >
+                      <ArrowLeft aria-label={backLabel} size={20} />
+                    </Btn>
+                  )}
+                </div>
+                <h1 className="items-center md:flex">Ruangan</h1>
+              </div>
             </div>
 
             <SectionCard palette={palette}>
@@ -742,134 +760,137 @@ export default function RoomSchool() {
             </SectionCard>
 
             <SectionCard palette={palette}>
-              <div className="p-3 md:p-4">
-                <div className="mb-3 font-medium">Daftar Ruangan</div>
+  <div className="p-4 pb-1 font-medium flex items-center justify-between">
+    <div className="flex items-center gap-2">
+      <div
+        className="h-9 w-9 rounded-xl flex items-center justify-center"
+        style={{
+          background: palette.white3,
+          color: palette.primary,
+        }}
+      >
+        <Building2 size={18} />
+      </div>
+      <h1 className="text-base font-semibold">Daftar Ruangan</h1>
+    </div>
+    <Btn palette={palette} variant="default" onClick={handleAddRoom}>
+      <Plus size={16} className="mr-2" /> Tambah
+    </Btn>
+  </div>
 
-                {!USE_DUMMY && roomsQ.isLoading && (
-                  <div className="text-sm opacity-70 flex items-center gap-2">
-                    <Loader2 className="animate-spin" size={16} /> Memuat
-                    ruangan…
-                  </div>
-                )}
-                {!USE_DUMMY && roomsQ.isError && (
-                  <div className="text-sm opacity-70">
-                    Gagal memuat ruangan.
-                  </div>
-                )}
+  <div className="px-4 pb-4 space-y-3">
+    {/* Loading / Error Handling */}
+    {!USE_DUMMY && roomsQ.isLoading && (
+      <div className="text-sm opacity-70 flex items-center gap-2">
+        <Loader2 className="animate-spin" size={16} /> Memuat ruangan…
+      </div>
+    )}
+    {!USE_DUMMY && roomsQ.isError && (
+      <div className="text-sm opacity-70">Gagal memuat ruangan.</div>
+    )}
 
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr
-                        className="text-left"
-                        style={{ color: palette.black2 }}
-                      >
-                        <th className="py-2 pr-3">Nama</th>
-                        <th className="py-2 pr-3">Kapasitas</th>
-                        <th className="py-2 pr-3">Lokasi</th>
-                        <th className="py-2 pr-3">Status</th>
-                        <th className="py-2 pr-3 text-right">Aksi</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {listResp.data.map((r) => (
-                        <tr
-                          key={r.id}
-                          className="border-t"
-                          style={{ borderColor: palette.silver1 }}
-                        >
-                          <td className="py-2 pr-3">{r.name}</td>
-                          <td className="py-2 pr-3">{r.capacity}</td>
-                          <td className="py-2 pr-3">
-                            {r.location ? (
-                              <span className="inline-flex items-center gap-1">
-                                <MapPin size={14} /> {r.location}
-                              </span>
-                            ) : (
-                              <span className="opacity-60">—</span>
-                            )}
-                          </td>
-                          <td className="py-2 pr-3">
-                            <Badge
-                              palette={palette}
-                              variant={r.is_active ? "success" : "outline"}
-                            >
-                              {r.is_active ? "Aktif" : "Nonaktif"}
-                            </Badge>
-                          </td>
-                          <td className="py-2 pr-3">
-                            <div className="flex items-center gap-2 justify-end">
-                              <Btn
-                                palette={palette}
-                                variant="ghost"
-                                onClick={() => navigate(`./${r.id}`)}
-                                title="Detail"
-                              >
-                                <Eye size={16} />
-                              </Btn>
-                              <Btn
-                                palette={palette}
-                                variant="ghost"
-                                onClick={() => handleEditRoom(r)}
-                                title="Edit"
-                              >
-                                <Edit3 size={16} />
-                              </Btn>
-                              <Btn
-                                palette={palette}
-                                variant="ghost"
-                                onClick={() => handleDeleteRoom(r)}
-                                title="Hapus"
-                                disabled={deleteMutation.isPending}
-                              >
-                                <Trash2 size={16} />
-                              </Btn>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+    {/* List Ruangan */}
+    {listResp.data.length > 0 ? (
+      listResp.data.map((r) => (
+        <div
+          key={r.id}
+          className="rounded-xl border p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between hover:shadow transition-all duration-200"
+          style={{
+            borderColor: palette.silver1,
+            background: palette.white1,
+          }}
+        >
+          <div className="flex flex-col">
+            <span className="font-semibold text-sm">{r.name}</span>
+            <div
+              className="flex items-center gap-2 text-sm mt-1"
+              style={{ color: palette.black2 }}
+            >
+              <MapPin size={14} />
+              {r.location ?? "Lokasi tidak tersedia"}
+            </div>
+            <div
+              className="text-sm opacity-80 mt-1"
+              style={{ color: palette.black2 }}
+            >
+              Kapasitas: {r.capacity} orang
+            </div>
+          </div>
 
-                      {listResp.data.length === 0 && (
-                        <tr>
-                          <td
-                            colSpan={5}
-                            className="py-6 text-center opacity-70"
-                          >
-                            Belum ada ruangan yang cocok.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+          <div className="flex items-center gap-2 mt-3 sm:mt-0">
+            <Badge
+              palette={palette}
+              variant={r.is_active ? "success" : "outline"}
+            >
+              {r.is_active ? "Aktif" : "Nonaktif"}
+            </Badge>
 
-                {total > 0 && (
-                  <div className="mt-3 flex items-center justify-between text-sm">
-                    <div className="opacity-90">
-                      Total: {total} • Halaman {page}/{pageCount}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Btn
-                        palette={palette}
-                        variant="default"
-                        onClick={() => gotoPage(page - 1)}
-                        disabled={page <= 1}
-                      >
-                        ‹ Prev
-                      </Btn>
-                      <Btn
-                        palette={palette}
-                        variant="default"
-                        onClick={() => gotoPage(page + 1)}
-                        disabled={page >= pageCount}
-                      >
-                        Next ›
-                      </Btn>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </SectionCard>
+            <Btn
+              palette={palette}
+              variant="ghost"
+              title="Detail"
+              onClick={() => navigate(`./${r.id}`)}
+            >
+              <Eye size={16} />
+            </Btn>
+            <Btn
+              palette={palette}
+              variant="ghost"
+              title="Edit"
+              onClick={() => handleEditRoom(r)}
+            >
+              <Edit3 size={16} />
+            </Btn>
+            <Btn
+              palette={palette}
+              variant="ghost"
+              title="Hapus"
+              onClick={() => handleDeleteRoom(r)}
+              disabled={deleteMutation.isPending}
+            >
+              <Trash2 size={16} />
+            </Btn>
+          </div>
+        </div>
+      ))
+    ) : (
+      <div
+        className="text-sm text-center py-6"
+        style={{ color: palette.black2 }}
+      >
+        Belum ada ruangan yang cocok.
+      </div>
+    )}
+
+    {/* Pagination */}
+    {total > 0 && (
+      <div className="mt-3 flex items-center justify-between text-sm">
+        <div className="opacity-90">
+          Total: {total} • Halaman {page}/{pageCount}
+        </div>
+        <div className="flex items-center gap-2">
+          <Btn
+            palette={palette}
+            variant="default"
+            onClick={() => gotoPage(page - 1)}
+            disabled={page <= 1}
+          >
+            ‹ Prev
+          </Btn>
+          <Btn
+            palette={palette}
+            variant="default"
+            onClick={() => gotoPage(page + 1)}
+            disabled={page >= pageCount}
+          >
+            Next ›
+          </Btn>
+        </div>
+      </div>
+    )}
+  </div>
+</SectionCard>
+
           </section>
         </div>
       </main>

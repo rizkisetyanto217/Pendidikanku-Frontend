@@ -7,8 +7,6 @@ import {
   Btn,
   type Palette,
 } from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
-import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/ParentSideBar";
 import {
   CalendarDays,
   CheckCircle2,
@@ -21,12 +19,12 @@ import {
 /* ===== Type harus sama dengan AcademicSchool ===== */
 type AcademicTerm = {
   academic_terms_masjid_id: string;
-  academic_terms_academic_year: string; // "2025/2026"
-  academic_terms_name: string; // "Ganjil"
-  academic_terms_start_date: string; // ISO with TZ
-  academic_terms_end_date: string; // ISO with TZ
+  academic_terms_academic_year: string;
+  academic_terms_name: string;
+  academic_terms_start_date: string;
+  academic_terms_end_date: string;
   academic_terms_is_active: boolean;
-  academic_terms_angkatan: number; // 2025
+  academic_terms_angkatan: number;
 };
 
 /* ===== Dummy fallback kalau masuk tanpa state ===== */
@@ -66,6 +64,9 @@ const toLocalNoonISO = (d: Date) => {
   return x.toISOString();
 };
 
+/* =====================================================
+   🧩 Page: StudentDetailAcademic (Rapi seperti RoomSchool)
+===================================================== */
 export default function StudentDetailAcademic() {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
@@ -85,26 +86,31 @@ export default function StudentDetailAcademic() {
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-     
       <main className="w-full px-4 md:px-6 py-4 md:py-8">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
-          
           {/* Main */}
           <section className="flex-1 flex flex-col space-y-6 min-w-0">
-            <div className="md:flex items-center gap-3 hidden">
-              <Btn
-                palette={palette}
-                variant="ghost"
-                size="md"
-                onClick={() => navigate(-1)}
-                className="inline-flex items-center gap-2 px-3 py-2 p-5"
-              >
-                <ArrowLeft size={20} />
-              </Btn>
-              <h1 className="text-lg font-semibold">Halaman Detail Akademik</h1>
+            {/* ===== Header ===== */}
+            <div className="flex items-center justify-between">
+              <div className="font-semibold text-lg flex items-center">
+                <div className="items-center md:flex">
+                  <Btn
+                    palette={palette}
+                    variant="ghost"
+                    size="md"
+                    onClick={() => navigate(-1)}
+                    className="cursor-pointer mr-3"
+                  >
+                    <ArrowLeft size={20} />
+                  </Btn>
+                </div>
+                <h1 className="items-center md:flex">
+                  Halaman Detail Akademik
+                </h1>
+              </div>
             </div>
 
-            {/* Header */}
+            {/* ===== Info Periode Akademik ===== */}
             <SectionCard palette={palette} className="overflow-hidden">
               <div
                 className="px-5 py-4 border-b flex items-center gap-3"
@@ -162,7 +168,7 @@ export default function StudentDetailAcademic() {
               </div>
             </SectionCard>
 
-            {/* Detail Tambahan */}
+            {/* ===== Detail Tambahan ===== */}
             <SectionCard palette={palette} className="p-5">
               <div className="grid md:grid-cols-2 gap-4">
                 <InfoRow
