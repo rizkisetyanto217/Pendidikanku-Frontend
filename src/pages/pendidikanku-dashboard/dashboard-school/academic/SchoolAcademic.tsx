@@ -33,7 +33,7 @@ import {
   Pencil,
   Trash2,
 } from "lucide-react";
-import { useTopBar } from "../../components/home/useTopBar";
+import { useTopBar } from "../../components/home/UseTopBar";
 
 /* ===================== Types ===================== */
 type AcademicTerm = {
