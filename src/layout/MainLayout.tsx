@@ -12,7 +12,7 @@ import {
   TopBarContext,
   type TopBarConfig,
   type TopBarAPI,
-} from "@/pages/pendidikanku-dashboard/components/home/useTopBar";
+} from "@/pages/pendidikanku-dashboard/components/home/UseTopBar";
 
 export default function MainLayout() {
   const { isDark, themeName } = useHtmlDarkMode();
