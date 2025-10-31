@@ -7,6 +7,7 @@ export type Palette = typeof colors.light;
 /* ======================================================
    SectionCard — FIXED dark/light detection
 ====================================================== */
+// --- gunakan tipe ini ---
 type SectionCardProps = React.HTMLAttributes<HTMLDivElement> & {
   palette: Palette;
   /** Paksa bg di semua mode: "white1" | "black1" | "auto" (default) */
@@ -15,15 +16,33 @@ type SectionCardProps = React.HTMLAttributes<HTMLDivElement> & {
   bgOnDark?: "white1" | "black1";
 };
 
-export function SectionCard({ children }: any) {
+// --- implementasinya pakai SectionCardProps & forward props ---
+export function SectionCard({
+  children,
+  palette,
+  className = "",
+  style,
+  bg = "auto",
+  bgOnDark,
+  ...rest
+}: SectionCardProps) {
+  const bgClass =
+    bg === "auto"
+      ? "bg-white dark:bg-neutral-900"
+      : bg === "white1"
+        ? "bg-white"
+        : "bg-black";
+
   return (
-    <div className="rounded-xl shadow bg-white dark:bg-neutral-900 overflow-x-visible overflow-y-visible">
+    <div
+      {...rest}
+      className={`rounded-xl shadow ${bgClass} overflow-x-visible overflow-y-visible ${className}`}
+      style={style}
+    >
       {children}
     </div>
   );
 }
-
-
 
 /* ======================================================
    Badge
