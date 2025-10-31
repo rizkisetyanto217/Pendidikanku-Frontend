@@ -71,7 +71,7 @@ export default function AppRoutes() {
 
       {/* --- Protected (dengan masjidId) --- */}
       {/* Ganti :masjid_id -> :masjidId agar konsisten */}
-      <Route path=":masjidId" element={<ProtectedRoute />}>
+      <Route path=":masjid_id" element={<ProtectedRoute />}>
         {/* ===== Guru cluster: hanya teacher/admin/dkm ===== */}
         <Route
           element={<RequireMasjidRoles allow={["teacher", "admin", "dkm"]} />}
@@ -93,7 +93,7 @@ export default function AppRoutes() {
       </Route>
 
       {/* --- Forbidden harus di atas wildcard --- */}
-      <Route path=":masjidId/forbidden" element={<Forbidden403 />} />
+      <Route path=":masjid_id/forbidden" element={<Forbidden403 />} />
 
       {/* --- 404 & Unauthorized --- */}
       <Route path="/unauthorized" element={<Unauthorized />} />

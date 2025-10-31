@@ -7,13 +7,7 @@ import {
   useParams,
   useNavigate,
 } from "react-router-dom";
-import {
-  Filter as FilterIcon,
-  Plus,
-  Layers,
-  ChevronDown,
-  ArrowLeft,
-} from "lucide-react";
+import { Plus, Layers, ArrowLeft } from "lucide-react";
 
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
@@ -23,8 +17,6 @@ import {
   Btn,
   type Palette,
 } from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
-import ParentSidebar from "../../components/home/ParentSideBar";
 import TambahKelas, {
   type ClassRow as NewClassRow,
 } from "./components/SchoolAddClass";
@@ -46,55 +38,6 @@ export interface ClassRow {
   classId?: string;
 }
 
-export interface ClassStats {
-  total: number;
-  active: number;
-  students: number;
-  homerooms: number;
-}
-
-type ApiSchedule = {
-  start?: string;
-  end?: string;
-  days?: string[];
-  location?: string;
-};
-type ApiTeacherLite = {
-  id: string;
-  user_name: string;
-  email: string;
-  is_active: boolean;
-};
-type ApiClassSection = {
-  class_sections_id: string;
-  class_sections_class_id: string;
-  class_sections_masjid_id: string;
-  class_sections_teacher_id?: string | null;
-  class_sections_slug: string;
-  class_sections_name: string;
-  class_sections_code?: string | null;
-  class_sections_capacity?: number | null;
-  class_sections_schedule?: ApiSchedule | null;
-  class_sections_is_active: boolean;
-  class_sections_created_at: string;
-  class_sections_updated_at: string;
-  teacher?: ApiTeacherLite | null;
-};
-type ApiListSections = { data: ApiClassSection[]; message: string };
-
-type ApiLevel = {
-  class_id: string;
-  class_masjid_id: string;
-  class_name: string;
-  class_slug: string;
-  class_description?: string | null;
-  class_level?: string | null;
-  class_fee_monthly_idr?: number | null;
-  class_is_active: boolean;
-  class_created_at: string;
-};
-type ApiListLevels = { data: ApiLevel[]; message: string };
-
 export interface Level {
   id: string;
   name: string;
@@ -104,33 +47,75 @@ export interface Level {
   is_active: boolean;
 }
 
-type SchoolClassProps = {
-  showBack?: boolean;
-  backTo?: string;
-  backLabel?: string;
+type ApiSchedule = {
+  start?: string;
+  end?: string;
+  days?: string[];
+  location?: string;
 };
 
+type ApiClassSection = {
+  class_section_id: string;
+  class_section_masjid_id: string;
+  class_section_class_id: string;
+  class_section_teacher_id?: string | null;
+  class_section_assistant_teacher_id?: string | null;
+  class_section_class_room_id?: string | null;
+  class_section_leader_student_id?: string | null;
+
+  class_section_slug: string;
+  class_section_name: string;
+  class_section_code?: string | null;
+
+  class_section_schedule?: ApiSchedule | null;
+  class_section_capacity?: number | null;
+  class_section_total_students?: number | null;
+
+  class_section_group_url?: string | null;
+  class_section_image_url?: string | null;
+
+  class_section_is_active: boolean;
+  class_section_created_at: string;
+  class_section_updated_at: string;
+
+  // snapshot ringkas parent
+  class_section_parent_name_snap?: string | null;
+  class_section_parent_code_snap?: string | null;
+  class_section_parent_slug_snap?: string | null;
+};
+
+type ApiListSections = {
+  data: ApiClassSection[];
+};
+
+/* ====== PUBLIC class-parents (levels) ====== */
+type ApiClassParent = {
+  class_parent_id: string;
+  class_parent_masjid_id: string;
+  class_parent_name: string;
+  class_parent_code?: string | null;
+  class_parent_slug: string;
+  class_parent_description?: string | null;
+  class_parent_level?: number | null;
+  class_parent_is_active: boolean;
+  class_parent_total_classes?: number | null;
+  class_parent_image_url?: string | null;
+  class_parent_created_at: string;
+  class_parent_updated_at: string;
+};
+
+function mapClassParent(x: ApiClassParent): Level {
+  return {
+    id: x.class_parent_id,
+    name: x.class_parent_name,
+    slug: x.class_parent_slug,
+    level: x.class_parent_level != null ? String(x.class_parent_level) : null,
+    fee: null,
+    is_active: x.class_parent_is_active,
+  };
+}
+
 /* ================= Helpers ================= */
-const dateLong = (iso?: string) =>
-  iso
-    ? new Date(iso).toLocaleDateString("id-ID", {
-        weekday: "long",
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      })
-    : "";
-
-const hijriWithWeekday = (iso?: string) =>
-  iso
-    ? new Date(iso).toLocaleDateString("id-ID-u-ca-islamic-umalqura", {
-        weekday: "long",
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      })
-    : "-";
-
 const parseGrade = (code?: string | null, name?: string): string => {
   const from = (code ?? name ?? "").toString();
   const m = from.match(/\d+/);
@@ -160,99 +145,37 @@ const getShiftFromSchedule = (
 const uid = (p = "tmp") =>
   `${p}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 
-/* ================= Dummy Data ================= */
-const DUMMY_LEVELS: Level[] = [
-  {
-    id: "lv-1",
-    name: "SD Kelas 1",
-    slug: "sd-1",
-    level: "1",
-    fee: 150000,
-    is_active: true,
-  },
-  {
-    id: "lv-2",
-    name: "SD Kelas 2",
-    slug: "sd-2",
-    level: "2",
-    fee: 150000,
-    is_active: true,
-  },
-];
-
-const DUMMY_CLASSES: ClassRow[] = [
-  {
-    id: "cls-1",
-    code: "1A",
-    name: "Kelas 1A",
-    grade: "1",
-    homeroom: "Ahmad Fauzi",
-    studentCount: 28,
-    schedule: "Senin, Rabu, Jumat 07:30–09:30 @Ruang A1",
-    status: "active",
-    classId: "lv-1",
-  },
-  {
-    id: "cls-2",
-    code: "1B",
-    name: "Kelas 1B",
-    grade: "1",
-    homeroom: "Siti Nurhaliza",
-    studentCount: 26,
-    schedule: "Selasa & Kamis 08:00–10:00 @Ruang A2",
-    status: "inactive",
-    classId: "lv-1",
-  },
-  {
-    id: "cls-3",
-    code: "2A",
-    name: "Kelas 2A",
-    grade: "2",
-    homeroom: "Budi Santoso",
-    studentCount: 30,
-    schedule: "Senin–Kamis 09:00–11:00 @Ruang B1",
-    status: "active",
-    classId: "lv-2",
-  },
-];
-
 /* ================= Fetchers ================= */
 async function fetchClassSections({
+  masjidId,
   q,
   status,
   classId,
 }: {
+  masjidId: string;
   q?: string;
   status?: ClassStatus | "all";
-  classId?: string;
+  classId?: string; // NOTE: ini class_parent_id (level) kalau backend belum support, kita filter client-side via slug snapshot
 }): Promise<ApiClassSection[]> {
   const params: Record<string, any> = {};
   if (q?.trim()) params.search = q.trim();
   if (status && status !== "all") params.active_only = status === "active";
-  if (classId) params.class_id = classId;
-
-  const res = await axios.get<ApiListSections>("/api/a/class-sections", {
-    params,
-  });
+  if (classId) params.class_parent_id = classId; // kalau BE support; kalau tidak, tetap aman (diabaikan)
+  const res = await axios.get<ApiListSections>(
+    `/public/${masjidId}/class-sections/list`,
+    { params }
+  );
   return res.data?.data ?? [];
 }
 
-function mapLevelRow(x: ApiLevel): Level {
-  return {
-    id: x.class_id,
-    name: x.class_name,
-    slug: x.class_slug,
-    level: x.class_level ?? null,
-    fee: x.class_fee_monthly_idr ?? null,
-    is_active: x.class_is_active,
-  };
+async function fetchLevelsPublic(masjidId: string): Promise<Level[]> {
+  const res = await axios.get<{ data: ApiClassParent[] }>(
+    `/public/${masjidId}/class-parents/list`
+  );
+  return (res.data?.data ?? []).map(mapClassParent);
 }
 
-async function fetchLevels(): Promise<Level[]> {
-  const res = await axios.get<ApiListLevels>("/api/a/classes");
-  return (res.data?.data ?? []).map(mapLevelRow);
-}
-
+/* ================= Card ================= */
 function ClassCard({
   r,
   slug,
@@ -264,7 +187,7 @@ function ClassCard({
 }) {
   return (
     <div
-      className="rounded-xl border p-3 space-y-2"
+      className="rounded-xl border p-3 space-y-2 min-w-0"
       style={{ borderColor: palette.silver1, background: palette.white1 }}
     >
       <div className="flex items-center justify-between gap-3">
@@ -313,11 +236,11 @@ function ClassCard({
 }
 
 /* ================= Page ================= */
-const SchoolClass: React.FC<SchoolClassProps> = ({
-  showBack = false,
-  backTo,
-  backLabel = "Kembali",
-}) => {
+const SchoolClass: React.FC<{
+  showBack?: boolean;
+  backTo?: string;
+  backLabel?: string;
+}> = ({ showBack = false, backTo, backLabel = "Kembali" }) => {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
@@ -326,30 +249,50 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
 
   const [openTambah, setOpenTambah] = useState(false);
   const [openTambahLevel, setOpenTambahLevel] = useState(false);
-  const { slug = "" } = useParams<{ slug: string }>();
+
+  // ambil masjid_id dari path
+  const { masjid_id, slug = "" } = useParams<{
+    masjid_id?: string;
+    slug: string;
+  }>();
+  const masjidId = masjid_id ?? "";
+
   const q = (sp.get("q") ?? "").trim();
   const status = (sp.get("status") ?? "all") as ClassStatus | "all";
   const shift = (sp.get("shift") ?? "all") as "Pagi" | "Sore" | "all";
   const levelId = sp.get("level_id") ?? "";
 
+  // Levels dari endpoint publik
   const levelsQ = useQuery({
-    queryKey: ["levels"],
-    queryFn: fetchLevels,
+    queryKey: ["levels-public", masjidId],
+    enabled: Boolean(masjidId),
+    queryFn: () => fetchLevelsPublic(masjidId),
     staleTime: 60_000,
-    placeholderData: DUMMY_LEVELS, // ⬅️ langsung pakai dummy di awal
     refetchOnWindowFocus: false,
   });
-  // Class sections
+
+  // slug level terpilih (untuk filter client-side via snapshot)
+  const selectedLevelSlug = useMemo(() => {
+    const lv = (levelsQ.data ?? []).find((x) => x.id === levelId);
+    return lv?.slug ?? null;
+  }, [levelsQ.data, levelId]);
+
+  // Class sections (public scope by masjid)
   const {
-    data: apiItems = [], // ⬅️ default array kosong
+    data: apiItems = [],
     isFetching,
     refetch,
   } = useQuery({
-    queryKey: ["class-sections", q, status, levelId],
+    queryKey: ["class-sections", masjidId, q, status, levelId],
+    enabled: Boolean(masjidId),
     queryFn: () =>
-      fetchClassSections({ q, status, classId: levelId || undefined }),
+      fetchClassSections({
+        masjidId,
+        q,
+        status,
+        classId: levelId || undefined, // kalau BE belum support, tetap aman
+      }),
     staleTime: 60_000,
-    placeholderData: [], // ⬅️ tampilkan dummy via fallback di bawah
     refetchOnWindowFocus: false,
   });
 
@@ -360,45 +303,55 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
   const mappedRows: ClassRow[] = useMemo(
     () =>
       (apiItems ?? []).map((it) => ({
-        id: it.class_sections_id,
-        classId: it.class_sections_class_id,
-        code: it.class_sections_code ?? "-",
-        name: it.class_sections_name,
-        grade: parseGrade(it.class_sections_code, it.class_sections_name),
-        homeroom: it.teacher?.user_name ?? "-",
-        studentCount: 0,
-        schedule: scheduleToText(it.class_sections_schedule),
-        status: it.class_sections_is_active ? "active" : "inactive",
+        id: it.class_section_id,
+        classId: it.class_section_class_id, // id "class" (bukan parent)
+        code: it.class_section_code ?? "-",
+        name: it.class_section_name,
+        grade: parseGrade(it.class_section_code, it.class_section_name),
+        homeroom: "-", // endpoint publik belum kirim nama wali
+        studentCount: it.class_section_total_students ?? 0,
+        schedule: scheduleToText(it.class_section_schedule),
+        status: it.class_section_is_active ? "active" : "inactive",
       })),
     [apiItems]
   );
 
+  // FILTER: level (via parent_slug snapshot) + shift
   const filteredRows = useMemo(() => {
     return mappedRows.filter((r) => {
-      const apiItem = (apiItems ?? []).find(
-        (x) => x.class_sections_id === r.id
-      );
-      const rowShift = getShiftFromSchedule(apiItem?.class_sections_schedule);
-      return shift === "all" || rowShift === shift;
+      const apiItem = (apiItems ?? []).find((x) => x.class_section_id === r.id);
+      // filter level via snapshot slug
+      const okLevel =
+        !selectedLevelSlug ||
+        apiItem?.class_section_parent_slug_snap === selectedLevelSlug;
+
+      // filter shift
+      const rowShift = getShiftFromSchedule(apiItem?.class_section_schedule);
+      const okShift = shift === "all" || rowShift === shift;
+
+      return okLevel && okShift;
     });
-  }, [mappedRows, shift, apiItems]);
+  }, [mappedRows, apiItems, selectedLevelSlug, shift]);
 
   const sectionCountByLevel = useMemo(() => {
+    // hitung jumlah section per LEVEL (menggunakan snapshot slug)
     const m = new Map<string, number>();
-    mappedRows.forEach((r) => {
-      if (r.classId) m.set(r.classId, (m.get(r.classId) ?? 0) + 1);
+    (apiItems ?? []).forEach((it) => {
+      const slug = it.class_section_parent_slug_snap;
+      if (!slug) return;
+      m.set(slug, (m.get(slug) ?? 0) + 1);
     });
     return m;
-  }, [mappedRows]);
+  }, [apiItems]);
 
   const setParam = (k: string, v: string) => {
     const next = new URLSearchParams(sp);
     v ? next.set(k, v) : next.delete(k);
     setSp(next, { replace: true });
   };
-  const items = filteredRows.length > 0 ? filteredRows : DUMMY_CLASSES;
-  const levels =
-    levelsQ.data && levelsQ.data.length > 0 ? levelsQ.data : DUMMY_LEVELS;
+
+  const items = filteredRows;
+  const levels = levelsQ.data ?? [];
 
   const toSlug = (s: string) =>
     (s || "level-baru").toLowerCase().trim().replace(/\s+/g, "-");
@@ -412,48 +365,45 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
       fee: payload?.fee ?? null,
       is_active: payload?.is_active ?? true,
     };
-    qc.setQueryData<Level[]>(["levels"], (old = []) => [lvl, ...(old ?? [])]);
+    qc.setQueryData<Level[]>(["levels-public", masjidId], (old = []) => [
+      lvl,
+      ...(old ?? []),
+    ]);
     setOpenTambahLevel(false);
   };
 
   const handleClassCreated = (row: NewClassRow) => {
+    // dummy yang match tipe API BARU untuk optimistic UI
     const dummy: ApiClassSection = {
-      class_sections_id: (row as any).id ?? uid("sec"),
-      class_sections_class_id: (row as any).classId ?? levels[0]?.id ?? "",
-      class_sections_masjid_id: (row as any).masjidId ?? "",
-      class_sections_teacher_id: (row as any).teacherId ?? null,
-      class_sections_slug:
-        (row as any).slug ?? toSlug(row.name ?? "kelas-baru"),
-      class_sections_name: row.name ?? "Kelas Baru",
-      class_sections_code: (row as any).code ?? "-",
-      class_sections_capacity: (row as any).capacity ?? null,
-      class_sections_schedule: (row as any).schedule ?? {
+      class_section_id: (row as any).id ?? uid("sec"),
+      class_section_class_id: (row as any).classId ?? "",
+      class_section_masjid_id: (row as any).masjidId ?? masjidId,
+      class_section_teacher_id: (row as any).teacherId ?? null,
+      class_section_slug: (row as any).slug ?? toSlug(row.name ?? "kelas-baru"),
+      class_section_name: row.name ?? "Kelas Baru",
+      class_section_code: (row as any).code ?? "-",
+      class_section_capacity: (row as any).capacity ?? null,
+      class_section_schedule: (row as any).schedule ?? {
         days: [],
         start: undefined,
         end: undefined,
       },
-      class_sections_is_active: (row as any).is_active ?? true,
-      class_sections_created_at: new Date().toISOString(),
-      class_sections_updated_at: new Date().toISOString(),
-      teacher: (row as any).teacher
-        ? {
-            id: (row as any).teacher.id ?? uid("tch"),
-            user_name: (row as any).teacher.user_name ?? "Guru Baru",
-            email: (row as any).teacher.email ?? "",
-            is_active: (row as any).teacher.is_active ?? true,
-          }
-        : null,
+      class_section_total_students: (row as any).studentCount ?? 0,
+      class_section_is_active: (row as any).is_active ?? true,
+      class_section_created_at: new Date().toISOString(),
+      class_section_updated_at: new Date().toISOString(),
+      // isi snapshot parent slug biar langsung lolos filter saat level dipilih
+      class_section_parent_slug_snap: selectedLevelSlug ?? undefined,
     };
 
+    // optimistic add ke cache list sections
     qc.setQueryData<ApiClassSection[]>(
-      ["class-sections", q, status, levelId],
+      ["class-sections", masjidId, q, status, levelId],
       (old = []) => [dummy, ...(old ?? [])]
     );
 
     setOpenTambah(false);
   };
-
-  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div
@@ -482,29 +432,26 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
                 <h1>Seluruh Kelas</h1>
               </div>
             </div>
-            {/* Panel Tingkat */}
+
             {/* Panel Tingkat */}
             <SectionCard palette={palette}>
               <div className="flex p-4 md:p-5 pb-2 items-center justify-between">
                 <div className="font-medium flex items-center gap-2">
                   <Layers size={18} /> Tingkat
                 </div>
-                <Btn
-                  palette={palette}
-                  
-                  onClick={() => setOpenTambahLevel(true)}>
+                <Btn palette={palette} onClick={() => setOpenTambahLevel(true)}>
                   <Plus size={16} className="mr-2" /> Tambah Level
                 </Btn>
               </div>
 
-              {/* HANYA chip yang bisa scroll di mobile; desktop wrap */}
+              {/* chip tingkat (NO horizontal scroll on mobile) */}
               <div className="pb-4">
-                {/* hilangkan padding agar scrollbar stay di area chip */}
-                <div className="-mx-4 md:-mx-5 overflow-x-auto md:overflow-x-visible">
-                  {/* kembalikan padding + atur layout chip */}
-                  <div className="px-4 md:px-5 flex items-center gap-2 w-max md:w-auto md:flex-wrap min-w-0">
+                <div className="px-4 md:px-5">
+                  <div className="flex flex-wrap gap-2 min-w-0">
                     <button
-                      className={`px-3 py-1.5 ml-2 rounded-lg border text-sm ${!levelId ? "font-semibold" : ""}`}
+                      className={`px-3 py-1.5 ml-0 rounded-lg border text-sm ${
+                        !levelId ? "font-semibold" : ""
+                      }`}
                       style={{
                         borderColor: palette.silver1,
                         background: !levelId
@@ -518,12 +465,15 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
                     </button>
 
                     {levels.map((lv) => {
-                      const cnt = sectionCountByLevel.get(lv.id) ?? 0;
+                      // hitung pakai slug agar konsisten dengan snapshot
+                      const cnt = sectionCountByLevel.get(lv.slug) ?? 0;
                       const active = levelId === lv.id;
                       return (
                         <button
                           key={lv.id}
-                          className={`px-3 py-1.5 rounded-lg border text-sm ${active ? "font-semibold" : ""} shrink-0`}
+                          className={`px-3 py-1.5 rounded-lg border text-sm ${
+                            active ? "font-semibold" : ""
+                          }`}
                           style={{
                             borderColor: palette.silver1,
                             background: active
@@ -544,12 +494,8 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
                 </div>
               </div>
             </SectionCard>
-            {/* Filter */}
-            {/* Tabel / Cards */}
-            {/* Tabel / Cards */}
-            {/* Tabel / Cards */}
-            {/* Daftar Kelas (FULL CARDS) */}
-            {/* Daftar Kelas (FULL CARDS) */}
+
+            {/* Daftar Kelas */}
             <SectionCard palette={palette}>
               <div className="p-4 md:p-5 pb-2 flex items-center justify-between">
                 <div className="font-medium">Daftar Kelas</div>
@@ -580,12 +526,13 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
                   className="pt-3 flex items-center justify-between text-sm"
                   style={{ color: palette.black2 }}
                 >
-                  <div className="flex items-center gap-2">
-                    <span>Menampilkan {items.length} kelas</span>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="truncate">
+                      Menampilkan {items.length} kelas
+                    </span>
                     {isFetching && (
                       <span className="opacity-70">• Menyegarkan…</span>
-                    )}{" "}
-                    {/* ⬅️ indikator ringan */}
+                    )}
                   </div>
                   <button
                     onClick={() => refetch()}

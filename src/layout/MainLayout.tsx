@@ -57,11 +57,12 @@ export default function MainLayout() {
         </div>
 
         <main
-          className="flex-1 overflow-y-auto px-4 md:px-6 py-4 md:py-8"
-          style={{ background: palette.white2, color: palette.black1 }}
-        >
+          className="flex-1 overflow-y-auto overflow-x-visible px-4 md:px-6 py-4 md:py-8"
+          style={{ background: palette.white2, color: palette.black1 }}>
           <Outlet />
         </main>
+
+
       </div>
 
       {/* Sidebar mobile */}

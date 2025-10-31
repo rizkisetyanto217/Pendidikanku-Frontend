@@ -12,17 +12,27 @@ export default function RequireMasjidRoles({
 }: {
   allow: MasjidRole[];
 }): ReactElement | null {
-  const { masjidId } = useParams();
+  // ✅ samakan dengan router: :masjid_id
+  const { masjid_id } = useParams<{ masjid_id?: string }>();
+  const masjidId = masjid_id ?? ""; // alias lokal yang stabil
   const loc = useLocation();
   const access = getAccessToken();
 
   if (!access) {
-    return <Navigate to="/login" replace state={{ from: loc.pathname }} />;
+    return (
+      <Navigate
+        to="/login"
+        replace
+        state={{ from: loc.pathname + loc.search }}
+      />
+    );
   }
 
-  const { loading, roles } = useMasjidMembership(masidOrUndef(masjidId));
+  // ✅ kirim id yang benar ke hook
+  const { loading, roles } = useMasjidMembership(masjidOrUndef(masjidId));
   if (loading) return null;
 
+  // ✅ redirect dengan id yang benar
   if (!roles.length) {
     return <Navigate to={`/${masjidId}/forbidden`} replace />;
   }
@@ -30,10 +40,10 @@ export default function RequireMasjidRoles({
     return <Navigate to={`/${masjidId}/forbidden`} replace />;
   }
 
-  // render nested routes
   return <Outlet />;
 }
 
-function masidOrUndef(v?: string) {
+// kecil tapi rapi
+function masjidOrUndef(v?: string) {
   return v && v.length ? v : undefined;
 }

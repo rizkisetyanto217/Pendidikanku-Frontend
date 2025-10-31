@@ -15,52 +15,15 @@ type SectionCardProps = React.HTMLAttributes<HTMLDivElement> & {
   bgOnDark?: "white1" | "black1";
 };
 
-export function SectionCard({
-  children,
-  palette,
-  className = "",
-  style,
-  bg = "auto",
-  bgOnDark,
-  ...rest
-}: React.PropsWithChildren<SectionCardProps>) {
-  // ✅ Deteksi dark mode berdasarkan objek palette langsung
-  const isDark = palette === colors.dark;
-
-  // Tentukan background default
-  let background =
-    bg === "black1"
-      ? palette.black1
-      : bg === "white1"
-        ? palette.white1
-        : isDark
-          ? palette.black1
-          : palette.white1;
-
-  // Override kalau dark mode + ada bgOnDark
-  if (isDark && bgOnDark) background = palette[bgOnDark] as string;
-
-  // Warna teks dan border menyesuaikan
-  const isBgDark =
-    background === palette.black1 || background === palette.black2;
-  const textColor = isBgDark ? palette.white1 : palette.black1;
-  const borderColor = isBgDark ? palette.white3 : palette.silver1;
-
+export function SectionCard({ children }: any) {
   return (
-    <div
-      {...rest}
-      className={`rounded-2xl border shadow-sm transition-colors duration-300 ${className}`}
-      style={{
-        background,
-        borderColor,
-        color: textColor,
-        ...style,
-      }}
-    >
+    <div className="rounded-xl shadow bg-white dark:bg-neutral-900 overflow-x-visible overflow-y-visible">
       {children}
     </div>
   );
 }
+
+
 
 /* ======================================================
    Badge
@@ -292,7 +255,7 @@ export function ProgressBar({
   const v = Math.max(0, Math.min(100, value ?? 0));
   return (
     <div
-      className="h-2 w-full overflow-hidden rounded-full"
+      className="h-2 w-full overflow rounded-full"
       style={{ background: palette.white3 }}
       role="progressbar"
       aria-valuemin={0}
