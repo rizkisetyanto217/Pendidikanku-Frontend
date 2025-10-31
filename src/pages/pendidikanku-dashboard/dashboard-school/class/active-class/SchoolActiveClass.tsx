@@ -143,20 +143,19 @@ const SchoolActiveClass: React.FC = () => {
           {/* Main */}
 
           <section className="flex-1 flex flex-col space-y-6 min-w-0">
+    
             {/* Header */}
-
-            <section className="md:flex hidden items-center gap-7 ">
-              <span className="h-10 w-10 grid place-items-center rounded-xl rounded-t-none font-bold ">
+            <section className="flex items-center justify-between">
+              <div className="flex items-center font-semibold text-lg">
                 <Btn
                   onClick={() => navigate(-1)}
                   palette={palette}
                   variant="ghost"
+                  className="cursor-pointer mr-3"
                 >
-                  <ArrowLeft size={20} className="cursor-pointer" />
+                  <ArrowLeft size={20} />
                 </Btn>
-              </span>
-              <div className="flex-1 min-w-0">
-                <div className="text-lg font-semibold">Daftar Kelas Aktif</div>
+                <h1>Daftar Kelas Aktif</h1>
               </div>
             </section>
 

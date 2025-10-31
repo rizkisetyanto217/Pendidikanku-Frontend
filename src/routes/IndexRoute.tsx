@@ -1,3 +1,5 @@
+//src/routes/IndexRoute.tsx
+
 import { Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoutes";
 import Unauthorized from "./UnAuthorized";
@@ -24,12 +26,13 @@ import { TeacherRoutes } from "./TeacherRoutes";
 import { StudentRoutes } from "./StudentRoutes";
 import { SchoolRoutes } from "./SchoolRoutes";
 import Login from "@/pages/pendidikanku-dashboard/auth/Login";
-
+import Forbidden403 from "@/pages/Forbidden403";
+import RequireMasjidRoles from "./RequireMasjidRoles";
 
 export default function AppRoutes() {
   return (
     <Routes>
-      {/* === Public Routes Masjidku === */}
+      {/* --- Public Masjidku --- */}
       <Route element={<MasjidkuLayout />}>
         <Route index element={<MasjidkuHome />} />
         <Route path="website" element={<MasjidkuWebHome />} />
@@ -40,19 +43,21 @@ export default function AppRoutes() {
         <Route path="website/hubungi-kami" element={<Contact />} />
       </Route>
 
-      {/* === Public Auth === */}
+      {/* --- Public Auth --- */}
       <Route path="/login" element={<Login />} />
       <Route path="/register-user" element={<RegisterUser />} />
-      <Route path="/website/daftar-sekarang" element={<RegisterAdminMasjid />} />
+      <Route
+        path="/website/daftar-sekarang"
+        element={<RegisterAdminMasjid />}
+      />
 
-      {/* === LinkTree Masjid === */}
-      <Route path="masjid/:slug" index element={<MasjidLinkTree />} />
+      {/* --- LinkTree --- */}
       <Route path="/" element={<MasjidLayout />}>
+        <Route path="masjid/:slug" index element={<MasjidLinkTree />} />
         <Route path="masjid/:slug">
           <Route path="login" element={<Login />} />
           <Route path="login/:id" element={<RegisterAdminMasjid />} />
           <Route path="register-masjid" element={<RegisterAdminMasjid />} />
-          
           <Route
             path="soal-materi/:lecture_session_slug/latihan-soal"
             element={<MasjidQuizLectureSessions />}
@@ -64,19 +69,36 @@ export default function AppRoutes() {
         </Route>
       </Route>
 
-      {/* === Protected Routes dengan masjidId === */}
-      <Route path=":masjid_id" element={<ProtectedRoute />}>
-        {TeacherRoutes}
-        {StudentRoutes}
-        {SchoolRoutes}
+      {/* --- Protected (dengan masjidId) --- */}
+      {/* Ganti :masjid_id -> :masjidId agar konsisten */}
+      <Route path=":masjidId" element={<ProtectedRoute />}>
+        {/* ===== Guru cluster: hanya teacher/admin/dkm ===== */}
+        <Route
+          element={<RequireMasjidRoles allow={["teacher", "admin", "dkm"]} />}
+        >
+          {TeacherRoutes}
+        </Route>
+
+        {/* ===== Murid cluster: student/admin/dkm ===== */}
+        <Route
+          element={<RequireMasjidRoles allow={["student", "admin", "dkm"]} />}
+        >
+          {StudentRoutes}
+        </Route>
+
+        {/* ===== Sekolah/Manajemen: admin/dkm ===== */}
+        <Route element={<RequireMasjidRoles allow={["admin", "dkm"]} />}>
+          {SchoolRoutes}
+        </Route>
       </Route>
 
-      {/* === 404 & Unauthorized === */}
+      {/* --- Forbidden harus di atas wildcard --- */}
+      <Route path=":masjidId/forbidden" element={<Forbidden403 />} />
+
+      {/* --- 404 & Unauthorized --- */}
+      <Route path="/unauthorized" element={<Unauthorized />} />
       <Route path="/not-found" element={<NotFound />} />
       <Route path="*" element={<NotFound />} />
-      <Route path="/unauthorized" element={<Unauthorized />} />
     </Routes>
-
-    
   );
-} 
+}

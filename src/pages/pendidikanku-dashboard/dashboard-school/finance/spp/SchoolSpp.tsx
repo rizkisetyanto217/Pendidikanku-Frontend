@@ -62,7 +62,7 @@ const idr = (n?: number) =>
       }).format(n);
 
 /* ================= Types ================= */
-export type SppStatus = "unpaid" | "partial" | "paid" | "overdue";
+export type SppStatus = "unpaid" | "paid" | "overdue";
 
 type SppBillRow = {
   id: string;
@@ -107,18 +107,18 @@ const SchoolSpp: React.FC = () => {
           id: `spp-${i + 1}`,
           student_id: `S-${1000 + i}`,
           student_name: `Siswa ${i + 1}`,
-          class_name: ["1A", "1B", "2A", "2B"][i % 4],
+          class_name: ["1A", "1B", "2A"][i % 4],
           amount: 150000 + (i % 3) * 50000,
           due_date: new Date(
             today.getFullYear(),
             today.getMonth(),
             20
           ).toISOString(),
-          status: (["unpaid", "partial", "paid", "overdue"] as SppStatus[])[
+          status: (["unpaid", "paid", "overdue"] as SppStatus[])[
             i % 4
           ],
         })),
-        classes: ["1A", "1B", "2A", "2B", "3A"],
+        classes: ["1A", "1B", "2A", "3A"],
       };
       return dummy;
     },
@@ -134,22 +134,38 @@ const SchoolSpp: React.FC = () => {
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <main className="w-full px-4 md:px-6 md:py-8">
+      <main className="w-full">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Main */}
           <section className="flex-1 flex flex-col space-y-6 min-w-0">
-            {/* Back */}
-            <div className="md:flex hidden gap-3 items-center">
-              <Btn
-                palette={palette}
-                variant="ghost"
-                onClick={() => navigate(-1)}
-                className="inline-flex items-center gap-2"
-              >
-                <ArrowLeft size={20} />
-              </Btn>
-              <h1 className="text-base font-semibold">SPP Murid</h1>
-            </div>
+          
+            {/* Header */}
+            <section className="flex items-center justify-between">
+              <div className="flex items-center font-semibold text-lg">
+                <Btn
+                  palette={palette}
+                  variant="ghost"
+                  onClick={() => navigate(-1)}
+                  className="cursor-pointer mr-3"
+                >
+                  <ArrowLeft size={20} />
+                </Btn>
+                <h1>SPP Murid</h1>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Btn
+                  palette={palette}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => billsQ.refetch()}
+                  className="text-sm"
+                >
+                  <RefreshCcw size={16} className="mr-1" />
+                  Muat Ulang
+                </Btn>
+              </div>
+            </section>
 
             {/* Filter */}
             <SectionCard palette={palette}>
@@ -220,7 +236,6 @@ const SchoolSpp: React.FC = () => {
                   >
                     <option value="semua">Semua</option>
                     <option value="paid">Lunas</option>
-                    <option value="partial">Sebagian</option>
                     <option value="unpaid">Belum Bayar</option>
                     <option value="overdue">Terlambat</option>
                   </select>
@@ -303,11 +318,7 @@ const SchoolSpp: React.FC = () => {
                               Lunas
                             </Badge>
                           )}
-                          {r.status === "partial" && (
-                            <Badge palette={palette} variant="info">
-                              Sebagian
-                            </Badge>
-                          )}
+                      
                           {r.status === "unpaid" && (
                             <Badge palette={palette} variant="outline">
                               Belum Bayar
@@ -416,8 +427,6 @@ function SppDetailModal({
                 variant={
                   bill.status === "paid"
                     ? "success"
-                    : bill.status === "partial"
-                      ? "info"
                       : bill.status === "unpaid"
                         ? "outline"
                         : "warning"
@@ -425,8 +434,7 @@ function SppDetailModal({
               >
                 {bill.status === "paid"
                   ? "Lunas"
-                  : bill.status === "partial"
-                    ? "Sebagian"
+                  
                     : bill.status === "unpaid"
                       ? "Belum Bayar"
                       : "Terlambat"}

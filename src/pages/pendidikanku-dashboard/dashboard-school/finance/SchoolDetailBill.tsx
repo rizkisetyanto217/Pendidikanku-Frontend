@@ -6,6 +6,13 @@ import { useNavigate, useParams } from "react-router-dom";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 
+// modal
+import SchoolReceiptExport from "./modal/SchoolReceiptExport";
+
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+
+
 // UI primitives & layout
 import {
   SectionCard,
@@ -218,6 +225,10 @@ const DetailBill: React.FC = () => {
   const gregorianISO = toLocalNoonISO(new Date());
   const isFromMenuUtama = location.pathname.includes("/menu-utama/");
 
+   // ===== Modal =====
+   const [openReceipt, setOpenReceipt] = useState(false);
+   const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(null);
+
   // ===== Query =====
   const invoiceQuery = useQuery({
     queryKey: ["invoice-detail", id],
@@ -279,9 +290,35 @@ const DetailBill: React.FC = () => {
   };
 
   const handleDownloadReceipt = (paymentId: string) => {
-    console.log("Download receipt for payment:", paymentId);
-    // Implement receipt download logic
-  };
+  console.log("Membuka modal kuitansi untuk:", paymentId);
+  setSelectedPaymentId(paymentId);
+  setOpenReceipt(true);
+};
+
+const handleExportReceipt = async (data: { paymentId?: string; format: string }) => {
+  if (!data.paymentId || !invoice) return;
+  const payment = invoice.payment_history.find((p) => p.id === data.paymentId);
+  if (!payment) return;
+
+  const receiptElement = document.getElementById(`receipt-${payment.id}`);
+  if (!receiptElement) {
+    console.error("Elemen kuitansi tidak ditemukan:", `receipt-${payment.id}`);
+    return;
+  }
+
+  // === PDF ===
+  if (data.format === "pdf") {
+    const canvas = await html2canvas(receiptElement, { scale: 2 });
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF("p", "mm", "a4");
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+    pdf.save(`Kuitansi_${invoice.student_name}_${payment.receipt_number}.pdf`);
+  }
+};
+
+
 
   const getPaymentMethodIcon = (method?: string) => {
     const iconMap: Record<string, string> = {
@@ -298,18 +335,10 @@ const DetailBill: React.FC = () => {
         className="min-h-full w-full"
         style={{ background: palette.white2, color: palette.black1 }}
       >
-        <ParentTopBar
-          palette={palette}
-          title="Detail Tagihan"
-          gregorianDate={gregorianISO}
-          hijriDate={hijriLong(gregorianISO)}
-          showBack
-        />
+        
         <main className="w-full px-4 md:px-6 md:py-8">
           <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
-            <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-              <ParentSidebar />
-            </aside>
+            
             <section className="flex-1">
               <LoadingSpinner
                 text="Memuat detail tagihan..."
@@ -366,24 +395,9 @@ const DetailBill: React.FC = () => {
   return (
     <div
       className="min-h-full w-full"
-      style={{ background: palette.white2, color: palette.black1 }}
-    >
-      {/* TopBar */}
-      <ParentTopBar
-        palette={palette}
-        title="Detail Tagihan"
-        gregorianDate={gregorianISO}
-        hijriDate={hijriLong(gregorianISO)}
-        showBack
-      />
-
-      <main className="w-full px-4 md:px-6 md:py-8">
+      style={{ background: palette.white2, color: palette.black1 }}>
+      <main className="w-full">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
-          {/* Sidebar */}
-          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-            <ParentSidebar />
-          </aside>
-
           {/* Main Content */}
           <section className="flex-1 flex flex-col space-y-6 min-w-0">
             {/* Header */}
@@ -393,7 +407,7 @@ const DetailBill: React.FC = () => {
                   palette={palette}
                   variant="ghost"
                   onClick={handleGoBack}
-                  className="md:inline-flex items-center gap-2 hidden "
+                  className="md:inline-flex items-center gap-2 "
                 >
                   <ArrowLeft size={20} />
                 </Btn>
@@ -403,27 +417,6 @@ const DetailBill: React.FC = () => {
                     ID: {invoice.id}
                   </p>
                 </div>
-              </div>
-              <div className="flex gap-2">
-                <Btn
-                  palette={palette}
-                  variant="outline"
-                  onClick={handleEdit}
-                  className="inline-flex items-center gap-2"
-                >
-                  <Edit3 size={16} />
-                  <span className="hidden sm:inline">Edit</span>
-                </Btn>
-                <Btn
-                  palette={palette}
-                  variant="ghost"
-                  onClick={handleDelete}
-                  disabled={deleteInvoice.isPending}
-                  className="inline-flex items-center gap-2 text-red-600 hover:text-red-700"
-                >
-                  <Trash2 size={16} />
-                  <span className="hidden sm:inline">Hapus</span>
-                </Btn>
               </div>
             </div>
 
@@ -621,6 +614,7 @@ const DetailBill: React.FC = () => {
                   className="divide-y"
                   style={{ borderColor: palette.silver1 }}
                 >
+                
                   {invoice.payment_history.map((payment) => {
                     const paymentDate = normalizeISOToLocalNoon(payment.date);
                     return (
@@ -673,6 +667,7 @@ const DetailBill: React.FC = () => {
                               )}
                             </div>
                           </div>
+                          
                           <div className="flex gap-2">
                             <Btn
                               palette={palette}
@@ -686,12 +681,65 @@ const DetailBill: React.FC = () => {
                             </Btn>
                           </div>
                         </div>
+
+                        
                       </div>
                     );
                   })}
                 </div>
               </SectionCard>
             )}
+             {/* Cetak Kuitansi */}
+            <SchoolReceiptExport
+                  open={openReceipt}
+                  onClose={() => setOpenReceipt(false)}
+                  palette={palette}
+                  paymentOptions={invoice.payment_history.map((p) => ({
+                    value: p.id,
+                    label: `${idr(p.amount)} — ${p.method ?? "Metode tidak diketahui"}`,
+                  }))}
+                  onSubmit={(data) => handleExportReceipt(data)}/>
+            
+            {/* Template Kuitansi (off-screen) */}
+            {invoice.payment_history.map((payment) => (
+              <div
+                key={payment.id}
+                id={`receipt-${payment.id}`}
+                className="p-6 bg-white text-black w-[600px]"
+                style={{
+                  position: "absolute",
+                  top: "-9999px", // di luar layar, tapi tetap render
+                  left: "-9999px",
+                  fontFamily: "Arial, sans-serif",
+                  border: "1px solid #ddd",
+                  borderRadius: "8px",
+                }}
+              >
+                <h2
+                  style={{
+                    fontWeight: "bold",
+                    textAlign: "center",
+                    marginBottom: "10px",
+                  }}
+                >
+                  KUITANSI PEMBAYARAN
+                </h2>
+                <p><strong>Nama Siswa:</strong> {invoice.student_name}</p>
+                <p><strong>Nama Tagihan:</strong> {invoice.title}</p>
+                <p><strong>Kelas:</strong> {invoice.class_name}</p>
+                <p><strong>Jumlah Pembayaran:</strong> {idr(payment.amount)}</p>
+                <p><strong>Metode:</strong> {payment.method}</p>
+                <p><strong>No. Kuitansi:</strong> {payment.receipt_number}</p>
+                <p>
+                  <strong>Tanggal:</strong> {dateFmt(payment.date)} • {timeFmt(payment.date)}
+                </p>
+                {payment.notes && <p><strong>Catatan:</strong> {payment.notes}</p>}
+                <div style={{ marginTop: "20px", textAlign: "right" }}>
+                  <p>Jakarta, {dateFmt(payment.date)}</p>
+                  <p><strong>Bendahara Sekolah</strong></p>
+                </div>
+              </div>
+            ))}
           </section>
         </div>
       </main>

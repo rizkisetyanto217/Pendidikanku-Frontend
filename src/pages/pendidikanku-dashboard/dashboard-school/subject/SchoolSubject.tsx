@@ -1,7 +1,7 @@
 // src/pages/sekolahislamku/pages/academic/SchoolSubject.tsx
-import React, { useMemo, useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
+import React, { useMemo, useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate, useParams } from "react-router-dom";
 
 // Theme & utils
 import { pickTheme, ThemeName } from "@/constants/thema";
@@ -15,189 +15,133 @@ import {
   Btn,
   type Palette,
 } from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
-import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/ParentSideBar";
 
 // Icons
 import {
-  LibraryBig,
-  Filter as FilterIcon,
-  RefreshCcw,
   ArrowLeft,
-  Plus,
-  Pencil,
-  Trash2,
   Eye,
+  Pencil,
+  Plus,
+  Trash2,
   X,
+  BookOpen,
 } from "lucide-react";
 
 /* ================= Types ================= */
 export type SubjectStatus = "active" | "inactive";
+
 export type SubjectRow = {
-  id: string;
+  id: string; // subject_id
   code: string;
   name: string;
-  level?: string;
-  hours_per_week?: number;
-  teacher_name?: string;
   status: SubjectStatus;
-};
-type ApiSubjectsResp = {
-  list: SubjectRow[];
-  levels?: string[];
+  class_count: number;
+  total_hours_per_week: number | null;
+  assignments: ClassSubjectItem[];
 };
 
-/* ================== Utils ================== */
-const atLocalNoon = (d: Date) => {
-  const x = new Date(d);
-  x.setHours(12, 0, 0, 0);
-  return x;
+type SubjectsAPIItem = {
+  subject_id: string;
+  subject_masjid_id: string;
+  subject_code: string | null;
+  subject_name: string;
+  subject_desc?: string | null;
+  subject_slug?: string | null;
+  subject_image_url?: string | null;
+  subject_is_active: boolean;
+  subject_created_at: string;
+  subject_updated_at: string;
 };
-const toLocalNoonISO = (d: Date) => atLocalNoon(d).toISOString();
-const dateLong = (iso?: string) =>
-  iso
-    ? new Date(iso).toLocaleDateString("id-ID", {
-        weekday: "long",
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      })
-    : "-";
-const hijriLong = (iso?: string) =>
-  iso
-    ? new Date(iso).toLocaleDateString("id-ID-u-ca-islamic-umalqura", {
-        weekday: "long",
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      })
-    : "-";
+type SubjectsAPIResp = {
+  data: SubjectsAPIItem[];
+  pagination: { limit: number; offset: number; total: number };
+};
 
-/* ================= Modal Form ================= */
-function SubjectFormModal({
-  open,
-  palette,
-  onClose,
-  initial,
-  onSave,
-}: {
-  open: boolean;
-  palette: Palette;
-  onClose: () => void;
-  initial?: SubjectRow | null;
-  onSave: (v: SubjectRow) => void;
-}) {
-  const isEdit = Boolean(initial);
-  const [form, setForm] = useState<SubjectRow>({
-    id: "",
-    code: "",
-    name: "",
-    level: "",
-    hours_per_week: 0,
-    teacher_name: "",
-    status: "active",
+type ClassSubjectItem = {
+  class_subject_id: string;
+  class_subject_masjid_id: string;
+  class_subject_parent_id: string;
+  class_subject_subject_id: string;
+  class_subject_slug: string;
+  class_subject_order_index: number | null;
+  class_subject_hours_per_week: number | null;
+  class_subject_min_passing_score: number | null;
+  class_subject_weight_on_report: number | null;
+  class_subject_is_core: boolean | null;
+  class_subject_subject_name_snapshot: string;
+  class_subject_subject_code_snapshot: string | null;
+  class_subject_subject_slug_snapshot: string | null;
+  class_subject_subject_url_snapshot: string | null;
+  class_subject_is_active: boolean;
+  class_subject_created_at: string;
+  class_subject_updated_at: string;
+};
+type ClassSubjectsAPIResp = {
+  data: ClassSubjectItem[];
+  pagination: { limit: number; offset: number; total: number };
+};
+
+/* ================= Helpers ================= */
+const API_PREFIX = "/public"; // GET list
+const ADMIN_PREFIX = "/a"; // POST/PUT/DELETE (admin)
+
+const sumHours = (arr: ClassSubjectItem[]) => {
+  const hrs = arr
+    .map((x) => x.class_subject_hours_per_week ?? 0)
+    .filter((n) => Number.isFinite(n));
+  if (hrs.length === 0) return null;
+  return hrs.reduce((a, b) => a + b, 0);
+};
+
+/* ================= Reusable Mutations ================= */
+function useCreateSubjectMutation(masjidId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (form: FormData) => {
+      const { data } = await axios.post(
+        `${ADMIN_PREFIX}/${masjidId}/subjects`,
+        form,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+      return data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["subjects-merged", masjidId] });
+    },
   });
+}
 
-  useEffect(() => {
-    if (initial) setForm(initial);
-    else
-      setForm({
-        id: "",
-        code: "",
-        name: "",
-        level: "",
-        hours_per_week: 0,
-        teacher_name: "",
-        status: "active",
-      });
-  }, [initial, open]);
+function useUpdateSubjectMutation(masjidId: string, subjectId: string) {
+  const qc = useQueryClient();
+  return useMutation({
 
-  if (!open) return null;
+    mutationFn: async (form: FormData) => {
+      const { data } = await axios.patch(
+        `${ADMIN_PREFIX}/${masjidId}/subjects/${subjectId}`,
+        form,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+      return data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["subjects-merged", masjidId] });
+    },
+  });
+}
 
-  return (
-    <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
-      style={{ background: "rgba(0,0,0,.35)" }}
-    >
-      <SectionCard
-        palette={palette}
-        className="w-full max-w-lg flex flex-col rounded-2xl shadow-2xl overflow-hidden"
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b">
-          <h3 className="font-semibold">
-            {isEdit ? "Edit Mapel" : "Tambah Mapel"}
-          </h3>
-          <button onClick={onClose} className="p-1">
-            <X size={18} />
-          </button>
-        </div>
-
-        {/* Body */}
-        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 max-h-[70vh]">
-          <Field
-            label="Kode"
-            value={form.code}
-            onChange={(v) => setForm({ ...form, code: v })}
-          />
-          <Field
-            label="Nama Mapel"
-            value={form.name}
-            onChange={(v) => setForm({ ...form, name: v })}
-          />
-          <Field
-            label="Level"
-            value={form.level || ""}
-            onChange={(v) => setForm({ ...form, level: v })}
-          />
-          <Field
-            label="Jam / Minggu"
-            type="number"
-            value={String(form.hours_per_week ?? 0)}
-            onChange={(v) => setForm({ ...form, hours_per_week: Number(v) })}
-          />
-          <Field
-            label="Pengampu"
-            value={form.teacher_name || ""}
-            onChange={(v) => setForm({ ...form, teacher_name: v })}
-          />
-
-          {/* Status */}
-          <div>
-            <label className="text-sm">Status</label>
-            <select
-              value={form.status}
-              onChange={(e) =>
-                setForm({ ...form, status: e.target.value as SubjectStatus })
-              }
-              className="w-full rounded-lg border px-2 py-2 text-sm"
-            >
-              <option value="active">Aktif</option>
-              <option value="inactive">Nonaktif</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="px-4 py-3 flex items-center justify-end gap-2 border-t">
-          <Btn palette={palette} variant="ghost" onClick={onClose}>
-            Batal
-          </Btn>
-          <Btn
-            palette={palette}
-            onClick={() =>
-              onSave({
-                ...form,
-                id: isEdit ? form.id : `sub-${Date.now()}`,
-              })
-            }
-          >
-            {isEdit ? "Simpan" : "Tambah"}
-          </Btn>
-        </div>
-      </SectionCard>
-    </div>
-  );
+function useDeleteSubjectMutation(masjidId: string, subjectId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const { data } = await axios.delete(
+        `${ADMIN_PREFIX}/${masjidId}/subjects/${subjectId}`
+      );
+      return data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["subjects-merged", masjidId] });
+    },
+  });
 }
 
 /* ================= Modal Detail ================= */
@@ -213,6 +157,7 @@ function SubjectDetailModal({
   onClose: () => void;
 }) {
   if (!open || !subject) return null;
+
   return (
     <div
       className="fixed inset-0 z-[90] flex items-center justify-center p-4"
@@ -220,24 +165,81 @@ function SubjectDetailModal({
     >
       <SectionCard
         palette={palette}
-        className="w-full max-w-md rounded-2xl shadow-2xl overflow-hidden"
+        className="w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden"
       >
         <div className="flex items-center justify-between px-4 py-3 border-b">
-          <h3 className="font-semibold">Detail Mapel</h3>
+          <h3 className="font-semibold">Detail Mapel — {subject.name}</h3>
           <button onClick={onClose} className="p-1">
             <X size={18} />
           </button>
         </div>
-        <div className="px-4 py-4 space-y-2 text-sm">
-          <InfoRow label="Kode" value={subject.code} />
-          <InfoRow label="Nama" value={subject.name} />
-          <InfoRow label="Level" value={subject.level ?? "-"} />
-          <InfoRow label="Jam/Minggu" value={subject.hours_per_week ?? "-"} />
-          <InfoRow label="Pengampu" value={subject.teacher_name ?? "-"} />
-          <InfoRow
-            label="Status"
-            value={subject.status === "active" ? "Aktif" : "Nonaktif"}
-          />
+
+        <div className="px-4 py-4 space-y-3 text-sm">
+          <div className="grid grid-cols-2 gap-3">
+            <InfoRow label="Kode" value={subject.code || "-"} />
+            <InfoRow
+              label="Status"
+              value={subject.status === "active" ? "Aktif" : "Nonaktif"}
+            />
+            <InfoRow label="Jumlah Kelas" value={subject.class_count} />
+            <InfoRow
+              label="Total Jam/Minggu"
+              value={
+                subject.total_hours_per_week != null
+                  ? `${subject.total_hours_per_week}`
+                  : "-"
+              }
+            />
+          </div>
+
+          <div className="mt-2">
+            <div className="font-semibold mb-2">Penugasan per Kelas</div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm min-w-[720px]">
+                <thead className="border-b">
+                  <tr>
+                    <th className="text-left py-2 pr-3">Slug Kelas</th>
+                    <th className="text-left py-2 pr-3">Jam/Minggu</th>
+                    <th className="text-left py-2 pr-3">Passing</th>
+                    <th className="text-left py-2 pr-3">Bobot Rapor</th>
+                    <th className="text-left py-2 pr-3">Core</th>
+                    <th className="text-left py-2 pr-3">Aktif</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {subject.assignments.map((cs) => (
+                    <tr key={cs.class_subject_id} className="border-b">
+                      <td className="py-2 pr-3">
+                        {cs.class_subject_slug || "-"}
+                      </td>
+                      <td className="py-2 pr-3">
+                        {cs.class_subject_hours_per_week ?? "-"}
+                      </td>
+                      <td className="py-2 pr-3">
+                        {cs.class_subject_min_passing_score ?? "-"}
+                      </td>
+                      <td className="py-2 pr-3">
+                        {cs.class_subject_weight_on_report ?? "-"}
+                      </td>
+                      <td className="py-2 pr-3">
+                        {cs.class_subject_is_core ? "Ya" : "Tidak"}
+                      </td>
+                      <td className="py-2 pr-3">
+                        {cs.class_subject_is_active ? "Aktif" : "Nonaktif"}
+                      </td>
+                    </tr>
+                  ))}
+                  {subject.assignments.length === 0 && (
+                    <tr>
+                      <td colSpan={6} className="py-4 text-center opacity-70">
+                        Belum ditugaskan ke kelas manapun.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </SectionCard>
     </div>
@@ -253,26 +255,436 @@ function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
-function Field({
-  label,
-  value,
-  onChange,
-  type = "text",
+/* =============== Subject Card =============== */
+function SubjectCard({
+  palette,
+  row,
+  onDetail,
+  onEdit,
+  onDelete,
 }: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  type?: string;
+  palette: Palette;
+  row: SubjectRow;
+  onDetail: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
 }) {
   return (
-    <div className="flex flex-col gap-1">
-      <label className="text-sm">{label}</label>
-      <input
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-lg border px-3 py-2 text-sm"
-      />
+    <SectionCard
+      palette={palette}
+      className="rounded-2xl shadow-md overflow-hidden flex flex-col"
+    >
+      <div className="p-4 flex items-start gap-3">
+        <div className="shrink-0 rounded-xl p-2 border">
+          <BookOpen size={20} />
+        </div>
+        <div className="flex-1">
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <div className="font-semibold leading-snug">{row.name}</div>
+              <div className="text-xs opacity-80">Kode: {row.code || "-"}</div>
+            </div>
+            <Badge
+              palette={palette}
+              variant={row.status === "active" ? "success" : "outline"}
+            >
+              {row.status === "active" ? "Aktif" : "Nonaktif"}
+            </Badge>
+          </div>
+
+          <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
+            <div className="rounded-lg border p-2">
+              <div className="opacity-70 text-xs">Jumlah Kelas</div>
+              <div className="font-medium">{row.class_count}</div>
+            </div>
+            <div className="rounded-lg border p-2">
+              <div className="opacity-70 text-xs">Total Jam/Minggu</div>
+              <div className="font-medium">
+                {row.total_hours_per_week ?? "-"}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 flex flex-wrap items-center justify-end gap-2">
+            <Btn
+              palette={palette}
+              size="sm"
+              variant="outline"
+              onClick={onDetail}
+            >
+              <Eye size={14} /> Detail
+            </Btn>
+            <Btn
+              palette={palette}
+              size="sm"
+              variant="outline"
+              onClick={onEdit}
+              title="Edit Subject"
+            >
+              <Pencil size={14} /> Edit
+            </Btn>
+            <Btn
+              palette={palette}
+              size="sm"
+              variant="quaternary"
+              onClick={onDelete}
+              title="Hapus Subject"
+            >
+              <Trash2 size={14} /> Hapus
+            </Btn>
+          </div>
+        </div>
+      </div>
+    </SectionCard>
+  );
+}
+
+/* =============== Create Modal =============== */
+function CreateSubjectModal({
+  open,
+  palette,
+  masjidId,
+  onClose,
+}: {
+  open: boolean;
+  palette: Palette;
+  masjidId: string;
+  onClose: () => void;
+}) {
+  const [code, setCode] = useState("");
+  const [name, setName] = useState("");
+  const [desc, setDesc] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+
+  const createMutation = useCreateSubjectMutation(masjidId);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const fd = new FormData();
+    if (code.trim()) fd.append("subject_code", code.trim());
+    fd.append("subject_name", name.trim());
+    if (desc.trim()) fd.append("subject_desc", desc.trim());
+    if (file) fd.append("file", file);
+    await createMutation.mutateAsync(fd);
+    onClose();
+    // Fields reset
+    setCode("");
+    setName("");
+    setDesc("");
+    setFile(null);
+  };
+
+  if (!open) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-[95] flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,.35)" }}
+    >
+      <SectionCard
+        palette={palette}
+        className="w-full max-w-xl rounded-2xl overflow-hidden shadow-2xl"
+      >
+        <div className="flex items-center justify-between px-4 py-3 border-b">
+          <h3 className="font-semibold">Tambah Mapel</h3>
+          <button onClick={onClose} className="p-1">
+            <X size={18} />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="px-4 py-4 space-y-3 text-sm">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <label className="flex flex-col gap-1">
+              <span className="opacity-80">Kode (opsional)</span>
+              <input
+                className="border rounded-lg px-3 py-2"
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                placeholder="B-Ing-1"
+              />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="opacity-80">Nama *</span>
+              <input
+                required
+                className="border rounded-lg px-3 py-2"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Bahasa Inggris"
+              />
+            </label>
+          </div>
+
+          <label className="flex flex-col gap-1">
+            <span className="opacity-80">Deskripsi (opsional)</span>
+            <textarea
+              className="border rounded-lg px-3 py-2"
+              rows={3}
+              value={desc}
+              onChange={(e) => setDesc(e.target.value)}
+              placeholder="Pelajaran membaca dan menghafal kosakata"
+            />
+          </label>
+
+          <label className="flex flex-col gap-1">
+            <span className="opacity-80">Gambar (opsional)</span>
+            <input
+              type="file"
+              accept="image/*"
+              className="border rounded-lg px-3 py-2"
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            />
+          </label>
+
+          {createMutation.isError && (
+            <div className="text-red-600">
+              {(createMutation.error as any)?.message ??
+                "Gagal membuat subject."}
+            </div>
+          )}
+
+          <div className="pt-2 flex justify-end gap-2">
+            <Btn
+              type="button"
+              palette={palette}
+              variant="outline"
+              onClick={onClose}
+            >
+              Batal
+            </Btn>
+            <Btn
+              type="submit"
+              palette={palette}
+              disabled={createMutation.isPending}
+              className="gap-1"
+            >
+              {createMutation.isPending ? "Menyimpan…" : "Simpan"}
+            </Btn>
+          </div>
+        </form>
+      </SectionCard>
+    </div>
+  );
+}
+
+/* =============== Edit Modal =============== */
+function EditSubjectModal({
+  open,
+  palette,
+  masjidId,
+  subject,
+  onClose,
+}: {
+  open: boolean;
+  palette: Palette;
+  masjidId: string;
+  subject: SubjectRow | null;
+  onClose: () => void;
+}) {
+  const [code, setCode] = useState(subject?.code ?? "");
+  const [name, setName] = useState(subject?.name ?? "");
+  const [desc, setDesc] = useState<string>("");
+  const [isActive, setIsActive] = useState(subject?.status === "active");
+  const [file, setFile] = useState<File | null>(null);
+
+  // Sync when subject changes
+  React.useEffect(() => {
+    setCode(subject?.code ?? "");
+    setName(subject?.name ?? "");
+    setIsActive(subject?.status === "active");
+    setDesc("");
+    setFile(null);
+  }, [subject?.id]);
+
+  const updateMutation = useUpdateSubjectMutation(masjidId, subject?.id ?? "");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!subject) return;
+
+    const fd = new FormData();
+    // Kirim hanya yang diisi; aman jika backend treat partial
+    fd.append("subject_name", name.trim());
+    fd.append("subject_is_active", isActive ? "true" : "false");
+    if (code.trim()) fd.append("subject_code", code.trim());
+    if (desc.trim()) fd.append("subject_desc", desc.trim());
+    if (file) fd.append("file", file);
+
+    await updateMutation.mutateAsync(fd);
+    onClose();
+  };
+
+  if (!open || !subject) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-[95] flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,.35)" }}
+    >
+      <SectionCard
+        palette={palette}
+        className="w-full max-w-xl rounded-2xl overflow-hidden shadow-2xl"
+      >
+        <div className="flex items-center justify-between px-4 py-3 border-b">
+          <h3 className="font-semibold">Edit Mapel — {subject.name}</h3>
+          <button onClick={onClose} className="p-1">
+            <X size={18} />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="px-4 py-4 space-y-3 text-sm">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <label className="flex flex-col gap-1">
+              <span className="opacity-80">Kode</span>
+              <input
+                className="border rounded-lg px-3 py-2"
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+              />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="opacity-80">Nama *</span>
+              <input
+                required
+                className="border rounded-lg px-3 py-2"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </label>
+          </div>
+
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={isActive}
+              onChange={(e) => setIsActive(e.target.checked)}
+            />
+            <span>Aktif</span>
+          </label>
+
+          <label className="flex flex-col gap-1">
+            <span className="opacity-80">Deskripsi (opsional)</span>
+            <textarea
+              className="border rounded-lg px-3 py-2"
+              rows={3}
+              value={desc}
+              onChange={(e) => setDesc(e.target.value)}
+              placeholder="Update deskripsi jika perlu"
+            />
+          </label>
+
+          <label className="flex flex-col gap-1">
+            <span className="opacity-80">
+              Gambar (opsional — menimpa yang lama)
+            </span>
+            <input
+              type="file"
+              accept="image/*"
+              className="border rounded-lg px-3 py-2"
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            />
+          </label>
+
+          {updateMutation.isError && (
+            <div className="text-red-600">
+              {(updateMutation.error as any)?.message ??
+                "Gagal mengubah subject."}
+            </div>
+          )}
+
+          <div className="pt-2 flex justify-end gap-2">
+            <Btn
+              type="button"
+              palette={palette}
+              variant="outline"
+              onClick={onClose}
+            >
+              Batal
+            </Btn>
+            <Btn
+              type="submit"
+              palette={palette}
+              disabled={updateMutation.isPending}
+              className="gap-1"
+            >
+              {updateMutation.isPending ? "Menyimpan…" : "Simpan Perubahan"}
+            </Btn>
+          </div>
+        </form>
+      </SectionCard>
+    </div>
+  );
+}
+
+/* =============== Delete Confirm =============== */
+function DeleteConfirmModal({
+  open,
+  palette,
+  masjidId,
+  subject,
+  onClose,
+}: {
+  open: boolean;
+  palette: Palette;
+  masjidId: string;
+  subject: SubjectRow | null;
+  onClose: () => void;
+}) {
+  const delMutation = useDeleteSubjectMutation(masjidId, subject?.id ?? "");
+
+  const handleDelete = async () => {
+    if (!subject) return;
+    await delMutation.mutateAsync();
+    onClose();
+  };
+
+  if (!open || !subject) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-[95] flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,.35)" }}
+    >
+      <SectionCard
+        palette={palette}
+        className="w-full max-w-md rounded-2xl overflow-hidden shadow-2xl"
+      >
+        <div className="flex items-center justify-between px-4 py-3 border-b">
+          <h3 className="font-semibold">Hapus Mapel</h3>
+          <button onClick={onClose} className="p-1">
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="px-4 py-4 text-sm space-y-3">
+          <p>
+            Kamu yakin ingin menghapus <b>{subject.name}</b>? Tindakan ini tidak
+            bisa dibatalkan.
+          </p>
+
+          {delMutation.isError && (
+            <div className="text-red-600">
+              {(delMutation.error as any)?.message ??
+                "Gagal menghapus subject."}
+            </div>
+          )}
+
+          <div className="pt-2 flex justify-end gap-2">
+            <Btn palette={palette} variant="outline" onClick={onClose}>
+              Batal
+            </Btn>
+            <Btn
+              palette={palette}
+              variant="quaternary"
+              onClick={handleDelete}
+              disabled={delMutation.isPending}
+              className="gap-1"
+            >
+              {delMutation.isPending ? "Menghapus…" : "Hapus"}
+            </Btn>
+          </div>
+        </div>
+      </SectionCard>
     </div>
   );
 }
@@ -282,193 +694,163 @@ const SchoolSubject: React.FC = () => {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
-  const gregorianISO = toLocalNoonISO(new Date());
+  const { masjidId } = useParams<{ masjidId: string }>();
 
-  // State modal
-  const [openForm, setOpenForm] = useState(false);
-  const [editData, setEditData] = useState<SubjectRow | null>(null);
   const [detailData, setDetailData] = useState<SubjectRow | null>(null);
-  const [rows, setRows] = useState<SubjectRow[]>([]);
+  const [openCreate, setOpenCreate] = useState(false);
+  const [editData, setEditData] = useState<SubjectRow | null>(null);
+  const [deleteData, setDeleteData] = useState<SubjectRow | null>(null);
 
-  // Dummy load
-  const subjectsQ = useQuery<ApiSubjectsResp>({
-    queryKey: ["subjects"],
-    queryFn: async () => {
-      const dummy: ApiSubjectsResp = {
-        list: [
-          { id: "1", code: "SBJ01", name: "Matematika", status: "active" },
-          {
-            id: "2",
-            code: "SBJ02",
-            name: "Bahasa Indonesia",
-            status: "inactive",
-          },
-        ],
-      };
-      return dummy;
+  const mergedQ = useQuery({
+    queryKey: ["subjects-merged", masjidId],
+    enabled: !!masjidId,
+    queryFn: async (): Promise<SubjectRow[]> => {
+      const [subjectsResp, classSubjectsResp] = await Promise.all([
+        axios
+          .get<SubjectsAPIResp>(`${API_PREFIX}/${masjidId}/subjects/list`, {
+            params: { limit: 500, offset: 0 },
+          })
+          .then((r) => r.data),
+        axios
+          .get<ClassSubjectsAPIResp>(
+            `${API_PREFIX}/${masjidId}/class-subjects/list`,
+            { params: { limit: 1000, offset: 0 } }
+          )
+          .then((r) => r.data),
+      ]);
+
+      const classBySubject = new Map<string, ClassSubjectItem[]>();
+      for (const cs of classSubjectsResp.data) {
+        const key = cs.class_subject_subject_id;
+        if (!classBySubject.has(key)) classBySubject.set(key, []);
+        classBySubject.get(key)!.push(cs);
+      }
+
+      const rows: SubjectRow[] = subjectsResp.data.map((s) => {
+        const assignments = classBySubject.get(s.subject_id) ?? [];
+        return {
+          id: s.subject_id,
+          code: s.subject_code ?? "",
+          name: s.subject_name,
+          status: s.subject_is_active ? "active" : "inactive",
+          class_count: assignments.length,
+          total_hours_per_week: sumHours(assignments),
+          assignments,
+        };
+      });
+
+      return rows;
     },
   });
 
-  useEffect(() => {
-    if (subjectsQ.data) {
-      setRows(subjectsQ.data.list);
-    }
-  }, [subjectsQ.data]);
-
-  // Handlers
-  const handleSave = (subject: SubjectRow) => {
-    setRows((prev) => {
-      const exists = prev.find((x) => x.id === subject.id);
-      if (exists) return prev.map((x) => (x.id === subject.id ? subject : x));
-      return [...prev, subject];
-    });
-    setOpenForm(false);
-    setEditData(null);
-  };
-
-  const handleDelete = (id: string) => {
-    if (!confirm("Yakin hapus mapel ini?")) return;
-    setRows((prev) => prev.filter((x) => x.id !== id));
-  };
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const rows = useMemo(() => mergedQ.data ?? [], [mergedQ.data]);
 
   return (
     <div className="min-h-screen w-full" style={{ background: palette.white2 }}>
       <main className="w-full px-4 md:px-6 py-4 md:py-8">
-        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
-          <section className="flex-1 flex flex-col space-y-6">
-            {/* Toolbar */}
-
-            <div className=" flex items-center justify-between">
-              <div className="  md:flex hidden items-center gap-3">
-                <Btn
-                  palette={palette}
-                  variant="ghost"
-                  onClick={() => navigate(-1)}
-                >
-                  <ArrowLeft className="cursor-pointer" size={20} />
-                </Btn>
-
-                <h1 className="font-semibold text-lg">Daftar Pelajaran</h1>
-              </div>
+        <div className="max-w-screen-2xl mx-auto flex flex-col gap-6">
+          {/* Toolbar */}
+          <div className="flex items-center justify-between">
+            <div className="md:flex hidden items-center gap-3">
               <Btn
                 palette={palette}
-                size="sm"
-                className="gap-1"
-                onClick={() => setOpenForm(true)}
+                variant="ghost"
+                onClick={() => navigate(-1)}
               >
-                <Plus size={16} /> Tambah
+                <ArrowLeft className="cursor-pointer" size={20} />
               </Btn>
+              <h1 className="font-semibold text-lg">Daftar Pelajaran</h1>
             </div>
+            <Btn
+              palette={palette}
+              size="sm"
+              className="gap-1"
+              onClick={() => setOpenCreate(true)}
+            >
+              <Plus size={16} /> Tambah
+            </Btn>
+          </div>
 
-            {/* Table */}
-            <SectionCard palette={palette}>
-              <div className="overflow-x-auto px-4 pb-4">
-                <table className="w-full text-sm min-w-[820px]">
-                  <thead style={{ color: palette.silver2 }}>
-                    <tr
-                      className="border-b"
-                      style={{ borderColor: palette.silver1 }}
-                    >
-                      <th className="py-2 pr-3">Kode</th>
-                      <th className="py-2 pr-3">Nama</th>
-                      <th className="py-2 pr-3">Level</th>
-                      <th className="py-2 pr-3">Jam/Minggu</th>
-                      <th className="py-2 pr-3">Pengampu</th>
-                      <th className="py-2 pr-3">Status</th>
-                      <th className="py-2 text-right">Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rows.map((r) => (
-                      <tr
-                        key={r.id}
-                        className="border-b"
-                        style={{ borderColor: palette.silver1 }}
-                      >
-                        <td className="py-2 pr-3">{r.code}</td>
-                        <td className="py-2 pr-3">{r.name}</td>
-                        <td className="py-2 pr-3">{r.level}</td>
-                        <td className="py-2 pr-3">{r.hours_per_week}</td>
-                        <td className="py-2 pr-3">{r.teacher_name}</td>
-                        <td className="py-2 pr-3">
-                          <Badge
-                            palette={palette}
-                            variant={
-                              r.status === "active" ? "success" : "outline"
-                            }
-                          >
-                            {r.status === "active" ? "Aktif" : "Nonaktif"}
-                          </Badge>
-                        </td>
-                        <td className="py-2 text-right">
-                          <div className="flex justify-end gap-2">
-                            <Btn
-                              palette={palette}
-                              size="sm"
-                              variant="outline"
-                              onClick={() => setDetailData(r)}
-                            >
-                              <Eye size={14} />
-                            </Btn>
-                            <Btn
-                              palette={palette}
-                              size="sm"
-                              variant="outline"
-                              onClick={() => {
-                                setEditData(r);
-                                setOpenForm(true);
-                              }}
-                            >
-                              <Pencil size={14} />
-                            </Btn>
-                            <Btn
-                              palette={palette}
-                              size="sm"
-                              variant="quaternary"
-                              onClick={() => handleDelete(r.id)}
-                            >
-                              <Trash2 size={14} />
-                            </Btn>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                    {rows.length === 0 && (
-                      <tr>
-                        <td
-                          colSpan={7}
-                          className="py-6 text-center text-silver-500"
-                        >
-                          Tidak ada data.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
+          {/* State: loading / error / empty */}
+          {mergedQ.isLoading && (
+            <SectionCard palette={palette} className="p-6 text-center">
+              Memuat…
             </SectionCard>
-          </section>
+          )}
+          {mergedQ.isError && (
+            <SectionCard
+              palette={palette}
+              className="p-6 text-center text-red-600"
+            >
+              Gagal memuat data.
+            </SectionCard>
+          )}
+          {!mergedQ.isLoading && !mergedQ.isError && rows.length === 0 && (
+            <SectionCard
+              palette={palette}
+              className="p-6 text-center opacity-70"
+            >
+              Tidak ada data.
+            </SectionCard>
+          )}
+
+          {/* Grid Cards */}
+          {!mergedQ.isLoading && !mergedQ.isError && rows.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+              {rows.map((r) => (
+                <SubjectCard
+                  key={r.id}
+                  palette={palette}
+                  row={r}
+                  onDetail={() => setDetailData(r)}
+                  onEdit={() => setEditData(r)}
+                  onDelete={() => setDeleteData(r)}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </main>
 
-      {/* Modals */}
-      <SubjectFormModal
-        open={openForm}
-        palette={palette}
-        onClose={() => {
-          setOpenForm(false);
-          setEditData(null);
-        }}
-        initial={editData}
-        onSave={handleSave}
-      />
+      {/* Modal Detail */}
       <SubjectDetailModal
         open={!!detailData}
         palette={palette}
         subject={detailData}
         onClose={() => setDetailData(null)}
       />
+
+      {/* Modal Create */}
+      {masjidId && (
+        <CreateSubjectModal
+          open={openCreate}
+          palette={palette}
+          masjidId={masjidId}
+          onClose={() => setOpenCreate(false)}
+        />
+      )}
+
+      {/* Modal Edit */}
+      {masjidId && (
+        <EditSubjectModal
+          open={!!editData}
+          palette={palette}
+          masjidId={masjidId}
+          subject={editData}
+          onClose={() => setEditData(null)}
+        />
+      )}
+
+      {/* Modal Delete */}
+      {masjidId && (
+        <DeleteConfirmModal
+          open={!!deleteData}
+          palette={palette}
+          masjidId={masjidId}
+          subject={deleteData}
+          onClose={() => setDeleteData(null)}
+        />
+      )}
     </div>
   );
 };

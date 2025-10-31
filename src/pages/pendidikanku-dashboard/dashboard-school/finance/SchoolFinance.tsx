@@ -84,7 +84,7 @@ const dateFmt = (iso?: string) =>
     : "-";
 
 /* ================= Types ================= */
-export type InvoiceStatus = "unpaid" | "partial" | "paid" | "overdue";
+export type InvoiceStatus = "unpaid" | "paid" | "overdue";
 
 export interface InvoiceItem {
   id: string;
@@ -151,18 +151,6 @@ const dummyInvoices: InvoiceItem[] = [
     amount: 350000,
     status: "unpaid",
     type: "Seragam",
-  },
-  {
-    id: "inv003",
-    title: "Buku Semester 1",
-    student_id: "stu003",
-    student_name: "Budi Santoso",
-    class_name: "2A",
-    due_date: "2025-09-10T12:00:00.000Z",
-    amount: 400000,
-    paid_amount: 200000,
-    status: "partial",
-    type: "Buku",
   },
   {
     id: "inv004",
@@ -241,7 +229,7 @@ const StatusBadge: React.FC<{ status: InvoiceStatus; palette: Palette }> = ({
 }) => {
   const statusConfig = {
     paid: { variant: "success" as const, icon: "✓", label: "Lunas" },
-    partial: { variant: "info" as const, icon: "◐", label: "Sebagian" },
+    
     unpaid: { variant: "outline" as const, icon: "○", label: "Belum Bayar" },
     overdue: { variant: "warning" as const, icon: "⚠", label: "Terlambat" },
   };
@@ -1009,24 +997,28 @@ const SchoolFinance: React.FC<SchoolFinanceProps> = ({
       className="min-h-full w-full "
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <main className="w-full px-4 md:px-6  md:py-8">
+      <main className="w-full">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Main Content */}
           <section className="flex-1 flex flex-col space-y-6 min-w-0">
+            
             {/* Header */}
-            <div className="md:flex hidden gap-3 items-center">
-              {showBack && (
-                <Btn
-                  palette={palette}
-                  variant="ghost"
-                  onClick={handleGoBack}
-                  className="inline-flex items-center gap-2"
-                >
-                  <ArrowLeft size={20} />
-                </Btn>
-              )}
-              <h1 className="text-lg font-semibold">Keuangan Sekolah</h1>
-            </div>
+            <section className="flex items-center justify-between">
+              <div className="flex items-center font-semibold text-lg">
+                {showBack && (
+                  <Btn
+                    palette={palette}
+                    variant="ghost"
+                    onClick={handleGoBack}
+                    className="cursor-pointer mr-3"
+                  >
+                    <ArrowLeft size={20} />
+                  </Btn>
+                )}
+                <h1>Keuangan Sekolah</h1>
+              </div>
+            </section>
+
 
             {/* Summary Cards */}
             <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 py-3 md:py-0">
@@ -1153,7 +1145,7 @@ const SchoolFinance: React.FC<SchoolFinanceProps> = ({
                 >
                   <option value="semua">Semua Status</option>
                   <option value="unpaid">Belum Bayar</option>
-                  <option value="partial">Sebagian</option>
+                  
                   <option value="paid">Lunas</option>
                   <option value="overdue">Terlambat</option>
                 </select>

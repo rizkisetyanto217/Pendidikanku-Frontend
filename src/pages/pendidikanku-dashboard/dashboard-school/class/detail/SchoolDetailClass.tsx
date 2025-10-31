@@ -522,9 +522,9 @@ export default function SchoolDetailClass() {
                           Guru: {subj.teacher}
                         </div>
                       </div>
-                      <Btn palette={palette} size="sm" variant="ghost">
+                      {/* <Btn palette={palette} size="sm" variant="ghost">
                         Tambah Tugas
-                      </Btn>
+                      </Btn> */}
                     </div>
 
                     {/* Tabel tugas */}
