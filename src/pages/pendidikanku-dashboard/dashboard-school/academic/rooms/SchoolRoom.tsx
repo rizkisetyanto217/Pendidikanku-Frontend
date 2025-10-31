@@ -5,6 +5,7 @@ import axios from "@/lib/axios";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import { useNavigate, useParams } from "react-router-dom";
+import Swal from "sweetalert2";
 import {
   SectionCard,
   Badge,
@@ -437,6 +438,51 @@ export default function RoomSchool({
     },
   });
 
+  // ✅ Fungsi hapus ruangan (dengan konfirmasi Swal)
+const handleDeleteRoom = (room: Room) => {
+  if (delRoom.isPending) return;
+
+  Swal.fire({
+    title: "Hapus ruangan?",
+    text: "Data ruangan akan dihapus permanen.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Ya, hapus",
+    cancelButtonText: "Batal",
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#6c757d",
+  }).then((res) => {
+    if (res.isConfirmed) {
+      delRoom.mutate(room.id, {
+        onSuccess: async () => {
+          await qc.invalidateQueries({
+            queryKey: QK.ROOMS_PUBLIC(masjid_id ?? "", q, page, perPage),
+          });
+          Swal.fire({
+            icon: "success",
+            title: "Berhasil",
+            text: `Ruangan "${room.name}" berhasil dihapus.`,
+            timer: 1500,
+            showConfirmButton: false,
+          });
+        },
+        onError: (err: any) => {
+          const msg =
+            err?.response?.data?.message ||
+            err.message ||
+            "Terjadi kesalahan saat menghapus ruangan.";
+          Swal.fire({
+            icon: "error",
+            title: "Gagal",
+            text: msg,
+          });
+        },
+      });
+    }
+  });
+};
+
+
   // Guard path
   if (!masjid_id) {
     return (
@@ -619,19 +665,11 @@ export default function RoomSchool({
                             palette={palette}
                             variant="ghost"
                             title="Hapus"
-                            onClick={() => {
-                              if (
-                                confirm(
-                                  `Hapus ruangan "${r.name}"? Tindakan ini tidak dapat dibatalkan.`
-                                )
-                              ) {
-                                delRoom.mutate(r.id);
-                              }
-                            }}
-                            disabled={delRoom.isPending}
-                          >
+                            onClick={() => handleDeleteRoom(r)}
+                            disabled={delRoom.isPending}>
                             <Trash2 size={16} />
                           </Btn>
+
                         </div>
                       </div>
                     ))

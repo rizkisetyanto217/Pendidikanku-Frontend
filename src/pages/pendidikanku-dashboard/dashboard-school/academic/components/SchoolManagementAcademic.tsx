@@ -348,7 +348,7 @@ export default function ManagementAcademic() {
         onSubmit={handleEdit}
       />
 
-      <main className="w-full px-4 md:px-6 py-4 md:py-8">
+      <main className="w-full">
         <div className="max-w-screen-2xl mx-auto flex flex-col gap-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">

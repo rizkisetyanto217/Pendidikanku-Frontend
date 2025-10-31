@@ -279,6 +279,7 @@ export default function DetailRoomSchool() {
     );
   }
 
+
   return (
     <div
       className="min-h-screen w-full"
@@ -286,7 +287,7 @@ export default function DetailRoomSchool() {
     >
       <main className="w-full">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
-          {/* Content */}
+          {/* lihat keseluruhan ruangan */}
           <section className="flex-1 min-w-0 space-y-6">
             {/* Header */}
             <div className="flex items-center gap-3">
@@ -295,7 +296,7 @@ export default function DetailRoomSchool() {
                 variant="ghost"
                 onClick={() => navigate(-1)}
                 title="Kembali"
-                className="md:flex hidden"
+                className="md:flex"
               >
                 <ArrowLeft size={20} />
               </Btn>

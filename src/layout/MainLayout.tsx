@@ -1,3 +1,4 @@
+// src/layout/MainLayout.tsx
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import { pickTheme, ThemeName } from "@/constants/thema";
@@ -5,6 +6,7 @@ import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import type { Palette } from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
 import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
 import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/ParentSideBar";
+import { useActiveMasjidInfo } from "@/hooks/useActiveMasjidInfo"; // 👈 tambah
 
 export default function MainLayout() {
   const { isDark, themeName } = useHtmlDarkMode();
@@ -18,6 +20,8 @@ export default function MainLayout() {
     "id-ID-u-ca-islamic-umalqura",
     { weekday: "long", day: "2-digit", month: "long", year: "numeric" }
   );
+
+  const { name: activeMasjidName } = useActiveMasjidInfo(); // 👈 ambil nama
 
   return (
     <div
@@ -43,12 +47,12 @@ export default function MainLayout() {
         <div className="sticky top-0 z-50">
           <ParentTopBar
             palette={palette}
-            title="Sekolah Al Hijrah Bandung 3"
+            title={activeMasjidName || "Memuat…"} // 👈 pakai nama sekolah/masjid
             gregorianDate={nowIso}
             hijriDate={hijri}
-            onMenuClick={() => setMobileOpen(true)} // mobile drawer
-            sidebarOpen={sidebarVisible} // 👈 baru
-            onToggleSidebar={() => setSidebarVisible((v) => !v)} // 👈 baru
+            onMenuClick={() => setMobileOpen(true)}
+            sidebarOpen={sidebarVisible}
+            onToggleSidebar={() => setSidebarVisible((v) => !v)}
           />
         </div>
 

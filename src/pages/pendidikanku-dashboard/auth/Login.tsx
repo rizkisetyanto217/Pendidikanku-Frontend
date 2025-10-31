@@ -657,11 +657,20 @@ export default function Login() {
     }
   }
 
+  // DI LOGIN.TSX
   function handleSelectMasjidRole(masjidId: string, role: MasjidRole) {
-    setActiveMasjidContext(masjidId, role);
-    const path =
-      role === "teacher" ? "guru" : role === "student" ? "murid" : "sekolah";
-    navigate(`/${masjidId}/${path}`, { replace: true });
+    api.get("/auth/me/simple-context").then((res) => {
+      const m = (res.data?.data?.memberships ?? []).find(
+        (x: any) => x.masjid_id === masjidId
+      );
+      setActiveMasjidContext(masjidId, role, {
+        name: m?.masjid_name ?? undefined,
+        icon: m?.masjid_icon_url ?? undefined,
+      });
+      const path =
+        role === "teacher" ? "guru" : role === "student" ? "murid" : "sekolah";
+      navigate(`/${masjidId}/${path}`, { replace: true });
+    });
   }
 
   return (

@@ -1,4 +1,3 @@
-// src/pages/sekolahislamku/tagihan/AllInvoices.tsx
 import React, { useMemo, useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { pickTheme, ThemeName } from "@/constants/thema";
@@ -8,10 +7,8 @@ import {
   Btn,
   type Palette,
 } from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
-import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/ParentSideBar";
 import axios from "@/lib/axios";
-import { ArrowLeft, Plus } from "lucide-react";
+import { ArrowLeft, Plus, CalendarDays } from "lucide-react";
 import Swal from "sweetalert2";
 
 /* ===== Types ===== */
@@ -19,7 +16,7 @@ type BillItem = {
   id: string;
   title: string;
   amount: number;
-  dueDate: string; // ISO
+  dueDate: string;
   status: "unpaid" | "paid" | "overdue";
 };
 
@@ -52,25 +49,16 @@ function toTagihan(b: BillItem): Tagihan {
 }
 
 /* ===== Modal Add/Edit ===== */
-type InvoiceModalProps = {
-  open: boolean;
-  onClose: () => void;
-  palette: Palette;
-  defaultValue?: Partial<BillItem>;
-  onSubmit: (
-    payload: Omit<BillItem, "id"> & { id?: string }
-  ) => Promise<void> | void;
-  title: string;
-};
+// (kode modal tetap sama seperti sebelumnya)
 
-const InvoiceModal: React.FC<InvoiceModalProps> = ({
+const InvoiceModal = ({
   open,
   onClose,
   palette,
   defaultValue,
   onSubmit,
   title,
-}) => {
+}: any) => {
   const [nama, setNama] = useState(defaultValue?.title ?? "");
   const [jumlah, setJumlah] = useState<number>(defaultValue?.amount ?? 0);
   const [jatuhTempo, setJatuhTempo] = useState<string>(
@@ -130,9 +118,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
           border: `1px solid ${palette.silver1}`,
         }}
       >
-        <div className="mb-4">
-          <h3 className="text-lg font-semibold">{title}</h3>
-        </div>
+        <h3 className="text-lg font-semibold mb-4">{title}</h3>
         <form onSubmit={submit} className="space-y-3">
           <div>
             <label className="text-sm">Nama Tagihan</label>
@@ -144,7 +130,6 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
               }}
               value={nama}
               onChange={(e) => setNama(e.target.value)}
-              placeholder="Contoh: SPP September"
             />
           </div>
           <div>
@@ -158,7 +143,6 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
               }}
               value={jumlah}
               onChange={(e) => setJumlah(Number(e.target.value))}
-              min={0}
             />
           </div>
           <div>
@@ -191,13 +175,8 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
             </select>
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-2">
-            <Btn
-              type="button"
-              variant="white1"
-              palette={palette}
-              onClick={onClose}
-            >
+          <div className="flex justify-end gap-2 pt-2">
+            <Btn palette={palette} variant="ghost" onClick={onClose}>
               Batal
             </Btn>
             <Btn type="submit" palette={palette} disabled={loading}>
@@ -209,114 +188,6 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
     </div>
   );
 };
-
-/* ===== Table Header & Row ===== */
-const TableHeader = ({ palette }: { palette: Palette }) => (
-  <thead>
-    <tr
-      style={{
-        background: palette.white1,
-        borderBottom: `2px solid ${palette.silver1}`,
-      }}
-    >
-      {["No", "Nama Tagihan", "Jumlah", "Status", "Jatuh Tempo", "Aksi"].map(
-        (h, i) => (
-          <th
-            key={h}
-            className={`p-3 border font-semibold ${
-              i === 0 || i >= 3
-                ? "text-center"
-                : i === 2
-                  ? "text-right"
-                  : "text-left"
-            }`}
-            style={{ borderColor: palette.silver1 }}
-          >
-            {h}
-          </th>
-        )
-      )}
-    </tr>
-  </thead>
-);
-
-const Row = ({
-  tagihan,
-  index,
-  palette,
-  onEdit,
-  onDelete,
-}: {
-  tagihan: Tagihan;
-  index: number;
-  palette: Palette;
-  onEdit: (id: string) => void;
-  onDelete: (id: string) => void;
-}) => (
-  <tr style={{ background: index % 2 === 0 ? palette.white1 : palette.white2 }}>
-    <td
-      className="p-3 border text-center"
-      style={{ borderColor: palette.silver1 }}
-    >
-      {index + 1}
-    </td>
-    <td
-      className="p-3 border font-medium"
-      style={{ borderColor: palette.silver1 }}
-    >
-      {tagihan.nama}
-    </td>
-    <td
-      className="p-3 border text-right font-semibold"
-      style={{ borderColor: palette.silver1 }}
-    >
-      Rp {tagihan.jumlah.toLocaleString("id-ID")}
-    </td>
-    <td
-      className="p-3 border text-center"
-      style={{ borderColor: palette.silver1 }}
-    >
-      <span
-        className={`px-2 py-1 rounded-full text-xs font-medium ${
-          tagihan.status === "Lunas"
-            ? "bg-green-100 text-green-800"
-            : "bg-red-100 text-red-800"
-        }`}
-      >
-        {tagihan.status}
-      </span>
-    </td>
-    <td
-      className="p-3 border text-center"
-      style={{ borderColor: palette.silver1 }}
-    >
-      {tagihan.tanggalJatuhTempo}
-    </td>
-    <td
-      className="p-3 border text-center"
-      style={{ borderColor: palette.silver1 }}
-    >
-      <div className="flex items-center justify-center gap-2">
-        <Btn
-          size="sm"
-          variant="ghost"
-          palette={palette}
-          onClick={() => onEdit(tagihan.id)}
-        >
-          Edit
-        </Btn>
-        <Btn
-          size="sm"
-          variant="destructive"
-          palette={palette}
-          onClick={() => onDelete(tagihan.id)}
-        >
-          Hapus
-        </Btn>
-      </div>
-    </td>
-  </tr>
-);
 
 /* ===== Ringkasan ===== */
 const Total = ({ data, palette }: { data: Tagihan[]; palette: Palette }) => {
@@ -360,16 +231,13 @@ export default function AllInvoices() {
 
   const initialBills: BillItem[] = state?.bills ?? [];
   const [items, setItems] = useState<BillItem[]>(initialBills);
-
   useEffect(() => setItems(initialBills), [initialBills]);
 
   const tagihanList: Tagihan[] = useMemo(() => items.map(toTagihan), [items]);
-  const currentDate = new Date().toISOString();
-
   const [openAdd, setOpenAdd] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [selected, setSelected] = useState<BillItem | null>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   const handleAdd = async (payload: Omit<BillItem, "id"> & { id?: string }) => {
     const created: BillItem = {
       id: payload.id ?? String(Date.now()),
@@ -394,18 +262,10 @@ export default function AllInvoices() {
     setOpenEdit(true);
   };
 
-  const handleEdit = async (
-    payload: Omit<BillItem, "id"> & { id?: string }
-  ) => {
+  const handleEdit = async (payload: Omit<BillItem, "id"> & { id?: string }) => {
     if (!selected) return;
     const id = selected.id;
-    const updated: BillItem = {
-      id,
-      title: payload.title,
-      amount: payload.amount,
-      dueDate: payload.dueDate,
-      status: payload.status,
-    };
+    const updated: BillItem = { ...payload, id };
     setItems((prev) => prev.map((x) => (x.id === id ? updated : x)));
     Swal.fire({
       icon: "success",
@@ -444,9 +304,7 @@ export default function AllInvoices() {
       className="min-h-screen w-full transition-colors duration-200"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      
-
-      {/* Modals */}
+      {/* Modal Add & Edit */}
       <InvoiceModal
         open={openAdd}
         onClose={() => setOpenAdd(false)}
@@ -466,76 +324,101 @@ export default function AllInvoices() {
         onSubmit={handleEdit}
       />
 
-      {/* Layout */}
       <main className="w-full">
-        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
-          
-
-          <section className="flex-1 flex flex-col space-y-6 min-w-0">
-            <div className="flex items-center justify-between">
-              <div className="  md:flex hidden items-center gap-3">
+        <div className="max-w-screen-2xl mx-auto flex flex-col space-y-6">
+          {/* ===== Header ===== */}
+          <div className="flex items-center justify-between">
+            <div className="font-semibold text-lg flex items-center">
+              <div className="items-center md:flex">
                 <Btn
                   palette={palette}
                   variant="ghost"
                   onClick={() => navigate(-1)}
+                  className="cursor-pointer mr-3"
                 >
-                  <ArrowLeft className="cursor-pointer" size={20} />
-                </Btn>
-
-                <h1 className="font-semibold text-lg">Tagihan</h1>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <Btn palette={palette} onClick={() => setOpenAdd(true)}>
-                  <Plus />
+                  <ArrowLeft size={20} />
                 </Btn>
               </div>
+              <h1 className="items-center md:flex">Tagihan</h1>
             </div>
 
-            <Total data={tagihanList} palette={palette} />
+            <Btn palette={palette} onClick={() => setOpenAdd(true)}>
+              <Plus size={18} className="mr-1" /> Tambah
+            </Btn>
+          </div>
 
-            <SectionCard palette={palette} className="p-0 overflow-hidden">
-              <div
-                className="p-4 border-b"
-                style={{ borderColor: palette.silver1 }}
-              >
-                <h2 className="text-xl font-semibold">Daftar Tagihan</h2>
-                <p className="text-sm opacity-90 mt-1">
-                  Berikut adalah daftar semua tagihan sekolah
+          {/* ===== Ringkasan ===== */}
+          <Total data={tagihanList} palette={palette} />
+
+          {/* ===== Daftar Tagihan (Card) ===== */}
+          <SectionCard palette={palette}>
+            <div className="p-4 border-b" style={{ borderColor: palette.silver1 }}>
+              <h2 className="text-xl font-semibold">Daftar Tagihan</h2>
+              <p className="text-sm opacity-90 mt-1">
+                Berikut adalah daftar semua tagihan sekolah
+              </p>
+            </div>
+
+            <div className="p-4 space-y-3">
+              {tagihanList.length > 0 ? (
+                tagihanList.map((t) => (
+                  <div
+                    key={t.id}
+                    className="border rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+                    style={{
+                      borderColor: palette.silver1,
+                      background: palette.white1,
+                    }}
+                  >
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-base">{t.nama}</h3>
+                      <p className="text-sm mt-1 opacity-80 flex items-center gap-1">
+                        <CalendarDays size={14} /> {t.tanggalJatuhTempo}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <span
+                        className={`px-3 py-1 text-sm rounded-full font-medium ${
+                          t.status === "Lunas"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-red-100 text-red-700"
+                        }`}
+                      >
+                        {t.status}
+                      </span>
+                      <p className="font-semibold text-sm">
+                        Rp {t.jumlah.toLocaleString("id-ID")}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2 sm:ml-4">
+                      <Btn
+                        size="sm"
+                        variant="ghost"
+                        palette={palette}
+                        onClick={() => openEditById(t.id)}
+                      >
+                        Edit
+                      </Btn>
+                      <Btn
+                        size="sm"
+                        variant="destructive"
+                        palette={palette}
+                        onClick={() => handleDelete(t.id)}
+                      >
+                        Hapus
+                      </Btn>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-center py-6 opacity-70">
+                  Tidak ada tagihan yang ditemukan.
                 </p>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm border-collapse">
-                  <TableHeader palette={palette} />
-                  <tbody>
-                    {tagihanList.length > 0 ? (
-                      tagihanList.map((t, i) => (
-                        <Row
-                          key={t.id}
-                          tagihan={t}
-                          index={i}
-                          palette={palette}
-                          onEdit={openEditById}
-                          onDelete={handleDelete}
-                        />
-                      ))
-                    ) : (
-                      <tr>
-                        <td
-                          colSpan={6}
-                          className="p-8 text-center opacity-60"
-                          style={{ borderColor: palette.silver1 }}
-                        >
-                          Tidak ada tagihan yang ditemukan
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </SectionCard>
-          </section>
+              )}
+            </div>
+          </SectionCard>
         </div>
       </main>
     </div>

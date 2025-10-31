@@ -49,24 +49,34 @@ const isFormData = (d: any) =>
   typeof FormData !== "undefined" && d instanceof FormData;
 
 /* ==========================================
-   🏷️ MASJID CONTEXT (cookie)
+   🏷️ MASJID CONTEXT (cookie + display)
 ========================================== */
 const ACTIVE_MASJID_COOKIE = "active_masjid_id";
 const ACTIVE_ROLE_COOKIE = "active_role";
 
-export function setActiveMasjidContext(masjidId: string, role?: string) {
-  if (masjidId) setCookie(ACTIVE_MASJID_COOKIE, masjidId);
-  if (role) setCookie(ACTIVE_ROLE_COOKIE, role);
+// simpan nama & icon masjid aktif untuk render cepat di UI (per-tab)
+const ACTIVE_MASJID_NAME_SS = "active_masjid_name";
+const ACTIVE_MASJID_ICON_SS = "active_masjid_icon";
+
+export function setActiveMasjidDisplay(name?: string, icon?: string) {
+  if (typeof sessionStorage === "undefined") return;
+  if (typeof name === "string")
+    sessionStorage.setItem(ACTIVE_MASJID_NAME_SS, name);
+  if (typeof icon === "string")
+    sessionStorage.setItem(ACTIVE_MASJID_ICON_SS, icon);
 }
-export function clearActiveMasjidContext() {
-  delCookie(ACTIVE_MASJID_COOKIE);
-  delCookie(ACTIVE_ROLE_COOKIE);
+export function getActiveMasjidDisplay() {
+  if (typeof sessionStorage === "undefined")
+    return { name: null as string | null, icon: null as string | null };
+  return {
+    name: sessionStorage.getItem(ACTIVE_MASJID_NAME_SS),
+    icon: sessionStorage.getItem(ACTIVE_MASJID_ICON_SS),
+  };
 }
-export function getActiveMasjidId(): string | null {
-  return getCookie(ACTIVE_MASJID_COOKIE);
-}
-export function getActiveRole(): string | null {
-  return getCookie(ACTIVE_ROLE_COOKIE);
+export function clearActiveMasjidDisplay() {
+  if (typeof sessionStorage === "undefined") return;
+  sessionStorage.removeItem(ACTIVE_MASJID_NAME_SS);
+  sessionStorage.removeItem(ACTIVE_MASJID_ICON_SS);
 }
 
 /* ==========================================
@@ -113,6 +123,73 @@ export async function ensureCsrf() {
 }
 
 /* ==========================================
+   👤 Simple Context (me/simple-context) + cache
+========================================== */
+export type Membership = {
+  masjid_id: string;
+  masjid_name: string;
+  masjid_icon_url?: string;
+  roles?: string[];
+};
+
+let _ctxCache: { at: number; data: { memberships: Membership[] } } | null =
+  null;
+const CTX_TTL_MS = 5 * 60 * 1000; // 5 menit
+
+export function clearSimpleContextCache() {
+  _ctxCache = null;
+}
+
+export async function fetchSimpleContext(force = false) {
+  const now = Date.now();
+  if (!force && _ctxCache && now - _ctxCache.at < CTX_TTL_MS) {
+    return _ctxCache.data;
+  }
+  const res = await api.get("/auth/me/simple-context");
+  const data = {
+    memberships: (res.data?.data?.memberships ?? []) as Membership[],
+  };
+  _ctxCache = { at: now, data };
+  return data;
+}
+
+/* ==========================================
+   🏷️ Set/Clear Active Context + broadcast
+========================================== */
+export function setActiveMasjidContext(
+  masjidId: string,
+  role?: string,
+  opts?: { name?: string; icon?: string } // opsional ikut set display
+) {
+  if (masjidId) setCookie(ACTIVE_MASJID_COOKIE, masjidId);
+  if (role) setCookie(ACTIVE_ROLE_COOKIE, role);
+  if (opts?.name || opts?.icon) setActiveMasjidDisplay(opts.name, opts.icon);
+
+  clearSimpleContextCache(); // invalidasi cache agar hook refetch
+  window.dispatchEvent(
+    new CustomEvent("masjid:changed", {
+      detail: { masjidId, role, meta: opts },
+    })
+  );
+}
+
+export function clearActiveMasjidContext() {
+  delCookie(ACTIVE_MASJID_COOKIE);
+  delCookie(ACTIVE_ROLE_COOKIE);
+  clearActiveMasjidDisplay();
+
+  clearSimpleContextCache();
+  window.dispatchEvent(new CustomEvent("masjid:changed", { detail: null }));
+}
+
+export function getActiveMasjidId(): string | null {
+  return getCookie(ACTIVE_MASJID_COOKIE);
+}
+export function getActiveRole(): string | null {
+  return getCookie(ACTIVE_ROLE_COOKIE);
+}
+
+/* ==========================================
    🔄 REFRESH via Cookie HttpOnly + XSRF
 ========================================== */
 let isRefreshing = false;
@@ -122,8 +199,6 @@ const notifyWaiters = (t: string | null) => {
   while (waiters.length) waiters.shift()!(t);
 };
 
-// lib/axios.ts
-// src/lib/axios.ts
 async function doRefresh(): Promise<string | null> {
   if (isRefreshing && refreshPromise) return refreshPromise;
   isRefreshing = true;
@@ -140,7 +215,7 @@ async function doRefresh(): Promise<string | null> {
       {},
       {
         headers,
-        withCredentials: true, // ⬅️ pastikan cookie terkirim
+        withCredentials: true, // pastikan cookie terkirim
       }
     );
     const newAT = res.data?.data?.access_token ?? null;
@@ -148,7 +223,7 @@ async function doRefresh(): Promise<string | null> {
     return newAT;
   })()
     .catch((err) => {
-      console.warn("[refresh] failed:", err?.response || err);
+      console.warn("[refresh] failed:", (err as any)?.response || err);
       clearTokens();
       window.dispatchEvent(new CustomEvent("auth:unauthorized"));
       return null;
@@ -166,16 +241,15 @@ async function doRefresh(): Promise<string | null> {
 /* ==========================================
    🧩 INTERCEPTORS
 ========================================== */
-// src/lib/axios.ts (interceptor request)
 api.interceptors.request.use((config) => {
   const url = (config.url || "") + "";
-  const isAuthArea = url.startsWith("/auth/"); // ⬅️ tambahkan ini
+  const isAuthArea = url.startsWith("/auth/");
 
   const isLogin = url.endsWith("/auth/login");
   const isRefresh = url.endsWith("/auth/refresh-token");
   const isCsrf = url.endsWith("/auth/csrf");
 
-  // Authorization: kirim normal kecuali login/refresh (opsional, boleh kirim juga utk /auth/me)
+  // Authorization: kirim normal kecuali login/refresh
   if (!isLogin && !isRefresh) {
     const at = getAccessToken();
     if (at) {
@@ -190,7 +264,7 @@ api.interceptors.request.use((config) => {
     (config.headers as any)["X-CSRF-Token"] = csrfTokenMem;
   }
 
-  // ⛔️ PENTING: JANGAN kirim X-Masjid-ID untuk endpoint /auth/*
+  // JANGAN kirim X-Masjid-ID di /auth/*
   if (!isAuthArea) {
     const mid = getActiveMasjidId();
     if (mid) {
@@ -224,14 +298,13 @@ api.interceptors.response.use(
     if (status === 401 && !original._retry && !isRefreshCall) {
       original._retry = true;
 
-      // Nunggu refresh yg lagi jalan
+      // tunggu refresh yg sedang berjalan
       if (isRefreshing && refreshPromise) {
         return new Promise((resolve, reject) => {
           waiters.push((t) => {
             if (!t) return reject(error);
             original.headers = original.headers ?? {};
             (original.headers as any).Authorization = `Bearer ${t}`;
-            // pastikan X-Masjid-ID ikut
             const mid = getActiveMasjidId();
             if (mid) (original.headers as any)["X-Masjid-ID"] = mid;
             resolve(api(original));
@@ -276,6 +349,7 @@ export async function apiLogout() {
   } finally {
     clearTokens();
     clearActiveMasjidContext();
+    clearSimpleContextCache(); // pastikan cache bersih
     window.dispatchEvent(
       new CustomEvent("auth:logout", { detail: { source: "axios" } })
     );
