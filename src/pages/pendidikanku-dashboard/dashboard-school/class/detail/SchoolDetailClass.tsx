@@ -616,63 +616,6 @@ export default function SchoolDetailClass() {
                         </div>
                       </div>
                     </div>
-
-
-                    {/* Bagian Quiz */}
-                    <div className="mt-5">
-                      <div className="font-medium mb-2">Quiz</div>
-                      <table className="min-w-[400px] w-full text-sm">
-                        <thead
-                          className="text-left border-b"
-                          style={{
-                            color: palette.black2,
-                            borderColor: palette.silver1,
-                          }}
-                        >
-                          <tr>
-                            <th className="py-2 pr-4">Judul</th>
-                            <th className="py-2 pr-4">Status</th>
-                            <th className="py-2 pr-4">Aksi</th>
-                          </tr>
-                        </thead>
-                        <tbody
-                          className="divide-y"
-                          style={{ borderColor: palette.silver1 }}
-                        >
-                          {DUMMY_QUIZZES.filter(
-                            (q) => q.subjectId === subj.id
-                          ).map((q) => (
-                            <tr key={q.id}>
-                              <td className="py-3 pr-4">{q.title}</td>
-                              <td className="py-3 pr-4">
-                                <Badge
-                                  palette={palette}
-                                  variant={
-                                    q.status === "graded"
-                                      ? "success"
-                                      : q.status === "open"
-                                        ? "secondary"
-                                        : "outline"
-                                  }
-                                >
-                                  {q.status}
-                                </Badge>
-                              </td>
-                              <td className="py-3 pr-4">
-                                <Btn
-                                  palette={palette}
-                                  size="sm"
-                                  variant="default"
-                                  onClick={() => navigate(`../quiz/${q.id}`)}
-                                >
-                                  Detail
-                                </Btn>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
                   </div>
                 ))}
               </div>
