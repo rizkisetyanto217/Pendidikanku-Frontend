@@ -233,35 +233,55 @@ export default function ParentTopBar({
         </div>
 
         {/* === MOBILE BAR === */}
+        {/* === MOBILE BAR === */}
         <div className="flex md:hidden items-center justify-between w-full">
-          {showBack ? (
-            <button
-              onClick={handleBack}
-              className="h-9 w-9 grid place-items-center rounded-xl border"
-              style={{ borderColor: palette.silver1 }}
-              title="Kembali"
-            >
-              <ArrowLeft size={18} />
-            </button>
-          ) : (
-            <button
-              onClick={onMenuClick}
-              className="h-9 w-9 grid place-items-center rounded-xl border"
-              style={{ borderColor: palette.silver1 }}
-              title="Buka menu"
-            >
-              <Menu size={18} />
-            </button>
-          )}
+          {/* Kiri: back kalau ada; kalau tidak, tampilkan menu */}
+          <div className="flex items-center gap-2">
+            {showBack ? (
+              <button
+                onClick={handleBack}
+                className="h-9 w-9 grid place-items-center rounded-xl border"
+                style={{ borderColor: palette.silver1 }}
+                title="Kembali"
+                aria-label="Kembali"
+              >
+                <ArrowLeft size={18} />
+              </button>
+            ) : (
+              <button
+                onClick={onMenuClick}
+                className="h-9 w-9 grid place-items-center rounded-xl border"
+                style={{ borderColor: palette.silver1 }}
+                title="Buka menu"
+                aria-label="Buka menu"
+              >
+                <Menu size={18} />
+              </button>
+            )}
+          </div>
+
+          {/* Tengah: judul */}
           <span className="font-semibold text-base truncate flex-1 text-center">
             {activeLabel}
           </span>
-          <PublicUserDropdown variant="icon" withBg={false} />
+
+          {/* Kanan: jika showBack true, tetap sediakan hamburger di kanan */}
+          <div className="flex items-center gap-2">
+            {showBack && (
+              <button
+                onClick={onMenuClick}
+                className="h-9 w-9 grid place-items-center rounded-xl border"
+                style={{ borderColor: palette.silver1 }}
+                title="Buka menu"
+                aria-label="Buka menu"
+              >
+                <Menu size={18} />
+              </button>
+            )}
+            <PublicUserDropdown variant="icon" withBg={false} />
+          </div>
         </div>
       </div>
     </div>
   );
 }
-
-
-

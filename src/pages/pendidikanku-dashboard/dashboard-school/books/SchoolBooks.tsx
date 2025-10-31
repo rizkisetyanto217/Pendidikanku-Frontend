@@ -2,7 +2,6 @@
 import React, { useMemo, useState } from "react";
 import { useSearchParams, useNavigate, useParams } from "react-router-dom";
 import axios from "@/lib/axios";
-// import { useEffectiveMasjidId } from "@/hooks/useEffectiveMasjidId";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import {
@@ -26,7 +25,7 @@ import ActionEditDelete from "@/components/common/main/MainActionEditDelete";
 import BookModal from "./components/SchoolBookModal";
 import ParentSidebar from "../../components/home/ParentSideBar";
 
-/* ============== Types API ============== */
+/* ============== Types API (PUBLIC) ============== */
 export type SectionLite = {
   class_sections_id: string;
   class_sections_name: string;
@@ -44,6 +43,7 @@ export type UsageItem = {
   sections: SectionLite[];
 };
 
+// Bentuk yang dipakai komponen-komponen lain (dipertahankan)
 export type BookAPI = {
   books_id: string;
   books_masjid_id: string;
@@ -56,11 +56,30 @@ export type BookAPI = {
   usages: UsageItem[];
 };
 
+// Response internal yang sudah dinormalisasi
 export type BooksResponse = {
   data: BookAPI[];
-  pagination: { limit: number; offset: number; total: number };
+  // NOTE: endpoint publik belum expose pagination; properti ini opsional
+  pagination?: { limit: number; offset: number; total: number };
 };
 
+// Bentuk response mentah dari endpoint publik
+type PublicBook = {
+  book_id: string;
+  book_masjid_id: string;
+  book_title: string;
+  book_author?: string | null;
+  book_desc?: string | null;
+  book_slug?: string | null;
+  book_image_url?: string | null;
+  book_image_object_key?: string | null;
+  book_created_at?: string;
+  book_updated_at?: string;
+  book_is_deleted?: boolean;
+};
+type PublicBooksResponse = { data: PublicBook[] };
+
+/* ============== Props ============== */
 type SchoolBooksProps = {
   showBack?: boolean;
   backTo?: string;
@@ -73,19 +92,39 @@ const yyyyMmDdLocal = (d = new Date()) => {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 };
 
-
-
-/* ============== Data Hook: /api/a/books ============== */
-function useBooksList(params: { limit: number; offset: number }) {
-  const { limit, offset } = params;
+/* ============== Data Hook: /api/public/{masjid_id}/books/list ============== */
+function useBooksListPublic(params: { masjidId: string; limit: number; offset: number }) {
+  const { masjidId, limit, offset } = params;
   return useQuery<BooksResponse>({
-    queryKey: ["books-list", { limit, offset }],
+    queryKey: ["books-list-public", { masjidId, limit, offset }],
     queryFn: async () => {
-      const r = await axios.get<BooksResponse>("/api/a/books", {
-        withCredentials: true,
-        params: { limit, offset },
-      });
-      return r.data;
+      // Endpoint publik saat ini tidak mendukung pagination di server;
+      // kita ambil semua lalu filter/paginate di client jika perlu.
+      const r = await axios.get<PublicBooksResponse>(
+        `/public/${encodeURIComponent(masjidId)}/books/list`,
+        { withCredentials: false }
+      );
+
+      const mapped: BookAPI[] = (r.data?.data ?? []).map((b) => ({
+        books_id: b.book_id,
+        books_masjid_id: b.book_masjid_id,
+        books_title: b.book_title,
+        books_author: b.book_author ?? null,
+        books_desc: b.book_desc ?? null,
+        books_url: null, // tidak tersedia di endpoint publik
+        books_image_url: b.book_image_url ?? null,
+        books_slug: b.book_slug ?? null,
+        usages: [], // tidak tersedia di endpoint publik
+      }));
+
+      // Pagination client-side (opsional—untuk menjaga UI sekarang)
+      const total = mapped.length;
+      const sliced = mapped.slice(offset, Math.min(offset + limit, total));
+
+      return {
+        data: sliced,
+        pagination: { limit, offset, total },
+      };
     },
     staleTime: 60_000,
     gcTime: 10 * 60 * 1000,
@@ -94,43 +133,6 @@ function useBooksList(params: { limit: number; offset: number }) {
     retry: 1,
   });
 }
-
-/* ============== Dummy Data ============== */
-const DUMMY_BOOKS: BookAPI[] = [
-  {
-    books_id: "dummy-1",
-    books_masjid_id: "masjid-1",
-    books_title: "Matematika Dasar",
-    books_author: "Ahmad Fauzi",
-    books_desc: "Buku dasar untuk memahami konsep matematika SD.",
-    books_url: "https://contoh.com/matematika-dasar",
-    books_image_url: null,
-    books_slug: "matematika-dasar",
-    usages: [],
-  },
-  {
-    books_id: "dummy-2",
-    books_masjid_id: "masjid-1",
-    books_title: "Bahasa Indonesia",
-    books_author: "Siti Nurhaliza",
-    books_desc: "Panduan belajar Bahasa Indonesia dengan mudah.",
-    books_url: "https://contoh.com/bahasa-indonesia",
-    books_image_url: null,
-    books_slug: "bahasa-indonesia",
-    usages: [],
-  },
-  {
-    books_id: "dummy-3",
-    books_masjid_id: "masjid-1",
-    books_title: "IPA Terapan",
-    books_author: "Budi Santoso",
-    books_desc: "Eksperimen IPA untuk siswa SMP.",
-    books_url: null,
-    books_image_url: null,
-    books_slug: "ipa-terapan",
-    usages: [],
-  },
-];
 
 /* ============== Skeletons ============== */
 function CardSkeleton({ palette }: { palette: Palette }) {
@@ -173,36 +175,43 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
 
   const navigate = useNavigate();
-  // useEffectiveMasjidId();
-
   const [sp, setSp] = useSearchParams();
   const nav = useNavigate();
   const [q, setQ] = useState(sp.get("q") || "");
 
+  // Ambil masjidId dari path param (dukung beberapa kemungkinan nama)
+  const params = useParams<{
+    masjidId?: string;
+    masjid_id?: string;
+    slug?: string; // tetap dukung base slug untuk detail route
+  }>();
+  const masjidId =
+    params.masjidId || params.masjid_id || ""; // wajib ada untuk endpoint publik
+
   const limit = Math.min(Math.max(Number(sp.get("limit") || 20), 1), 200);
   const offset = Math.max(Number(sp.get("offset") || 0), 0);
 
-  const booksQ = useBooksList({ limit, offset });
-  const isFromMenuUtama = location.pathname.includes("/menu-utama/");
+  const booksQ = useBooksListPublic({ masjidId, limit, offset });
 
   const [bookModal, setBookModal] = useState<{
     mode: "create" | "edit";
     book?: BookAPI | null;
   } | null>(null);
 
-  const { slug = "" } = useParams<{ slug: string }>();
-  const base = slug ? `/${encodeURIComponent(slug)}` : "";
+  const base = params.slug ? `/${encodeURIComponent(params.slug)}` : "";
 
   const qc = useQueryClient();
   const deleteBook = useMutation({
     mutationFn: async (bookId: string) => {
+      // NOTE: hapus tetap via admin route. Jika halaman publik tidak boleh hapus,
+      // cukup sembunyikan tombol delete dari UI publik.
       const r = await axios.delete(`/api/a/books/${bookId}`, {
         withCredentials: true,
       });
       return r.data;
     },
     onSuccess: async () => {
-      await qc.invalidateQueries({ queryKey: ["books-list"] });
+      await qc.invalidateQueries({ queryKey: ["books-list-public"] });
     },
     onError: (err: any) => {
       alert(err?.response?.data?.message ?? "Gagal menghapus buku.");
@@ -210,7 +219,7 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
   });
 
   const items = useMemo(() => {
-    const src = booksQ.data?.data?.length ? booksQ.data.data : DUMMY_BOOKS;
+    const src = booksQ.data?.data ?? [];
     const text = q.trim().toLowerCase();
     if (!text) return src;
     return src.filter((b) =>
@@ -224,10 +233,10 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
 
   const total = booksQ.data?.pagination?.total ?? 0;
   const showing = items.length;
-  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const onPage = (dir: -1 | 1) => {
     const nextOffset = Math.max(offset + dir * limit, 0);
+    if (nextOffset === offset) return;
     setSp(
       (prev) => {
         const p = new URLSearchParams(prev);
@@ -310,9 +319,7 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
           style={{ borderColor: palette.silver1, background: palette.white1 }}
           onClick={() => {
             const qs = sp.toString();
-            nav(
-              `${base}/sekolah/buku/detail/${b.books_id}${qs ? `?${qs}` : ""}`
-            );
+            nav(`${base}/sekolah/buku/detail/${b.books_id}${qs ? `?${qs}` : ""}`);
           }}
         >
           <div className="shrink-0">
@@ -333,35 +340,26 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <div
-              className="font-medium truncate"
-              style={{ color: palette.black2 }}
-            >
+            <div className="font-medium truncate" style={{ color: palette.black2 }}>
               {b.books_title || "(Tanpa judul)"}
             </div>
-            <div
-              className="text-sm opacity-90 truncate"
-              style={{ color: palette.black2 }}
-            >
+            <div className="text-sm opacity-90 truncate" style={{ color: palette.black2 }}>
               {b.books_author || "-"}
             </div>
             {!!b.books_desc && (
-              <div
-                className="text-sm opacity-80 mt-1 line-clamp-2"
-                style={{ color: palette.black2 }}
-              >
+              <div className="text-sm opacity-80 mt-1 line-clamp-2" style={{ color: palette.black2 }}>
                 {b.books_desc}
               </div>
             )}
             <div className="mt-3 flex items-center gap-2">
               {b.books_url && (
                 <a
-                  // href={b.books_url}
+                  href={b.books_url}
                   target="_blank"
                   rel="noreferrer noopener"
                   className="inline-flex items-center gap-1 text-sm underline"
                   style={{ color: palette.primary }}
-                  onClick={(e) => e.stopPropagation()} // biar gak trigger ke detail
+                  onClick={(e) => e.stopPropagation()}
                 >
                   <ExternalLink size={14} /> Kunjungi
                 </a>
@@ -371,9 +369,7 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
                   onEdit={() => setBookModal({ mode: "edit", book: b })}
                   onDelete={() => {
                     if (deleteBook.isPending) return;
-                    const ok = confirm(
-                      `Hapus buku ini?\nJudul: ${b.books_title ?? "-"}`
-                    );
+                    const ok = confirm(`Hapus buku ini?\nJudul: ${b.books_title ?? "-"}`);
                     if (!ok) return;
                     deleteBook.mutate(b.books_id);
                   }}
@@ -388,17 +384,14 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
 
   /* ============== Render ============== */
   return (
-    <div
-      className="min-h-screen w-full"
-      style={{ background: palette.white2, color: palette.black1 }}
-    >
+    <div className="min-h-screen w-full" style={{ background: palette.white2, color: palette.black1 }}>
       <main className="w-full">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Main content */}
           <section className="flex-1 flex flex-col space-y-6 min-w-0">
             {/* Header */}
             <div className="flex items-center justify-between gap-3">
-              <div className="md:flex  hidden items-center gap-3">
+              <div className="md:flex hidden items-center gap-3">
                 {showBack && (
                   <Btn
                     palette={palette}
@@ -411,10 +404,7 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
                 )}
                 <h1 className="text-lg font-semibold">Buku Pelajaran</h1>
               </div>
-              <Btn
-                palette={palette}
-                onClick={() => setBookModal({ mode: "create" })}
-              >
+              <Btn palette={palette} onClick={() => setBookModal({ mode: "create" })}>
                 + Buku
               </Btn>
             </div>
@@ -424,10 +414,7 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
               <div className="p-4 md:p-5 pb-2 font-medium">Filter</div>
               <div className="px-4 md:px-5 pb-4">
                 <div className="relative">
-                  <Search
-                    size={14}
-                    className="absolute left-2 top-1/2 -translate-y-1/2 opacity-60"
-                  />
+                  <Search size={14} className="absolute left-2 top-1/2 -translate-y-1/2 opacity-60" />
                   <input
                     value={q}
                     onChange={(e) => setQ(e.target.value)}
@@ -441,8 +428,7 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
 
             {/* Summary */}
             <div className="text-sm px-1" style={{ color: palette.black2 }}>
-              {yyyyMmDdLocal()} •{" "}
-              {booksQ.isFetching ? "memuat…" : `${total} total`}
+              {yyyyMmDdLocal()} • {booksQ.isFetching ? "memuat…" : `${total} total`}
             </div>
 
             {/* List: Mobile / Desktop */}
@@ -456,9 +442,7 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
               ) : items.length === 0 ? (
                 <SectionCard palette={palette} className="p-10 text-center">
                   <div className="text-sm" style={{ color: palette.black2 }}>
-                    {q
-                      ? "Tidak ada hasil untuk pencarianmu."
-                      : "Belum ada buku."}
+                    {q ? "Tidak ada hasil untuk pencarianmu." : "Belum ada buku."}
                   </div>
                 </SectionCard>
               ) : (
@@ -468,49 +452,36 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
 
             <div className="hidden md:block" style={{ color: palette.black2 }}>
               <SimpleTable
-                columns={[
-                  "No",
-                  "Cover",
-                  "Judul & Penulis",
-                  "Dipakai di",
-
-                  "Aksi",
-                ]}
+                columns={["No", "Cover", "Judul & Penulis", "Dipakai di", "Aksi"]}
                 rows={rows}
                 onRowClick={(rowIndex) => {
                   const book = items[rowIndex];
                   if (!book) return;
                   const qs = sp.toString();
-                  nav(
-                    `${base}/sekolah/buku/detail/${book.books_id}${qs ? `?${qs}` : ""}`
-                  );
+                  nav(`${base}/sekolah/buku/detail/${book.books_id}${qs ? `?${qs}` : ""}`);
                 }}
                 emptyText={booksQ.isLoading ? "Memuat…" : "Belum ada buku."}
               />
             </div>
 
-            {/* Pagination */}
-            <div className="flex items-center justify-between text-sm">
-              <div>
-                Menampilkan {showing} dari {total}
+            {/* Pagination (client-side agar UI konsisten) */}
+            {total > limit && (
+              <div className="flex items-center justify-between text-sm">
+                <div>Menampilkan {Math.min(limit, showing)} dari {total}</div>
+                <div className="flex items-center gap-2">
+                  <Btn palette={palette} onClick={() => onPage(-1)} disabled={offset <= 0}>
+                    <ChevronLeft size={16} /> Prev
+                  </Btn>
+                  <Btn
+                    palette={palette}
+                    onClick={() => onPage(1)}
+                    disabled={offset + limit >= total}
+                  >
+                    Next <ChevronRight size={16} />
+                  </Btn>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Btn
-                  palette={palette}
-                  onClick={() => onPage(-1)}
-                  disabled={offset <= 0}
-                >
-                  <ChevronLeft size={16} /> Prev
-                </Btn>
-                <Btn
-                  palette={palette}
-                  onClick={() => onPage(1)}
-                  disabled={offset + limit >= total}
-                >
-                  Next <ChevronRight size={16} />
-                </Btn>
-              </div>
-            </div>
+            )}
           </section>
         </div>
       </main>
