@@ -1,10 +1,7 @@
-// src/components/layout/AuthLayout.tsx
 import React, { useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
-
-// ⬇️ Import modal pilihan pendaftaran (bukan role)
 import RegisterChoiceModal from "@/pages/pendidikanku-dashboard/auth/components/RegisterModalChoice";
 
 type AuthLayoutProps = {
@@ -28,26 +25,22 @@ export default function AuthLayout({
   const [openChoice, setOpenChoice] = useState(false);
 
   const handleOpenChoice = useCallback((e: React.MouseEvent) => {
-    e.preventDefault(); // cegah Link langsung pindah halaman
+    e.preventDefault();
     setOpenChoice(true);
   }, []);
 
-  // ⬇️ Handler netral: map pilihan ke rute register
   const handleSelectChoice = useCallback(
     (choice: "school" | "user") => {
       setOpenChoice(false);
-      if (choice === "school") {
-        navigate("/register-sekolah");
-      } else {
-        navigate("/register-user");
-      }
+      if (choice === "school") navigate("/register-sekolah");
+      else navigate("/register-user");
     },
     [navigate]
   );
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center w-full"
+      className="min-h-[100svh] flex items-center justify-center w-full overflow-hidden"
       style={{
         background: isDark
           ? `linear-gradient(180deg, ${theme.white1} 0%, ${theme.white2} 100%)`
@@ -63,10 +56,8 @@ export default function AuthLayout({
         ].join(" ")}
         style={{ backgroundColor: theme.white1, borderColor: theme.white3 }}
       >
-        {/* Konten Halaman */}
         {children}
 
-        {/* Footer Link */}
         <div className="mt-6 text-center">
           <p className="text-sm" style={{ color: theme.silver2 }}>
             {isLogin ? (
@@ -97,7 +88,6 @@ export default function AuthLayout({
         </div>
       </div>
 
-      {/* Modal pilihan pendaftaran (school/user) */}
       {isLogin && (
         <RegisterChoiceModal
           open={openChoice}

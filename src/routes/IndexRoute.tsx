@@ -6,7 +6,7 @@ import Unauthorized from "./UnAuthorized";
 import NotFound from "@/pages/NotFound";
 
 // Layout & Pages
-import MasjidkuLayout from "@/layout/MasjidkuLayout";
+import MasjidkuLayout from "@/layout/CPendWebLayout";
 import MasjidkuHome from "@/pages/pendidikanku-profile/website/PendWebHome";
 import MasjidkuWebHome from "@/pages/pendidikanku-profile/website/website/PendWebHome";
 import RegisterAdminMasjid from "@/pages/pendidikanku-dashboard/auth/register/RegisterAdminMasjid";

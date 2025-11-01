@@ -1,5 +1,5 @@
 import { Route } from "react-router-dom";
-import MainLayout from "@/layout/MainLayout";
+import DashboardLayout from "@/layout/CDashboardLayout";
 import StudentDashboard from "@/pages/pendidikanku-dashboard/dashboard-student/StudentMainDashboard";
 import StudentProgressDetail from "@/pages/pendidikanku-dashboard/dashboard-student/progress/StudentProgress";
 import StudentAllSchedule from "@/pages/pendidikanku-dashboard/dashboard-student/dashboard/StudentAllSchedule";
@@ -27,14 +27,13 @@ import StudentAttandenceClass from "@/pages/pendidikanku-dashboard/dashboard-stu
 import StudentExam from "@/pages/pendidikanku-dashboard/dashboard-student/class/StudentExam";
 import StudentCertificate from "@/pages/pendidikanku-dashboard/dashboard-student/certificate/StudentCertificate";
 
-
 // ======================
 // Routing untuk halaman MURID (Student Dashboard)
 // ======================
 
 export const StudentRoutes = (
   // Route utama: semua path di bawah "/murid"
-  <Route path="murid" element={<MainLayout />}>
+  <Route path="murid" element={<DashboardLayout />}>
     {/* =====================
         DASHBOARD UTAMA
     ===================== */}
@@ -101,9 +100,9 @@ export const StudentRoutes = (
 
       {/* Halaman keuangan ringkas */}
       <Route path="keuangan" element={<StudentFInance />} />
-      
+
       {/* Jadwal utama (khusus tampilan kelas saya / tab jadwal) */}
-    <Route path="jadwal" element={<StudentSchedule />} />
+      <Route path="jadwal" element={<StudentSchedule />} />
 
       {/* Detail per kelas (dengan dynamic :id) */}
       <Route path="kelas-saya/:id/materi" element={<StudentMateri />} />

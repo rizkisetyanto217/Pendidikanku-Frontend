@@ -1,4 +1,3 @@
-// src/layout/MainLayout.tsx
 import { useMemo, useState, useCallback } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { pickTheme, ThemeName } from "@/constants/thema";
@@ -7,14 +6,13 @@ import type { Palette } from "@/pages/pendidikanku-dashboard/components/ui/CPrim
 import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
 import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/CParentSideBar";
 import { useActiveMasjidInfo } from "@/hooks/useActiveMasjidInfo";
-
 import {
   TopBarContext,
   type TopBarConfig,
   type TopBarAPI,
 } from "@/pages/pendidikanku-dashboard/components/home/CUseTopBar";
 
-export default function MainLayout() {
+export default function DashboardLayout() {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
@@ -30,25 +28,23 @@ export default function MainLayout() {
 
   const { name: activeMasjidName } = useActiveMasjidInfo();
 
-  // ==== TopBar state (default: mode "menu", title by ParentTopBar) ====
   const [topBar, setTopBarState] = useState<Required<TopBarConfig>>({
     mode: "menu",
-    title: null, // gunakan null agar aman di ReactNode
+    title: null,
     backTo: -1,
   });
 
-  // ✅ Memoized setter agar stable (hindari infinite re-renders di child useEffect)
   const setTopBar = useCallback((cfg: TopBarConfig) => {
-    setTopBarState((prev: Required<TopBarConfig>) => ({
+    setTopBarState((prev) => ({
       ...prev,
       ...cfg,
       mode: cfg.mode ?? prev.mode,
     }));
   }, []);
-
-  const resetTopBar = useCallback(() => {
-    setTopBarState({ mode: "menu", title: null, backTo: -1 });
-  }, []);
+  const resetTopBar = useCallback(
+    () => setTopBarState({ mode: "menu", title: null, backTo: -1 }),
+    []
+  );
 
   const api: TopBarAPI = useMemo(
     () => ({ topBar, setTopBar, resetTopBar }),
@@ -65,13 +61,13 @@ export default function MainLayout() {
   return (
     <TopBarContext.Provider value={api}>
       <div
-        className="flex w-full transition-colors"
+        className="flex w-full min-h-[100svh] transition-colors"
         style={{ background: palette.white2, color: palette.black1 }}
       >
         {/* Sidebar desktop */}
         <aside
           className={`hidden lg:flex fixed top-0 left-0 h-screen flex-shrink-0 z-30 transition-all duration-300 ${
-            sidebarVisible ? "w-64 xl:w-72" : "w-14"
+            sidebarVisible ? "w-64" : "w-14"
           } overflow-hidden border-r`}
           style={{ background: palette.white1, borderColor: palette.silver1 }}
         >
@@ -81,7 +77,7 @@ export default function MainLayout() {
         {/* Konten utama */}
         <div
           className={`flex-1 flex flex-col transition-all duration-300 ${
-            sidebarVisible ? "lg:ml-64 xl:ml-72" : "lg:ml-14"
+            sidebarVisible ? "lg:ml-64" : "lg:ml-14"
           }`}
         >
           <div className="sticky top-0 z-50">
@@ -99,7 +95,7 @@ export default function MainLayout() {
           </div>
 
           <main
-            className="flex-1 overflow-x-visible px-4 md:px-6 py-4 md:py-8"
+            className="flex-1 min-h-0 overflow-x-visible px-4 md:px-6 py-4 md:py-8"
             style={{ background: palette.white2, color: palette.black1 }}
           >
             <Outlet context={api} />

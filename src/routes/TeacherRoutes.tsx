@@ -1,6 +1,6 @@
 // src/routes/TeacherRoutes.tsx
 import { Route, Navigate } from "react-router-dom";
-import MainLayout from "@/layout/MainLayout";
+import DashboardLayout from "@/layout/CDashboardLayout";
 
 // Dashboard & Profil
 import TeacherDashboard from "@/pages/pendidikanku-dashboard/dashboard-teacher/TeacherMainDashboard";
@@ -13,7 +13,6 @@ import AttendanceDetail from "@/pages/pendidikanku-dashboard/dashboard-teacher/a
 // Grading
 import TeacherGrading from "@/pages/pendidikanku-dashboard/dashboard-teacher/grade/TeacherGrade";
 import DetailGrading from "@/pages/pendidikanku-dashboard/dashboard-teacher/grade/components/CTeacherDetailGrading";
-
 
 // Class & Assignments
 import TeacherClass from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/TeacherClass";
@@ -48,9 +47,8 @@ import TeacherAssignment from "@/pages/pendidikanku-dashboard/dashboard-teacher/
 import TeacherCertificate from "@/pages/pendidikanku-dashboard/dashboard-teacher/menu/certificate/TeacherCertificate";
 import TeacherSubjectsList from "@/pages/pendidikanku-dashboard/dashboard-teacher/TeacherSubject/TeacherSubjectsList";
 
-
 export const TeacherRoutes = (
-  <Route path="guru" element={<MainLayout />}>
+  <Route path="guru" element={<DashboardLayout />}>
     {/* Dashboard */}
     <Route index element={<TeacherDashboard />} />
 
@@ -97,7 +95,10 @@ export const TeacherRoutes = (
       <Route path=":id/material/:materialId" element={<DetailMateri />} />
       <Route path=":id/materi" element={<ClassMateri />} />
       <Route path=":id/tugas" element={<AssignmentClass />} />
-      <Route path=":id/assignment/:assignmentId" element={<DetailAssignmentClass />} />
+      <Route
+        path=":id/assignment/:assignmentId"
+        element={<DetailAssignmentClass />}
+      />
       <Route path=":id/student/:studentId/score" element={<StudentScore />} />
     </Route>
 

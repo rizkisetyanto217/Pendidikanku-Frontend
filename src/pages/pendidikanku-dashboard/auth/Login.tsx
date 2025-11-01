@@ -12,7 +12,7 @@ import {
   Sparkles,
 } from "lucide-react";
 
-import AuthLayout from "@/layout/AuthLayout";
+import AuthLayout from "@/layout/CAuthLayout";
 import api, { setTokens, setActiveMasjidContext } from "@/lib/axios";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";

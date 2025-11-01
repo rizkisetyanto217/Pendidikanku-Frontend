@@ -467,7 +467,7 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
 
       {/* Main */}
       <main className="w-full">
-        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-2">
+        <div className="mx-auto w-full flex flex-col lg:flex-row gap-4 lg:gap-2 px-4 xl:px-6 2xl:max-w-[1800px]">
           <section className="flex-1 flex flex-col space-y-6 min-w-0">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 ">
               {[

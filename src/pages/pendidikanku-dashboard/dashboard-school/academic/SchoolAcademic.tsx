@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { pickTheme, ThemeName } from "@/constants/thema";
+import { Palette, pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import axios from "@/lib/axios";
 import {
@@ -9,12 +9,7 @@ import {
   Link,
   useSearchParams,
 } from "react-router-dom";
-import {
-  SectionCard,
-  Badge,
-  Btn,
-  type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
+
 import {
   CalendarDays,
   CheckCircle2,
@@ -28,7 +23,9 @@ import {
   Pencil,
   Trash2,
 } from "lucide-react";
+import { Badge, Btn, SectionCard } from "../../components/ui/CPrimitives";
 import { useTopBar } from "../../components/home/CUseTopBar";
+
 
 /* ===================== Types ===================== */
 type AcademicTerm = {
@@ -146,33 +143,49 @@ function mapTermPayloadToApi(p: TermPayload) {
 const API_PREFIX = "/public";
 const ADMIN_PREFIX = "/a";
 
-/* ===== Scroll helpers ===== */
+/* ===== Scroll helpers (PAKAI PALETTE) ===== */
 function ScrollShadows() {
   return (
     <>
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-white dark:from-neutral-900 to-transparent rounded-l-2xl"
+        className="pointer-events-none absolute inset-y-0 left-0 w-6 rounded-l-2xl
+        bg-gradient-to-r from-transparent to-transparent"
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-white dark:from-neutral-900 to-transparent rounded-r-2xl"
+        className="pointer-events-none absolute inset-y-0 right-0 w-6 rounded-r-2xl
+        bg-gradient-to-l from-transparent to-transparent"
       />
     </>
   );
 }
-function MobileScrollArea({ children }: { children: React.ReactNode }) {
+
+function MobileScrollArea({
+  children,
+  palette,
+}: {
+  children: React.ReactNode;
+  palette: Palette;
+}) {
   return (
     <div className="relative" aria-label="Scrollable table region">
       <div
-        className="overflow-x-auto overscroll-x-contain max-w-full rounded-2xl border border-gray-200 bg-white dark:bg-neutral-900 dark:border-neutral-800 shadow-sm"
+        className="overflow-x-auto overscroll-x-contain max-w-full rounded-2xl shadow-sm"
         role="region"
         aria-roledescription="horizontal scroller"
         tabIndex={0}
+        style={{
+          background: palette.white1, // parent bg
+          border: `1px solid ${palette.silver1}`, // parent border
+        }}
       >
         <ScrollShadows />
         {children}
       </div>
+      <p className="mt-2 text-[11px]" style={{ color: palette.silver2 }}>
+        Geser tabel ke kiri/kanan untuk melihat semua kolom.
+      </p>
     </div>
   );
 }
@@ -187,7 +200,6 @@ type TermPayload = {
   slug?: string;
 };
 
-/* ===================== Mutations (pola SchoolSubject) ===================== */
 /* ===================== Mutations ===================== */
 function useCreateTerm(masjidId?: string) {
   const qc = useQueryClient();
@@ -195,18 +207,8 @@ function useCreateTerm(masjidId?: string) {
     mutationFn: async (payload: TermPayload) => {
       const apiBody = mapTermPayloadToApi(payload);
       const url = `${ADMIN_PREFIX}/${encodeURIComponent(masjidId!)}/academic-terms`;
-      console.log("[createTerm] POST", url, apiBody);
-      try {
-        const { data } = await axios.post(url, apiBody);
-        console.log("[createTerm] OK:", data);
-        return data;
-      } catch (err: any) {
-        console.error("[createTerm] FAIL:", {
-          status: err?.response?.status,
-          data: err?.response?.data,
-        });
-        throw err;
-      }
+      const { data } = await axios.post(url, apiBody);
+      return data;
     },
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: TERMS_QKEY(masjidId) });
@@ -345,7 +347,7 @@ function TermFormModal({
       slug: initial?.slug ?? "",
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]); // <— penting: tergantung open saja
+  }, [open]);
 
   if (!open) return null;
 
@@ -586,7 +588,7 @@ const AcademicSchool: React.FC<{
 
   return (
     <div
-      className="w-full"
+      className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
       <div
@@ -704,7 +706,7 @@ const AcademicSchool: React.FC<{
                 </div>
               </div>
 
-              <div className="p-4 md:p-0">
+              <div className="p-4 md:p-5">
                 {termsQ.isLoading ? (
                   <div className="flex items-center gap-2 text-sm opacity-70">
                     <Loader2 className="animate-spin" size={16} /> Memuat…
@@ -742,10 +744,15 @@ const AcademicSchool: React.FC<{
 
                     {/* Tablet/Desktop: Table */}
                     <div className="hidden md:block">
-                      <MobileScrollArea>
+                      <MobileScrollArea palette={palette}>
                         <table className="min-w-[840px] w-full text-sm text-left">
                           <thead>
-                            <tr className="bg-gray-50/80 dark:bg-neutral-800/60">
+                            <tr
+                              style={{
+                                background: palette.primary2, // header bg
+                                color: palette.primary, // header text
+                              }}
+                            >
                               {[
                                 "Tahun Ajaran",
                                 "Nama",
@@ -757,16 +764,25 @@ const AcademicSchool: React.FC<{
                                 <th
                                   key={h}
                                   scope="col"
-                                  className="sticky top-0 z-10 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300 backdrop-blur supports-[backdrop-filter]:bg-gray-50/70 dark:supports-[backdrop-filter]:bg-neutral-800/50"
+                                  className="sticky top-0 z-10 px-4 py-3 text-xs font-semibold uppercase tracking-wide backdrop-blur"
+                                  style={{
+                                    color: palette.primary,
+                                  }}
                                 >
                                   {h}
                                 </th>
                               ))}
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-gray-100 dark:divide-neutral-800">
+                          <tbody
+                            className="divide-y"
+                            style={{ borderColor: palette.silver1 }}
+                          >
                             {pageTerms.map((t) => (
-                              <tr key={t.id} className="hover:bg-black/5">
+                              <tr
+                                key={t.id}
+                                className="odd:bg-black/5 dark:odd:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
+                              >
                                 <td className="px-4 py-3 font-medium">
                                   {t.academic_year}
                                 </td>
@@ -915,10 +931,6 @@ const AcademicSchool: React.FC<{
               {
                 onSuccess: () => setModal(null),
                 onError: (e: any) => {
-                  console.error("[edit term] failed", {
-                    status: e?.response?.status,
-                    data: e?.response?.data,
-                  });
                   alert(e?.response?.data?.message ?? "Gagal memperbarui term");
                 },
               }
@@ -929,10 +941,6 @@ const AcademicSchool: React.FC<{
               onError: (e: any) => {
                 const msg = extractErrorMessage(e);
                 alert(msg || "Gagal membuat term");
-                console.error("[UI createTerm] error:", {
-                  status: e?.response?.status,
-                  data: e?.response?.data,
-                });
               },
             });
           }

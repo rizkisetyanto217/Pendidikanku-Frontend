@@ -2,17 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Tambahan: Hilangkan overscroll putih dan dukung dark mode */
+/* ==== Warna dasar & dark mode ==== */
 html,
 body {
-  @apply min-h-screen bg-white text-black dark:bg-[#121212] dark:text-white overscroll-none;
+  /* gunakan svh/dvh agar tidak sisa 1-2px di mobile karena URL bar */
+  @apply bg-white text-black dark:bg-[#121212] dark:text-white overscroll-none;
 }
 
+/* Kutipan */
 blockquote {
   @apply pl-4 ml-0 border-l-4 italic text-sm text-[#555] border-[#ccc] dark:text-[#ccc] dark:border-[#444];
 }
 
-/* ==== Global height & scroll ==== */
+/* ==== Tinggi & scroll global ==== */
 html,
 body,
 #root {
@@ -21,7 +23,26 @@ body,
   padding: 0;
 }
 
+/* Tinggi viewport yang stabil untuk container root */
+#root {
+  min-height: 100svh;
+}
+@supports (min-height: 100dvh) {
+  #root {
+    min-height: 100dvh;
+  }
+}
+
+/* Scroll global aktif hanya jika perlu */
 body {
-  overflow-y: auto; /* scroll hanya kalau perlu */
-  overscroll-behavior: contain; /* enak di mobile, ga 'mantul' */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* iOS Safari fallback supaya tinggi terisi penuh */
+html {
+  height: -webkit-fill-available;
+}
+body {
+  min-height: -webkit-fill-available;
 }

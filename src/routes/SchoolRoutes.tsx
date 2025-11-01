@@ -1,5 +1,5 @@
 import { Route } from "react-router-dom";
-import MainLayout from "@/layout/MainLayout";
+import DashboardLayout from "@/layout/CDashboardLayout";
 
 // Pages
 import SchoolDashboard from "@/pages/pendidikanku-dashboard/dashboard-school/SchoolMainDashboard";
@@ -40,9 +40,8 @@ import SchoolStatistik from "@/pages/pendidikanku-dashboard/dashboard-school/com
 import SchoolSettings from "@/pages/pendidikanku-dashboard/dashboard-school/coming-soon/settings-(pending)/SchoolSettings";
 import SchoolActiveClass from "@/pages/pendidikanku-dashboard/dashboard-school/class/active-class/SchoolActiveClass";
 
-
 export const SchoolRoutes = (
-  <Route path="sekolah" element={<MainLayout />}>
+  <Route path="sekolah" element={<DashboardLayout />}>
     {/* === Dashboard Utama === */}
     <Route index element={<SchoolDashboard />} />
 

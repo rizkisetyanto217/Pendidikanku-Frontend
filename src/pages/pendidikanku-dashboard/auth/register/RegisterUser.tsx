@@ -1,7 +1,7 @@
 // src/pages/auth/Register.tsx
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import AuthLayout from "@/layout/AuthLayout";
+import AuthLayout from "@/layout/CAuthLayout";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import api from "@/lib/axios";
