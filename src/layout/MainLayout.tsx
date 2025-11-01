@@ -1,5 +1,5 @@
 // src/layout/MainLayout.tsx
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
@@ -33,19 +33,26 @@ export default function MainLayout() {
   // ==== TopBar state (default: mode "menu", title by ParentTopBar) ====
   const [topBar, setTopBarState] = useState<Required<TopBarConfig>>({
     mode: "menu",
-    title: null, // ✅ pakai null, bukan undefined
+    title: null, // gunakan null agar aman di ReactNode
     backTo: -1,
   });
-  const setTopBar = (cfg: TopBarConfig) =>
-    setTopBarState((s) => ({ ...s, ...cfg, mode: cfg.mode ?? s.mode }));
 
-  const resetTopBar = () =>
-    setTopBarState({ mode: "menu", title: null, backTo: -1 }); // ✅ null juga di reset
+  // ✅ Memoized setter agar stable (hindari infinite re-renders di child useEffect)
+  const setTopBar = useCallback((cfg: TopBarConfig) => {
+    setTopBarState((prev: Required<TopBarConfig>) => ({
+      ...prev,
+      ...cfg,
+      mode: cfg.mode ?? prev.mode,
+    }));
+  }, []);
 
-  
+  const resetTopBar = useCallback(() => {
+    setTopBarState({ mode: "menu", title: null, backTo: -1 });
+  }, []);
+
   const api: TopBarAPI = useMemo(
     () => ({ topBar, setTopBar, resetTopBar }),
-    [topBar]
+    [topBar, setTopBar, resetTopBar]
   );
 
   const handleBack = () => {
@@ -83,7 +90,6 @@ export default function MainLayout() {
               title={topBar.title ?? activeMasjidName ?? "Memuat…"}
               gregorianDate={nowIso}
               hijriDate={hijri}
-              // mode kontrol: back atau menu
               showBack={topBar.mode === "back"}
               onBackClick={handleBack}
               onMenuClick={() => setMobileOpen(true)}
@@ -96,7 +102,6 @@ export default function MainLayout() {
             className="flex-1 overflow-y-auto overflow-x-visible px-4 md:px-6 py-4 md:py-8"
             style={{ background: palette.white2, color: palette.black1 }}
           >
-            {/* Beri akses context ke halaman anak */}
             <Outlet context={api} />
           </main>
         </div>

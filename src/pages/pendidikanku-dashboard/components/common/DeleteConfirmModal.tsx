@@ -6,6 +6,20 @@ import {
   type Palette,
 } from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
 
+/* Helper: ubah hex (#RRGGBB) → rgba(r,g,b,a) */
+function hexToRgba(hex: string, a = 1) {
+  let h = hex.replace("#", "");
+  if (h.length === 3)
+    h = h
+      .split("")
+      .map((c) => c + c)
+      .join("");
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${a})`;
+}
+
 /* ========== Modal Konfirmasi Hapus ========== */
 export function DeleteConfirmModal({
   open,
@@ -47,9 +61,10 @@ export function DeleteConfirmModal({
     <div
       className="fixed inset-0 z-50"
       onClick={onClose}
-      style={{ background: "rgba(0,0,0,0.35)" }}
       role="dialog"
       aria-modal="true"
+      // overlay pakai warna dari palette (black1) dengan opacity 0.35
+      style={{ background: hexToRgba(palette.black1, 0.35) }}
     >
       <div
         className="mx-auto mt-24 w-[92%] max-w-md rounded-2xl shadow-lg"
@@ -69,6 +84,8 @@ export function DeleteConfirmModal({
             onClick={onClose}
             className="rounded-xl p-2 hover:opacity-80"
             aria-label="Tutup"
+            // icon mengikuti warna teks sekunder
+            style={{ color: palette.black2 }}
           >
             <X size={18} />
           </button>
@@ -81,7 +98,7 @@ export function DeleteConfirmModal({
         <div className="p-4 md:p-5 pt-0 flex items-center justify-end gap-2">
           <Btn
             palette={palette}
-            variant="white1"
+            variant="white1" // Btn sudah merender sesuai palette.white1/black1
             size="sm"
             onClick={onClose}
             disabled={loading}
@@ -90,12 +107,13 @@ export function DeleteConfirmModal({
           </Btn>
           <Btn
             palette={palette}
-            variant="destructive"
+            variant="destructive" // Btn gunakan palette.error1/white1 di dalam
             size="sm"
             onClick={onConfirm}
             disabled={loading}
+            className="gap-1"
           >
-            <Trash2 size={16} className="mr-1" />
+            <Trash2 size={16} />
             {loading ? "Menghapus…" : confirmLabel}
           </Btn>
         </div>
@@ -125,8 +143,8 @@ export function DeleteConfirmButton({
   cancelLabel?: string;
   size?: "sm" | "md" | "icon";
   variant?: "destructive" | "outline" | "secondary" | "default";
-  ariaLabel?: string; // untuk icon-only
-  children?: React.ReactNode; // custom isi tombol (default pakai icon + "Hapus")
+  ariaLabel?: string;
+  children?: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -145,7 +163,7 @@ export function DeleteConfirmButton({
     <>
       <Btn
         palette={palette}
-        variant={variant}
+        variant={variant as any}
         size={size as any}
         aria-label={ariaLabel}
         onClick={() => setOpen(true)}

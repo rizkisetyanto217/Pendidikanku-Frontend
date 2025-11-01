@@ -1,4 +1,3 @@
-// src/pages/sekolahislamku/academic/AcademicSchool.tsx
 import React, { useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { pickTheme, ThemeName } from "@/constants/thema";
@@ -10,14 +9,12 @@ import {
   Link,
   useSearchParams,
 } from "react-router-dom";
-
 import {
   SectionCard,
   Badge,
   Btn,
   type Palette,
 } from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
-
 import {
   CalendarDays,
   CheckCircle2,
@@ -27,9 +24,7 @@ import {
   Building2,
   Layers,
   Info,
-  ArrowLeft,
   Loader2,
-  Plus,
   Pencil,
   Trash2,
 } from "lucide-react";
@@ -63,13 +58,7 @@ type ClassRoom = {
   class_rooms_features?: string[];
 };
 
-type SchoolAcademicProps = {
-  showBack?: boolean;
-  backTo?: string;
-  backLabel?: string;
-};
-
-/* ========== API types (server payload) ========= */
+/* ========== API types ========= */
 type AcademicTermApi = {
   academic_term_id: string;
   academic_term_masjid_id: string;
@@ -84,42 +73,10 @@ type AcademicTermApi = {
   academic_term_created_at?: string;
   academic_term_updated_at?: string;
 };
-
 type AdminTermsResponse = {
   data: AcademicTermApi[];
-  pagination?: {
-    limit: number;
-    offset: number;
-    total: number;
-  };
+  pagination?: { limit: number; offset: number; total: number };
 };
-
-/* ===================== Dummy Rooms (tetap) ===================== */
-const DUMMY_ROOMS: ClassRoom[] = [
-  {
-    class_rooms_masjid_id: "e9876a6e-ab91-4226-84f7-cda296ec747e",
-    class_rooms_name: "Ruang Tahfidz A",
-    class_rooms_code: "R-TFZ-A",
-    class_rooms_location: "Gedung Utama Lt. 2",
-    class_rooms_floor: 2,
-    class_rooms_capacity: 40,
-    class_rooms_description: "Ruang untuk setoran hafalan & halaqah kecil.",
-    class_rooms_is_virtual: false,
-    class_rooms_is_active: true,
-    class_rooms_features: ["AC", "Proyektor", "Whiteboard", "Karpet"],
-  },
-  {
-    class_rooms_masjid_id: "e9876a6e-ab91-4226-84f7-cda296ec747e",
-    class_rooms_name: "Kelas Daring Malam",
-    class_rooms_code: "VR-NIGHT-01",
-    class_rooms_location: "https://meet.google.com/abc-defg-hij",
-    class_rooms_is_virtual: true,
-    class_rooms_capacity: 100,
-    class_rooms_description: "Sesi online untuk murid pekanan.",
-    class_rooms_is_active: true,
-    class_rooms_features: ["Virtual", "Google Meet", "Rekaman Otomatis"],
-  },
-];
 
 /* ===================== Helpers ===================== */
 const dateShort = (iso?: string) =>
@@ -131,23 +88,12 @@ const dateShort = (iso?: string) =>
       })
     : "-";
 
-function mapApiTermToUI(x: AcademicTermApi): AcademicTerm {
-  return {
-    id: x.academic_term_id,
-    masjid_id: x.academic_term_masjid_id,
-    academic_year: x.academic_term_academic_year,
-    name: x.academic_term_name,
-    start_date: x.academic_term_start_date,
-    end_date: x.academic_term_end_date,
-    is_active: x.academic_term_is_active,
-    angkatan: x.academic_term_angkatan,
-    slug: x.academic_term_slug,
-    created_at: x.academic_term_created_at,
-    updated_at: x.academic_term_updated_at,
-  };
-}
+const API_PREFIX = "/public"; // GET list
+const ADMIN_PREFIX = "/a"; // POST/PATCH/DELETE
+const TERMS_QKEY = (masjidId?: string) =>
+  ["academic-terms-merged", masjidId] as const;
 
-/* ===== Mobile-only horizontal scroll helpers (untuk md+ table) ===== */
+/* ===== Scroll helpers ===== */
 function ScrollShadows() {
   return (
     <>
@@ -162,7 +108,6 @@ function ScrollShadows() {
     </>
   );
 }
-
 function MobileScrollArea({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative" aria-label="Scrollable table region">
@@ -182,33 +127,6 @@ function MobileScrollArea({ children }: { children: React.ReactNode }) {
   );
 }
 
-/* ===================== React Query: ADMIN terms ===================== */
-function useAdminAcademicTerms(params: {
-  masjidId?: string;
-  limit: number;
-  offset: number;
-  q?: string;
-}) {
-  const { masjidId, limit, offset, q } = params;
-  return useQuery<AdminTermsResponse>({
-    queryKey: ["admin-academic-terms", { masjidId, limit, offset, q }],
-    enabled: !!masjidId,
-    staleTime: 60_000,
-    retry: 1,
-    queryFn: async () => {
-      // GET list by masjid_id (public listing untuk halaman ini)
-      const res = await axios.get<AdminTermsResponse>(
-        `/public/${encodeURIComponent(masjidId!)}/academic-terms/list`,
-        {
-          withCredentials: true,
-          params: { limit, offset, q },
-        }
-      );
-      return res.data;
-    },
-  });
-}
-
 type TermPayload = {
   academic_year: string;
   name: string;
@@ -219,23 +137,26 @@ type TermPayload = {
   slug?: string;
 };
 
+/* ===================== Mutations (pola SchoolSubject) ===================== */
 function useCreateTerm(masjidId?: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: TermPayload) => {
-      const r = await axios.post(
-        `/a/${encodeURIComponent(masjidId!)}/academic-terms`,
-        payload,
-        { withCredentials: true }
+      const { data } = await axios.post(
+        `${ADMIN_PREFIX}/${encodeURIComponent(masjidId!)}/academic-terms`,
+        payload
       );
-      return r.data;
+      return data;
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admin-academic-terms"] });
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: TERMS_QKEY(masjidId) });
+      await qc.refetchQueries({
+        queryKey: TERMS_QKEY(masjidId),
+        type: "active",
+      });
     },
   });
 }
-
 function useUpdateTerm(masjidId?: string) {
   const qc = useQueryClient();
   return useMutation({
@@ -246,31 +167,64 @@ function useUpdateTerm(masjidId?: string) {
       id: string;
       payload: TermPayload;
     }) => {
-      const r = await axios.put(
-        `/a/${encodeURIComponent(masjidId!)}/academic-terms/${id}`,
-        payload,
-        { withCredentials: true }
+      const { data } = await axios.patch(
+        `${ADMIN_PREFIX}/${encodeURIComponent(masjidId!)}/academic-terms/${id}`,
+        payload
       );
-      return r.data;
+      return data;
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admin-academic-terms"] });
+    onMutate: async ({ id, payload }) => {
+      await qc.cancelQueries({ queryKey: TERMS_QKEY(masjidId) });
+      const previous = qc.getQueryData<AcademicTerm[]>(TERMS_QKEY(masjidId));
+      if (previous) {
+        qc.setQueryData<AcademicTerm[]>(
+          TERMS_QKEY(masjidId),
+          previous.map((t) => (t.id === id ? ({ ...t, ...payload } as any) : t))
+        );
+      }
+      return { previous };
+    },
+    onError: (_e, _vars, ctx) => {
+      if (ctx?.previous) qc.setQueryData(TERMS_QKEY(masjidId), ctx.previous);
+    },
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: TERMS_QKEY(masjidId) });
+      await qc.refetchQueries({
+        queryKey: TERMS_QKEY(masjidId),
+        type: "active",
+      });
     },
   });
 }
-
 function useDeleteTerm(masjidId?: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const r = await axios.delete(
-        `/a/${encodeURIComponent(masjidId!)}/academic-terms/${id}`,
-        { withCredentials: true }
+      const { data } = await axios.delete(
+        `${ADMIN_PREFIX}/${encodeURIComponent(masjidId!)}/academic-terms/${id}`
       );
-      return r.data;
+      return data ?? { ok: true };
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admin-academic-terms"] });
+    onMutate: async (id) => {
+      await qc.cancelQueries({ queryKey: TERMS_QKEY(masjidId) });
+      const previous = qc.getQueryData<AcademicTerm[]>(TERMS_QKEY(masjidId));
+      if (previous) {
+        qc.setQueryData<AcademicTerm[]>(
+          TERMS_QKEY(masjidId),
+          previous.filter((t) => t.id !== id)
+        );
+      }
+      return { previous };
+    },
+    onError: (_e, _vars, ctx) => {
+      if (ctx?.previous) qc.setQueryData(TERMS_QKEY(masjidId), ctx.previous);
+    },
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: TERMS_QKEY(masjidId) });
+      await qc.refetchQueries({
+        queryKey: TERMS_QKEY(masjidId),
+        type: "active",
+      });
     },
   });
 }
@@ -291,19 +245,35 @@ function TermFormModal({
   onSubmit: (values: TermPayload) => void;
   loading?: boolean;
 }) {
+  // ✅ lazy init dari initial (tidak reset tiap render)
   const [values, setValues] = useState<TermPayload>(() => ({
     academic_year: initial?.academic_year ?? "",
     name: initial?.name ?? "",
     start_date: initial?.start_date ?? "",
     end_date: initial?.end_date ?? "",
-    angkatan: initial?.angkatan ?? new Date().getFullYear(),
-    is_active: initial?.is_active ?? false,
+    angkatan: Number(initial?.angkatan ?? new Date().getFullYear()),
+    is_active: Boolean(initial?.is_active ?? false),
     slug: initial?.slug ?? "",
   }));
 
+  // ✅ reset hanya ketika modal dibuka (bukan saat submit re-render)
+  useEffect(() => {
+    if (!open) return;
+    setValues({
+      academic_year: initial?.academic_year ?? "",
+      name: initial?.name ?? "",
+      start_date: initial?.start_date ?? "",
+      end_date: initial?.end_date ?? "",
+      angkatan: Number(initial?.angkatan ?? new Date().getFullYear()),
+      is_active: Boolean(initial?.is_active ?? false),
+      slug: initial?.slug ?? "",
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]); // <— penting: tergantung open saja
+
   if (!open) return null;
 
-  const set = (k: keyof TermPayload, v: any) =>
+  const set = <K extends keyof TermPayload>(k: K, v: TermPayload[K]) =>
     setValues((s) => ({ ...s, [k]: v }));
 
   const canSubmit =
@@ -311,7 +281,8 @@ function TermFormModal({
     values.name.trim() &&
     values.start_date &&
     values.end_date &&
-    values.angkatan >= 1900;
+    Number.isFinite(values.angkatan) &&
+    values.angkatan > 0;
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center p-4">
@@ -325,6 +296,7 @@ function TermFormModal({
         }}
       >
         <div className="text-lg font-semibold">Periode Akademik</div>
+
         <div className="grid grid-cols-1 gap-3">
           <div>
             <label className="text-sm opacity-80">Tahun Ajaran</label>
@@ -391,16 +363,6 @@ function TermFormModal({
               </label>
             </div>
           </div>
-          <div>
-            <label className="text-sm opacity-80">Slug (opsional)</label>
-            <input
-              value={values.slug ?? ""}
-              onChange={(e) => set("slug", e.target.value)}
-              placeholder="ganjil-2025"
-              className="w-full mt-1 px-3 py-2 rounded-lg border bg-transparent"
-              style={{ borderColor: palette.silver1 }}
-            />
-          </div>
         </div>
 
         <div className="flex items-center justify-end gap-2 pt-2">
@@ -430,11 +392,11 @@ function TermFormModal({
 }
 
 /* ===================== Page ===================== */
-const AcademicSchool: React.FC<SchoolAcademicProps> = ({
-  showBack = false,
-  backTo,
-  backLabel = "Kembali",
-}) => {
+const AcademicSchool: React.FC<{
+  showBack?: boolean;
+  backTo?: string;
+  backLabel?: string;
+}> = () => {
   const { masjid_id } = useParams<{ masjid_id?: string }>();
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
@@ -442,33 +404,61 @@ const AcademicSchool: React.FC<SchoolAcademicProps> = ({
   const [sp, setSp] = useSearchParams();
 
   const { setTopBar, resetTopBar } = useTopBar();
-
   useEffect(() => {
-    // Tampilkan menubar + judul halaman
-    setTopBar({
-      mode: "back",
-      title: "Periode Akademik",
-    });
-    return resetTopBar; // bersihkan saat unmount
+    setTopBar({ mode: "back", title: "Periode Akademik" });
+    return resetTopBar;
   }, [setTopBar, resetTopBar]);
 
-  // filter rooms
   const [filter, setFilter] = useState<"all" | "physical" | "virtual">("all");
 
-  // pagination + search untuk terms
   const limit = Math.min(Math.max(Number(sp.get("limit") || 20), 1), 200);
   const offset = Math.max(Number(sp.get("offset") || 0), 0);
   const [q, setQ] = useState(sp.get("q") || "");
 
-  const termsQ = useAdminAcademicTerms({
-    masjidId: masjid_id,
-    limit,
-    offset,
-    q,
+  const termsQ = useQuery({
+    queryKey: TERMS_QKEY(masjid_id),
+    enabled: !!masjid_id,
+    staleTime: 60_000,
+    retry: 1,
+    queryFn: async (): Promise<AcademicTerm[]> => {
+      const res = await axios.get<AdminTermsResponse>(
+        `${API_PREFIX}/${encodeURIComponent(masjid_id!)}/academic-terms/list`,
+        { params: { limit: 999, offset: 0, _: Date.now() } }
+      );
+      const raw = res.data?.data ?? [];
+      return raw.map((x) => ({
+        id: x.academic_term_id,
+        masjid_id: x.academic_term_masjid_id,
+        academic_year: x.academic_term_academic_year,
+        name: x.academic_term_name,
+        start_date: x.academic_term_start_date,
+        end_date: x.academic_term_end_date,
+        is_active: x.academic_term_is_active,
+        angkatan: x.academic_term_angkatan,
+        slug: x.academic_term_slug,
+        created_at: x.academic_term_created_at,
+        updated_at: x.academic_term_updated_at,
+      }));
+    },
   });
-  const terms: AcademicTerm[] = useMemo(
-    () => (termsQ.data?.data ?? []).map(mapApiTermToUI),
-    [termsQ.data]
+
+  const terms = termsQ.data ?? [];
+
+  const filtered = useMemo(() => {
+    const s = (q || "").toLowerCase().trim();
+    if (!s) return terms;
+    return terms.filter(
+      (t) =>
+        t.academic_year.toLowerCase().includes(s) ||
+        t.name.toLowerCase().includes(s) ||
+        String(t.angkatan).includes(s)
+    );
+  }, [terms, q]);
+
+  const total = filtered.length;
+  const pageTerms = useMemo(
+    () => filtered.slice(offset, Math.min(offset + limit, total)),
+    [filtered, offset, limit, total]
   );
 
   const activeTerm: AcademicTerm | null = useMemo(() => {
@@ -477,7 +467,6 @@ const AcademicSchool: React.FC<SchoolAcademicProps> = ({
     return actives[0] ?? terms[0] ?? null;
   }, [terms]);
 
-  // CRUD hooks
   const createTerm = useCreateTerm(masjid_id);
   const updateTerm = useUpdateTerm(masjid_id);
   const deleteTerm = useDeleteTerm(masjid_id);
@@ -487,7 +476,6 @@ const AcademicSchool: React.FC<SchoolAcademicProps> = ({
     editing?: AcademicTerm | null;
   } | null>(null);
 
-  const total = termsQ.data?.pagination?.total ?? terms.length;
   const onPage = (dir: -1 | 1) => {
     const nextOffset = Math.max(offset + dir * limit, 0);
     if (nextOffset === offset) return;
@@ -504,14 +492,20 @@ const AcademicSchool: React.FC<SchoolAcademicProps> = ({
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Rooms (dummy)
-  const rooms = useMemo(() => {
-    if (filter === "physical")
-      return DUMMY_ROOMS.filter((r) => !r.class_rooms_is_virtual);
-    if (filter === "virtual")
-      return DUMMY_ROOMS.filter((r) => r.class_rooms_is_virtual);
-    return DUMMY_ROOMS;
-  }, [filter]);
+  /* ✅ memoized initial + key agar modal re-mount saat ganti item/mode */
+  const modalInitial = useMemo(() => {
+    if (!(modal?.mode === "edit" && modal.editing)) return undefined;
+    const e = modal.editing;
+    return {
+      academic_year: e.academic_year,
+      name: e.name,
+      start_date: e.start_date?.slice(0, 10) ?? "",
+      end_date: e.end_date?.slice(0, 10) ?? "",
+      angkatan: e.angkatan,
+      is_active: e.is_active,
+      slug: e.slug ?? "",
+    } as Partial<TermPayload>;
+  }, [modal?.mode, modal?.editing?.id]);
 
   return (
     <div
@@ -522,63 +516,13 @@ const AcademicSchool: React.FC<SchoolAcademicProps> = ({
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Main */}
           <section className="flex-1 flex flex-col space-y-6 min-w-0">
-            {/* Header */}
-            {/* <div className="flex items-center justify-between ">
-              <div className="font-semibold text-lg flex items-center ">
-                {showBack && (
-                  <Btn
-                    palette={palette}
-                    onClick={() => (backTo ? navigate(backTo) : navigate(-1))}
-                    variant="ghost"
-                    className="cursor-pointer mr-3"
-                  >
-                    <ArrowLeft aria-label={backLabel} size={20} />
-                  </Btn>
-                )}
-                <h1 className="items-center md:flex">Periode Akademik</h1>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="relative">
-                  <input
-                    value={q}
-                    onChange={(e) => setQ(e.target.value)}
-                    placeholder="Cari (tahun ajaran/nama)…"
-                    className="pl-3 pr-3 py-2 rounded-lg text-sm border w-64 bg-transparent"
-                    style={{ borderColor: palette.silver1 }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        setSp(
-                          (prev) => {
-                            const p = new URLSearchParams(prev);
-                            if (q) p.set("q", q);
-                            else p.delete("q");
-                            p.set("offset", "0");
-                            p.set("limit", String(limit));
-                            return p;
-                          },
-                          { replace: true }
-                        );
-                      }
-                    }}
-                  />
-                </div>
-                <Btn
-                  palette={palette}
-                  onClick={() => setModal({ mode: "create" })}
-                  className="inline-flex items-center gap-2"
-                >
-                  <Plus size={18} /> Tambah
-                </Btn>
-              </div>
-            </div> */}
-
-            {/* ===== Ringkasan term aktif (opsional) ===== */}
+            {/* ===== Ringkasan term aktif ===== */}
             <SectionCard palette={palette} className="overflow-hidden ">
               <div className="p-5">
                 {termsQ.isLoading ? (
                   <div className="flex items-center gap-2 text-sm opacity-70">
-                    <Loader2 className="animate-spin" size={16} />
-                    Memuat periode akademik…
+                    <Loader2 className="animate-spin" size={16} /> Memuat
+                    periode akademik…
                   </div>
                 ) : termsQ.isError ? (
                   <div
@@ -588,8 +532,7 @@ const AcademicSchool: React.FC<SchoolAcademicProps> = ({
                       color: palette.silver2,
                     }}
                   >
-                    <Info size={16} />
-                    Gagal memuat periode akademik.
+                    <Info size={16} /> Gagal memuat periode akademik.
                   </div>
                 ) : !activeTerm ? (
                   <div
@@ -599,8 +542,7 @@ const AcademicSchool: React.FC<SchoolAcademicProps> = ({
                       color: palette.silver2,
                     }}
                   >
-                    <Info size={16} />
-                    Belum ada periode akademik.
+                    <Info size={16} /> Belum ada periode akademik.
                   </div>
                 ) : (
                   <div className="grid md:grid-cols-2 gap-4">
@@ -618,7 +560,7 @@ const AcademicSchool: React.FC<SchoolAcademicProps> = ({
                         className="text-sm flex items-center gap-2"
                         style={{ color: palette.black2 }}
                       >
-                        <CalendarDays size={16} />
+                        <CalendarDays size={16} />{" "}
                         {dateShort(activeTerm.start_date)} s/d{" "}
                         {dateShort(activeTerm.end_date)}
                       </div>
@@ -638,8 +580,8 @@ const AcademicSchool: React.FC<SchoolAcademicProps> = ({
                         className="text-sm flex items-center gap-2"
                         style={{ color: palette.black2 }}
                       >
-                        <CheckCircle2 size={16} />
-                        Status: {activeTerm.is_active ? "Aktif" : "Nonaktif"}
+                        <CheckCircle2 size={16} /> Status:{" "}
+                        {activeTerm.is_active ? "Aktif" : "Nonaktif"}
                       </div>
                     </div>
                   </div>
@@ -654,8 +596,7 @@ const AcademicSchool: React.FC<SchoolAcademicProps> = ({
                 style={{ borderColor: palette.silver1 }}
               >
                 <div className="flex items-center gap-2 font-semibold">
-                  <Layers size={18} color={palette.quaternary} />
-                  Daftar Periode
+                  <Layers size={18} color={palette.quaternary} /> Daftar Periode
                 </div>
                 <div className="text-sm" style={{ color: palette.black2 }}>
                   {termsQ.isFetching ? "memuat…" : `${total} total`}
@@ -665,10 +606,9 @@ const AcademicSchool: React.FC<SchoolAcademicProps> = ({
               <div className="p-4 md:p-5">
                 {termsQ.isLoading ? (
                   <div className="flex items-center gap-2 text-sm opacity-70">
-                    <Loader2 className="animate-spin" size={16} />
-                    Memuat…
+                    <Loader2 className="animate-spin" size={16} /> Memuat…
                   </div>
-                ) : terms.length === 0 ? (
+                ) : total === 0 ? (
                   <div
                     className="rounded-xl border p-4 text-sm flex items-center gap-2"
                     style={{
@@ -676,14 +616,13 @@ const AcademicSchool: React.FC<SchoolAcademicProps> = ({
                       color: palette.silver2,
                     }}
                   >
-                    <Info size={16} />
-                    Belum ada data.
+                    <Info size={16} /> Belum ada data.
                   </div>
                 ) : (
                   <>
                     {/* Mobile: Cards */}
                     <div className="md:hidden grid grid-cols-1 gap-3">
-                      {terms.map((t) => (
+                      {pageTerms.map((t) => (
                         <TermCard
                           key={t.id}
                           term={t}
@@ -725,7 +664,7 @@ const AcademicSchool: React.FC<SchoolAcademicProps> = ({
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-gray-100 dark:divide-neutral-800">
-                            {terms.map((t) => (
+                            {pageTerms.map((t) => (
                               <tr key={t.id} className="hover:bg-black/5">
                                 <td className="px-4 py-3 font-medium">
                                   {t.academic_year}
@@ -785,11 +724,11 @@ const AcademicSchool: React.FC<SchoolAcademicProps> = ({
                   </>
                 )}
 
-                {/* Pagination di luar area scroll */}
                 {total > limit && (
                   <div className="mt-4 flex items-center justify-between">
                     <div className="text-sm" style={{ color: palette.black2 }}>
-                      Menampilkan {Math.min(limit, total - offset)} dari {total}
+                      Menampilkan {Math.min(limit, Math.max(total - offset, 0))}{" "}
+                      dari {total}
                     </div>
                     <div className="flex items-center gap-2">
                       <Btn
@@ -812,15 +751,15 @@ const AcademicSchool: React.FC<SchoolAcademicProps> = ({
               </div>
             </SectionCard>
 
-            {/* ===== Daftar Rooms (dummy seperti sebelumnya) ===== */}
+            {/* ===== Daftar Rooms (dummy) ===== */}
             <SectionCard palette={palette}>
               <div
                 className="p-4 md:p-5 pb-3 border-b flex flex-wrap items-center justify-between gap-2"
                 style={{ borderColor: palette.silver1 }}
               >
                 <div className="flex items-center gap-2 font-semibold">
-                  <Layers size={18} color={palette.quaternary} />
-                  Daftar Ruang Kelas
+                  <Layers size={18} color={palette.quaternary} /> Daftar Ruang
+                  Kelas
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -846,29 +785,6 @@ const AcademicSchool: React.FC<SchoolAcademicProps> = ({
                   ))}
                 </div>
               </div>
-
-              <div className="p-4 md:p-5">
-                {rooms.length === 0 ? (
-                  <div
-                    className="rounded-xl border p-4 text-sm flex items-center gap-2"
-                    style={{
-                      borderColor: palette.silver1,
-                      color: palette.silver2,
-                    }}
-                  >
-                    <Info size={16} />
-                    Tidak ada ruang untuk filter ini.
-                  </div>
-                ) : (
-                  <ul className="grid sm:grid-cols-2 gap-3">
-                    {rooms.map((r) => (
-                      <li key={r.class_rooms_code}>
-                        <RoomCard palette={palette} room={r} />
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
             </SectionCard>
           </section>
         </div>
@@ -876,34 +792,34 @@ const AcademicSchool: React.FC<SchoolAcademicProps> = ({
 
       {/* ===== Modal Create/Edit ===== */}
       <TermFormModal
+        key={modal?.editing?.id ?? modal?.mode ?? "closed"} // ✅ re-mount saat ganti
         open={!!modal}
         onClose={() => setModal(null)}
         palette={palette}
-        initial={
-          modal?.mode === "edit" && modal.editing
-            ? {
-                academic_year: modal.editing.academic_year,
-                name: modal.editing.name,
-                start_date: modal.editing.start_date?.slice(0, 10),
-                end_date: modal.editing.end_date?.slice(0, 10),
-                angkatan: modal.editing.angkatan,
-                is_active: modal.editing.is_active,
-                slug: modal.editing.slug,
-              }
-            : undefined
-        }
+        initial={modalInitial}
         loading={createTerm.isPending || updateTerm.isPending}
         onSubmit={(v) => {
           if (modal?.mode === "edit" && modal.editing) {
+            const fullPayload: TermPayload = {
+              academic_year: v.academic_year,
+              name: v.name,
+              start_date: v.start_date,
+              end_date: v.end_date,
+              angkatan: v.angkatan,
+              is_active: v.is_active,
+              slug: v.slug ?? "",
+            };
             updateTerm.mutate(
-              {
-                id: modal.editing.id,
-                payload: v,
-              },
+              { id: modal.editing.id, payload: fullPayload },
               {
                 onSuccess: () => setModal(null),
-                onError: (e: any) =>
-                  alert(e?.response?.data?.message ?? "Gagal memperbarui term"),
+                onError: (e: any) => {
+                  console.error("[edit term] failed", {
+                    status: e?.response?.status,
+                    data: e?.response?.data,
+                  });
+                  alert(e?.response?.data?.message ?? "Gagal memperbarui term");
+                },
               }
             );
           } else {
@@ -993,7 +909,6 @@ function TermCard({
 
 function RoomCard({ room, palette }: { room: ClassRoom; palette: Palette }) {
   const isVirtual = room.class_rooms_is_virtual;
-
   return (
     <div
       className="rounded-2xl border p-4 h-full flex flex-col gap-3"
@@ -1037,16 +952,6 @@ function RoomCard({ room, palette }: { room: ClassRoom; palette: Palette }) {
         <p className="text-sm" style={{ color: palette.black2 }}>
           {room.class_rooms_description}
         </p>
-      )}
-
-      {!!room.class_rooms_features?.length && (
-        <div className="flex flex-wrap gap-1.5">
-          {room.class_rooms_features.map((f, i) => (
-            <Badge key={i} palette={palette} variant="outline">
-              <span style={{ color: palette.black2 }}>{f}</span>
-            </Badge>
-          ))}
-        </div>
       )}
 
       <div className="pt-1 mt-auto flex items-center justify-end gap-2">

@@ -1,4 +1,4 @@
-// src/layout/useTopBar.tsx
+// src/layout/UseTopBar.tsx
 import { createContext, useContext } from "react";
 import type { ReactNode } from "react";
 
@@ -6,8 +6,8 @@ export type TopBarMode = "menu" | "back";
 
 export type TopBarConfig = {
   mode?: TopBarMode; // "menu" | "back"
-  title?: ReactNode; // judul halaman
-  backTo?: number | string; // -1 (history), atau path "/:id/..."
+  title?: ReactNode | null; // judul halaman
+  backTo?: number | string; // -1 (history) atau path "/:id/..."
 };
 
 export type TopBarAPI = {
@@ -21,9 +21,7 @@ export const TopBarContext = createContext<TopBarAPI | null>(null);
 export function useTopBar() {
   const ctx = useContext(TopBarContext);
   if (!ctx) {
-    throw new Error(
-      "useTopBar must be used within a TopBarContext provider (MainLayout)."
-    );
+    throw new Error("useTopBar must be used within TopBarContext provider.");
   }
   return ctx;
 }

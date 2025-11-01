@@ -104,19 +104,23 @@ export function clearTokens() {
 ========================================== */
 let csrfTokenMem: string | null = null;
 
-export async function ensureCsrf() {
+// ⬇️ ganti fungsi ini
+export async function ensureCsrf(): Promise<string | null> {
   if (csrfTokenMem) return csrfTokenMem;
+
+  // 1) Coba baca dari cookie dulu (paling cepat, no network)
+  const fromCookie = getCookie("XSRF-TOKEN");
+  if (fromCookie) {
+    csrfTokenMem = fromCookie;
+    return csrfTokenMem;
+  }
+
+  // 2) Kalau belum ada, baru hit /auth/csrf
   try {
-    const t0 = performance.now();
     const res = await apiNoAuth.get("/auth/csrf", { withCredentials: true });
-    csrfTokenMem = res.data?.data?.csrf_token ?? null;
-    console.debug(
-      "[csrf] fetched in",
-      Math.round(performance.now() - t0),
-      "ms"
-    );
-  } catch (e) {
-    console.warn("[csrf] fetch failed", e);
+    csrfTokenMem =
+      res.data?.data?.csrf_token ?? getCookie("XSRF-TOKEN") ?? null;
+  } catch {
     csrfTokenMem = null;
   }
   return csrfTokenMem;
@@ -204,36 +208,69 @@ async function doRefresh(): Promise<string | null> {
   isRefreshing = true;
 
   refreshPromise = (async () => {
+    // Pastikan kita punya XSRF, idealnya dari cookie (instant)
     const xsrf = (await ensureCsrf()) || "";
+
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
     };
     if (xsrf) headers["X-CSRF-Token"] = xsrf;
 
-    const res = await apiNoAuth.post(
-      "/auth/refresh-token",
-      {},
-      {
-        headers,
-        withCredentials: true, // pastikan cookie terkirim
+    try {
+      const res = await apiNoAuth.post(
+        "/auth/refresh-token",
+        {},
+        { headers, withCredentials: true }
+      );
+      const newAT = res.data?.data?.access_token ?? null;
+      if (newAT) setTokens(newAT);
+
+      // 🔄 server set cookie XSRF baru → sync ke mem
+      const fromCookie = getCookie("XSRF-TOKEN");
+      if (fromCookie) csrfTokenMem = fromCookie;
+
+      return newAT;
+    } catch (err: any) {
+      // ✅ fallback: kalau 403 CSRF, re-seed lalu retry sekali
+      if (err?.response?.status === 403) {
+        await apiNoAuth.get("/auth/csrf", { withCredentials: true });
+        const token = getCookie("XSRF-TOKEN");
+        if (token) csrfTokenMem = token;
+
+        const res2 = await apiNoAuth
+          .post(
+            "/auth/refresh-token",
+            {},
+            {
+              headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-Token": csrfTokenMem || "",
+              },
+              withCredentials: true,
+            }
+          )
+          .catch(() => null);
+
+        const newAT2 = res2?.data?.data?.access_token ?? null;
+        if (newAT2) {
+          setTokens(newAT2);
+          const fromCookie2 = getCookie("XSRF-TOKEN");
+          if (fromCookie2) csrfTokenMem = fromCookie2;
+          return newAT2;
+        }
       }
-    );
-    const newAT = res.data?.data?.access_token ?? null;
-    if (newAT) setTokens(newAT);
-    return newAT;
-  })()
-    .catch((err) => {
-      console.warn("[refresh] failed:", (err as any)?.response || err);
+
+      // gagal total
       clearTokens();
       window.dispatchEvent(new CustomEvent("auth:unauthorized"));
       return null;
-    })
-    .finally(() => {
-      isRefreshing = false;
-      const p = refreshPromise;
-      refreshPromise = null;
-      return p;
-    });
+    }
+  })().finally(() => {
+    isRefreshing = false;
+    const p = refreshPromise;
+    refreshPromise = null;
+    return p;
+  });
 
   return refreshPromise;
 }
@@ -241,15 +278,21 @@ async function doRefresh(): Promise<string | null> {
 /* ==========================================
    🧩 INTERCEPTORS
 ========================================== */
-api.interceptors.request.use((config) => {
-  const url = (config.url || "") + "";
-  const isAuthArea = url.startsWith("/auth/");
+/* ==========================================
+   🔁 RESPONSE INTERCEPTOR: auto refresh + retry
+========================================== */
 
+/* ==========================================
+   🧩 REQUEST INTERCEPTOR
+========================================== */
+api.interceptors.request.use(async (config) => {
+  const url = String(config.url || "");
+  const method = (config.method || "get").toUpperCase();
+  const isAuthArea = url.startsWith("/auth/");
   const isLogin = url.endsWith("/auth/login");
   const isRefresh = url.endsWith("/auth/refresh-token");
-  const isCsrf = url.endsWith("/auth/csrf");
 
-  // Authorization: kirim normal kecuali login/refresh
+  // 1) Authorization
   if (!isLogin && !isRefresh) {
     const at = getAccessToken();
     if (at) {
@@ -258,13 +301,17 @@ api.interceptors.request.use((config) => {
     }
   }
 
-  // X-CSRF-Token: jangan kirim utk login/refresh/csrf
-  if (!isLogin && !isRefresh && !isCsrf && csrfTokenMem) {
+  // 2) CSRF untuk non-auth & method mutating
+  const needsCsrf = !isAuthArea && !["GET", "HEAD", "OPTIONS"].includes(method);
+  if (needsCsrf && !csrfTokenMem) {
+    await ensureCsrf();
+  }
+  if (!isAuthArea && csrfTokenMem) {
     config.headers = config.headers ?? {};
     (config.headers as any)["X-CSRF-Token"] = csrfTokenMem;
   }
 
-  // JANGAN kirim X-Masjid-ID di /auth/*
+  // 3) Scope tenant (opsional, kalau backend baca header ini)
   if (!isAuthArea) {
     const mid = getActiveMasjidId();
     if (mid) {
@@ -273,7 +320,7 @@ api.interceptors.request.use((config) => {
     }
   }
 
-  // Content-Type default
+  // 4) Content-Type default (kecuali FormData)
   if (
     !isFormData((config as any).data) &&
     !(config.headers && "Content-Type" in (config.headers as any))
@@ -284,54 +331,6 @@ api.interceptors.request.use((config) => {
 
   return config;
 });
-
-type RetriableConfig = AxiosRequestConfig & { _retry?: boolean };
-
-api.interceptors.response.use(
-  (res) => res,
-  async (error: AxiosError) => {
-    const original = (error?.config || {}) as RetriableConfig;
-    const status = error?.response?.status;
-    const url = (original.url || "") + "";
-    const isRefreshCall = url.includes("/auth/refresh-token");
-
-    if (status === 401 && !original._retry && !isRefreshCall) {
-      original._retry = true;
-
-      // tunggu refresh yg sedang berjalan
-      if (isRefreshing && refreshPromise) {
-        return new Promise((resolve, reject) => {
-          waiters.push((t) => {
-            if (!t) return reject(error);
-            original.headers = original.headers ?? {};
-            (original.headers as any).Authorization = `Bearer ${t}`;
-            const mid = getActiveMasjidId();
-            if (mid) (original.headers as any)["X-Masjid-ID"] = mid;
-            resolve(api(original));
-          });
-        });
-      }
-
-      const newToken = await doRefresh();
-      notifyWaiters(newToken);
-
-      if (newToken) {
-        original.headers = original.headers ?? {};
-        (original.headers as any).Authorization = `Bearer ${newToken}`;
-        const mid = getActiveMasjidId();
-        if (mid) (original.headers as any)["X-Masjid-ID"] = mid;
-        return api(original);
-      }
-    }
-
-    if (isRefreshCall && (status === 400 || status === 401 || status === 403)) {
-      clearTokens();
-      window.dispatchEvent(new CustomEvent("auth:unauthorized"));
-    }
-
-    return Promise.reject(error);
-  }
-);
 
 /* ==========================================
    🚪 LOGOUT
@@ -365,8 +364,7 @@ export default api;
 export async function restoreSession(): Promise<boolean> {
   if (getAccessToken()) return true;
   const t0 = performance.now();
-  await ensureCsrf();
-  const t = await doRefresh();
+  const t = await doRefresh(); // ensureCsrf() tak perlu lagi di sini
   console.debug(
     "[restoreSession] done in",
     Math.round(performance.now() - t0),

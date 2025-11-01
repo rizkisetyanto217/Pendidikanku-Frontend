@@ -26,6 +26,7 @@ import {
   X,
   BookOpen,
 } from "lucide-react";
+import { DeleteConfirmModal } from "../../components/common/DeleteConfirmModal";
 
 /* ================= Types ================= */
 export type SubjectStatus = "active" | "inactive";
@@ -94,52 +95,51 @@ const sumHours = (arr: ClassSubjectItem[]) => {
 };
 
 /* ================= Reusable Mutations ================= */
-function useCreateSubjectMutation(masjidId: string) {
+function useCreateSubjectMutation(masjid_id: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (form: FormData) => {
       const { data } = await axios.post(
-        `${ADMIN_PREFIX}/${masjidId}/subjects`,
+        `${ADMIN_PREFIX}/${masjid_id}/subjects`,
         form,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
       return data;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["subjects-merged", masjidId] });
+      qc.invalidateQueries({ queryKey: ["subjects-merged", masjid_id] });
     },
   });
 }
 
-function useUpdateSubjectMutation(masjidId: string, subjectId: string) {
+function useUpdateSubjectMutation(masjid_id: string, subjectId: string) {
   const qc = useQueryClient();
   return useMutation({
-
     mutationFn: async (form: FormData) => {
       const { data } = await axios.patch(
-        `${ADMIN_PREFIX}/${masjidId}/subjects/${subjectId}`,
+        `${ADMIN_PREFIX}/${masjid_id}/subjects/${subjectId}`,
         form,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
       return data;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["subjects-merged", masjidId] });
+      qc.invalidateQueries({ queryKey: ["subjects-merged", masjid_id] });
     },
   });
 }
 
-function useDeleteSubjectMutation(masjidId: string, subjectId: string) {
+function useDeleteSubjectMutation(masjid_id: string, subjectId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async () => {
       const { data } = await axios.delete(
-        `${ADMIN_PREFIX}/${masjidId}/subjects/${subjectId}`
+        `${ADMIN_PREFIX}/${masjid_id}/subjects/${subjectId}`
       );
       return data;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["subjects-merged", masjidId] });
+      qc.invalidateQueries({ queryKey: ["subjects-merged", masjid_id] });
     },
   });
 }
@@ -467,7 +467,6 @@ function CreateSubjectModal({
   );
 }
 
-/* =============== Edit Modal =============== */
 function EditSubjectModal({
   open,
   palette,
@@ -503,7 +502,6 @@ function EditSubjectModal({
     if (!subject) return;
 
     const fd = new FormData();
-    // Kirim hanya yang diisi; aman jika backend treat partial
     fd.append("subject_name", name.trim());
     fd.append("subject_is_active", isActive ? "true" : "false");
     if (code.trim()) fd.append("subject_code", code.trim());
@@ -516,6 +514,13 @@ function EditSubjectModal({
 
   if (!open || !subject) return null;
 
+  const labelStyle: React.CSSProperties = { color: palette.black2 };
+  const fieldStyle: React.CSSProperties = {
+    borderColor: palette.silver1,
+    background: "transparent",
+    color: palette.black1,
+  };
+
   return (
     <div
       className="fixed inset-0 z-[95] flex items-center justify-center p-4"
@@ -524,10 +529,23 @@ function EditSubjectModal({
       <SectionCard
         palette={palette}
         className="w-full max-w-xl rounded-2xl overflow-hidden shadow-2xl"
+        style={{
+          background: palette.white1,
+          borderColor: palette.silver1,
+          color: palette.black1,
+        }}
       >
-        <div className="flex items-center justify-between px-4 py-3 border-b">
+        <div
+          className="flex items-center justify-between px-4 py-3 border-b"
+          style={{ borderColor: palette.silver1 }}
+        >
           <h3 className="font-semibold">Edit Mapel — {subject.name}</h3>
-          <button onClick={onClose} className="p-1">
+          <button
+            onClick={onClose}
+            className="p-1 rounded-lg"
+            style={{ color: palette.black2 }}
+            title="Tutup"
+          >
             <X size={18} />
           </button>
         </div>
@@ -535,18 +553,25 @@ function EditSubjectModal({
         <form onSubmit={handleSubmit} className="px-4 py-4 space-y-3 text-sm">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <label className="flex flex-col gap-1">
-              <span className="opacity-80">Kode</span>
+              <span className="opacity-80" style={labelStyle}>
+                Kode
+              </span>
               <input
-                className="border rounded-lg px-3 py-2"
+                className="rounded-lg px-3 py-2 border outline-none"
+                style={fieldStyle}
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
               />
             </label>
+
             <label className="flex flex-col gap-1">
-              <span className="opacity-80">Nama *</span>
+              <span className="opacity-80" style={labelStyle}>
+                Nama *
+              </span>
               <input
                 required
-                className="border rounded-lg px-3 py-2"
+                className="rounded-lg px-3 py-2 border outline-none"
+                style={fieldStyle}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
@@ -558,15 +583,20 @@ function EditSubjectModal({
               type="checkbox"
               checked={isActive}
               onChange={(e) => setIsActive(e.target.checked)}
+              // warna centang ikut primary
+              style={{ accentColor: palette.primary }}
             />
-            <span>Aktif</span>
+            <span style={{ color: palette.black1 }}>Aktif</span>
           </label>
 
           <label className="flex flex-col gap-1">
-            <span className="opacity-80">Deskripsi (opsional)</span>
+            <span className="opacity-80" style={labelStyle}>
+              Deskripsi (opsional)
+            </span>
             <textarea
-              className="border rounded-lg px-3 py-2"
+              className="rounded-lg px-3 py-2 border outline-none"
               rows={3}
+              style={fieldStyle}
               value={desc}
               onChange={(e) => setDesc(e.target.value)}
               placeholder="Update deskripsi jika perlu"
@@ -574,19 +604,20 @@ function EditSubjectModal({
           </label>
 
           <label className="flex flex-col gap-1">
-            <span className="opacity-80">
+            <span className="opacity-80" style={labelStyle}>
               Gambar (opsional — menimpa yang lama)
             </span>
             <input
               type="file"
               accept="image/*"
-              className="border rounded-lg px-3 py-2"
+              className="rounded-lg px-3 py-2 border file:mr-3 file:py-1 file:px-2 file:rounded-md"
+              style={fieldStyle}
               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
             />
           </label>
 
           {updateMutation.isError && (
-            <div className="text-red-600">
+            <div style={{ color: palette.error1 }}>
               {(updateMutation.error as any)?.message ??
                 "Gagal mengubah subject."}
             </div>
@@ -617,103 +648,39 @@ function EditSubjectModal({
 }
 
 /* =============== Delete Confirm =============== */
-function DeleteConfirmModal({
-  open,
-  palette,
-  masjidId,
-  subject,
-  onClose,
-}: {
-  open: boolean;
-  palette: Palette;
-  masjidId: string;
-  subject: SubjectRow | null;
-  onClose: () => void;
-}) {
-  const delMutation = useDeleteSubjectMutation(masjidId, subject?.id ?? "");
-
-  const handleDelete = async () => {
-    if (!subject) return;
-    await delMutation.mutateAsync();
-    onClose();
-  };
-
-  if (!open || !subject) return null;
-
-  return (
-    <div
-      className="fixed inset-0 z-[95] flex items-center justify-center p-4"
-      style={{ background: "rgba(0,0,0,.35)" }}
-    >
-      <SectionCard
-        palette={palette}
-        className="w-full max-w-md rounded-2xl overflow-hidden shadow-2xl"
-      >
-        <div className="flex items-center justify-between px-4 py-3 border-b">
-          <h3 className="font-semibold">Hapus Mapel</h3>
-          <button onClick={onClose} className="p-1">
-            <X size={18} />
-          </button>
-        </div>
-
-        <div className="px-4 py-4 text-sm space-y-3">
-          <p>
-            Kamu yakin ingin menghapus <b>{subject.name}</b>? Tindakan ini tidak
-            bisa dibatalkan.
-          </p>
-
-          {delMutation.isError && (
-            <div className="text-red-600">
-              {(delMutation.error as any)?.message ??
-                "Gagal menghapus subject."}
-            </div>
-          )}
-
-          <div className="pt-2 flex justify-end gap-2">
-            <Btn palette={palette} variant="outline" onClick={onClose}>
-              Batal
-            </Btn>
-            <Btn
-              palette={palette}
-              variant="quaternary"
-              onClick={handleDelete}
-              disabled={delMutation.isPending}
-              className="gap-1"
-            >
-              {delMutation.isPending ? "Menghapus…" : "Hapus"}
-            </Btn>
-          </div>
-        </div>
-      </SectionCard>
-    </div>
-  );
-}
 
 /* ================== Page ================== */
 const SchoolSubject: React.FC = () => {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
-  const { masjidId } = useParams<{ masjidId: string }>();
+  const { masjid_id } = useParams<{ masjid_id: string }>();
+  // const masjidId = masjid_id; // pakai alias lokal biar konsisten di bawah
 
   const [detailData, setDetailData] = useState<SubjectRow | null>(null);
   const [openCreate, setOpenCreate] = useState(false);
   const [editData, setEditData] = useState<SubjectRow | null>(null);
   const [deleteData, setDeleteData] = useState<SubjectRow | null>(null);
 
+  // panggil hook dengan argumen terkini (aman, hook tetap dipanggil setiap render)
+  const delMut = useDeleteSubjectMutation(
+    masjid_id ?? "",
+    deleteData?.id ?? ""
+  );
+
   const mergedQ = useQuery({
-    queryKey: ["subjects-merged", masjidId],
-    enabled: !!masjidId,
+    queryKey: ["subjects-merged", masjid_id],
+    enabled: !!masjid_id,
     queryFn: async (): Promise<SubjectRow[]> => {
       const [subjectsResp, classSubjectsResp] = await Promise.all([
         axios
-          .get<SubjectsAPIResp>(`${API_PREFIX}/${masjidId}/subjects/list`, {
+          .get<SubjectsAPIResp>(`${API_PREFIX}/${masjid_id}/subjects/list`, {
             params: { limit: 500, offset: 0 },
           })
           .then((r) => r.data),
         axios
           .get<ClassSubjectsAPIResp>(
-            `${API_PREFIX}/${masjidId}/class-subjects/list`,
+            `${API_PREFIX}/${masjid_id}/class-subjects/list`,
             { params: { limit: 1000, offset: 0 } }
           )
           .then((r) => r.data),
@@ -821,34 +788,44 @@ const SchoolSubject: React.FC = () => {
       />
 
       {/* Modal Create */}
-      {masjidId && (
+      {masjid_id && (
         <CreateSubjectModal
           open={openCreate}
           palette={palette}
-          masjidId={masjidId}
+          masjidId={masjid_id}
           onClose={() => setOpenCreate(false)}
         />
       )}
 
       {/* Modal Edit */}
-      {masjidId && (
+      {masjid_id && (
         <EditSubjectModal
           open={!!editData}
           palette={palette}
-          masjidId={masjidId}
+          masjidId={masjid_id}
           subject={editData}
           onClose={() => setEditData(null)}
         />
       )}
 
       {/* Modal Delete */}
-      {masjidId && (
+      {masjid_id && (
         <DeleteConfirmModal
           open={!!deleteData}
           palette={palette}
-          masjidId={masjidId}
-          subject={deleteData}
           onClose={() => setDeleteData(null)}
+          onConfirm={async () => {
+            if (!masjid_id || !deleteData) return;
+            try {
+              await delMut.mutateAsync(); // ← tidak perlu kirim variabel lagi
+            } finally {
+              setDeleteData(null);
+            }
+          }}
+          title={`Hapus "${deleteData?.name}"?`}
+          message="Yakin ingin menghapus pelajaran ini? Tindakan tidak dapat dibatalkan."
+          confirmLabel={delMut.isPending ? "Menghapus…" : "Hapus"}
+          loading={delMut.isPending}
         />
       )}
     </div>
