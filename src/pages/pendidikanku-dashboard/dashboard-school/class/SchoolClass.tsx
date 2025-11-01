@@ -16,11 +16,11 @@ import {
   Badge,
   Btn,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 import TambahKelas, {
   type ClassRow as NewClassRow,
-} from "./components/SchoolAddClass";
-import TambahLevel from "./components/SchoolAddLevel";
+} from "./components/CSchoolAddClass";
+import TambahLevel from "./components/CSchoolAddLevel";
 import axios from "@/lib/axios";
 
 /* ================= Types ================= */
@@ -35,6 +35,7 @@ export interface ClassRow {
   studentCount: number;
   schedule: string;
   status: ClassStatus;
+  /** id class (middle layer) */
   classId?: string;
 }
 
@@ -78,10 +79,14 @@ type ApiClassSection = {
   class_section_created_at: string;
   class_section_updated_at: string;
 
-  // snapshot ringkas parent
+  // snapshot ringkas parent (LEVEL)
   class_section_parent_name_snap?: string | null;
   class_section_parent_code_snap?: string | null;
   class_section_parent_slug_snap?: string | null;
+
+  // (opsional) snapshot class (middle) bila backend kirim
+  class_section_class_slug_snap?: string | null;
+  class_section_class_name_snap?: string | null;
 };
 
 type ApiListSections = {
@@ -114,6 +119,45 @@ function mapClassParent(x: ApiClassParent): Level {
     is_active: x.class_parent_is_active,
   };
 }
+
+/* ====== PUBLIC classes (middle layer) ====== */
+type ApiClass = {
+  class_id: string;
+  class_masjid_id: string;
+  class_parent_id: string;
+  class_slug: string;
+  class_name: string; // bisa kosong
+  class_start_date?: string | null;
+  class_end_date?: string | null;
+  class_term_id?: string | null;
+  class_registration_opens_at?: string | null;
+  class_registration_closes_at?: string | null;
+  class_quota_taken?: number | null;
+  class_status: "active" | "inactive";
+  class_image_url?: string | null;
+
+  // snapshots
+  class_parent_code_snapshot?: string | null;
+  class_parent_name_snapshot?: string | null;
+  class_parent_slug_snapshot?: string | null;
+  class_parent_level_snapshot?: number | null;
+
+  class_term_academic_year_snapshot?: string | null;
+  class_term_name_snapshot?: string | null;
+  class_term_slug_snapshot?: string | null;
+  class_term_angkatan_snapshot?: string | null;
+
+  class_created_at: string;
+  class_updated_at: string;
+};
+type ApiListClasses = { data: ApiClass[] };
+
+type MiddleClassChip = {
+  id: string;
+  name: string;
+  slug?: string | null;
+  count: number;
+};
 
 /* ================= Helpers ================= */
 const parseGrade = (code?: string | null, name?: string): string => {
@@ -155,12 +199,12 @@ async function fetchClassSections({
   masjidId: string;
   q?: string;
   status?: ClassStatus | "all";
-  classId?: string; // NOTE: ini class_parent_id (level) kalau backend belum support, kita filter client-side via slug snapshot
+  classId?: string; // kalau BE support filter by class_parent_id (level) akan ikut dipakai
 }): Promise<ApiClassSection[]> {
   const params: Record<string, any> = {};
   if (q?.trim()) params.search = q.trim();
   if (status && status !== "all") params.active_only = status === "active";
-  if (classId) params.class_parent_id = classId; // kalau BE support; kalau tidak, tetap aman (diabaikan)
+  if (classId) params.class_parent_id = classId;
   const res = await axios.get<ApiListSections>(
     `/public/${masjidId}/class-sections/list`,
     { params }
@@ -173,6 +217,22 @@ async function fetchLevelsPublic(masjidId: string): Promise<Level[]> {
     `/public/${masjidId}/class-parents/list`
   );
   return (res.data?.data ?? []).map(mapClassParent);
+}
+
+async function fetchClassesPublic(
+  masjidId: string,
+  params?: { q?: string; status?: ClassStatus | "all"; levelId?: string }
+): Promise<ApiClass[]> {
+  const p: Record<string, any> = {};
+  if (params?.q?.trim()) p.search = params.q.trim();
+  if (params?.status && params.status !== "all")
+    p.active_only = params.status === "active";
+  if (params?.levelId) p.class_parent_id = params.levelId;
+  const res = await axios.get<ApiListClasses>(
+    `/public/${masjidId}/classes/list`,
+    { params: p }
+  );
+  return res.data?.data ?? [];
 }
 
 /* ================= Card ================= */
@@ -260,7 +320,10 @@ const SchoolClass: React.FC<{
   const q = (sp.get("q") ?? "").trim();
   const status = (sp.get("status") ?? "all") as ClassStatus | "all";
   const shift = (sp.get("shift") ?? "all") as "Pagi" | "Sore" | "all";
+
+  // filter chip
   const levelId = sp.get("level_id") ?? "";
+  const classId = sp.get("class_id") ?? "";
 
   // Levels dari endpoint publik
   const levelsQ = useQuery({
@@ -277,7 +340,7 @@ const SchoolClass: React.FC<{
     return lv?.slug ?? null;
   }, [levelsQ.data, levelId]);
 
-  // Class sections (public scope by masjid)
+  // Class sections
   const {
     data: apiItems = [],
     isFetching,
@@ -296,15 +359,84 @@ const SchoolClass: React.FC<{
     refetchOnWindowFocus: false,
   });
 
+  // Classes (middle layer)
+  const classesQ = useQuery({
+    queryKey: ["classes-public", masjidId, q, status, levelId],
+    enabled: Boolean(masjidId),
+    queryFn: () => fetchClassesPublic(masjidId, { q, status, levelId }),
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
+  });
+
   useEffect(() => {
     if (!openTambah) refetch();
   }, [openTambah, refetch]);
 
+  // Hitung jumlah section per CLASS ID (untuk chip count)
+  const sectionCountByClassId = useMemo(() => {
+    const m = new Map<string, number>();
+    (apiItems ?? []).forEach((s) => {
+      if (!s.class_section_class_id) return;
+      const okLevel =
+        !selectedLevelSlug ||
+        s.class_section_parent_slug_snap === selectedLevelSlug;
+      if (!okLevel) return;
+      m.set(
+        s.class_section_class_id,
+        (m.get(s.class_section_class_id) ?? 0) + 1
+      );
+    });
+    return m;
+  }, [apiItems, selectedLevelSlug]);
+
+  // Daftar chip class
+  const classChips: MiddleClassChip[] = useMemo(() => {
+    const arr = (classesQ.data ?? [])
+      .filter(
+        (c) =>
+          !selectedLevelSlug ||
+          c.class_parent_slug_snapshot === selectedLevelSlug
+      )
+      .map((c) => {
+        const label =
+          c.class_name && c.class_name.trim().length > 0
+            ? c.class_name
+            : [
+                c.class_parent_name_snapshot ?? "Class",
+                c.class_term_name_snapshot ?? "",
+                c.class_term_academic_year_snapshot ?? "",
+              ]
+                .filter(Boolean)
+                .join(" — ");
+
+        return {
+          id: c.class_id,
+          name: label,
+          slug: c.class_slug,
+          count: sectionCountByClassId.get(c.class_id) ?? 0,
+        };
+      });
+    return arr.sort(
+      (a, b) => b.count - a.count || a.name.localeCompare(b.name)
+    );
+  }, [classesQ.data, selectedLevelSlug, sectionCountByClassId]);
+
+  // Reset class_id kalau tidak relevan dengan level terpilih
+  useEffect(() => {
+    if (classId && !classChips.find((c) => c.id === classId)) {
+      const next = new URLSearchParams(sp);
+      next.delete("class_id");
+      setSp(next, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedLevelSlug, classChips.length]);
+
+  // Map ke row grid (section)
   const mappedRows: ClassRow[] = useMemo(
     () =>
       (apiItems ?? []).map((it) => ({
         id: it.class_section_id,
-        classId: it.class_section_class_id, // id "class" (bukan parent)
+        classId: it.class_section_class_id, // id "class" (middle layer)
         code: it.class_section_code ?? "-",
         name: it.class_section_name,
         grade: parseGrade(it.class_section_code, it.class_section_name),
@@ -316,30 +448,30 @@ const SchoolClass: React.FC<{
     [apiItems]
   );
 
-  // FILTER: level (via parent_slug snapshot) + shift
+  // FILTER: level + class + shift
   const filteredRows = useMemo(() => {
     return mappedRows.filter((r) => {
       const apiItem = (apiItems ?? []).find((x) => x.class_section_id === r.id);
-      // filter level via snapshot slug
       const okLevel =
         !selectedLevelSlug ||
         apiItem?.class_section_parent_slug_snap === selectedLevelSlug;
 
-      // filter shift
+      const okClass = !classId || r.classId === classId;
+
       const rowShift = getShiftFromSchedule(apiItem?.class_section_schedule);
       const okShift = shift === "all" || rowShift === shift;
 
-      return okLevel && okShift;
+      return okLevel && okClass && okShift;
     });
-  }, [mappedRows, apiItems, selectedLevelSlug, shift]);
+  }, [mappedRows, apiItems, selectedLevelSlug, classId, shift]);
 
+  // Counter section per level (chip level)
   const sectionCountByLevel = useMemo(() => {
-    // hitung jumlah section per LEVEL (menggunakan snapshot slug)
     const m = new Map<string, number>();
     (apiItems ?? []).forEach((it) => {
-      const slug = it.class_section_parent_slug_snap;
-      if (!slug) return;
-      m.set(slug, (m.get(slug) ?? 0) + 1);
+      const s = it.class_section_parent_slug_snap;
+      if (!s) return;
+      m.set(s, (m.get(s) ?? 0) + 1);
     });
     return m;
   }, [apiItems]);
@@ -347,6 +479,7 @@ const SchoolClass: React.FC<{
   const setParam = (k: string, v: string) => {
     const next = new URLSearchParams(sp);
     v ? next.set(k, v) : next.delete(k);
+    if (k === "level_id") next.delete("class_id"); // reset class saat level berubah
     setSp(next, { replace: true });
   };
 
@@ -373,7 +506,7 @@ const SchoolClass: React.FC<{
   };
 
   const handleClassCreated = (row: NewClassRow) => {
-    // dummy yang match tipe API BARU untuk optimistic UI
+    // dummy untuk optimistic UI
     const dummy: ApiClassSection = {
       class_section_id: (row as any).id ?? uid("sec"),
       class_section_class_id: (row as any).classId ?? "",
@@ -392,11 +525,9 @@ const SchoolClass: React.FC<{
       class_section_is_active: (row as any).is_active ?? true,
       class_section_created_at: new Date().toISOString(),
       class_section_updated_at: new Date().toISOString(),
-      // isi snapshot parent slug biar langsung lolos filter saat level dipilih
       class_section_parent_slug_snap: selectedLevelSlug ?? undefined,
     };
 
-    // optimistic add ke cache list sections
     qc.setQueryData<ApiClassSection[]>(
       ["class-sections", masjidId, q, status, levelId],
       (old = []) => [dummy, ...(old ?? [])]
@@ -433,7 +564,7 @@ const SchoolClass: React.FC<{
               </div>
             </div>
 
-            {/* Panel Tingkat */}
+            {/* ===== Panel Tingkat (LEVEL) ===== */}
             <SectionCard palette={palette}>
               <div className="flex p-4 md:p-5 pb-2 items-center justify-between">
                 <div className="font-medium flex items-center gap-2">
@@ -444,7 +575,6 @@ const SchoolClass: React.FC<{
                 </Btn>
               </div>
 
-              {/* chip tingkat (NO horizontal scroll on mobile) */}
               <div className="pb-4">
                 <div className="px-4 md:px-5">
                   <div className="flex flex-wrap gap-2 min-w-0">
@@ -465,7 +595,6 @@ const SchoolClass: React.FC<{
                     </button>
 
                     {levels.map((lv) => {
-                      // hitung pakai slug agar konsisten dengan snapshot
                       const cnt = sectionCountByLevel.get(lv.slug) ?? 0;
                       const active = levelId === lv.id;
                       return (
@@ -495,12 +624,74 @@ const SchoolClass: React.FC<{
               </div>
             </SectionCard>
 
-            {/* Daftar Kelas */}
+            {/* ===== Panel CLASS (middle chips) ===== */}
+            <SectionCard palette={palette}>
+              <div className="flex p-4 md:p-5 pb-2 items-center justify-between">
+                <div className="font-medium flex items-center gap-2">
+                  <Layers size={18} /> Kelas (Dalam Tingkat)
+                </div>
+                {/* (opsional) tombol tambah Class */}
+              </div>
+
+              <div className="pb-4">
+                <div className="px-4 md:px-5">
+                  <div className="flex flex-wrap gap-2 min-w-0">
+                    <button
+                      className={`px-3 py-1.5 ml-0 rounded-lg border text-sm ${
+                        !classId ? "font-semibold" : ""
+                      }`}
+                      style={{
+                        borderColor: palette.silver1,
+                        background: !classId
+                          ? palette.primary2
+                          : palette.white1,
+                        color: !classId ? palette.primary : palette.quaternary,
+                      }}
+                      onClick={() => setParam("class_id", "")}
+                    >
+                      Semua Kelas
+                    </button>
+
+                    {classChips.map((c) => {
+                      const active = classId === c.id;
+                      return (
+                        <button
+                          key={c.id}
+                          className={`px-3 py-1.5 rounded-lg border text-sm ${
+                            active ? "font-semibold" : ""
+                          }`}
+                          style={{
+                            borderColor: palette.silver1,
+                            background: active
+                              ? palette.primary2
+                              : palette.white1,
+                            color: active
+                              ? palette.primary
+                              : palette.quaternary,
+                          }}
+                          onClick={() => setParam("class_id", c.id)}
+                          title={c.slug ?? c.name}
+                        >
+                          {c.name}{" "}
+                          <span style={{ color: palette.black2 }}>
+                            ({c.count})
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </SectionCard>
+
+            {/* ===== Daftar Section (grid) ===== */}
             <SectionCard palette={palette}>
               <div className="p-4 md:p-5 pb-2 flex items-center justify-between">
-                <div className="font-medium">Daftar Kelas</div>
+                <div className="font-medium">
+                  Daftar Kelas Paralel (Section)
+                </div>
                 <Btn palette={palette} onClick={() => setOpenTambah(true)}>
-                  <Plus className="mr-2" size={16} /> Tambah Kelas
+                  <Plus className="mr-2" size={16} /> Tambah Section
                 </Btn>
               </div>
 
@@ -528,7 +719,7 @@ const SchoolClass: React.FC<{
                 >
                   <div className="flex items-center gap-2 min-w-0">
                     <span className="truncate">
-                      Menampilkan {items.length} kelas
+                      Menampilkan {items.length} section
                     </span>
                     {isFetching && (
                       <span className="opacity-70">• Menyegarkan…</span>

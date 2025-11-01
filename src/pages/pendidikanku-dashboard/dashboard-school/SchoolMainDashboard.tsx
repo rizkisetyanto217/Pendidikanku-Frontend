@@ -11,13 +11,13 @@ import {
   Badge,
   Btn,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
-import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/ParentSideBar";
-import TodayScheduleCard from "@/pages/pendidikanku-dashboard/components/card/TodayScheduleCard";
-import AnnouncementsList from "@/pages/pendidikanku-dashboard/components/card/AnnouncementsListCard";
-import BillsSectionCard from "@/pages/pendidikanku-dashboard/components/card/BillsSectionCard";
+import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
+import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/CParentSideBar";
+import TodayScheduleCard from "@/pages/pendidikanku-dashboard/components/card/CTodayScheduleCard";
+import AnnouncementsList from "@/pages/pendidikanku-dashboard/components/card/CAnnouncementsListCard";
+import BillsSectionCard from "@/pages/pendidikanku-dashboard/components/card/CBillsSectionCard";
 
 import {
   Users,
@@ -460,7 +460,7 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
 
   return (
     <div
-      className="min-h-screen w-full"
+      className="w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
       <Flash palette={palette} flash={flash} />

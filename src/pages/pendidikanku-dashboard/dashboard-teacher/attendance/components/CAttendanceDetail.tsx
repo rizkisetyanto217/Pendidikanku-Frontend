@@ -16,9 +16,9 @@ import {
   Badge,
   Btn,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
-import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/ParentSideBar";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
+import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
+import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/CParentSideBar";
 
 type ClassInfo = {
   id: string;
@@ -61,15 +61,11 @@ export default function AttendanceDetail() {
 
   return (
     <div
-      className="min-h-screen w-full"
+      className="w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      
-
       <main className="mx-auto">
         <div className="lg:flex lg:items-start lg:gap-4">
-          
-
           {/* Konten utama */}
           <div className="flex-1 space-y-6">
             {/* Aksi kembali */}

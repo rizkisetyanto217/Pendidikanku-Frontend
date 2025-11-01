@@ -1,7 +1,7 @@
 // src/pages/sekolahislamku/schedule/components/ScheduleEditorModal.tsx
 import React, { useEffect, useState } from "react";
-import EditModal from "@/pages/pendidikanku-dashboard/components/common/EditModal";
-import { type Palette } from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
+import EditModal from "@/pages/pendidikanku-dashboard/components/common/CEditModal";
+import { type Palette } from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 
 type ScheduleForm = {
   time: string;

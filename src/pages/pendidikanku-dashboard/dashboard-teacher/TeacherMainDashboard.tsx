@@ -10,9 +10,9 @@ import {
   SectionCard,
   Btn,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
-import TodayScheduleCard from "@/pages/pendidikanku-dashboard/components/card/TodayScheduleCard";
-import AnnouncementsList from "@/pages/pendidikanku-dashboard/components/card/AnnouncementsListCard";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
+import TodayScheduleCard from "@/pages/pendidikanku-dashboard/components/card/CTodayScheduleCard";
+import AnnouncementsList from "@/pages/pendidikanku-dashboard/components/card/CAnnouncementsListCard";
 import ListJadwal from "./schedule/components/CTeacherListSchedule";
 import TeacherAddEditAnnouncement, {
   type TeacherAnnouncementForm,
@@ -24,8 +24,8 @@ import {
   TEACHER_HOME_QK,
   type Announcement,
 } from "./class/types/teacher";
-import ParentTopBar from "../components/home/ParentTopBar";
-import ParentSidebar from "../components/home/ParentSideBar";
+import ParentTopBar from "../components/home/CParentTopBar";
+import ParentSidebar from "../components/home/CParentSideBar";
 import AddSchedule from "./dashboard/TeacherAddSchedule";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -330,7 +330,7 @@ export default function TeacherDashboard() {
 
   return (
     <div
-      className="min-h-screen w-full"
+      className="w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
       {/* Topbar */}
@@ -455,7 +455,6 @@ export default function TeacherDashboard() {
               </div>
             </section>
 
-           
             {isLoading && (
               <div className="text-sm" style={{ color: palette.silver2 }}>
                 Memuat data dashboard…

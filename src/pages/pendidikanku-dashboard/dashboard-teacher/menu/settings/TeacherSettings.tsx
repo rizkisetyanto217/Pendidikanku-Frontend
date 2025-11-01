@@ -4,14 +4,14 @@ import { useNavigate } from "react-router-dom";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
-import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/ParentSideBar";
+import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
+import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/CParentSideBar";
 import {
   SectionCard,
   Btn,
   Badge,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 
 import {
   Bell,
@@ -185,14 +185,11 @@ const TeacherSettings: React.FC<TeacherSettingsProps> = ({
 
   return (
     <div
-      className="min-h-screen w-full"
+      className="w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-
       <main className="w-full px-4 md:px-6 py-4  md:py-8">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
-        
-
           <div className="flex-1 flex flex-col space-y-6 min-w-0">
             {/* Header */}
             <div className="md:flex  hidden items-center gap-4">

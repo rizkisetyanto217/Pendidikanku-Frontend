@@ -7,18 +7,18 @@ import NotFound from "@/pages/NotFound";
 
 // Layout & Pages
 import MasjidkuLayout from "@/layout/MasjidkuLayout";
-import MasjidkuHome from "@/pages/pendidikanku-profile/website/MasjidkuHome";
-import MasjidkuWebHome from "@/pages/pendidikanku-profile/website/website/MasjidkuWebHome";
+import MasjidkuHome from "@/pages/pendidikanku-profile/website/PendWebHome";
+import MasjidkuWebHome from "@/pages/pendidikanku-profile/website/website/PendWebHome";
 import RegisterAdminMasjid from "@/pages/pendidikanku-dashboard/auth/register/RegisterAdminMasjid";
 import RegisterUser from "@/pages/pendidikanku-dashboard/auth/register/RegisterUser";
-import SupportPage from "@/pages/pendidikanku-profile/website/website/pages/navbar-page/support";
-import Panduan from "@/pages/pendidikanku-profile/website/website/pages/navbar-page/panduan";
-import Fitur from "@/pages/pendidikanku-profile/website/website/pages/navbar-page/fitur";
-import About from "@/pages/pendidikanku-profile/website/website/pages/navbar-page/about";
-import Contact from "@/pages/pendidikanku-profile/website/website/pages/navbar-page/contact";
+import SupportPage from "@/pages/pendidikanku-profile/website/website/pages/navbar-page/PendWebSupport";
+import Panduan from "@/pages/pendidikanku-profile/website/website/pages/navbar-page/PendWebGuide";
+import Fitur from "@/pages/pendidikanku-profile/website/website/pages/navbar-page/PendWebFeature";
+import About from "@/pages/pendidikanku-profile/website/website/pages/navbar-page/PendWebAbout";
+import Contact from "@/pages/pendidikanku-profile/website/website/pages/navbar-page/PendWebContact";
 
-import MasjidLayout from "@/pages/pendidikanku-profile/linktree/MasjidLayout";
-import MasjidLinkTree from "@/pages/pendidikanku-profile/linktree/MasjidLinkTreeHome";
+import MasjidLayout from "@/pages/pendidikanku-profile/linktree/PendLinkLayout";
+import MasjidLinkTree from "@/pages/pendidikanku-profile/linktree/PendLinkTreeHome";
 import MasjidQuizLectureSessions from "@/pages/pendidikanku-dashboard/quizzes/TeacherMasjidQuizLectureSessions";
 import MasjidResultQuizLectureSessions from "@/pages/pendidikanku-dashboard/quizzes/TeacherMasjidResultQuizLectureSessions";
 

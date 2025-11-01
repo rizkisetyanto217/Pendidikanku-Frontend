@@ -17,9 +17,9 @@ import {
   SectionCard,
   Btn,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
-import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/ParentSideBar";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
+import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
+import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/CParentSideBar";
 
 type AssignmentState = {
   id?: string;
@@ -282,7 +282,7 @@ export default function TaskScore() {
   if (isLoading) {
     return (
       <div
-        className="min-h-screen w-full flex items-center justify-center"
+        className="w-full flex items-center justify-center"
         style={{ background: palette.white2 }}
       >
         <div className="flex items-center gap-2">
@@ -295,7 +295,7 @@ export default function TaskScore() {
 
   return (
     <div
-      className="min-h-screen w-full"
+      className="w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
       <ParentTopBar

@@ -18,11 +18,11 @@ import {
   Badge,
   Btn,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
-import ParentSidebar from "../../components/home/ParentSideBar";
-import MiniBar from "../../components/ui/MiniBar";
-import StatPill from "../../components/ui/StatPill";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
+import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
+import ParentSidebar from "../../components/home/CParentSideBar";
+import MiniBar from "../../components/ui/CMiniBar";
+import StatPill from "../../components/ui/CStatPill";
 
 /* ================= Types ================= */
 type AttendanceStatus = "hadir" | "sakit" | "izin" | "alpa" | "online";
@@ -386,11 +386,9 @@ export default function TeacherAttendance() {
 
   return (
     <div
-      className="min-h-screen w-full"
+      className="w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-
-
       <main className="mx-auto Replace px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
           {/* Konten utama */}

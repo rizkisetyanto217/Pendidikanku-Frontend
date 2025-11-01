@@ -11,10 +11,10 @@ import {
   Badge,
   Btn,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
-import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/ParentSideBar";
+import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
+import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/CParentSideBar";
 
 import {
   Users,
@@ -351,7 +351,7 @@ const ClassDetail: React.FC = () => {
   if (isFetching) {
     return (
       <div
-        className="min-h-screen w-full flex items-center justify-center"
+        className="w-full flex items-center justify-center"
         style={{ background: palette.white2 }}
       >
         <div>Loading...</div>
@@ -362,7 +362,7 @@ const ClassDetail: React.FC = () => {
   if (!classDetail) {
     return (
       <div
-        className="min-h-screen w-full flex items-center justify-center"
+        className="w-full flex items-center justify-center"
         style={{ background: palette.white2 }}
       >
         <div>Class not found</div>
@@ -380,14 +380,11 @@ const ClassDetail: React.FC = () => {
 
   return (
     <div
-      className="min-h-screen w-full"
+      className="w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      
       <main className="mx-auto max-w-7xl px-4 py-6 space-y-6">
         <div className="lg:flex lg:items-start lg:gap-6">
-         
-
           <div className="flex-1 min-w-0 space-y-6">
             {/* Header */}
             <SectionCard palette={palette}>

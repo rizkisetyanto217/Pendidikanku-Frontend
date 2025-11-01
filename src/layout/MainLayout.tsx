@@ -3,16 +3,16 @@ import { useMemo, useState, useCallback } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
-import type { Palette } from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
-import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/ParentSideBar";
+import type { Palette } from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
+import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
+import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/CParentSideBar";
 import { useActiveMasjidInfo } from "@/hooks/useActiveMasjidInfo";
 
 import {
   TopBarContext,
   type TopBarConfig,
   type TopBarAPI,
-} from "@/pages/pendidikanku-dashboard/components/home/UseTopBar";
+} from "@/pages/pendidikanku-dashboard/components/home/CUseTopBar";
 
 export default function MainLayout() {
   const { isDark, themeName } = useHtmlDarkMode();
@@ -65,7 +65,7 @@ export default function MainLayout() {
   return (
     <TopBarContext.Provider value={api}>
       <div
-        className="flex min-h-screen w-full transition-colors"
+        className="flex w-full transition-colors"
         style={{ background: palette.white2, color: palette.black1 }}
       >
         {/* Sidebar desktop */}
@@ -99,7 +99,7 @@ export default function MainLayout() {
           </div>
 
           <main
-            className="flex-1 overflow-y-auto overflow-x-visible px-4 md:px-6 py-4 md:py-8"
+            className="flex-1 overflow-x-visible px-4 md:px-6 py-4 md:py-8"
             style={{ background: palette.white2, color: palette.black1 }}
           >
             <Outlet context={api} />

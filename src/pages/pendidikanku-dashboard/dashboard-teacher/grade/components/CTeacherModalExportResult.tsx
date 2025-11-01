@@ -3,7 +3,7 @@ import { X, Download } from "lucide-react";
 import {
   Btn,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 
 type Props = {
   open: boolean;

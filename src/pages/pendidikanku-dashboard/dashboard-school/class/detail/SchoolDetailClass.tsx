@@ -11,8 +11,8 @@ import {
   Badge,
   Btn,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
+import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
 import {
   ArrowLeft,
   BookOpen,
@@ -21,7 +21,7 @@ import {
   CalendarDays,
   Clock4,
 } from "lucide-react";
-import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/ParentSideBar";
+import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/CParentSideBar";
 
 /* =========================================
    DUMMY SWITCH
@@ -306,13 +306,13 @@ export default function SchoolDetailClass() {
 
   const semesterRange = SEMESTER_RANGES[semester];
 
-
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div
       className="h-full w-full"
-      style={{ background: palette.white2, color: palette.black1 }}>
+      style={{ background: palette.white2, color: palette.black1 }}
+    >
       <main className="">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
           {/* Content */}
@@ -346,7 +346,6 @@ export default function SchoolDetailClass() {
                 <option value="2025-Genap">2025 Genap</option>
               </select>
             </section>
-
 
             {/* Ringkasan */}
             <SectionCard palette={palette}>
@@ -530,40 +529,42 @@ export default function SchoolDetailClass() {
                     {/* Tabel tugas */}
                     {/* Daftar tugas per mapel */}
                     <div className="mt-4 space-y-3">
-                      {DUMMY_TASKS.filter((t) => t.subjectId === subj.id).map((t) => (
-                        <div
-                          key={t.id}
-                          className="border rounded-xl p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between"
-                          style={{
-                            borderColor: palette.silver1,
-                            background: palette.white1,
-                          }}
-                        >
-                          <div className="flex-1 space-y-1">
-                            <div className="font-medium">{t.title}</div>
-                            <div
-                              className="text-sm flex items-center gap-1"
-                              style={{ color: palette.black2 }}
-                            >
-                              <CalendarDays size={14} /> {dateLong(t.dueDate)}
+                      {DUMMY_TASKS.filter((t) => t.subjectId === subj.id).map(
+                        (t) => (
+                          <div
+                            key={t.id}
+                            className="border rounded-xl p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between"
+                            style={{
+                              borderColor: palette.silver1,
+                              background: palette.white1,
+                            }}
+                          >
+                            <div className="flex-1 space-y-1">
+                              <div className="font-medium">{t.title}</div>
+                              <div
+                                className="text-sm flex items-center gap-1"
+                                style={{ color: palette.black2 }}
+                              >
+                                <CalendarDays size={14} /> {dateLong(t.dueDate)}
+                              </div>
+                            </div>
+                            <div className="mt-2 sm:mt-0">
+                              <Badge
+                                palette={palette}
+                                variant={
+                                  t.status === "graded"
+                                    ? "success"
+                                    : t.status === "submitted"
+                                      ? "secondary"
+                                      : "outline"
+                                }
+                              >
+                                {t.status}
+                              </Badge>
                             </div>
                           </div>
-                          <div className="mt-2 sm:mt-0">
-                            <Badge
-                              palette={palette}
-                              variant={
-                                t.status === "graded"
-                                  ? "success"
-                                  : t.status === "submitted"
-                                  ? "secondary"
-                                  : "outline"
-                              }
-                            >
-                              {t.status}
-                            </Badge>
-                          </div>
-                        </div>
-                      ))}
+                        )
+                      )}
 
                       {/* Bagian Quiz */}
                       <div className="mt-5">
@@ -571,7 +572,9 @@ export default function SchoolDetailClass() {
                           <BookOpen size={16} /> Quiz
                         </div>
                         <div className="space-y-3">
-                          {DUMMY_QUIZZES.filter((q) => q.subjectId === subj.id).map((q) => (
+                          {DUMMY_QUIZZES.filter(
+                            (q) => q.subjectId === subj.id
+                          ).map((q) => (
                             <div
                               key={q.id}
                               className="border rounded-xl p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between"
@@ -596,8 +599,8 @@ export default function SchoolDetailClass() {
                                     q.status === "graded"
                                       ? "success"
                                       : q.status === "open"
-                                      ? "secondary"
-                                      : "outline"
+                                        ? "secondary"
+                                        : "outline"
                                   }
                                 >
                                   {q.status}

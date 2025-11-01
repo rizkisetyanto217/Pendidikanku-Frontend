@@ -13,9 +13,9 @@ import {
   Btn,
   Badge,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
-import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/ParentSideBar";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
+import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
+import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/CParentSideBar";
 
 // Icons
 import {
@@ -135,7 +135,7 @@ const SchoolActiveClass: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   return (
     <div
-      className="min-h-screen w-full"
+      className="w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
       <main className="w-full">
@@ -143,7 +143,6 @@ const SchoolActiveClass: React.FC = () => {
           {/* Main */}
 
           <section className="flex-1 flex flex-col space-y-6 min-w-0">
-    
             {/* Header */}
             <section className="flex items-center justify-between">
               <div className="flex items-center font-semibold text-lg">

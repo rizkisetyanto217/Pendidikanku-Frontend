@@ -5,7 +5,7 @@ import {
   Btn,
   Badge,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 
 // Reuse ScheduleItem type dari TodayScheduleCard
 export interface ScheduleItem {

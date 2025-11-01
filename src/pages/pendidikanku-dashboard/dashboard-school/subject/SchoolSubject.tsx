@@ -14,7 +14,7 @@ import {
   Badge,
   Btn,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 
 // Icons
 import {
@@ -26,7 +26,7 @@ import {
   X,
   BookOpen,
 } from "lucide-react";
-import { DeleteConfirmModal } from "../../components/common/DeleteConfirmModal";
+import { DeleteConfirmModal } from "../../components/common/CDeleteConfirmModal";
 
 /* ================= Types ================= */
 export type SubjectStatus = "active" | "inactive";
@@ -713,7 +713,7 @@ const SchoolSubject: React.FC = () => {
   const rows = useMemo(() => mergedQ.data ?? [], [mergedQ.data]);
 
   return (
-    <div className="min-h-screen w-full" style={{ background: palette.white2 }}>
+    <div className="w-full" style={{ background: palette.white2 }}>
       <main className="w-full px-4 md:px-6 py-4 md:py-8">
         <div className="max-w-screen-2xl mx-auto flex flex-col gap-6">
           {/* Toolbar */}

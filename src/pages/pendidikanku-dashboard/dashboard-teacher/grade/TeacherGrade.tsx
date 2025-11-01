@@ -10,7 +10,7 @@ import {
   Badge,
   Btn,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 
 import {
   Filter,
@@ -28,8 +28,8 @@ import {
   Eye,
 } from "lucide-react";
 
-import ParentTopBar from "../../components/home/ParentTopBar";
-import ParentSidebar from "../../components/home/ParentSideBar";
+import ParentTopBar from "../../components/home/CParentTopBar";
+import ParentSidebar from "../../components/home/CParentSideBar";
 import ModalGrading from "./components/CTeacherModalGrading";
 import ModalExportResult from "./components/CTeacherModalExportResult";
 
@@ -427,11 +427,9 @@ export default function TeacherGrading() {
 
   return (
     <div
-      className="min-h-screen w-full"
+      className="w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      
-
       {/* Modal Grading */}
       <ModalGrading
         open={gradingOpen}
@@ -464,8 +462,6 @@ export default function TeacherGrading() {
 
       <main className="mx-auto max-w-7xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-6">
-        
-
           {/* Main Content */}
           <div className="flex-1 space-y-6">
             {/* ---- Stats Overview ---- */}

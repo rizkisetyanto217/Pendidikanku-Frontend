@@ -10,8 +10,8 @@ import {
   Badge,
   type Palette,
   Btn,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
+import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
 import {
   mockTodaySchedule,
   type TodayScheduleItem,
@@ -19,7 +19,7 @@ import {
 
 // Edit (ubah item yang ada)
 import ModalEditSchedule from "./SchoolModalEditSchedule";
-import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/ParentSideBar";
+import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/CParentSideBar";
 import AddSchedule from "@/pages/pendidikanku-dashboard/dashboard-teacher/dashboard/TeacherAddSchedule";
 
 /** State yang dikirim dari komponen lain via <Link state={...}> */
@@ -185,7 +185,7 @@ export default function AllSchedule() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   return (
     <div
-      className="min-h-screen w-full"
+      className="w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
       {/* Modal Edit */}

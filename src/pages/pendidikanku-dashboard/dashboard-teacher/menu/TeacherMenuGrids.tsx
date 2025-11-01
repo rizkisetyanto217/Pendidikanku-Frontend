@@ -8,8 +8,7 @@ import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import {
   SectionCard,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
-
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 
 // Icons
 import {
@@ -99,7 +98,7 @@ export default function TeacherMenuGrids() {
 
   return (
     <div
-      className="min-h-screen w-full"
+      className="w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
       <main className="w-full">

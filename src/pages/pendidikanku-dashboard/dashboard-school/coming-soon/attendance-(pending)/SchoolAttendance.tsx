@@ -11,12 +11,12 @@ import {
   Badge,
   Btn,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
+import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
 
 import { CalendarDays, Users, UserCog, Search } from "lucide-react";
-import ParentSidebar from "../../../components/home/ParentSideBar";
+import ParentSidebar from "../../../components/home/CParentSideBar";
 
 /* ================= Types ================ */
 export type AttendeeType = "siswa" | "guru";

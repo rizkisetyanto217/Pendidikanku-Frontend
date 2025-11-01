@@ -16,9 +16,9 @@ import {
   Badge,
   Btn,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
-import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/ParentSideBar";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
+import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
+import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/CParentSideBar";
 
 /* ===== Types ===== */
 interface NoteLog {
@@ -176,17 +176,14 @@ export default function StudentNotesSummary() {
 
   return (
     <div
-      className="min-h-screen w-full"
+      className="w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
       {/* Top Bar pakai parent */}
-      
 
       {/* Content + Sidebar */}
       <main className="w-full px-4 md:px-6 py-4   md:py-8">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
-          
-
           {/* Konten utama */}
           <div className="flex-1 flex flex-col space-y-6 min-w-0">
             <div className="md:flex hidden items-center gap-3">

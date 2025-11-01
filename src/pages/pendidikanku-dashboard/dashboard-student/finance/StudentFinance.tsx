@@ -8,7 +8,7 @@ import {
   SectionCard,
   Btn,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 
 /* =========================
    Types & Helpers
@@ -87,11 +87,18 @@ function TabsHeader({
 }) {
   const tabs = [
     { key: "today", label: "Tagihan Hari Ini", icon: <Clock size={16} /> },
-    { key: "history", label: "Riwayat Pembayaran", icon: <CheckCircle2 size={16} /> },
+    {
+      key: "history",
+      label: "Riwayat Pembayaran",
+      icon: <CheckCircle2 size={16} />,
+    },
   ];
 
   return (
-    <div className="flex gap-3 border-b mb-4" style={{ borderColor: palette.silver1 }}>
+    <div
+      className="flex gap-3 border-b mb-4"
+      style={{ borderColor: palette.silver1 }}
+    >
       {tabs.map((t) => {
         const isActive = activeTab === t.key;
         return (
@@ -158,7 +165,7 @@ export default function StudentFinance() {
 
   return (
     <div
-      className="min-h-screen w-full"
+      className="w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
       <main className="max-w-screen-2xl mx-auto p-4 space-y-6">
@@ -178,28 +185,40 @@ export default function StudentFinance() {
               <ArrowLeft size={18} />
             </button>
 
-            <h1 className="text-lg font-semibold" style={{ color: palette.black1 }}>
+            <h1
+              className="text-lg font-semibold"
+              style={{ color: palette.black1 }}
+            >
               Pembayaran
             </h1>
           </div>
         </div>
 
         {/* Tabs */}
-        <TabsHeader activeTab={activeTab} setActiveTab={setActiveTab} palette={palette} />
+        <TabsHeader
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          palette={palette}
+        />
 
         {/* Tab: Tagihan Hari Ini */}
         {activeTab === "today" && (
           <>
             {error ? (
               <SectionCard palette={palette} className="p-4">
-                <div style={{ color: palette.error1 }}>Gagal memuat data tagihan.</div>
+                <div style={{ color: palette.error1 }}>
+                  Gagal memuat data tagihan.
+                </div>
               </SectionCard>
             ) : (
               <>
                 <SectionCard palette={palette} className="p-4 md:p-5">
                   <div className="flex items-center gap-3 mb-2">
                     <Wallet size={18} color={palette.primary} />
-                    <div className="font-medium" style={{ color: palette.black1 }}>
+                    <div
+                      className="font-medium"
+                      style={{ color: palette.black1 }}
+                    >
                       Tagihan Aktif
                     </div>
                   </div>
@@ -211,8 +230,14 @@ export default function StudentFinance() {
                 {!isLoading && data && (
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                     {/* Rincian Item */}
-                    <SectionCard palette={palette} className="p-4 md:p-5 lg:col-span-2">
-                      <div className="font-medium mb-2" style={{ color: palette.black1 }}>
+                    <SectionCard
+                      palette={palette}
+                      className="p-4 md:p-5 lg:col-span-2"
+                    >
+                      <div
+                        className="font-medium mb-2"
+                        style={{ color: palette.black1 }}
+                      >
                         Rincian Tagihan
                       </div>
                       <div
@@ -226,11 +251,18 @@ export default function StudentFinance() {
                           <div
                             key={it.id}
                             className="grid grid-cols-12 px-3 py-2 border-b last:border-none"
-                            style={{ borderColor: palette.silver1, color: palette.black2 }}
+                            style={{
+                              borderColor: palette.silver1,
+                              color: palette.black2,
+                            }}
                           >
                             <div className="col-span-7">{it.name}</div>
-                            <div className="col-span-2 text-right">{it.qty ?? 1}x</div>
-                            <div className="col-span-3 text-right">{formatIDR(it.amount)}</div>
+                            <div className="col-span-2 text-right">
+                              {it.qty ?? 1}x
+                            </div>
+                            <div className="col-span-3 text-right">
+                              {formatIDR(it.amount)}
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -238,12 +270,18 @@ export default function StudentFinance() {
 
                     {/* Ringkasan */}
                     <SectionCard palette={palette} className="p-4 md:p-5">
-                      <div className="font-medium mb-2" style={{ color: palette.black1 }}>
+                      <div
+                        className="font-medium mb-2"
+                        style={{ color: palette.black1 }}
+                      >
                         Ringkasan
                       </div>
                       <div style={{ color: palette.black2 }}>
                         Total:{" "}
-                        <span className="font-semibold" style={{ color: palette.primary }}>
+                        <span
+                          className="font-semibold"
+                          style={{ color: palette.primary }}
+                        >
                           {formatIDR(data.total ?? 0)}
                         </span>
                       </div>
@@ -275,11 +313,15 @@ export default function StudentFinance() {
               >
                 <div className="flex justify-between items-center">
                   <div>
-                    <div className="font-medium" style={{ color: palette.black1 }}>
+                    <div
+                      className="font-medium"
+                      style={{ color: palette.black1 }}
+                    >
                       {b.title}
                     </div>
                     <div className="text-sm" style={{ color: palette.black2 }}>
-                      Dibayar pada {dateLong(b.payment?.date)} via {b.payment?.method}
+                      Dibayar pada {dateLong(b.payment?.date)} via{" "}
+                      {b.payment?.method}
                     </div>
                   </div>
                   <div
@@ -297,4 +339,3 @@ export default function StudentFinance() {
     </div>
   );
 }
-  

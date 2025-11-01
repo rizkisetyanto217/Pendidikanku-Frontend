@@ -14,9 +14,9 @@ import {
   Badge,
   Btn,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
-import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/ParentSideBar";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
+import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
+import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/CParentSideBar";
 
 // Icons
 import {
@@ -114,9 +114,7 @@ const SchoolSpp: React.FC = () => {
             today.getMonth(),
             20
           ).toISOString(),
-          status: (["unpaid", "paid", "overdue"] as SppStatus[])[
-            i % 4
-          ],
+          status: (["unpaid", "paid", "overdue"] as SppStatus[])[i % 4],
         })),
         classes: ["1A", "1B", "2A", "3A"],
       };
@@ -131,15 +129,13 @@ const SchoolSpp: React.FC = () => {
 
   return (
     <div
-      className="min-h-screen w-full"
+      className="w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
       <main className="w-full">
         <div className="w-full flex flex-col lg:flex-row gap-4 lg:gap-6 overflow-x-auto">
-
           {/* Main */}
           <section className="flex-1 flex flex-col space-y-6 min-w-0">
-          
             {/* Header */}
             <section className="flex items-center justify-between">
               <div className="flex items-center font-semibold text-lg">
@@ -260,108 +256,116 @@ const SchoolSpp: React.FC = () => {
                         color: palette.black1,
                       }}
                     />
-                    
                   </div>
                 </div>
               </div>
             </SectionCard>
 
-           {/* Table */}
-          <SectionCard palette={palette}>
-            <div className="p-4 md:p-5 pb-2 flex items-center justify-between">
-              <div className="font-medium">Daftar SPP</div>
-              <Btn palette={palette} variant="outline" size="sm">
-                <Download size={16} /> Export
-              </Btn>
-            </div>
+            {/* Table */}
+            <SectionCard palette={palette}>
+              <div className="p-4 md:p-5 pb-2 flex items-center justify-between">
+                <div className="font-medium">Daftar SPP</div>
+                <Btn palette={palette} variant="outline" size="sm">
+                  <Download size={16} /> Export
+                </Btn>
+              </div>
 
-            {/* ✅ Scroll container */}
-            <div className="relative" aria-label="Scrollable table">
-              <div className="overflow-x-auto overscroll-x-contain max-w-full rounded-xl border border-gray-200 bg-white dark:bg-neutral-900 shadow-sm">
-                {/* Optional fade shadows */}
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-white dark:from-neutral-900 to-transparent rounded-l-xl"
-                />
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-white dark:from-neutral-900 to-transparent rounded-r-xl"
-                />
+              {/* ✅ Scroll container */}
+              <div className="relative" aria-label="Scrollable table">
+                <div className="overflow-x-auto overscroll-x-contain max-w-full rounded-xl border border-gray-200 bg-white dark:bg-neutral-900 shadow-sm">
+                  {/* Optional fade shadows */}
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-white dark:from-neutral-900 to-transparent rounded-l-xl"
+                  />
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-white dark:from-neutral-900 to-transparent rounded-r-xl"
+                  />
 
-                {/* ✅ Table with fixed min-width */}
-                <table className="min-w-[960px] w-full text-sm text-left">
-                  <thead className="bg-gray-50 dark:bg-neutral-800/60 sticky top-0 z-10">
-                    <tr className="border-b" style={{ borderColor: palette.silver1 }}>
-                      <th className="py-2 px-4">Siswa</th>
-                      <th className="py-2 px-4">Kelas</th>
-                      <th className="py-2 px-4">Nominal</th>
-                      <th className="py-2 px-4">Jatuh Tempo</th>
-                      <th className="py-2 px-4">Status</th>
-                      <th className="py-2 px-4 text-right">Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y" style={{ borderColor: palette.silver1 }}>
-                    {bills.map((r) => (
-                      <tr key={r.id}>
-                        <td className="py-3 px-4 font-medium whitespace-nowrap">
-                          {r.student_name}
-                        </td>
-                        <td className="py-3 px-4 whitespace-nowrap">{r.class_name ?? "-"}</td>
-                        <td className="py-3 px-4 whitespace-nowrap">{idr(r.amount)}</td>
-                        <td className="py-3 px-4 whitespace-nowrap">
-                          {new Date(r.due_date).toLocaleDateString("id-ID")}
-                        </td>
-                        <td className="py-3 px-4 whitespace-nowrap">
-                          {r.status === "paid" && (
-                            <Badge palette={palette} variant="success">
-                              Lunas
-                            </Badge>
-                          )}
-                          {r.status === "unpaid" && (
-                            <Badge palette={palette} variant="outline">
-                              Belum Bayar
-                            </Badge>
-                          )}
-                          {r.status === "overdue" && (
-                            <Badge palette={palette} variant="warning">
-                              Terlambat
-                            </Badge>
-                          )}
-                        </td>
-                        <td className="py-3 px-4 text-right whitespace-nowrap">
-                          <div className="flex justify-end gap-2">
-                            <Btn
-                              palette={palette}
-                              size="sm"
-                              variant="outline"
-                              onClick={() => setDetailBill(r)}
-                            >
-                              Detail
-                            </Btn>
-                            {r.status !== "paid" && (
+                  {/* ✅ Table with fixed min-width */}
+                  <table className="min-w-[960px] w-full text-sm text-left">
+                    <thead className="bg-gray-50 dark:bg-neutral-800/60 sticky top-0 z-10">
+                      <tr
+                        className="border-b"
+                        style={{ borderColor: palette.silver1 }}
+                      >
+                        <th className="py-2 px-4">Siswa</th>
+                        <th className="py-2 px-4">Kelas</th>
+                        <th className="py-2 px-4">Nominal</th>
+                        <th className="py-2 px-4">Jatuh Tempo</th>
+                        <th className="py-2 px-4">Status</th>
+                        <th className="py-2 px-4 text-right">Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody
+                      className="divide-y"
+                      style={{ borderColor: palette.silver1 }}
+                    >
+                      {bills.map((r) => (
+                        <tr key={r.id}>
+                          <td className="py-3 px-4 font-medium whitespace-nowrap">
+                            {r.student_name}
+                          </td>
+                          <td className="py-3 px-4 whitespace-nowrap">
+                            {r.class_name ?? "-"}
+                          </td>
+                          <td className="py-3 px-4 whitespace-nowrap">
+                            {idr(r.amount)}
+                          </td>
+                          <td className="py-3 px-4 whitespace-nowrap">
+                            {new Date(r.due_date).toLocaleDateString("id-ID")}
+                          </td>
+                          <td className="py-3 px-4 whitespace-nowrap">
+                            {r.status === "paid" && (
+                              <Badge palette={palette} variant="success">
+                                Lunas
+                              </Badge>
+                            )}
+                            {r.status === "unpaid" && (
+                              <Badge palette={palette} variant="outline">
+                                Belum Bayar
+                              </Badge>
+                            )}
+                            {r.status === "overdue" && (
+                              <Badge palette={palette} variant="warning">
+                                Terlambat
+                              </Badge>
+                            )}
+                          </td>
+                          <td className="py-3 px-4 text-right whitespace-nowrap">
+                            <div className="flex justify-end gap-2">
                               <Btn
                                 palette={palette}
                                 size="sm"
-                                onClick={() => setTagihBill(r)}
+                                variant="outline"
+                                onClick={() => setDetailBill(r)}
                               >
-                                Tagih
+                                Detail
                               </Btn>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                              {r.status !== "paid" && (
+                                <Btn
+                                  palette={palette}
+                                  size="sm"
+                                  onClick={() => setTagihBill(r)}
+                                >
+                                  Tagih
+                                </Btn>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Helper text */}
+                <p className="mt-2 text-[11px] text-gray-500">
+                  Geser tabel ke kiri/kanan untuk melihat semua kolom.
+                </p>
               </div>
-
-              {/* Helper text */}
-              <p className="mt-2 text-[11px] text-gray-500">
-                Geser tabel ke kiri/kanan untuk melihat semua kolom.
-              </p>
-            </div>
-          </SectionCard>
-
+            </SectionCard>
           </section>
         </div>
       </main>
@@ -432,17 +436,16 @@ function SppDetailModal({
                 variant={
                   bill.status === "paid"
                     ? "success"
-                      : bill.status === "unpaid"
-                        ? "outline"
-                        : "warning"
+                    : bill.status === "unpaid"
+                      ? "outline"
+                      : "warning"
                 }
               >
                 {bill.status === "paid"
                   ? "Lunas"
-                  
-                    : bill.status === "unpaid"
-                      ? "Belum Bayar"
-                      : "Terlambat"}
+                  : bill.status === "unpaid"
+                    ? "Belum Bayar"
+                    : "Terlambat"}
               </Badge>
             }
           />
@@ -507,4 +510,3 @@ function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
     </div>
   );
 }
-

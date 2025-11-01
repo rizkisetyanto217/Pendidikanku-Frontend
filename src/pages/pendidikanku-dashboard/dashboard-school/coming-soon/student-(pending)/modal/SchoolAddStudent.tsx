@@ -3,7 +3,7 @@ import {
   Btn,
   SectionCard,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 import React, { useState } from "react";
 
 type Props = {

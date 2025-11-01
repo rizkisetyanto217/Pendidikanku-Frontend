@@ -10,12 +10,12 @@ import {
   Btn,
   Badge,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 import { Calendar, Clock, MapPin, Plus, ArrowLeft } from "lucide-react";
 
 import { fetchTeacherHome } from "../types/teacher";
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
-import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/ParentSideBar";
+import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
+import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/CParentSideBar";
 import AddSchedule from "../../dashboard/TeacherAddSchedule";
 
 /* ================= Types ================= */
@@ -346,11 +346,9 @@ export default function ScheduleThreeDays() {
   /* ================= Render ================= */
   return (
     <div
-      className="min-h-screen w-full"
+      className="w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      
-
       {/* Modal Tambah/Edit Jadwal */}
       <AddSchedule
         open={showTambahJadwal}
@@ -361,8 +359,6 @@ export default function ScheduleThreeDays() {
 
       <main className="w-full">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
-          
-
           <div className="flex-1 min-w-0 space-y-4">
             {/* Header actions */}
             <div className="md:flex hidden items-center justify-between gap-2">

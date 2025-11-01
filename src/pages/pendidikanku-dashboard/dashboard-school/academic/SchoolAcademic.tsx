@@ -14,7 +14,7 @@ import {
   Badge,
   Btn,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 import {
   CalendarDays,
   CheckCircle2,
@@ -28,7 +28,7 @@ import {
   Pencil,
   Trash2,
 } from "lucide-react";
-import { useTopBar } from "../../components/home/UseTopBar";
+import { useTopBar } from "../../components/home/CUseTopBar";
 
 /* ===================== Types ===================== */
 type AcademicTerm = {
@@ -88,10 +88,63 @@ const dateShort = (iso?: string) =>
       })
     : "-";
 
-const API_PREFIX = "/public"; // GET list
-const ADMIN_PREFIX = "/a"; // POST/PATCH/DELETE
 const TERMS_QKEY = (masjidId?: string) =>
   ["academic-terms-merged", masjidId] as const;
+
+/* ===================== Helpers (tanggal & mapping) ===================== */
+
+// --- helper: normalisasi "2028/29" => "2028/2029"
+function normalizeAcademicYear(input: string) {
+  const s = (input || "").trim();
+  // cocokkan "YYYY/YY"
+  const m = s.match(/^(\d{4})\s*\/\s*(\d{2})$/);
+  if (m) {
+    const start = Number(m[1]);
+    const end = start + 1;
+    return `${start}/${end}`;
+  }
+  // kalau sudah "YYYY/YYYY" biarkan
+  const mFull = s.match(/^(\d{4})\s*\/\s*(\d{4})$/);
+  if (mFull) return `${mFull[1]}/${mFull[2]}`;
+  return s; // fallback: kirim apa adanya
+}
+
+// --- helper: stringify error dari server
+function extractErrorMessage(err: any) {
+  const d = err?.response?.data;
+  if (!d) return err?.message || "Request error";
+  if (typeof d === "string") return d;
+  if (d.message) return d.message;
+  if (Array.isArray(d.errors)) {
+    return d.errors
+      .map((e: any) => [e.field, e.message].filter(Boolean).join(": "))
+      .join("\n");
+  }
+  try {
+    return JSON.stringify(d);
+  } catch {
+    return String(d);
+  }
+}
+
+// --- mapper payload -> API body (pakai normalisasi tahun + tanggal Z)
+function toZDate(d: string) {
+  return d ? `${d}T00:00:00Z` : "";
+}
+function mapTermPayloadToApi(p: TermPayload) {
+  return {
+    academic_term_academic_year: normalizeAcademicYear(p.academic_year),
+    academic_term_name: p.name,
+    academic_term_angkatan: Number(p.angkatan),
+    academic_term_start_date: toZDate(p.start_date),
+    academic_term_end_date: toZDate(p.end_date),
+    academic_term_is_active: Boolean(p.is_active),
+    ...(p.slug ? { academic_term_slug: p.slug } : {}),
+  };
+}
+
+const API_PREFIX = "/public";
+const ADMIN_PREFIX = "/a";
 
 /* ===== Scroll helpers ===== */
 function ScrollShadows() {
@@ -120,9 +173,6 @@ function MobileScrollArea({ children }: { children: React.ReactNode }) {
         <ScrollShadows />
         {children}
       </div>
-      <p className="mt-2 text-[11px] text-gray-500">
-        Geser tabel ke kiri/kanan untuk melihat semua kolom.
-      </p>
     </div>
   );
 }
@@ -138,15 +188,25 @@ type TermPayload = {
 };
 
 /* ===================== Mutations (pola SchoolSubject) ===================== */
+/* ===================== Mutations ===================== */
 function useCreateTerm(masjidId?: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: TermPayload) => {
-      const { data } = await axios.post(
-        `${ADMIN_PREFIX}/${encodeURIComponent(masjidId!)}/academic-terms`,
-        payload
-      );
-      return data;
+      const apiBody = mapTermPayloadToApi(payload);
+      const url = `${ADMIN_PREFIX}/${encodeURIComponent(masjidId!)}/academic-terms`;
+      console.log("[createTerm] POST", url, apiBody);
+      try {
+        const { data } = await axios.post(url, apiBody);
+        console.log("[createTerm] OK:", data);
+        return data;
+      } catch (err: any) {
+        console.error("[createTerm] FAIL:", {
+          status: err?.response?.status,
+          data: err?.response?.data,
+        });
+        throw err;
+      }
     },
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: TERMS_QKEY(masjidId) });
@@ -157,6 +217,7 @@ function useCreateTerm(masjidId?: string) {
     },
   });
 }
+
 function useUpdateTerm(masjidId?: string) {
   const qc = useQueryClient();
   return useMutation({
@@ -167,9 +228,10 @@ function useUpdateTerm(masjidId?: string) {
       id: string;
       payload: TermPayload;
     }) => {
+      const apiBody = mapTermPayloadToApi(payload);
       const { data } = await axios.patch(
         `${ADMIN_PREFIX}/${encodeURIComponent(masjidId!)}/academic-terms/${id}`,
-        payload
+        apiBody
       );
       return data;
     },
@@ -179,7 +241,20 @@ function useUpdateTerm(masjidId?: string) {
       if (previous) {
         qc.setQueryData<AcademicTerm[]>(
           TERMS_QKEY(masjidId),
-          previous.map((t) => (t.id === id ? ({ ...t, ...payload } as any) : t))
+          previous.map((t) =>
+            t.id === id
+              ? ({
+                  ...t,
+                  academic_year: payload.academic_year,
+                  name: payload.name,
+                  start_date: toZDate(payload.start_date),
+                  end_date: toZDate(payload.end_date),
+                  angkatan: payload.angkatan,
+                  is_active: payload.is_active,
+                  slug: payload.slug ?? t.slug,
+                } as AcademicTerm)
+              : t
+          )
         );
       }
       return { previous };
@@ -196,6 +271,7 @@ function useUpdateTerm(masjidId?: string) {
     },
   });
 }
+
 function useDeleteTerm(masjidId?: string) {
   const qc = useQueryClient();
   return useMutation({
@@ -281,6 +357,7 @@ function TermFormModal({
     values.name.trim() &&
     values.start_date &&
     values.end_date &&
+    new Date(values.end_date) > new Date(values.start_date) &&
     Number.isFinite(values.angkatan) &&
     values.angkatan > 0;
 
@@ -509,9 +586,33 @@ const AcademicSchool: React.FC<{
 
   return (
     <div
-      className="min-h-screen w-full"
+      className="w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
+      <div
+        className="p-4 md:p-5 pb-3 border-b flex items-center justify-between gap-2"
+        style={{ borderColor: palette.silver1 }}
+      >
+        <div className="flex items-center gap-2 font-semibold">
+          <Layers size={18} color={palette.quaternary} /> Daftar Periode
+        </div>
+        <div className="flex items-center gap-2">
+          <div
+            className="hidden sm:block text-sm"
+            style={{ color: palette.black2 }}
+          >
+            {termsQ.isFetching ? "memuat…" : `${total} total`}
+          </div>
+          <Btn
+            palette={palette}
+            size="sm"
+            className="gap-1"
+            onClick={() => setModal({ mode: "create" })}
+          >
+            Tambah
+          </Btn>
+        </div>
+      </div>
       <main className="w-full">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Main */}
@@ -603,7 +704,7 @@ const AcademicSchool: React.FC<{
                 </div>
               </div>
 
-              <div className="p-4 md:p-5">
+              <div className="p-4 md:p-0">
                 {termsQ.isLoading ? (
                   <div className="flex items-center gap-2 text-sm opacity-70">
                     <Loader2 className="animate-spin" size={16} /> Memuat…
@@ -825,8 +926,14 @@ const AcademicSchool: React.FC<{
           } else {
             createTerm.mutate(v, {
               onSuccess: () => setModal(null),
-              onError: (e: any) =>
-                alert(e?.response?.data?.message ?? "Gagal membuat term"),
+              onError: (e: any) => {
+                const msg = extractErrorMessage(e);
+                alert(msg || "Gagal membuat term");
+                console.error("[UI createTerm] error:", {
+                  status: e?.response?.status,
+                  data: e?.response?.data,
+                });
+              },
             });
           }
         }}

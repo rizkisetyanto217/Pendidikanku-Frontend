@@ -1,5 +1,5 @@
 // src/pages/sekolahislamku/dashboard-school/books/SchoolBooks.tsx
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useNavigate, useParams } from "react-router-dom";
 import axios from "@/lib/axios";
 import { pickTheme, ThemeName } from "@/constants/thema";
@@ -8,7 +8,7 @@ import {
   SectionCard,
   Btn,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   ExternalLink,
@@ -17,15 +17,14 @@ import {
   ChevronRight,
   ImageOff,
   ArrowLeft,
+  X,
 } from "lucide-react";
-
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
 import SimpleTable from "@/components/common/main/SimpleTable";
 import ActionEditDelete from "@/components/common/main/MainActionEditDelete";
-import BookModal from "./components/SchoolBookModal";
-import ParentSidebar from "../../components/home/ParentSideBar";
 
-/* ============== Types API (PUBLIC) ============== */
+/* =========================================================
+   Types API (PUBLIC)
+========================================================= */
 export type SectionLite = {
   class_sections_id: string;
   class_sections_name: string;
@@ -59,8 +58,7 @@ export type BookAPI = {
 // Response internal yang sudah dinormalisasi
 export type BooksResponse = {
   data: BookAPI[];
-  // NOTE: endpoint publik belum expose pagination; properti ini opsional
-  pagination?: { limit: number; offset: number; total: number };
+  pagination?: { limit: number; offset: number; total: number }; // opsional (client-side paging)
 };
 
 // Bentuk response mentah dari endpoint publik
@@ -79,27 +77,53 @@ type PublicBook = {
 };
 type PublicBooksResponse = { data: PublicBook[] };
 
-/* ============== Props ============== */
-type SchoolBooksProps = {
-  showBack?: boolean;
-  backTo?: string;
-  backLabel?: string;
-};
-
-/* ============== Helpers ============== */
+/* =========================================================
+   Helpers & Form Types
+========================================================= */
 const yyyyMmDdLocal = (d = new Date()) => {
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 };
 
-/* ============== Data Hook: /api/public/{masjid_id}/books/list ============== */
-function useBooksListPublic(params: { masjidId: string; limit: number; offset: number }) {
+export type BookFormInput = {
+  book_title: string;
+  book_author?: string | null;
+  book_desc?: string | null;
+  books_url?: string | null;
+  file?: File | null; // cover tunggal (opsional)
+  files?: File[] | null; // lampiran multi (opsional)
+  urls?: string[] | null; // daftar URL eksternal (opsional)
+};
+
+function buildBookFormData(input: BookFormInput) {
+  const fd = new FormData();
+  fd.set("book_title", input.book_title);
+
+  if (input.book_author != null) fd.set("book_author", input.book_author);
+  if (input.book_desc != null) fd.set("book_desc", input.book_desc);
+  if (input.books_url != null) fd.set("books_url", input.books_url);
+
+  if (input.file) fd.set("file", input.file);
+  if (input.files && input.files.length)
+    input.files.forEach((f) => fd.append("files", f));
+  if (input.urls && input.urls.length)
+    fd.set("urls_json", JSON.stringify(input.urls));
+
+  return fd;
+}
+
+/* =========================================================
+   Data Hook: /public/{masjid_id}/books/list  (read-only)
+========================================================= */
+function useBooksListPublic(params: {
+  masjidId: string;
+  limit: number;
+  offset: number;
+}) {
   const { masjidId, limit, offset } = params;
   return useQuery<BooksResponse>({
     queryKey: ["books-list-public", { masjidId, limit, offset }],
     queryFn: async () => {
-      // Endpoint publik saat ini tidak mendukung pagination di server;
-      // kita ambil semua lalu filter/paginate di client jika perlu.
       const r = await axios.get<PublicBooksResponse>(
         `/public/${encodeURIComponent(masjidId)}/books/list`,
         { withCredentials: false }
@@ -117,14 +141,10 @@ function useBooksListPublic(params: { masjidId: string; limit: number; offset: n
         usages: [], // tidak tersedia di endpoint publik
       }));
 
-      // Pagination client-side (opsional—untuk menjaga UI sekarang)
+      // Client-side pagination agar UI konsisten
       const total = mapped.length;
       const sliced = mapped.slice(offset, Math.min(offset + limit, total));
-
-      return {
-        data: sliced,
-        pagination: { limit, offset, total },
-      };
+      return { data: sliced, pagination: { limit, offset, total } };
     },
     staleTime: 60_000,
     gcTime: 10 * 60 * 1000,
@@ -134,7 +154,75 @@ function useBooksListPublic(params: { masjidId: string; limit: number; offset: n
   });
 }
 
-/* ============== Skeletons ============== */
+/* =========================================================
+   Admin Mutations (POST / PATCH / DELETE)
+========================================================= */
+function useCreateBook(masjidId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: BookFormInput) => {
+      const fd = buildBookFormData(payload);
+      const { data } = await axios.post(
+        `/api/a/${encodeURIComponent(masjidId)}/books`,
+        fd,
+        {
+          withCredentials: true,
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
+      return data;
+    },
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: ["books-list-public"] });
+    },
+  });
+}
+
+function useUpdateBook() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (args: { bookId: string; payload: BookFormInput }) => {
+      const fd = buildBookFormData(args.payload);
+      const { data } = await axios.patch(
+        `/api/a/books/${encodeURIComponent(args.bookId)}`,
+        fd,
+        {
+          withCredentials: true,
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
+      return data;
+    },
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: ["books-list-public"] });
+    },
+  });
+}
+
+function useDeleteBook() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (bookId: string) => {
+      const { data } = await axios.delete(
+        `/api/a/books/${encodeURIComponent(bookId)}`,
+        {
+          withCredentials: true,
+        }
+      );
+      return data;
+    },
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: ["books-list-public"] });
+    },
+    onError: (err: any) => {
+      alert(err?.response?.data?.message ?? "Gagal menghapus buku.");
+    },
+  });
+}
+
+/* =========================================================
+   Skeleton
+========================================================= */
 function CardSkeleton({ palette }: { palette: Palette }) {
   return (
     <div
@@ -165,7 +253,256 @@ function CardSkeleton({ palette }: { palette: Palette }) {
   );
 }
 
-/* ============== Page ============== */
+/* =========================================================
+   Inline Modal (presentational, submit dikerjakan parent)
+========================================================= */
+type BookLite = {
+  books_id: string;
+  books_title: string;
+  books_author?: string | null;
+  books_desc?: string | null;
+  books_url?: string | null;
+  books_image_url?: string | null;
+};
+
+type BookModalForm = BookFormInput;
+
+type BookModalProps = {
+  open: boolean;
+  mode: "create" | "edit";
+  book: BookLite | null;
+  palette: Palette;
+  onClose: () => void;
+  onSubmit?: (data: BookModalForm) => Promise<void> | void;
+  submitting?: boolean;
+  onSuccess?: () => void;
+};
+
+function BookModal({
+  open,
+  mode,
+  book,
+  palette,
+  onClose,
+  onSubmit,
+  submitting = false,
+  onSuccess,
+}: BookModalProps) {
+  const isEdit = mode === "edit";
+  const DEFAULT_FORM: BookModalForm = {
+    book_title: "",
+    book_author: "",
+    book_desc: "",
+    books_url: "",
+    file: null,
+    files: null,
+    urls: [],
+  };
+  const [form, setForm] = useState<BookModalForm>(DEFAULT_FORM);
+  const [preview, setPreview] = useState<string | null>(
+    book?.books_image_url ?? null
+  );
+
+  useEffect(() => {
+    if (!open) return;
+    if (isEdit && book) {
+      setForm({
+        book_title: book.books_title ?? "",
+        book_author: book.books_author ?? "",
+        book_desc: book.books_desc ?? "",
+        books_url: book.books_url ?? "",
+        file: null,
+        files: null,
+        urls: [],
+      });
+      setPreview(book.books_image_url ?? null);
+    } else {
+      setForm(DEFAULT_FORM);
+      setPreview(null);
+    }
+  }, [open, isEdit, book?.books_id]);
+
+  useEffect(() => {
+    if (!form.file) return;
+    const u = URL.createObjectURL(form.file);
+    setPreview(u);
+    return () => URL.revokeObjectURL(u);
+  }, [form.file]);
+
+  const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
+    e.preventDefault();
+    await onSubmit?.(form);
+    onSuccess?.();
+  };
+
+  if (!open) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-[70] flex items-center justify-center p-3"
+      style={{ background: "rgba(0,0,0,.45)" }}
+      onClick={() => !submitting && onClose()}
+    >
+      <SectionCard
+        palette={palette}
+        className="w-[min(760px,96vw)] rounded-2xl shadow-xl flex flex-col max-h-[90vh] overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div
+          className="flex items-center justify-between p-4 md:p-6 border-b"
+          style={{ borderColor: palette.silver1 }}
+        >
+          <div className="text-base md:text-lg font-semibold">
+            {isEdit ? "Edit Buku" : "Tambah Buku"}
+          </div>
+          <button
+            className="opacity-70 hover:opacity-100"
+            onClick={() => !submitting && onClose()}
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* Content */}
+        <form
+          onSubmit={handleSubmit}
+          className="flex-1 overflow-y-auto p-4 md:p-6"
+        >
+          <div className="grid md:grid-cols-12 gap-4">
+            {/* Preview & File */}
+            <div className="md:col-span-4">
+              <div
+                className="w-full aspect-[3/4] rounded-xl overflow-hidden grid place-items-center"
+                style={{ background: "rgba(0,0,0,.05)" }}
+              >
+                {preview ? (
+                  <img
+                    src={preview}
+                    className="w-full h-full object-cover"
+                    alt="Preview"
+                  />
+                ) : (
+                  <span className="text-xs opacity-60">Preview cover</span>
+                )}
+              </div>
+              <input
+                type="file"
+                accept="image/*"
+                className="mt-3 block w-full text-sm"
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, file: e.target.files?.[0] ?? null }))
+                }
+              />
+            </div>
+
+            {/* Form */}
+            <div className="md:col-span-8 grid gap-3">
+              <label className="grid gap-1 text-sm">
+                <span>Judul *</span>
+                <input
+                  required
+                  value={form.book_title}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, book_title: e.target.value }))
+                  }
+                  className="px-3 py-2 rounded-lg border bg-transparent"
+                  placeholder="cth. Matematika Kelas 7"
+                />
+              </label>
+
+              <div className="grid md:grid-cols-2 gap-3">
+                <label className="grid gap-1 text-sm">
+                  <span>Penulis</span>
+                  <input
+                    value={form.book_author ?? ""}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, book_author: e.target.value }))
+                    }
+                    className="px-3 py-2 rounded-lg border bg-transparent"
+                  />
+                </label>
+                <label className="grid gap-1 text-sm">
+                  <span>URL</span>
+                  <input
+                    value={form.books_url ?? ""}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, books_url: e.target.value }))
+                    }
+                    className="px-3 py-2 rounded-lg border bg-transparent"
+                  />
+                </label>
+              </div>
+
+              <label className="grid gap-1 text-sm">
+                <span>Deskripsi</span>
+                <textarea
+                  value={form.book_desc ?? ""}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, book_desc: e.target.value }))
+                  }
+                  className="px-3 py-2 rounded-lg border bg-transparent min-h-[84px]"
+                />
+              </label>
+
+              <label className="grid gap-1 text-sm">
+                <span>
+                  URL gambar eksternal (opsional) — Enter untuk menambah
+                </span>
+                <input
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      const v = (e.target as HTMLInputElement).value.trim();
+                      if (!v) return;
+                      setForm((f) => ({ ...f, urls: [...(f.urls ?? []), v] }));
+                      (e.target as HTMLInputElement).value = "";
+                    }
+                  }}
+                  className="px-3 py-2 rounded-lg border bg-transparent"
+                />
+                {!!form.urls?.length && (
+                  <div className="text-xs mt-1 opacity-80">
+                    {form.urls.map((u, i) => (
+                      <span key={i} className="inline-block mr-2">
+                        • {u}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </label>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="pt-4 md:pt-6 flex justify-end gap-2">
+            <Btn
+              palette={palette}
+              variant="ghost"
+              onClick={onClose}
+              disabled={submitting}
+            >
+              Batal
+            </Btn>
+            <Btn palette={palette} type="submit" loading={submitting}>
+              {submitting ? "Menyimpan…" : isEdit ? "Simpan" : "Tambah"}
+            </Btn>
+          </div>
+        </form>
+      </SectionCard>
+    </div>
+  );
+}
+
+/* =========================================================
+   Page
+========================================================= */
+type SchoolBooksProps = {
+  showBack?: boolean;
+  backTo?: string;
+  backLabel?: string;
+};
+
 const SchoolBooks: React.FC<SchoolBooksProps> = ({
   showBack = false,
   backTo,
@@ -183,10 +520,9 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
   const params = useParams<{
     masjidId?: string;
     masjid_id?: string;
-    slug?: string; // tetap dukung base slug untuk detail route
+    slug?: string;
   }>();
-  const masjidId =
-    params.masjidId || params.masjid_id || ""; // wajib ada untuk endpoint publik
+  const masjidId = params.masjidId || params.masjid_id || "";
 
   const limit = Math.min(Math.max(Number(sp.get("limit") || 20), 1), 200);
   const offset = Math.max(Number(sp.get("offset") || 0), 0);
@@ -200,23 +536,10 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
 
   const base = params.slug ? `/${encodeURIComponent(params.slug)}` : "";
 
-  const qc = useQueryClient();
-  const deleteBook = useMutation({
-    mutationFn: async (bookId: string) => {
-      // NOTE: hapus tetap via admin route. Jika halaman publik tidak boleh hapus,
-      // cukup sembunyikan tombol delete dari UI publik.
-      const r = await axios.delete(`/api/a/books/${bookId}`, {
-        withCredentials: true,
-      });
-      return r.data;
-    },
-    onSuccess: async () => {
-      await qc.invalidateQueries({ queryKey: ["books-list-public"] });
-    },
-    onError: (err: any) => {
-      alert(err?.response?.data?.message ?? "Gagal menghapus buku.");
-    },
-  });
+  // Admin mutations
+  const createBook = useCreateBook(masjidId);
+  const updateBook = useUpdateBook();
+  const deleteBook = useDeleteBook();
 
   const items = useMemo(() => {
     const src = booksQ.data?.data ?? [];
@@ -250,7 +573,7 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  /* ============== Rows ============== */
+  /* ============== Rows (Desktop) ============== */
   const rows = useMemo(() => {
     return items.map((b, idx): React.ReactNode[] => {
       const cover = b.books_image_url ? (
@@ -258,7 +581,6 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
           src={b.books_image_url}
           alt={b.books_title}
           className="w-10 h-14 object-cover rounded-md"
-          style={{ background: palette.white2 }}
         />
       ) : (
         <span
@@ -301,6 +623,14 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
         <div onClick={(e) => e.stopPropagation()}>
           <ActionEditDelete
             onEdit={() => setBookModal({ mode: "edit", book: b })}
+            onDelete={() => {
+              if (deleteBook.isPending) return;
+              const ok = confirm(
+                `Hapus buku ini?\nJudul: ${b.books_title ?? "-"}`
+              );
+              if (!ok) return;
+              deleteBook.mutate(b.books_id);
+            }}
           />
         </div>
       );
@@ -309,7 +639,7 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
     });
   }, [items, palette, offset, deleteBook.isPending]);
 
-  /* ============== MobileCards ============== */
+  /* ============== Cards (Mobile) ============== */
   const MobileCards = () => (
     <div className="grid grid-cols-1 gap-3">
       {items.map((b) => (
@@ -319,7 +649,9 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
           style={{ borderColor: palette.silver1, background: palette.white1 }}
           onClick={() => {
             const qs = sp.toString();
-            nav(`${base}/sekolah/buku/detail/${b.books_id}${qs ? `?${qs}` : ""}`);
+            nav(
+              `${base}/sekolah/buku/detail/${b.books_id}${qs ? `?${qs}` : ""}`
+            );
           }}
         >
           <div className="shrink-0">
@@ -328,7 +660,6 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
                 src={b.books_image_url}
                 alt={b.books_title}
                 className="w-12 h-16 object-cover rounded-md"
-                style={{ background: palette.white2 }}
               />
             ) : (
               <span
@@ -340,14 +671,23 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <div className="font-medium truncate" style={{ color: palette.black2 }}>
+            <div
+              className="font-medium truncate"
+              style={{ color: palette.black2 }}
+            >
               {b.books_title || "(Tanpa judul)"}
             </div>
-            <div className="text-sm opacity-90 truncate" style={{ color: palette.black2 }}>
+            <div
+              className="text-sm opacity-90 truncate"
+              style={{ color: palette.black2 }}
+            >
               {b.books_author || "-"}
             </div>
             {!!b.books_desc && (
-              <div className="text-sm opacity-80 mt-1 line-clamp-2" style={{ color: palette.black2 }}>
+              <div
+                className="text-sm opacity-80 mt-1 line-clamp-2"
+                style={{ color: palette.black2 }}
+              >
                 {b.books_desc}
               </div>
             )}
@@ -369,7 +709,9 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
                   onEdit={() => setBookModal({ mode: "edit", book: b })}
                   onDelete={() => {
                     if (deleteBook.isPending) return;
-                    const ok = confirm(`Hapus buku ini?\nJudul: ${b.books_title ?? "-"}`);
+                    const ok = confirm(
+                      `Hapus buku ini?\nJudul: ${b.books_title ?? "-"}`
+                    );
                     if (!ok) return;
                     deleteBook.mutate(b.books_id);
                   }}
@@ -384,7 +726,10 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
 
   /* ============== Render ============== */
   return (
-    <div className="min-h-screen w-full" style={{ background: palette.white2, color: palette.black1 }}>
+    <div
+      className="w-full"
+      style={{ background: palette.white2, color: palette.black1 }}
+    >
       <main className="w-full">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Main content */}
@@ -404,7 +749,10 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
                 )}
                 <h1 className="text-lg font-semibold">Buku Pelajaran</h1>
               </div>
-              <Btn palette={palette} onClick={() => setBookModal({ mode: "create" })}>
+              <Btn
+                palette={palette}
+                onClick={() => setBookModal({ mode: "create" })}
+              >
                 + Buku
               </Btn>
             </div>
@@ -414,7 +762,10 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
               <div className="p-4 md:p-5 pb-2 font-medium">Filter</div>
               <div className="px-4 md:px-5 pb-4">
                 <div className="relative">
-                  <Search size={14} className="absolute left-2 top-1/2 -translate-y-1/2 opacity-60" />
+                  <Search
+                    size={14}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 opacity-60"
+                  />
                   <input
                     value={q}
                     onChange={(e) => setQ(e.target.value)}
@@ -428,7 +779,8 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
 
             {/* Summary */}
             <div className="text-sm px-1" style={{ color: palette.black2 }}>
-              {yyyyMmDdLocal()} • {booksQ.isFetching ? "memuat…" : `${total} total`}
+              {yyyyMmDdLocal()} •{" "}
+              {booksQ.isFetching ? "memuat…" : `${total} total`}
             </div>
 
             {/* List: Mobile / Desktop */}
@@ -442,7 +794,9 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
               ) : items.length === 0 ? (
                 <SectionCard palette={palette} className="p-10 text-center">
                   <div className="text-sm" style={{ color: palette.black2 }}>
-                    {q ? "Tidak ada hasil untuk pencarianmu." : "Belum ada buku."}
+                    {q
+                      ? "Tidak ada hasil untuk pencarianmu."
+                      : "Belum ada buku."}
                   </div>
                 </SectionCard>
               ) : (
@@ -452,13 +806,20 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
 
             <div className="hidden md:block" style={{ color: palette.black2 }}>
               <SimpleTable
-                columns={["No", "Cover", "Judul & Penulis", "Dipakai di", "Aksi"]}
+                columns={[
+                  "No",
+                  "Cover",
+                  "Judul & Penulis",
+                  "Dipakai di",
+                  "Aksi",
+                ]}
                 rows={rows}
                 onRowClick={(rowIndex) => {
                   const book = items[rowIndex];
                   if (!book) return;
                   const qs = sp.toString();
-                  nav(`${base}/sekolah/buku/detail/${book.books_id}${qs ? `?${qs}` : ""}`);
+                  const url = `${base}/sekolah/buku/detail/${book.books_id}${qs ? `?${qs}` : ""}`;
+                  nav(url);
                 }}
                 emptyText={booksQ.isLoading ? "Memuat…" : "Belum ada buku."}
               />
@@ -467,9 +828,15 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
             {/* Pagination (client-side agar UI konsisten) */}
             {total > limit && (
               <div className="flex items-center justify-between text-sm">
-                <div>Menampilkan {Math.min(limit, showing)} dari {total}</div>
+                <div>
+                  Menampilkan {Math.min(limit, showing)} dari {total}
+                </div>
                 <div className="flex items-center gap-2">
-                  <Btn palette={palette} onClick={() => onPage(-1)} disabled={offset <= 0}>
+                  <Btn
+                    palette={palette}
+                    onClick={() => onPage(-1)}
+                    disabled={offset <= 0}
+                  >
                     <ChevronLeft size={16} /> Prev
                   </Btn>
                   <Btn
@@ -493,6 +860,17 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
         book={bookModal?.book ?? null}
         palette={palette}
         onClose={() => setBookModal(null)}
+        onSubmit={async (form) => {
+          if (bookModal?.mode === "edit" && bookModal.book) {
+            await updateBook.mutateAsync({
+              bookId: bookModal.book.books_id,
+              payload: form,
+            });
+          } else {
+            await createBook.mutateAsync(form);
+          }
+        }}
+        submitting={createBook.isPending || updateBook.isPending}
         onSuccess={() => {
           setBookModal(null);
           booksQ.refetch();

@@ -15,10 +15,10 @@ import {
   Btn,
   Badge,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 import ModalEditSchedule from "@/pages/pendidikanku-dashboard/dashboard-school/dashboard/SchoolModalEditSchedule";
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
-import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/ParentSideBar";
+import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
+import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/CParentSideBar";
 
 type ThreeDaysScheduleItem = {
   title: string;
@@ -85,11 +85,9 @@ export default function DetailScheduleThreeDays() {
 
   return (
     <div
-      className="min-h-screen w-full"
+      className="w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      
-
       <ModalEditSchedule
         open={editOpen}
         onClose={() => setEditOpen(false)}
@@ -103,8 +101,6 @@ export default function DetailScheduleThreeDays() {
 
       <main className="w-full">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
-          
-
           <div className="flex-1 min-w-0 space-y-4">
             <div className="mx-auto  md:flex hidden items-center gap-3">
               <Btn

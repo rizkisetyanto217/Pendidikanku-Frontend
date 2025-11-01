@@ -4,14 +4,14 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
-import ParentTopBar from "../../components/home/ParentTopBar";
+import ParentTopBar from "../../components/home/CParentTopBar";
 
 import {
   SectionCard,
   Btn,
   Badge,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 import {
   Bell,
   ArrowLeft,
@@ -21,7 +21,7 @@ import {
   Users,
   Check,
 } from "lucide-react";
-import ParentSidebar from "../../components/home/ParentSideBar";
+import ParentSidebar from "../../components/home/CParentSideBar";
 
 /* ===== Types ===== */
 type AnnType = "info" | "warning" | "success";
@@ -149,7 +149,7 @@ export default function StudentDetailAnnouncement() {
 
   return (
     <div
-      className="min-h-screen w-full"
+      className="w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
       <ParentTopBar

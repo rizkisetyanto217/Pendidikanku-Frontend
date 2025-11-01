@@ -22,10 +22,10 @@ import {
   Btn,
   ProgressBar,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 
-import ParentTopBar from "../../components/home/ParentTopBar";
-import ParentSidebar from "../../components/home/ParentSideBar";
+import ParentTopBar from "../../components/home/CParentTopBar";
+import ParentSidebar from "../../components/home/CParentSideBar";
 /* ========================================
    Types & constants
 ======================================== */
@@ -692,7 +692,7 @@ export default function TeacherAttendancePage({
   /* ===== UI ===== */
   return (
     <div
-      className="min-h-screen w-full"
+      className="w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
       <ParentTopBar

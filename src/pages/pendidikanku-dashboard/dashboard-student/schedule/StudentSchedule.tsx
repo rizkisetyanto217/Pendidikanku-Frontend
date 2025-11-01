@@ -13,7 +13,7 @@ import {
   SectionCard,
   Btn,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 
 import {
   CalendarDays,
@@ -200,7 +200,7 @@ export default function StudentSchedule() {
 
   return (
     <div
-      className="min-h-screen w-full"
+      className="w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
       <main className="w-full">
@@ -268,7 +268,9 @@ export default function StudentSchedule() {
 
               <div className="grid grid-cols-7 gap-2">
                 {days.map((c, i) => {
-                  const schedules = c.dateKey ? byDate.get(c.dateKey) : undefined;
+                  const schedules = c.dateKey
+                    ? byDate.get(c.dateKey)
+                    : undefined;
                   const selected = selectedDay === c.dateKey;
                   return (
                     <button

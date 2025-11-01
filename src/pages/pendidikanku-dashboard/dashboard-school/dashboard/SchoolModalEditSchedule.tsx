@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   Btn,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 
 type EditPayload = {
   title: string;

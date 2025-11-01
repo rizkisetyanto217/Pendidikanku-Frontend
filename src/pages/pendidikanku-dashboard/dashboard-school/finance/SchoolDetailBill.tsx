@@ -7,11 +7,10 @@ import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 
 // modal
-import SchoolReceiptExport from "./modal/SchoolReceiptExport";
+import SchoolReceiptExport from "./modal/CSchoolReceiptExport";
 
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-
 
 // UI primitives & layout
 import {
@@ -19,9 +18,9 @@ import {
   Badge,
   Btn,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
-import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/ParentSideBar";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
+import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
+import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/CParentSideBar";
 
 // Icons
 import {
@@ -225,9 +224,11 @@ const DetailBill: React.FC = () => {
   const gregorianISO = toLocalNoonISO(new Date());
   const isFromMenuUtama = location.pathname.includes("/menu-utama/");
 
-   // ===== Modal =====
-   const [openReceipt, setOpenReceipt] = useState(false);
-   const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(null);
+  // ===== Modal =====
+  const [openReceipt, setOpenReceipt] = useState(false);
+  const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(
+    null
+  );
 
   // ===== Query =====
   const invoiceQuery = useQuery({
@@ -290,35 +291,43 @@ const DetailBill: React.FC = () => {
   };
 
   const handleDownloadReceipt = (paymentId: string) => {
-  console.log("Membuka modal kuitansi untuk:", paymentId);
-  setSelectedPaymentId(paymentId);
-  setOpenReceipt(true);
-};
+    console.log("Membuka modal kuitansi untuk:", paymentId);
+    setSelectedPaymentId(paymentId);
+    setOpenReceipt(true);
+  };
 
-const handleExportReceipt = async (data: { paymentId?: string; format: string }) => {
-  if (!data.paymentId || !invoice) return;
-  const payment = invoice.payment_history.find((p) => p.id === data.paymentId);
-  if (!payment) return;
+  const handleExportReceipt = async (data: {
+    paymentId?: string;
+    format: string;
+  }) => {
+    if (!data.paymentId || !invoice) return;
+    const payment = invoice.payment_history.find(
+      (p) => p.id === data.paymentId
+    );
+    if (!payment) return;
 
-  const receiptElement = document.getElementById(`receipt-${payment.id}`);
-  if (!receiptElement) {
-    console.error("Elemen kuitansi tidak ditemukan:", `receipt-${payment.id}`);
-    return;
-  }
+    const receiptElement = document.getElementById(`receipt-${payment.id}`);
+    if (!receiptElement) {
+      console.error(
+        "Elemen kuitansi tidak ditemukan:",
+        `receipt-${payment.id}`
+      );
+      return;
+    }
 
-  // === PDF ===
-  if (data.format === "pdf") {
-    const canvas = await html2canvas(receiptElement, { scale: 2 });
-    const imgData = canvas.toDataURL("image/png");
-    const pdf = new jsPDF("p", "mm", "a4");
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-    pdf.save(`Kuitansi_${invoice.student_name}_${payment.receipt_number}.pdf`);
-  }
-};
-
-
+    // === PDF ===
+    if (data.format === "pdf") {
+      const canvas = await html2canvas(receiptElement, { scale: 2 });
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save(
+        `Kuitansi_${invoice.student_name}_${payment.receipt_number}.pdf`
+      );
+    }
+  };
 
   const getPaymentMethodIcon = (method?: string) => {
     const iconMap: Record<string, string> = {
@@ -335,10 +344,8 @@ const handleExportReceipt = async (data: { paymentId?: string; format: string })
         className="min-h-full w-full"
         style={{ background: palette.white2, color: palette.black1 }}
       >
-        
         <main className="w-full px-4 md:px-6 md:py-8">
           <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
-            
             <section className="flex-1">
               <LoadingSpinner
                 text="Memuat detail tagihan..."
@@ -395,7 +402,8 @@ const handleExportReceipt = async (data: { paymentId?: string; format: string })
   return (
     <div
       className="min-h-full w-full"
-      style={{ background: palette.white2, color: palette.black1 }}>
+      style={{ background: palette.white2, color: palette.black1 }}
+    >
       <main className="w-full">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Main Content */}
@@ -614,7 +622,6 @@ const handleExportReceipt = async (data: { paymentId?: string; format: string })
                   className="divide-y"
                   style={{ borderColor: palette.silver1 }}
                 >
-                
                   {invoice.payment_history.map((payment) => {
                     const paymentDate = normalizeISOToLocalNoon(payment.date);
                     return (
@@ -667,7 +674,7 @@ const handleExportReceipt = async (data: { paymentId?: string; format: string })
                               )}
                             </div>
                           </div>
-                          
+
                           <div className="flex gap-2">
                             <Btn
                               palette={palette}
@@ -681,25 +688,24 @@ const handleExportReceipt = async (data: { paymentId?: string; format: string })
                             </Btn>
                           </div>
                         </div>
-
-                        
                       </div>
                     );
                   })}
                 </div>
               </SectionCard>
             )}
-             {/* Cetak Kuitansi */}
+            {/* Cetak Kuitansi */}
             <SchoolReceiptExport
-                  open={openReceipt}
-                  onClose={() => setOpenReceipt(false)}
-                  palette={palette}
-                  paymentOptions={invoice.payment_history.map((p) => ({
-                    value: p.id,
-                    label: `${idr(p.amount)} — ${p.method ?? "Metode tidak diketahui"}`,
-                  }))}
-                  onSubmit={(data) => handleExportReceipt(data)}/>
-            
+              open={openReceipt}
+              onClose={() => setOpenReceipt(false)}
+              palette={palette}
+              paymentOptions={invoice.payment_history.map((p) => ({
+                value: p.id,
+                label: `${idr(p.amount)} — ${p.method ?? "Metode tidak diketahui"}`,
+              }))}
+              onSubmit={(data) => handleExportReceipt(data)}
+            />
+
             {/* Template Kuitansi (off-screen) */}
             {invoice.payment_history.map((payment) => (
               <div
@@ -724,19 +730,38 @@ const handleExportReceipt = async (data: { paymentId?: string; format: string })
                 >
                   KUITANSI PEMBAYARAN
                 </h2>
-                <p><strong>Nama Siswa:</strong> {invoice.student_name}</p>
-                <p><strong>Nama Tagihan:</strong> {invoice.title}</p>
-                <p><strong>Kelas:</strong> {invoice.class_name}</p>
-                <p><strong>Jumlah Pembayaran:</strong> {idr(payment.amount)}</p>
-                <p><strong>Metode:</strong> {payment.method}</p>
-                <p><strong>No. Kuitansi:</strong> {payment.receipt_number}</p>
                 <p>
-                  <strong>Tanggal:</strong> {dateFmt(payment.date)} • {timeFmt(payment.date)}
+                  <strong>Nama Siswa:</strong> {invoice.student_name}
                 </p>
-                {payment.notes && <p><strong>Catatan:</strong> {payment.notes}</p>}
+                <p>
+                  <strong>Nama Tagihan:</strong> {invoice.title}
+                </p>
+                <p>
+                  <strong>Kelas:</strong> {invoice.class_name}
+                </p>
+                <p>
+                  <strong>Jumlah Pembayaran:</strong> {idr(payment.amount)}
+                </p>
+                <p>
+                  <strong>Metode:</strong> {payment.method}
+                </p>
+                <p>
+                  <strong>No. Kuitansi:</strong> {payment.receipt_number}
+                </p>
+                <p>
+                  <strong>Tanggal:</strong> {dateFmt(payment.date)} •{" "}
+                  {timeFmt(payment.date)}
+                </p>
+                {payment.notes && (
+                  <p>
+                    <strong>Catatan:</strong> {payment.notes}
+                  </p>
+                )}
                 <div style={{ marginTop: "20px", textAlign: "right" }}>
                   <p>Jakarta, {dateFmt(payment.date)}</p>
-                  <p><strong>Bendahara Sekolah</strong></p>
+                  <p>
+                    <strong>Bendahara Sekolah</strong>
+                  </p>
                 </div>
               </div>
             ))}

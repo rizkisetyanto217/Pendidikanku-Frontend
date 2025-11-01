@@ -13,7 +13,7 @@ import {
   SectionCard,
   Btn,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 import {
   UserPlus,
   ChevronRight,
@@ -24,8 +24,8 @@ import {
   ArrowLeft,
 } from "lucide-react";
 
-import TambahGuru from "./components/SchoolAddTeacher";
-import UploadFileGuru from "./components/SchoolUploadFileTeacher";
+import TambahGuru from "./components/CSchoolAddTeacher";
+import UploadFileGuru from "./components/CSchoolUploadFileTeacher";
 
 /* ================= Types (API) ================= */
 export interface TeacherApiRow {
@@ -559,7 +559,7 @@ const TeachersPage: React.FC<SchoolTeacherProps> = ({ showBack = false }) => {
 
   return (
     <div
-      className="min-h-screen w-full"
+      className="w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
       {/* Modals */}

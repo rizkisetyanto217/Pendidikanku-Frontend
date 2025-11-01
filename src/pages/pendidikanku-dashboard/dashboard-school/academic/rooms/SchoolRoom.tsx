@@ -11,7 +11,7 @@ import {
   Badge,
   Btn,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 import {
   Building2,
   MapPin,
@@ -439,49 +439,48 @@ export default function RoomSchool({
   });
 
   // ✅ Fungsi hapus ruangan (dengan konfirmasi Swal)
-const handleDeleteRoom = (room: Room) => {
-  if (delRoom.isPending) return;
+  const handleDeleteRoom = (room: Room) => {
+    if (delRoom.isPending) return;
 
-  Swal.fire({
-    title: "Hapus ruangan?",
-    text: "Data ruangan akan dihapus permanen.",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonText: "Ya, hapus",
-    cancelButtonText: "Batal",
-    confirmButtonColor: "#d33",
-    cancelButtonColor: "#6c757d",
-  }).then((res) => {
-    if (res.isConfirmed) {
-      delRoom.mutate(room.id, {
-        onSuccess: async () => {
-          await qc.invalidateQueries({
-            queryKey: QK.ROOMS_PUBLIC(masjid_id ?? "", q, page, perPage),
-          });
-          Swal.fire({
-            icon: "success",
-            title: "Berhasil",
-            text: `Ruangan "${room.name}" berhasil dihapus.`,
-            timer: 1500,
-            showConfirmButton: false,
-          });
-        },
-        onError: (err: any) => {
-          const msg =
-            err?.response?.data?.message ||
-            err.message ||
-            "Terjadi kesalahan saat menghapus ruangan.";
-          Swal.fire({
-            icon: "error",
-            title: "Gagal",
-            text: msg,
-          });
-        },
-      });
-    }
-  });
-};
-
+    Swal.fire({
+      title: "Hapus ruangan?",
+      text: "Data ruangan akan dihapus permanen.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Ya, hapus",
+      cancelButtonText: "Batal",
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#6c757d",
+    }).then((res) => {
+      if (res.isConfirmed) {
+        delRoom.mutate(room.id, {
+          onSuccess: async () => {
+            await qc.invalidateQueries({
+              queryKey: QK.ROOMS_PUBLIC(masjid_id ?? "", q, page, perPage),
+            });
+            Swal.fire({
+              icon: "success",
+              title: "Berhasil",
+              text: `Ruangan "${room.name}" berhasil dihapus.`,
+              timer: 1500,
+              showConfirmButton: false,
+            });
+          },
+          onError: (err: any) => {
+            const msg =
+              err?.response?.data?.message ||
+              err.message ||
+              "Terjadi kesalahan saat menghapus ruangan.";
+            Swal.fire({
+              icon: "error",
+              title: "Gagal",
+              text: msg,
+            });
+          },
+        });
+      }
+    });
+  };
 
   // Guard path
   if (!masjid_id) {
@@ -495,7 +494,7 @@ const handleDeleteRoom = (room: Room) => {
 
   return (
     <div
-      className="min-h-screen w-full"
+      className="w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
       <main className="w-full">
@@ -666,10 +665,10 @@ const handleDeleteRoom = (room: Room) => {
                             variant="ghost"
                             title="Hapus"
                             onClick={() => handleDeleteRoom(r)}
-                            disabled={delRoom.isPending}>
+                            disabled={delRoom.isPending}
+                          >
                             <Trash2 size={16} />
                           </Btn>
-
                         </div>
                       </div>
                     ))

@@ -19,7 +19,7 @@ import {
   Badge,
   Btn,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 
@@ -142,22 +142,18 @@ export default function TeacherSubjectsList() {
     if (term !== "all") list = list.filter((s) => s.academicTerm === term);
 
     const q = deferredSearch.toLowerCase();
-    if (q)
-      list = list.filter((s) =>
-        s.name.toLowerCase().includes(q)
-      );
+    if (q) list = list.filter((s) => s.name.toLowerCase().includes(q));
 
-    if (sortBy === "name") list = [...list].sort((a, b) => a.name.localeCompare(b.name));
-    if (sortBy === "students") list = [...list].sort((a, b) => b.studentsCount - a.studentsCount);
+    if (sortBy === "name")
+      list = [...list].sort((a, b) => a.name.localeCompare(b.name));
+    if (sortBy === "students")
+      list = [...list].sort((a, b) => b.studentsCount - a.studentsCount);
 
     return list;
   }, [subjects, deferredSearch, day, level, term, sortBy]);
 
   return (
-    <div
-      className="min-h-screen"
-      
-    >
+    <div className="min-h-screen">
       <div className="w-full space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -191,7 +187,12 @@ export default function TeacherSubjectsList() {
           {[
             { label: "Hari", value: day, set: setDay, options: days },
             { label: "Level", value: level, set: setLevel, options: levels },
-            { label: "Tahun Ajaran", value: term, set: setTerm, options: terms },
+            {
+              label: "Tahun Ajaran",
+              value: term,
+              set: setTerm,
+              options: terms,
+            },
           ].map((f) => (
             <div key={f.label}>
               <label className="text-sm font-medium block mb-1">
@@ -279,8 +280,7 @@ export default function TeacherSubjectsList() {
               style={{
                 background:
                   viewMode === "simple" ? palette.primary : "transparent",
-                color:
-                  viewMode === "simple" ? palette.white1 : palette.black1,
+                color: viewMode === "simple" ? palette.white1 : palette.black1,
               }}
             >
               <LayoutList size={16} /> Simple
@@ -328,11 +328,17 @@ export default function TeacherSubjectsList() {
                 {viewMode === "detailed" && (
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center gap-2">
-                      <CalendarDays size={14} style={{ color: palette.primary }} />
+                      <CalendarDays
+                        size={14}
+                        style={{ color: palette.primary }}
+                      />
                       {s.day} • {s.time}
                     </div>
                     <div className="flex items-center gap-2">
-                      <GraduationCap size={14} style={{ color: palette.primary }} />
+                      <GraduationCap
+                        size={14}
+                        style={{ color: palette.primary }}
+                      />
                       {s.academicTerm}
                     </div>
                     <div className="flex items-center gap-2">

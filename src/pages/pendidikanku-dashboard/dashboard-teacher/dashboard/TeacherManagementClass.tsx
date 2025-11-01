@@ -6,12 +6,12 @@ import {
   Btn,
   SectionCard,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 
 // ⬇️ Sesuaikan path import sesuai struktur project
 import { ArrowLeft, Users, BookOpen, Calendar } from "lucide-react";
-import ParentTopBar from "../../components/home/ParentTopBar";
-import ParentSidebar from "../../components/home/ParentSideBar";
+import ParentTopBar from "../../components/home/CParentTopBar";
+import ParentSidebar from "../../components/home/CParentSideBar";
 import ModalEditManagementClass, {
   ClassInfo,
 } from "./TeacherModalEditManagementClass";
@@ -109,7 +109,7 @@ const ManagementClass = () => {
 
   return (
     <div
-      className="min-h-screen w-full"
+      className="w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
       {/* Topbar */}

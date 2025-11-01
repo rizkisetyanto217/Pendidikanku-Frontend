@@ -9,9 +9,9 @@ import {
   Badge,
   Btn,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
-import ParentTopBar from "../../components/home/ParentTopBar";
-import ParentSidebar from "../../components/home/ParentSideBar";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
+import ParentTopBar from "../../components/home/CParentTopBar";
+import ParentSidebar from "../../components/home/CParentSideBar";
 
 /* ========= Types ========= */
 type AnnType = "info" | "warning" | "success";
@@ -129,7 +129,7 @@ export default function StudentAnnouncement() {
 
   return (
     <div
-      className="min-h-screen w-full"
+      className="w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
       {/* Top Bar */}

@@ -9,10 +9,10 @@ import {
   Btn,
   Badge,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
+import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
 import ModalEditSchedule from "@/pages/pendidikanku-dashboard/dashboard-school/dashboard/SchoolModalEditSchedule";
-import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/ParentSideBar";
+import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/CParentSideBar";
 
 export type TodayScheduleItem = {
   title: string;
@@ -63,7 +63,7 @@ export default function DetailSchedule() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   return (
     <div
-      className="min-h-screen w-full"
+      className="w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
       {/* Modal Edit */}

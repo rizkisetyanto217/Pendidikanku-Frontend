@@ -20,12 +20,12 @@ import {
   mockTodaySchedule,
   TodayScheduleItem,
 } from "../dashboard-school/calender/TodaySchedule";
-import { Badge, Btn, SectionCard } from "../components/ui/Primitives";
-import ParentTopBar from "../components/home/ParentTopBar";
-import ParentSidebar from "../components/home/ParentSideBar";
-import TodayScheduleCard from "../components/card/TodayScheduleCard";
-import BillsSectionCard from "../components/card/BillsSectionCard";
-import AnnouncementsListCard from "../components/card/AnnouncementsListCard";
+import { Badge, Btn, SectionCard } from "../components/ui/CPrimitives";
+import ParentTopBar from "../components/home/CParentTopBar";
+import ParentSidebar from "../components/home/CParentSideBar";
+import TodayScheduleCard from "../components/card/CTodayScheduleCard";
+import BillsSectionCard from "../components/card/CBillsSectionCard";
+import AnnouncementsListCard from "../components/card/CAnnouncementsListCard";
 
 /* ================= Types (API & UI) ================ */
 export type AnnouncementUI = {
@@ -453,7 +453,7 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
 
   return (
     <div
-      className="min-h-screen w-full"
+      className="w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
       {/* Main */}

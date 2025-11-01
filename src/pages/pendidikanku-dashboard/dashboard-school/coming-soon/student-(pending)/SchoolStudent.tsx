@@ -14,8 +14,7 @@ import {
   Btn,
   Badge,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
-
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 
 import TambahSiswa from "./modal/SchoolAddStudent";
 import UploadFileSiswa from "./modal/SchoolUploadFileStudent";
@@ -300,7 +299,7 @@ const StudentsPage: React.FC<SchoolStudentProps> = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   return (
     <div
-      className="min-h-screen w-full"
+      className="w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
       {/* Modals */}

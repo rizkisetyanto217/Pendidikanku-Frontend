@@ -7,10 +7,10 @@ import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import {
   SectionCard,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
-import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/ParentSideBar";
+import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
+import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/CParentSideBar";
 
 import type { LucideIcon } from "lucide-react";
 import {
@@ -131,7 +131,7 @@ export default function SchoolMenuGrids() {
 
   return (
     <div
-      className="min-h-screen w-full "
+      className="w-full "
       style={{ background: palette.white2, color: palette.black1 }}
     >
       <main className="w-full">

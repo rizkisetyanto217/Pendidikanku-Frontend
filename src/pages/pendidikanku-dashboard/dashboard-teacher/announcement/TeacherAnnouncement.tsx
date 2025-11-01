@@ -9,9 +9,9 @@ import {
   Badge,
   Btn,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
+import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
 
 import {
   Megaphone,
@@ -29,8 +29,8 @@ import {
   EyeOff,
   Clock,
 } from "lucide-react";
-import AnnouncementsListCard from "../../components/card/AnnouncementsListCard";
-import ParentSidebar from "../../components/home/ParentSideBar";
+import AnnouncementsListCard from "../../components/card/CAnnouncementsListCard";
+import ParentSidebar from "../../components/home/CParentSideBar";
 
 /* ================= Types ================ */
 /* ================= Types ================ */
@@ -327,7 +327,7 @@ export default function TeacherAnnouncements() {
 
   return (
     <div
-      className="min-h-screen w-full"
+      className="w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
       <ParentTopBar

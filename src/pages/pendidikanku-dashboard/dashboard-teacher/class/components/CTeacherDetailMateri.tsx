@@ -7,13 +7,13 @@ import {
   Btn,
   Badge,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 
 import { ArrowLeft, Calendar, Paperclip } from "lucide-react";
 import ModalEditMateri, { EditMateriPayload } from "./CTeacherModalEditMateri";
 import Swal from "sweetalert2";
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
-import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/ParentSideBar";
+import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
+import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/CParentSideBar";
 
 /** ===== Types ===== */
 type MaterialItem = {
@@ -92,7 +92,7 @@ export default function DetailMateri() {
 
   return (
     <div
-      className="min-h-screen w-full"
+      className="w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
       <ModalEditMateri

@@ -12,3 +12,16 @@ blockquote {
   @apply pl-4 ml-0 border-l-4 italic text-sm text-[#555] border-[#ccc] dark:text-[#ccc] dark:border-[#444];
 }
 
+/* ==== Global height & scroll ==== */
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  overflow-y: auto; /* scroll hanya kalau perlu */
+  overscroll-behavior: contain; /* enak di mobile, ga 'mantul' */
+}

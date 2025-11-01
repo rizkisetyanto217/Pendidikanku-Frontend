@@ -4,7 +4,7 @@ import { X } from "lucide-react";
 import {
   Btn,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 
 export type EditAssignmentPayload = {
   title: string;

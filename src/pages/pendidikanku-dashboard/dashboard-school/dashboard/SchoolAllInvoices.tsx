@@ -6,7 +6,7 @@ import {
   SectionCard,
   Btn,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 import axios from "@/lib/axios";
 import { ArrowLeft, Plus, CalendarDays } from "lucide-react";
 import Swal from "sweetalert2";
@@ -262,7 +262,9 @@ export default function AllInvoices() {
     setOpenEdit(true);
   };
 
-  const handleEdit = async (payload: Omit<BillItem, "id"> & { id?: string }) => {
+  const handleEdit = async (
+    payload: Omit<BillItem, "id"> & { id?: string }
+  ) => {
     if (!selected) return;
     const id = selected.id;
     const updated: BillItem = { ...payload, id };
@@ -301,7 +303,7 @@ export default function AllInvoices() {
 
   return (
     <div
-      className="min-h-screen w-full transition-colors duration-200"
+      className="w-full transition-colors duration-200"
       style={{ background: palette.white2, color: palette.black1 }}
     >
       {/* Modal Add & Edit */}
@@ -352,7 +354,10 @@ export default function AllInvoices() {
 
           {/* ===== Daftar Tagihan (Card) ===== */}
           <SectionCard palette={palette}>
-            <div className="p-4 border-b" style={{ borderColor: palette.silver1 }}>
+            <div
+              className="p-4 border-b"
+              style={{ borderColor: palette.silver1 }}
+            >
               <h2 className="text-xl font-semibold">Daftar Tagihan</h2>
               <p className="text-sm opacity-90 mt-1">
                 Berikut adalah daftar semua tagihan sekolah

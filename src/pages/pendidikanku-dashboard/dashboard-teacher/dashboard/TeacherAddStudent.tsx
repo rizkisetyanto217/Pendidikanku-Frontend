@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import {
   Btn,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 import InputField from "@/components/common/main/InputField";
 
 export type StudentForm = {

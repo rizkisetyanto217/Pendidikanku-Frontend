@@ -12,9 +12,9 @@ import {
   Badge,
   Btn,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
-import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/ParentSideBar";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
+import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
+import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/CParentSideBar";
 
 // Icons
 import {
@@ -29,9 +29,9 @@ import {
 } from "lucide-react";
 
 // Modals
-import Export from "./modal/SchoolExport";
-import Pembayaran from "./modal/SchoolPayment";
-import CreateInvoiceModal from "./modal/SchoolBill";
+import Export from "./modal/CSchoolExport";
+import Pembayaran from "./modal/CSchoolPayment";
+import CreateInvoiceModal from "./modal/CSchoolBill";
 
 /* ================== Date helpers ================== */
 const atLocalNoon = (d: Date) => {
@@ -229,7 +229,7 @@ const StatusBadge: React.FC<{ status: InvoiceStatus; palette: Palette }> = ({
 }) => {
   const statusConfig = {
     paid: { variant: "success" as const, icon: "✓", label: "Lunas" },
-    
+
     unpaid: { variant: "outline" as const, icon: "○", label: "Belum Bayar" },
     overdue: { variant: "warning" as const, icon: "⚠", label: "Terlambat" },
   };
@@ -1001,7 +1001,6 @@ const SchoolFinance: React.FC<SchoolFinanceProps> = ({
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Main Content */}
           <section className="flex-1 flex flex-col space-y-6 min-w-0">
-            
             {/* Header */}
             <section className="flex items-center justify-between">
               <div className="flex items-center font-semibold text-lg">
@@ -1018,7 +1017,6 @@ const SchoolFinance: React.FC<SchoolFinanceProps> = ({
                 <h1>Keuangan Sekolah</h1>
               </div>
             </section>
-
 
             {/* Summary Cards */}
             <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 py-3 md:py-0">
@@ -1145,7 +1143,7 @@ const SchoolFinance: React.FC<SchoolFinanceProps> = ({
                 >
                   <option value="semua">Semua Status</option>
                   <option value="unpaid">Belum Bayar</option>
-                  
+
                   <option value="paid">Lunas</option>
                   <option value="overdue">Terlambat</option>
                 </select>

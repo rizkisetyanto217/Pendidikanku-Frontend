@@ -10,7 +10,7 @@ import {
   Badge,
   Btn,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 import { ArrowLeft, Loader2, Building2, MapPin, Users } from "lucide-react";
 
 /* ===================== TYPES (UI) ================= */
@@ -234,7 +234,7 @@ export default function DetailRoomSchool() {
   if (roomQuery.isLoading) {
     return (
       <div
-        className="min-h-screen w-full grid place-items-center"
+        className="w-full grid place-items-center"
         style={{ background: palette.white2 }}
       >
         <div className="flex flex-col items-center gap-3">
@@ -254,7 +254,7 @@ export default function DetailRoomSchool() {
   if (!room) {
     return (
       <div
-        className="min-h-screen w-full"
+        className="w-full"
         style={{ background: palette.white2, color: palette.black1 }}
       >
         <main className="px-4 md:px-6 md:py-8">
@@ -279,10 +279,9 @@ export default function DetailRoomSchool() {
     );
   }
 
-
   return (
     <div
-      className="min-h-screen w-full"
+      className="w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
       <main className="w-full">

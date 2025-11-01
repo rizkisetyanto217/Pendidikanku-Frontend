@@ -5,7 +5,7 @@ import {
   Badge,
   type Palette,
   SectionCard,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 
 type MaterialType = "pdf" | "doc" | "ppt" | "link" | "video";
 

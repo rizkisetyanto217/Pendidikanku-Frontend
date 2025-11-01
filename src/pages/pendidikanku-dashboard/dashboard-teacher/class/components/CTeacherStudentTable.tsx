@@ -3,8 +3,8 @@ import {
   Badge,
   Btn,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
-import MiniBar from "@/pages/pendidikanku-dashboard/components/ui/MiniBar";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
+import MiniBar from "@/pages/pendidikanku-dashboard/components/ui/CMiniBar";
 
 export type AttendanceStatus = "hadir" | "sakit" | "izin" | "alpa" | "online";
 export type AttendanceMode = "onsite" | "online";

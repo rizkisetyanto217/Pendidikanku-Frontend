@@ -7,9 +7,9 @@ import {
   Btn,
   type Palette,
   Badge,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
-import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/ParentSideBar";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
+import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
+import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/CParentSideBar";
 import {
   ArrowLeft,
   Users,
@@ -282,7 +282,7 @@ const HomeroomTeacher: React.FC = () => {
 
   return (
     <div
-      className="min-h-screen w-full transition-colors duration-200"
+      className="w-full transition-colors duration-200"
       style={{ background: palette.white2, color: palette.black1 }}
     >
       {/* TopBar */}

@@ -8,8 +8,7 @@ import {
   Btn,
   Badge,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
-
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 
 // Hanya tipe untuk state yang dibawa dari StudentDashboard
 type LocationState = {
@@ -50,15 +49,11 @@ export default function StudentDetail() {
 
   return (
     <div
-      className="min-h-screen w-full"
+      className="w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      
-
       <main className="w-full px-4 md:px-6 py-4   md:py-8">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
-          
-
           <div className="flex-1 flex flex-col space-y-6 min-w-0">
             <div className="md:flex hidden items-center gap-3">
               <Btn

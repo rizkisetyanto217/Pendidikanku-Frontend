@@ -4,7 +4,7 @@ import api from "@/lib/axios";
 import {
   Btn,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 
 type InformasiMengajarData = {
   activity: string;

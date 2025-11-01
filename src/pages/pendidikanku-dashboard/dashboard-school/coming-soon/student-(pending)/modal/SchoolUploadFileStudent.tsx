@@ -4,7 +4,7 @@ import {
   SectionCard,
   Btn,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 import { Upload, X, FileSpreadsheet } from "lucide-react";
 
 type Props = {

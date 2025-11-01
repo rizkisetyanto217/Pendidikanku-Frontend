@@ -12,8 +12,8 @@ import {
   Badge,
   Btn,
   type Palette,
-} from "@/pages/pendidikanku-dashboard/components/ui/Primitives";
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/ParentTopBar";
+} from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
+import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
 
 import {
   ArrowLeft,
@@ -24,7 +24,7 @@ import {
   FileDown,
   ClipboardList,
 } from "lucide-react";
-import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/ParentSideBar";
+import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/CParentSideBar";
 
 /* =========================================
    DUMMY SWITCH
@@ -509,11 +509,9 @@ export default function SchoolDetailStudent() {
 
   return (
     <div
-      className="min-h-screen w-full"
+      className="w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-
-
       <main className="mx-auto">
         <div className="lg:flex lg:items-start lg:gap-4">
           <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
