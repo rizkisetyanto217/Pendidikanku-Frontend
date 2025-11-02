@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 
 import WebsiteNavbar from "@/components/common/public/CWebsiteNavbar";
-import WebsiteFooter from "@/pages/pendidikanku-profile/website/website/components/CMasjidkuWebFooter";
+import WebsiteFooter from "@/pages/pendidikanku-profile/website/website/components/CschoolkuWebFooter";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 
@@ -46,7 +46,7 @@ const Section: React.FC<
 /* ================= Page ================= */
 type RoleKey = "murid" | "guru" | "sekolah";
 
-export default function MasjidkuWebTutorial() {
+export default function schoolkuWebTutorial() {
   const { isDark, themeName } = useHtmlDarkMode();
   const theme = pickTheme(themeName as ThemeName, isDark);
 

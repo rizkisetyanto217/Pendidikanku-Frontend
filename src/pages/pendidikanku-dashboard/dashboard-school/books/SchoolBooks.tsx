@@ -54,7 +54,7 @@ export type UsageItem = {
 
 export type BookAPI = {
   books_id: string;
-  books_masjid_id: string;
+  books_school_id: string;
   books_title: string;
   books_author?: string | null;
   books_desc?: string | null;
@@ -71,7 +71,7 @@ export type BooksResponse = {
 
 type PublicBook = {
   book_id: string;
-  book_masjid_id: string;
+  book_school_id: string;
   book_title: string;
   book_author?: string | null;
   book_desc?: string | null;
@@ -117,25 +117,25 @@ function buildBookFormData(input: BookFormInput) {
 }
 
 /* =========================================================
-   Data Hook: /public/{masjid_id}/books/list
+   Data Hook: /public/{school_id}/books/list
 ========================================================= */
 function useBooksListPublic(params: {
-  masjidId: string;
+  schoolId: string;
   limit: number;
   offset: number;
 }) {
-  const { masjidId, limit, offset } = params;
+  const { schoolId, limit, offset } = params;
   return useQuery<BooksResponse>({
-    queryKey: ["books-list-public", { masjidId, limit, offset }],
+    queryKey: ["books-list-public", { schoolId, limit, offset }],
     queryFn: async () => {
       const r = await axios.get<PublicBooksResponse>(
-        `/public/${encodeURIComponent(masjidId)}/books/list`,
+        `/public/${encodeURIComponent(schoolId)}/books/list`,
         { withCredentials: false }
       );
 
       const mapped: BookAPI[] = (r.data?.data ?? []).map((b) => ({
         books_id: b.book_id,
-        books_masjid_id: b.book_masjid_id,
+        books_school_id: b.book_school_id,
         books_title: b.book_title,
         books_author: b.book_author ?? null,
         books_desc: b.book_desc ?? null,
@@ -160,13 +160,13 @@ function useBooksListPublic(params: {
 /* =========================================================
    Admin Mutations
 ========================================================= */
-function useCreateBook(masjidId: string) {
+function useCreateBook(schoolId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: BookFormInput) => {
       const fd = buildBookFormData(payload);
       const { data } = await axios.post(
-        `/api/a/${encodeURIComponent(masjidId)}/books`,
+        `/api/a/${encodeURIComponent(schoolId)}/books`,
         fd,
         {
           withCredentials: true,
@@ -532,13 +532,13 @@ const SchoolBooks: React.FC<{
   const navigate = useNavigate();
   const [sp, setSp] = useSearchParams();
 
-  // Ambil masjidId dari path param
+  // Ambil schoolId dari path param
   const params = useParams<{
-    masjidId?: string;
-    masjid_id?: string;
+    schoolId?: string;
+    school_id?: string;
     slug?: string;
   }>();
-  const masjidId = params.masjidId || params.masjid_id || "";
+  const schoolId = params.schoolId || params.school_id || "";
   const base = params.slug ? `/${encodeURIComponent(params.slug)}` : "";
 
   /* 🔎 Search sinkron URL */
@@ -559,7 +559,7 @@ const SchoolBooks: React.FC<{
   } = useOffsetLimit(totalDummy, 20, 200);
 
   /* Fetch data (client slice di server hook agar UI konsisten) */
-  const booksQ = useBooksListPublic({ masjidId, limit, offset });
+  const booksQ = useBooksListPublic({ schoolId, limit, offset });
   const data = booksQ.data?.data ?? [];
   const total = booksQ.data?.pagination?.total ?? 0;
 
@@ -577,7 +577,7 @@ const SchoolBooks: React.FC<{
   }, [data, q]);
 
   // *** Actions
-  const createBook = useCreateBook(masjidId);
+  const createBook = useCreateBook(schoolId);
   const updateBook = useUpdateBook();
   const deleteBook = useDeleteBook();
   const [bookModal, setBookModal] = useState<{

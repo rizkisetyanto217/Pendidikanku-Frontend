@@ -13,7 +13,7 @@ import {
 import WebsiteNavbar from "@/components/common/public/CWebsiteNavbar";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
-import WebsiteFooter from "../components/CMasjidkuWebFooter";
+import WebsiteFooter from "../components/CschoolkuWebFooter";
 
 /* Helpers layout */
 const FullBleed: React.FC<React.PropsWithChildren<{ className?: string }>> = ({
@@ -197,7 +197,7 @@ const IntroModal: React.FC<{
 };
 
 /* PAGE: Intro only → redirect to login/register */
-export default function MasjidkuRegisterNow() {
+export default function schoolkuRegisterNow() {
   const navigate = useNavigate();
   const { isDark, themeName } = useHtmlDarkMode();
   const theme = pickTheme(themeName as ThemeName, isDark);

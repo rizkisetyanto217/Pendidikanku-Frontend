@@ -36,9 +36,9 @@ const defaultFormatHijri = (d: Date) =>
     year: "numeric",
   }).format(d);
 
-const getLocalMasjid = () => {
+const getLocalschool = () => {
   try {
-    return JSON.parse(localStorage.getItem("active_masjid") || "{}");
+    return JSON.parse(localStorage.getItem("active_school") || "{}");
   } catch {
     return {};
   }
@@ -64,16 +64,16 @@ export default function ParentTopBar({
   const match = useMatch("/:id/*");
   const id = params.id ?? match?.params.id ?? "";
 
-  const [masjidName, setMasjidName] = useState(
-    getLocalMasjid().masjid_name || "SekolahIslamKu"
+  const [schoolName, setschoolName] = useState(
+    getLocalschool().school_name || "SekolahIslamKu"
   );
-  const [masjidIcon, setMasjidIcon] = useState(
-    getLocalMasjid().masjid_icon_url || "/image/Gambar-Masjid.jpeg"
+  const [schoolIcon, setschoolIcon] = useState(
+    getLocalschool().school_icon_url || "/image/Gambar-school.jpeg"
   );
   const isFetching = useRef(false);
   const lastFetchedId = useRef<string>("");
 
-  /* ================== FETCH MASJID CONTEXT ================== */
+  /* ================== FETCH school CONTEXT ================== */
   useEffect(() => {
     if (!id || isFetching.current || lastFetchedId.current === id) return;
     isFetching.current = true;
@@ -84,19 +84,19 @@ export default function ParentTopBar({
         const userData = res.data?.data;
         const memberships = userData?.memberships ?? [];
         const current =
-          memberships.find((m: any) => m.masjid_id === id) || memberships[0];
+          memberships.find((m: any) => m.school_id === id) || memberships[0];
         if (!current) return;
 
-        const newMasjid = {
-          masjid_id: current.masjid_id,
-          masjid_name: current.masjid_name || "Tanpa Nama",
-          masjid_icon_url:
-            current.masjid_icon_url || "/image/Gambar-Masjid.jpeg",
+        const newschool = {
+          school_id: current.school_id,
+          school_name: current.school_name || "Tanpa Nama",
+          school_icon_url:
+            current.school_icon_url || "/image/Gambar-school.jpeg",
         };
 
-        localStorage.setItem("active_masjid", JSON.stringify(newMasjid));
-        setMasjidName(newMasjid.masjid_name);
-        setMasjidIcon(newMasjid.masjid_icon_url);
+        localStorage.setItem("active_school", JSON.stringify(newschool));
+        setschoolName(newschool.school_name);
+        setschoolIcon(newschool.school_icon_url);
 
         const role = (
           localStorage.getItem("active_role") || "user"
@@ -201,18 +201,18 @@ export default function ParentTopBar({
           )}
 
           <img
-            src={masjidIcon}
-            alt="Logo Masjid"
+            src={schoolIcon}
+            alt="Logo school"
             className="w-12 h-12 rounded-full object-cover border"
             style={{ borderColor: palette.primary }}
-            onError={(e) => (e.currentTarget.src = "/image/Gambar-Masjid.jpeg")}
+            onError={(e) => (e.currentTarget.src = "/image/Gambar-school.jpeg")}
           />
 
           <span
             className="text-base font-semibold"
             style={{ color: palette.primary }}
           >
-            {masjidName}
+            {schoolName}
           </span>
         </div>
 

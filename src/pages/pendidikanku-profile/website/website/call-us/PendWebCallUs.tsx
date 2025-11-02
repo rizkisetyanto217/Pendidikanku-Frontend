@@ -14,7 +14,7 @@ import {
 import WebsiteNavbar from "@/components/common/public/CWebsiteNavbar";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
-import WebsiteFooter from "../components/CMasjidkuWebFooter";
+import WebsiteFooter from "../components/CschoolkuWebFooter";
 
 const FullBleed: React.FC<React.PropsWithChildren<{ className?: string }>> = ({
   className = "",
@@ -35,7 +35,7 @@ const Section: React.FC<
   </section>
 );
 
-export default function MasjidkuWebCallUs() {
+export default function schoolkuWebCallUs() {
   const { isDark, themeName } = useHtmlDarkMode();
   const theme = pickTheme(themeName as ThemeName, isDark);
 

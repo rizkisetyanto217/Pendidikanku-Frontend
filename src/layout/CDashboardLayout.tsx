@@ -5,7 +5,7 @@ import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import type { Palette } from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
 import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/CParentSideBar";
-import { useActiveMasjidInfo } from "@/hooks/useActiveMasjidInfo";
+import { useActiveschoolInfo } from "@/hooks/useActiveSchoolInfo";
 import {
   TopBarContext,
   type TopBarConfig,
@@ -26,7 +26,7 @@ export default function DashboardLayout() {
     { weekday: "long", day: "2-digit", month: "long", year: "numeric" }
   );
 
-  const { name: activeMasjidName } = useActiveMasjidInfo();
+  const { name: activeschoolName } = useActiveschoolInfo();
 
   const [topBar, setTopBarState] = useState<Required<TopBarConfig>>({
     mode: "menu",
@@ -83,7 +83,7 @@ export default function DashboardLayout() {
           <div className="sticky top-0 z-50">
             <ParentTopBar
               palette={palette}
-              title={topBar.title ?? activeMasjidName ?? "Memuat…"}
+              title={topBar.title ?? activeschoolName ?? "Memuat…"}
               gregorianDate={nowIso}
               hijriDate={hijri}
               showBack={topBar.mode === "back"}

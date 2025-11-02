@@ -34,7 +34,7 @@ import {
 /* ===================== Types ===================== */
 type AcademicTerm = {
   id: string;
-  masjid_id: string;
+  school_id: string;
   academic_year: string;
   name: string;
   start_date: string;
@@ -49,7 +49,7 @@ type AcademicTerm = {
 /* ========== API types ========= */
 type AcademicTermApi = {
   academic_term_id: string;
-  academic_term_masjid_id: string;
+  academic_term_school_id: string;
   academic_term_academic_year: string;
   academic_term_name: string;
   academic_term_start_date: string;
@@ -76,8 +76,8 @@ const dateShort = (iso?: string) =>
       })
     : "-";
 
-const TERMS_QKEY = (masjidId?: string) =>
-  ["academic-terms-merged", masjidId] as const;
+const TERMS_QKEY = (schoolId?: string) =>
+  ["academic-terms-merged", schoolId] as const;
 
 /* ===================== Helpers (tanggal & mapping) ===================== */
 
@@ -142,26 +142,26 @@ const API_PREFIX = "/public";
 const ADMIN_PREFIX = "/a";
 
 /* ===================== Mutations ===================== */
-function useCreateTerm(masjidId?: string) {
+function useCreateTerm(schoolId?: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: TermPayload) => {
       const apiBody = mapTermPayloadToApi(payload);
-      const url = `${ADMIN_PREFIX}/${encodeURIComponent(masjidId!)}/academic-terms`;
+      const url = `${ADMIN_PREFIX}/${encodeURIComponent(schoolId!)}/academic-terms`;
       const { data } = await axios.post(url, apiBody);
       return data;
     },
     onSuccess: async () => {
-      await qc.invalidateQueries({ queryKey: TERMS_QKEY(masjidId) });
+      await qc.invalidateQueries({ queryKey: TERMS_QKEY(schoolId) });
       await qc.refetchQueries({
-        queryKey: TERMS_QKEY(masjidId),
+        queryKey: TERMS_QKEY(schoolId),
         type: "active",
       });
     },
   });
 }
 
-function useUpdateTerm(masjidId?: string) {
+function useUpdateTerm(schoolId?: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({
@@ -173,17 +173,17 @@ function useUpdateTerm(masjidId?: string) {
     }) => {
       const apiBody = mapTermPayloadToApi(payload);
       const { data } = await axios.patch(
-        `${ADMIN_PREFIX}/${encodeURIComponent(masjidId!)}/academic-terms/${id}`,
+        `${ADMIN_PREFIX}/${encodeURIComponent(schoolId!)}/academic-terms/${id}`,
         apiBody
       );
       return data;
     },
     onMutate: async ({ id, payload }) => {
-      await qc.cancelQueries({ queryKey: TERMS_QKEY(masjidId) });
-      const previous = qc.getQueryData<AcademicTerm[]>(TERMS_QKEY(masjidId));
+      await qc.cancelQueries({ queryKey: TERMS_QKEY(schoolId) });
+      const previous = qc.getQueryData<AcademicTerm[]>(TERMS_QKEY(schoolId));
       if (previous) {
         qc.setQueryData<AcademicTerm[]>(
-          TERMS_QKEY(masjidId),
+          TERMS_QKEY(schoolId),
           previous.map((t) =>
             t.id === id
               ? ({
@@ -203,45 +203,45 @@ function useUpdateTerm(masjidId?: string) {
       return { previous };
     },
     onError: (_e, _vars, ctx) => {
-      if (ctx?.previous) qc.setQueryData(TERMS_QKEY(masjidId), ctx.previous);
+      if (ctx?.previous) qc.setQueryData(TERMS_QKEY(schoolId), ctx.previous);
     },
     onSuccess: async () => {
-      await qc.invalidateQueries({ queryKey: TERMS_QKEY(masjidId) });
+      await qc.invalidateQueries({ queryKey: TERMS_QKEY(schoolId) });
       await qc.refetchQueries({
-        queryKey: TERMS_QKEY(masjidId),
+        queryKey: TERMS_QKEY(schoolId),
         type: "active",
       });
     },
   });
 }
 
-function useDeleteTerm(masjidId?: string) {
+function useDeleteTerm(schoolId?: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
       const { data } = await axios.delete(
-        `${ADMIN_PREFIX}/${encodeURIComponent(masjidId!)}/academic-terms/${id}`
+        `${ADMIN_PREFIX}/${encodeURIComponent(schoolId!)}/academic-terms/${id}`
       );
       return data ?? { ok: true };
     },
     onMutate: async (id) => {
-      await qc.cancelQueries({ queryKey: TERMS_QKEY(masjidId) });
-      const previous = qc.getQueryData<AcademicTerm[]>(TERMS_QKEY(masjidId));
+      await qc.cancelQueries({ queryKey: TERMS_QKEY(schoolId) });
+      const previous = qc.getQueryData<AcademicTerm[]>(TERMS_QKEY(schoolId));
       if (previous) {
         qc.setQueryData<AcademicTerm[]>(
-          TERMS_QKEY(masjidId),
+          TERMS_QKEY(schoolId),
           previous.filter((t) => t.id !== id)
         );
       }
       return { previous };
     },
     onError: (_e, _vars, ctx) => {
-      if (ctx?.previous) qc.setQueryData(TERMS_QKEY(masjidId), ctx.previous);
+      if (ctx?.previous) qc.setQueryData(TERMS_QKEY(schoolId), ctx.previous);
     },
     onSuccess: async () => {
-      await qc.invalidateQueries({ queryKey: TERMS_QKEY(masjidId) });
+      await qc.invalidateQueries({ queryKey: TERMS_QKEY(schoolId) });
       await qc.refetchQueries({
-        queryKey: TERMS_QKEY(masjidId),
+        queryKey: TERMS_QKEY(schoolId),
         type: "active",
       });
     },
@@ -415,7 +415,7 @@ const AcademicSchool: React.FC<{
   backTo?: string;
   backLabel?: string;
 }> = () => {
-  const { masjid_id } = useParams<{ masjid_id?: string }>();
+  const { school_id } = useParams<{ school_id?: string }>();
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
@@ -427,19 +427,19 @@ const AcademicSchool: React.FC<{
   }, [setTopBar, resetTopBar]);
 
   const termsQ = useQuery({
-    queryKey: TERMS_QKEY(masjid_id),
-    enabled: !!masjid_id,
+    queryKey: TERMS_QKEY(school_id),
+    enabled: !!school_id,
     staleTime: 60_000,
     retry: 1,
     queryFn: async (): Promise<AcademicTerm[]> => {
       const res = await axios.get<AdminTermsResponse>(
-        `${API_PREFIX}/${encodeURIComponent(masjid_id!)}/academic-terms/list`,
+        `${API_PREFIX}/${encodeURIComponent(school_id!)}/academic-terms/list`,
         { params: { limit: 999, offset: 0, _: Date.now() } }
       );
       const raw = res.data?.data ?? [];
       return raw.map((x) => ({
         id: x.academic_term_id,
-        masjid_id: x.academic_term_masjid_id,
+        school_id: x.academic_term_school_id,
         academic_year: x.academic_term_academic_year,
         name: x.academic_term_name,
         start_date: x.academic_term_start_date,
@@ -494,9 +494,9 @@ const AcademicSchool: React.FC<{
     return actives[0] ?? terms[0] ?? null;
   }, [terms]);
 
-  const createTerm = useCreateTerm(masjid_id);
-  const updateTerm = useUpdateTerm(masjid_id);
-  const deleteTerm = useDeleteTerm(masjid_id);
+  const createTerm = useCreateTerm(school_id);
+  const updateTerm = useUpdateTerm(school_id);
+  const deleteTerm = useDeleteTerm(school_id);
 
   const [modal, setModal] = useState<{
     mode: "create" | "edit";

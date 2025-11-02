@@ -29,7 +29,7 @@ type Props = {
   variant?: "primary" | "soft" | "ghost";
 
   /** ⬇️ baru */
-  masjidSlug?: string; // contoh: "masjid-ar-raudhah"
+  schoolSlug?: string; // contoh: "school-ar-raudhah"
   socialLinks?: SocialLinks; // kalau sudah dikasih, fetch tidak jalan
   prefetchOnHover?: boolean; // default true
 };
@@ -69,7 +69,7 @@ export default function ShareBCLectureSessionsButton({
   buttonLabel = "Bagikan",
   className,
   variant = "primary",
-  masjidSlug,
+  schoolSlug,
   socialLinks,
   prefetchOnHover = true,
 }: Props) {
@@ -86,37 +86,37 @@ export default function ShareBCLectureSessionsButton({
     [url]
   );
 
-  /* ============== Lazy fetch data masjid dari slug ============== */
-  const shouldFetch = open && !socialLinks && !!masjidSlug;
-  const { data: masjid } = useQuery({
-    queryKey: ["masjid-public", masjidSlug],
+  /* ============== Lazy fetch data school dari slug ============== */
+  const shouldFetch = open && !socialLinks && !!schoolSlug;
+  const { data: school } = useQuery({
+    queryKey: ["school-public", schoolSlug],
     enabled: shouldFetch,
     staleTime: 5 * 60 * 1000,
     queryFn: async () => {
-      const res = await axios.get(`/public/masjids/${masjidSlug}`);
+      const res = await axios.get(`/public/schools/${schoolSlug}`);
       return res.data?.data as {
-        masjid_name?: string;
-        masjid_google_maps_url?: string;
-        masjid_instagram_url?: string;
-        masjid_whatsapp_url?: string;
-        masjid_youtube_url?: string;
-        masjid_facebook_url?: string;
-        masjid_tiktok_url?: string;
-        masjid_whatsapp_group_ikhwan_url?: string;
-        masjid_whatsapp_group_akhwat_url?: string;
-        masjid_domain?: string;
+        school_name?: string;
+        school_google_maps_url?: string;
+        school_instagram_url?: string;
+        school_whatsapp_url?: string;
+        school_youtube_url?: string;
+        school_facebook_url?: string;
+        school_tiktok_url?: string;
+        school_whatsapp_group_ikhwan_url?: string;
+        school_whatsapp_group_akhwat_url?: string;
+        school_domain?: string;
       };
     },
   });
 
   // prefetch saat hover
   const handleMouseEnter = async () => {
-    if (!prefetchOnHover || !masjidSlug || socialLinks) return;
+    if (!prefetchOnHover || !schoolSlug || socialLinks) return;
     await qc.prefetchQuery({
-      queryKey: ["masjid-public", masjidSlug],
+      queryKey: ["school-public", schoolSlug],
       staleTime: 5 * 60 * 1000,
       queryFn: async () => {
-        const res = await axios.get(`/public/masjids/${masjidSlug}`);
+        const res = await axios.get(`/public/schools/${schoolSlug}`);
         return res.data?.data;
       },
     });
@@ -124,27 +124,27 @@ export default function ShareBCLectureSessionsButton({
 
   // normalisasi field API → SocialLinks
   const normalizedFromApi: SocialLinks | undefined = useMemo(() => {
-    if (!masjid) return undefined;
-    const website = masjid.masjid_domain
-      ? masjid.masjid_domain.startsWith("http")
-        ? masjid.masjid_domain
-        : `https://${masjid.masjid_domain}`
+    if (!school) return undefined;
+    const website = school.school_domain
+      ? school.school_domain.startsWith("http")
+        ? school.school_domain
+        : `https://${school.school_domain}`
       : undefined;
     return {
-      maps: masjid.masjid_google_maps_url,
-      instagram: masjid.masjid_instagram_url,
-      whatsapp: masjid.masjid_whatsapp_url,
-      youtube: masjid.masjid_youtube_url,
-      facebook: masjid.masjid_facebook_url,
-      tiktok: masjid.masjid_tiktok_url,
-      groupIkhwan: masjid.masjid_whatsapp_group_ikhwan_url,
-      groupAkhwat: masjid.masjid_whatsapp_group_akhwat_url,
+      maps: school.school_google_maps_url,
+      instagram: school.school_instagram_url,
+      whatsapp: school.school_whatsapp_url,
+      youtube: school.school_youtube_url,
+      facebook: school.school_facebook_url,
+      tiktok: school.school_tiktok_url,
+      groupIkhwan: school.school_whatsapp_group_ikhwan_url,
+      groupAkhwat: school.school_whatsapp_group_akhwat_url,
       website,
     };
-  }, [masjid]);
+  }, [school]);
 
   const finalSocials = socialLinks ?? normalizedFromApi;
-  const masjidName = masjid?.masjid_name;
+  const schoolName = school?.school_name;
 
   const socialsBlock = useMemo(() => {
     if (!finalSocials) return [];
@@ -172,7 +172,7 @@ export default function ShareBCLectureSessionsButton({
   const bcText = useMemo(() => {
     const waktu = formatTanggalId(dateIso);
     const lines = [
-      `*${title || "Kajian Masjid"}*`,
+      `*${title || "Kajian school"}*`,
       teacher ? `👤 Pemateri: *${teacher}*` : null,
       dateIso ? `🗓️ Waktu: ${waktu}` : null,
       place ? `📍 Tempat: ${place}` : null,
@@ -184,13 +184,13 @@ export default function ShareBCLectureSessionsButton({
 
     if (socialsBlock.length) {
       lines.push("");
-      lines.push(`Kontak & Sosial${masjidName ? ` — ${masjidName}` : ""}:`);
+      lines.push(`Kontak & Sosial${schoolName ? ` — ${schoolName}` : ""}:`);
       lines.push(...socialsBlock);
     }
 
-    lines.push("", "#KajianMasjid #MasjidKu");
+    lines.push("", "#Kajianschool #schoolKu");
     return lines.join("\n");
-  }, [title, teacher, dateIso, place, shareUrl, socialsBlock, masjidName]);
+  }, [title, teacher, dateIso, place, shareUrl, socialsBlock, schoolName]);
 
   // copy helpers
   const copy = useCallback(async (text: string, set: (b: boolean) => void) => {

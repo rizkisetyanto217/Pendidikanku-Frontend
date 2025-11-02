@@ -29,7 +29,10 @@ export interface MyProfileProps {
 }
 
 // utils: gabungkan base + patch tapi abaikan undefined/null/""
-function mergeDefined<T extends Record<string, any>>(base: T, patch?: Partial<T>): T {
+function mergeDefined<T extends Record<string, any>>(
+  base: T,
+  patch?: Partial<T>
+): T {
   const out = { ...base };
   if (!patch) return out;
   for (const [k, v] of Object.entries(patch)) {
@@ -39,7 +42,6 @@ function mergeDefined<T extends Record<string, any>>(base: T, patch?: Partial<T>
   }
   return out;
 }
-
 
 /* ========= Dummy fallback ========= */
 const DEFAULT_DATA: MyProfileData = {
@@ -52,7 +54,7 @@ const DEFAULT_DATA: MyProfileData = {
     location: "Bekasi, Jawa Barat",
     occupation: "Software Engineer",
     phone_number: "+6281234567890",
-    bio: "DKM Masjid, suka ngoprek Go & Postgres.",
+    bio: "DKM school, suka ngoprek Go & Postgres.",
   },
 };
 
@@ -119,39 +121,37 @@ const MyProfile: React.FC<MyProfileProps> = ({
   const theme = pickTheme(themeName as ThemeName, isDark);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
 
-  
-type UserShape = NonNullable<MyProfileData["user"]>;
-type ProfileShape = NonNullable<MyProfileData["profile"]>;
+  type UserShape = NonNullable<MyProfileData["user"]>;
+  type ProfileShape = NonNullable<MyProfileData["profile"]>;
 
-// base yang pasti terdefinisi (hindari non-null assertion "!"):
-const DEFAULT_USER: UserShape = {
-  full_name: DEFAULT_DATA.user?.full_name ?? "Pengguna",
-  email: DEFAULT_DATA.user?.email, // boleh undefined; mergeDefined akan handle
-};
-const DEFAULT_PROFILE: ProfileShape = {
-  donation_name: DEFAULT_DATA.profile?.donation_name,
-  photo_url: DEFAULT_DATA.profile?.photo_url,
-  date_of_birth: DEFAULT_DATA.profile?.date_of_birth,
-  gender: DEFAULT_DATA.profile?.gender,
-  location: DEFAULT_DATA.profile?.location,
-  occupation: DEFAULT_DATA.profile?.occupation,
-  phone_number: DEFAULT_DATA.profile?.phone_number,
-  bio: DEFAULT_DATA.profile?.bio,
-};
-
-const merged: MyProfileData = useMemo(() => {
-  return {
-    user: mergeDefined<UserShape>(
-      DEFAULT_USER,
-      data?.user as Partial<UserShape>
-    ),
-    profile: mergeDefined<ProfileShape>(
-      DEFAULT_PROFILE,
-      data?.profile as Partial<ProfileShape>
-    ),
+  // base yang pasti terdefinisi (hindari non-null assertion "!"):
+  const DEFAULT_USER: UserShape = {
+    full_name: DEFAULT_DATA.user?.full_name ?? "Pengguna",
+    email: DEFAULT_DATA.user?.email, // boleh undefined; mergeDefined akan handle
   };
-}, [data]);
+  const DEFAULT_PROFILE: ProfileShape = {
+    donation_name: DEFAULT_DATA.profile?.donation_name,
+    photo_url: DEFAULT_DATA.profile?.photo_url,
+    date_of_birth: DEFAULT_DATA.profile?.date_of_birth,
+    gender: DEFAULT_DATA.profile?.gender,
+    location: DEFAULT_DATA.profile?.location,
+    occupation: DEFAULT_DATA.profile?.occupation,
+    phone_number: DEFAULT_DATA.profile?.phone_number,
+    bio: DEFAULT_DATA.profile?.bio,
+  };
 
+  const merged: MyProfileData = useMemo(() => {
+    return {
+      user: mergeDefined<UserShape>(
+        DEFAULT_USER,
+        data?.user as Partial<UserShape>
+      ),
+      profile: mergeDefined<ProfileShape>(
+        DEFAULT_PROFILE,
+        data?.profile as Partial<ProfileShape>
+      ),
+    };
+  }, [data]);
 
   // ESC close + lock body scroll + autofocus
   useEffect(() => {

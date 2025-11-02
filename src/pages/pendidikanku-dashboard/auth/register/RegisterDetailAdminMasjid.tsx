@@ -1,4 +1,4 @@
-// src/pages/masjid/RegisterLembaga.tsx (refactor pakai InputField + Success Lock Modal)
+// src/pages/school/RegisterLembaga.tsx (refactor pakai InputField + Success Lock Modal)
 import React, { useMemo, useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { pickTheme, ThemeName } from "@/constants/thema";
@@ -24,7 +24,7 @@ import InputField from "@/components/common/main/InputField";
 /* =======================
    Utils
 ======================= */
-const CREATE_ENDPOINT = "api/u/masjids/user"; // ← ganti jika perlu
+const CREATE_ENDPOINT = "api/u/schools/user"; // ← ganti jika perlu
 
 function extractLatLngFromGmaps(url: string) {
   try {
@@ -46,55 +46,55 @@ const domainRegex = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i;
    Types
 ======================= */
 type FormState = {
-  masjid_name: string;
-  masjid_bio_short: string;
-  masjid_location: string;
-  masjid_latitude: string;
-  masjid_longitude: string;
+  school_name: string;
+  school_bio_short: string;
+  school_location: string;
+  school_latitude: string;
+  school_longitude: string;
 
-  masjid_image_url: string;
-  masjid_image_file?: File | null;
-  masjid_google_maps_url: string;
+  school_image_url: string;
+  school_image_file?: File | null;
+  school_google_maps_url: string;
 
-  masjid_domain: string;
+  school_domain: string;
 
-  masjid_instagram_url: string;
-  masjid_whatsapp_url: string;
-  masjid_youtube_url: string;
-  masjid_facebook_url: string;
-  masjid_tiktok_url: string;
-  masjid_whatsapp_group_ikhwan_url: string;
-  masjid_whatsapp_group_akhwat_url: string;
+  school_instagram_url: string;
+  school_whatsapp_url: string;
+  school_youtube_url: string;
+  school_facebook_url: string;
+  school_tiktok_url: string;
+  school_whatsapp_group_ikhwan_url: string;
+  school_whatsapp_group_akhwat_url: string;
 };
 
 /* =======================
    Component
 ======================= */
-export default function RegisterDetailAdminMasjid() {
+export default function RegisterDetailAdminschool() {
   const { isDark, themeName } = useHtmlDarkMode();
   const theme = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
 
   const [form, setForm] = useState<FormState>({
-    masjid_name: "",
-    masjid_bio_short: "",
-    masjid_location: "",
-    masjid_latitude: "",
-    masjid_longitude: "",
+    school_name: "",
+    school_bio_short: "",
+    school_location: "",
+    school_latitude: "",
+    school_longitude: "",
 
-    masjid_image_url: "",
-    masjid_image_file: null,
-    masjid_google_maps_url: "",
+    school_image_url: "",
+    school_image_file: null,
+    school_google_maps_url: "",
 
-    masjid_domain: "",
+    school_domain: "",
 
-    masjid_instagram_url: "",
-    masjid_whatsapp_url: "",
-    masjid_youtube_url: "",
-    masjid_facebook_url: "",
-    masjid_tiktok_url: "",
-    masjid_whatsapp_group_ikhwan_url: "",
-    masjid_whatsapp_group_akhwat_url: "",
+    school_instagram_url: "",
+    school_whatsapp_url: "",
+    school_youtube_url: "",
+    school_facebook_url: "",
+    school_tiktok_url: "",
+    school_whatsapp_group_ikhwan_url: "",
+    school_whatsapp_group_akhwat_url: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -155,15 +155,15 @@ export default function RegisterDetailAdminMasjid() {
   /* =======================
      Validation
   ======================= */
-  const nameValid = form.masjid_name.trim().length >= 3;
-  const lat = Number(form.masjid_latitude);
-  const lon = Number(form.masjid_longitude);
+  const nameValid = form.school_name.trim().length >= 3;
+  const lat = Number(form.school_latitude);
+  const lon = Number(form.school_longitude);
   const latValid =
-    form.masjid_latitude === "" || (lat >= -90 && lat <= 90 && !isNaN(lat));
+    form.school_latitude === "" || (lat >= -90 && lat <= 90 && !isNaN(lat));
   const lonValid =
-    form.masjid_longitude === "" || (lon >= -180 && lon <= 180 && !isNaN(lon));
+    form.school_longitude === "" || (lon >= -180 && lon <= 180 && !isNaN(lon));
   const domainValid =
-    form.masjid_domain === "" || domainRegex.test(form.masjid_domain);
+    form.school_domain === "" || domainRegex.test(form.school_domain);
 
   const canSubmit = nameValid && latValid && lonValid && !loading;
 
@@ -180,18 +180,18 @@ export default function RegisterDetailAdminMasjid() {
 
   const onFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0] ?? null;
-    setForm((s) => ({ ...s, masjid_image_file: f }));
+    setForm((s) => ({ ...s, school_image_file: f }));
     setError("");
     setSuccess("");
   };
 
   const applyGmaps = () => {
-    const parsed = extractLatLngFromGmaps(form.masjid_google_maps_url.trim());
+    const parsed = extractLatLngFromGmaps(form.school_google_maps_url.trim());
     if (parsed) {
       setForm((s) => ({
         ...s,
-        masjid_latitude: String(parsed.lat),
-        masjid_longitude: String(parsed.lon),
+        school_latitude: String(parsed.lat),
+        school_longitude: String(parsed.lon),
       }));
     } else {
       setError(
@@ -209,8 +209,8 @@ export default function RegisterDetailAdminMasjid() {
       (pos) => {
         setForm((s) => ({
           ...s,
-          masjid_latitude: String(pos.coords.latitude.toFixed(6)),
-          masjid_longitude: String(pos.coords.longitude.toFixed(6)),
+          school_latitude: String(pos.coords.latitude.toFixed(6)),
+          school_longitude: String(pos.coords.longitude.toFixed(6)),
         }));
       },
       () => setError("Gagal mengambil lokasi perangkat.")
@@ -238,40 +238,40 @@ export default function RegisterDetailAdminMasjid() {
       const fd = new FormData();
 
       // Wajib/utama
-      fd.append("masjid_name", form.masjid_name.trim());
+      fd.append("school_name", form.school_name.trim());
 
       // Opsional / teks
-      if (form.masjid_bio_short.trim())
-        fd.append("masjid_bio_short", form.masjid_bio_short.trim());
-      if (form.masjid_location.trim())
-        fd.append("masjid_location", form.masjid_location.trim());
-      if (form.masjid_google_maps_url.trim())
-        fd.append("masjid_google_maps_url", form.masjid_google_maps_url.trim());
-      if (form.masjid_domain.trim())
-        fd.append("masjid_domain", form.masjid_domain.trim());
+      if (form.school_bio_short.trim())
+        fd.append("school_bio_short", form.school_bio_short.trim());
+      if (form.school_location.trim())
+        fd.append("school_location", form.school_location.trim());
+      if (form.school_google_maps_url.trim())
+        fd.append("school_google_maps_url", form.school_google_maps_url.trim());
+      if (form.school_domain.trim())
+        fd.append("school_domain", form.school_domain.trim());
 
       // Koordinat (opsional)
-      if (form.masjid_latitude.trim())
-        fd.append("masjid_latitude", form.masjid_latitude.trim());
-      if (form.masjid_longitude.trim())
-        fd.append("masjid_longitude", form.masjid_longitude.trim());
+      if (form.school_latitude.trim())
+        fd.append("school_latitude", form.school_latitude.trim());
+      if (form.school_longitude.trim())
+        fd.append("school_longitude", form.school_longitude.trim());
 
       // Gambar (pilih salah satu: file atau url)
-      if (form.masjid_image_file) {
-        fd.append("masjid_image_file", form.masjid_image_file);
-      } else if (form.masjid_image_url.trim()) {
-        fd.append("masjid_image_url", form.masjid_image_url.trim());
+      if (form.school_image_file) {
+        fd.append("school_image_file", form.school_image_file);
+      } else if (form.school_image_url.trim()) {
+        fd.append("school_image_url", form.school_image_url.trim());
       }
 
       // Sosial
       const socials: (keyof FormState)[] = [
-        "masjid_instagram_url",
-        "masjid_whatsapp_url",
-        "masjid_youtube_url",
-        "masjid_facebook_url",
-        "masjid_tiktok_url",
-        "masjid_whatsapp_group_ikhwan_url",
-        "masjid_whatsapp_group_akhwat_url",
+        "school_instagram_url",
+        "school_whatsapp_url",
+        "school_youtube_url",
+        "school_facebook_url",
+        "school_tiktok_url",
+        "school_whatsapp_group_ikhwan_url",
+        "school_whatsapp_group_akhwat_url",
       ];
       socials.forEach((k) => {
         const v = form[k]?.toString().trim();
@@ -287,15 +287,15 @@ export default function RegisterDetailAdminMasjid() {
         },
       });
 
-      // Ambil masjid_id dari response (disimpan kalau nanti mau dipakai)
-      const masjidId =
-        (res.data as any)?.data?.masjid_id ??
-        (res.data as any)?.masjid_id ??
+      // Ambil school_id dari response (disimpan kalau nanti mau dipakai)
+      const schoolId =
+        (res.data as any)?.data?.school_id ??
+        (res.data as any)?.school_id ??
         (res.data as any)?.data?.id ??
         (res.data as any)?.id ??
         null;
 
-      setSuccess("Masjid berhasil didaftarkan.");
+      setSuccess("school berhasil didaftarkan.");
       // ⬇️ tampilkan modal kunci; jangan navigate otomatis
       setShowSuccessModal(true);
     } catch (err: any) {
@@ -306,7 +306,7 @@ export default function RegisterDetailAdminMasjid() {
           err?.response?.data?.message ||
           err?.response?.data?.error ||
           err?.message ||
-          "Gagal mendaftarkan masjid.";
+          "Gagal mendaftarkan school.";
         setError(msg);
       }
     } finally {
@@ -340,7 +340,7 @@ export default function RegisterDetailAdminMasjid() {
             className="text-2xl md:text-3xl font-bold"
             style={{ color: theme.black1 }}
           >
-            Registrasi Masjid
+            Registrasi school
           </h1>
           <p className="mt-1 text-sm" style={styles.muted}>
             Isi data di bawah ini untuk mengaktifkan lembaga Anda. Anda dapat
@@ -356,7 +356,7 @@ export default function RegisterDetailAdminMasjid() {
             style={styles.chip}
           >
             <Info className="h-4 w-4" />
-            Beberapa kolom opsional. Minimal isi <b>Nama Masjid</b>.
+            Beberapa kolom opsional. Minimal isi <b>Nama school</b>.
           </div>
 
           {/* Alerts */}
@@ -395,11 +395,11 @@ export default function RegisterDetailAdminMasjid() {
                 </span>
               </div>
               <InputField
-                label="Nama Masjid"
-                name="masjid_name"
-                value={form.masjid_name}
-                onChange={onChange("masjid_name")}
-                placeholder="Masukkan nama masjid"
+                label="Nama school"
+                name="school_name"
+                value={form.school_name}
+                onChange={onChange("school_name")}
+                placeholder="Masukkan nama school"
                 type="text"
               />
             </div>
@@ -408,12 +408,12 @@ export default function RegisterDetailAdminMasjid() {
             <div className="grid md:grid-cols-2 gap-4">
               <InputField
                 label="Deskripsi Singkat"
-                name="masjid_bio_short"
-                value={form.masjid_bio_short}
-                onChange={onChange("masjid_bio_short")}
+                name="school_bio_short"
+                value={form.school_bio_short}
+                onChange={onChange("school_bio_short")}
                 as="textarea"
                 rows={3}
-                placeholder="Tulis deskripsi singkat masjid"
+                placeholder="Tulis deskripsi singkat school"
               />
               <div>
                 <div className="flex items-center gap-2 mb-1">
@@ -424,9 +424,9 @@ export default function RegisterDetailAdminMasjid() {
                 </div>
                 <InputField
                   label=""
-                  name="masjid_location"
-                  value={form.masjid_location}
-                  onChange={onChange("masjid_location")}
+                  name="school_location"
+                  value={form.school_location}
+                  onChange={onChange("school_location")}
                   placeholder="Jl. Contoh No. 1, Kota"
                 />
               </div>
@@ -443,10 +443,10 @@ export default function RegisterDetailAdminMasjid() {
                 </div>
                 <InputField
                   label="Latitude"
-                  name="masjid_latitude"
+                  name="school_latitude"
                   type="number"
-                  value={form.masjid_latitude}
-                  onChange={onChange("masjid_latitude")}
+                  value={form.school_latitude}
+                  onChange={onChange("school_latitude")}
                   placeholder="-7.123456"
                 />
                 {!latValid && (
@@ -457,10 +457,10 @@ export default function RegisterDetailAdminMasjid() {
               <div className="pt-6 md:pt-0">
                 <InputField
                   label="Longitude"
-                  name="masjid_longitude"
+                  name="school_longitude"
                   type="number"
-                  value={form.masjid_longitude}
-                  onChange={onChange("masjid_longitude")}
+                  value={form.school_longitude}
+                  onChange={onChange("school_longitude")}
                   placeholder="112.654321"
                 />
                 {!lonValid && (
@@ -492,10 +492,10 @@ export default function RegisterDetailAdminMasjid() {
                 <div className="flex-1">
                   <InputField
                     label="Google Maps URL"
-                    name="masjid_google_maps_url"
+                    name="school_google_maps_url"
                     type="url"
-                    value={form.masjid_google_maps_url}
-                    onChange={onChange("masjid_google_maps_url")}
+                    value={form.school_google_maps_url}
+                    onChange={onChange("school_google_maps_url")}
                     placeholder="Tempelkan link Google Maps"
                   />
                 </div>
@@ -520,12 +520,12 @@ export default function RegisterDetailAdminMasjid() {
               </div>
               <InputField
                 label=""
-                name="masjid_domain"
-                value={form.masjid_domain}
-                onChange={onChange("masjid_domain")}
+                name="school_domain"
+                value={form.school_domain}
+                onChange={onChange("school_domain")}
                 placeholder="contoh: alikhlas.sch.id"
               />
-              {!domainValid && form.masjid_domain && (
+              {!domainValid && form.school_domain && (
                 <SmallError>Format domain tidak valid.</SmallError>
               )}
             </div>
@@ -541,10 +541,10 @@ export default function RegisterDetailAdminMasjid() {
                 </div>
                 <InputField
                   label=""
-                  name="masjid_image_url"
+                  name="school_image_url"
                   type="url"
-                  value={form.masjid_image_url}
-                  onChange={onChange("masjid_image_url")}
+                  value={form.school_image_url}
+                  onChange={onChange("school_image_url")}
                   placeholder="https://..."
                 />
               </div>
@@ -558,7 +558,7 @@ export default function RegisterDetailAdminMasjid() {
                 </div>
                 <InputField
                   label="Upload Gambar"
-                  name="masjid_image_file"
+                  name="school_image_file"
                   type="file"
                   accept="image/*"
                   onFileChange={onFile}
@@ -577,58 +577,58 @@ export default function RegisterDetailAdminMasjid() {
               <div className="grid md:grid-cols-2 gap-4">
                 <InputField
                   label="Instagram"
-                  name="masjid_instagram_url"
+                  name="school_instagram_url"
                   type="url"
-                  value={form.masjid_instagram_url}
-                  onChange={onChange("masjid_instagram_url")}
+                  value={form.school_instagram_url}
+                  onChange={onChange("school_instagram_url")}
                   placeholder="https://instagram.com/..."
                 />
                 <InputField
                   label="WhatsApp"
-                  name="masjid_whatsapp_url"
+                  name="school_whatsapp_url"
                   type="url"
-                  value={form.masjid_whatsapp_url}
-                  onChange={onChange("masjid_whatsapp_url")}
+                  value={form.school_whatsapp_url}
+                  onChange={onChange("school_whatsapp_url")}
                   placeholder="https://wa.me/..."
                 />
                 <InputField
                   label="YouTube"
-                  name="masjid_youtube_url"
+                  name="school_youtube_url"
                   type="url"
-                  value={form.masjid_youtube_url}
-                  onChange={onChange("masjid_youtube_url")}
+                  value={form.school_youtube_url}
+                  onChange={onChange("school_youtube_url")}
                   placeholder="https://youtube.com/@..."
                 />
                 <InputField
                   label="Facebook"
-                  name="masjid_facebook_url"
+                  name="school_facebook_url"
                   type="url"
-                  value={form.masjid_facebook_url}
-                  onChange={onChange("masjid_facebook_url")}
+                  value={form.school_facebook_url}
+                  onChange={onChange("school_facebook_url")}
                   placeholder="https://facebook.com/..."
                 />
                 <InputField
                   label="TikTok"
-                  name="masjid_tiktok_url"
+                  name="school_tiktok_url"
                   type="url"
-                  value={form.masjid_tiktok_url}
-                  onChange={onChange("masjid_tiktok_url")}
+                  value={form.school_tiktok_url}
+                  onChange={onChange("school_tiktok_url")}
                   placeholder="https://tiktok.com/@..."
                 />
                 <InputField
                   label="WA Group Ikhwan"
-                  name="masjid_whatsapp_group_ikhwan_url"
+                  name="school_whatsapp_group_ikhwan_url"
                   type="url"
-                  value={form.masjid_whatsapp_group_ikhwan_url}
-                  onChange={onChange("masjid_whatsapp_group_ikhwan_url")}
+                  value={form.school_whatsapp_group_ikhwan_url}
+                  onChange={onChange("school_whatsapp_group_ikhwan_url")}
                   placeholder="https://chat.whatsapp.com/..."
                 />
                 <InputField
                   label="WA Group Akhwat"
-                  name="masjid_whatsapp_group_akhwat_url"
+                  name="school_whatsapp_group_akhwat_url"
                   type="url"
-                  value={form.masjid_whatsapp_group_akhwat_url}
-                  onChange={onChange("masjid_whatsapp_group_akhwat_url")}
+                  value={form.school_whatsapp_group_akhwat_url}
+                  onChange={onChange("school_whatsapp_group_akhwat_url")}
                   placeholder="https://chat.whatsapp.com/..."
                 />
               </div>
@@ -729,7 +729,7 @@ export default function RegisterDetailAdminMasjid() {
 
             <p id="success-desc" className="text-sm" style={styles.muted}>
               Akun lembaga Anda telah aktif. Demi sinkron sesi, silakan login
-              kembali untuk mulai mengelola profil masjid.
+              kembali untuk mulai mengelola profil school.
             </p>
 
             <div className="mt-6">

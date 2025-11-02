@@ -16,7 +16,7 @@ import { ArrowLeft, Loader2, Building2, MapPin, Users } from "lucide-react";
 /* ===================== TYPES (UI) ================= */
 export type Room = {
   id: string;
-  masjid_id?: string;
+  school_id?: string;
   name: string;
   code?: string;
   slug?: string;
@@ -52,7 +52,7 @@ export type Room = {
 /* ========== TYPES (payload dari API publik) ========= */
 type ClassRoomApi = {
   class_room_id: string;
-  class_room_masjid_id: string;
+  class_room_school_id: string;
   class_room_name: string;
   class_room_code?: string | null;
   class_room_slug?: string | null;
@@ -92,8 +92,8 @@ type PublicRoomsResponse = {
 
 /* ===================== QK ========================= */
 const QK = {
-  ROOM_PUBLIC: (masjidId: string, id: string) =>
-    ["public-room", masjidId, id] as const,
+  ROOM_PUBLIC: (schoolId: string, id: string) =>
+    ["public-room", schoolId, id] as const,
 };
 
 /* ===================== HELPERS ==================== */
@@ -133,7 +133,7 @@ function normalizeSchedule(s: any[] | null | undefined): Room["schedule"] {
 function mapApiRoomToRoom(x: ClassRoomApi): Room {
   return {
     id: x.class_room_id,
-    masjid_id: x.class_room_masjid_id,
+    school_id: x.class_room_school_id,
     name: x.class_room_name,
     code: x.class_room_code ?? undefined,
     slug: x.class_room_slug ?? undefined,
@@ -162,15 +162,15 @@ function mapApiRoomToRoom(x: ClassRoomApi): Room {
 
 /* =============== API QUERY (public) =============== */
 /** Asumsi: endpoint list mendukung filter `ids=<uuid>` dan return 1 item */
-function usePublicRoomQuery(masjidId: string, id: string) {
+function usePublicRoomQuery(schoolId: string, id: string) {
   return useQuery<Room | null>({
-    queryKey: QK.ROOM_PUBLIC(masjidId, id),
-    enabled: !!masjidId && !!id,
+    queryKey: QK.ROOM_PUBLIC(schoolId, id),
+    enabled: !!schoolId && !!id,
     staleTime: 60_000,
     retry: 1,
     queryFn: async () => {
       const res = await axios.get<PublicRoomsResponse>(
-        `/public/${masjidId}/class-rooms/list`,
+        `/public/${schoolId}/class-rooms/list`,
         { params: { ids: id, page: 1, per_page: 1 } }
       );
       const item = res.data.data?.[0];
@@ -217,7 +217,7 @@ function InfoSection({ title, children, palette }: InfoSectionProps) {
 
 /* ===================== PAGE ======================= */
 export default function DetailRoomSchool() {
-  const { masjid_id, id } = useParams<{ masjid_id?: string; id?: string }>();
+  const { school_id, id } = useParams<{ school_id?: string; id?: string }>();
   const navigate = useNavigate();
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
@@ -225,10 +225,10 @@ export default function DetailRoomSchool() {
   const topbarGregorianISO = useMemo(() => atLocalNoonISO(new Date()), []);
 
   // Guard param
-  const masjidId = masjid_id ?? "";
+  const schoolId = school_id ?? "";
   const roomId = id ?? "";
 
-  const roomQuery = usePublicRoomQuery(masjidId, roomId);
+  const roomQuery = usePublicRoomQuery(schoolId, roomId);
 
   // Loading state
   if (roomQuery.isLoading) {

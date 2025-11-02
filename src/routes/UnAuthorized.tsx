@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 
 import useHtmlThema from "@/hooks/useHTMLThema";
-import { pickTheme,  ThemeName } from "@/constants/thema";
+import { pickTheme, ThemeName } from "@/constants/thema";
 
 type LocState = { need?: string[]; from?: string };
 
@@ -55,22 +55,22 @@ export default function Unauthorized() {
   );
 
   // ===== states: pilih aksi =====
-  type Mode = "none" | "create-masjid" | "join-school";
+  type Mode = "none" | "create-school" | "join-school";
   const [mode, setMode] = useState<Mode>("none");
 
   // ====== form DKM (dummy) ======
-  const [mName, setMName] = useState("Masjid Al-Hikmah");
+  const [mName, setMName] = useState("school Al-Hikmah");
   const [mCity, setMCity] = useState("Bandung");
   const [mAddress, setMAddress] = useState("Jl. Contoh No. 123");
-  const [masjidCreatedSlug, setMasjidCreatedSlug] = useState<string | null>(
+  const [schoolCreatedSlug, setschoolCreatedSlug] = useState<string | null>(
     null
   );
 
-  const createMasjid = (e: React.FormEvent) => {
+  const createschool = (e: React.FormEvent) => {
     e.preventDefault();
-    const slug = slugify(mName) || "masjid-baru";
+    const slug = slugify(mName) || "school-baru";
     // dummy “berhasil”
-    setMasjidCreatedSlug(slug);
+    setschoolCreatedSlug(slug);
   };
 
   // ====== form join sekolah (dummy) ======
@@ -172,13 +172,13 @@ export default function Unauthorized() {
         <div className="grid md:grid-cols-2 gap-4">
           {/* Card: Jadi DKM */}
           <button
-            onClick={() => setMode("create-masjid")}
+            onClick={() => setMode("create-school")}
             className={`text-left rounded-2xl border p-4 transition hover:shadow-sm ${
-              mode === "create-masjid" ? "ring-2" : ""
+              mode === "create-school" ? "ring-2" : ""
             }`}
             style={{
               borderColor:
-                mode === "create-masjid" ? theme.primary : surface.border,
+                mode === "create-school" ? theme.primary : surface.border,
               backgroundColor: surface.cardAlt,
             }}
           >
@@ -197,7 +197,7 @@ export default function Unauthorized() {
                   Saya Pengurus DKM
                 </div>
                 <div className="text-xs" style={{ color: text.body }}>
-                  Buat profil masjid (dummy)
+                  Buat profil school (dummy)
                 </div>
               </div>
             </div>
@@ -245,8 +245,8 @@ export default function Unauthorized() {
           </button>
         </div>
 
-        {/* ===== Panel: Create Masjid (DKM) ===== */}
-        {mode === "create-masjid" && (
+        {/* ===== Panel: Create school (DKM) ===== */}
+        {mode === "create-school" && (
           <div
             className="mt-6 rounded-2xl border p-5"
             style={{
@@ -257,11 +257,11 @@ export default function Unauthorized() {
             <div className="flex items-center gap-2 mb-3">
               <Building2 size={18} />
               <h3 className="font-semibold" style={{ color: text.title }}>
-                Buat Masjid (Dummy)
+                Buat school (Dummy)
               </h3>
             </div>
 
-            {masjidCreatedSlug ? (
+            {schoolCreatedSlug ? (
               <div
                 className="rounded-xl p-4 border mb-3"
                 style={{
@@ -272,14 +272,14 @@ export default function Unauthorized() {
               >
                 <div className="flex items-center gap-2 font-medium">
                   <CheckCircle2 size={18} />
-                  Masjid berhasil dibuat!
+                  school berhasil dibuat!
                 </div>
                 <div className="text-sm mt-1">
-                  Slug: <code>{masjidCreatedSlug}</code>
+                  Slug: <code>{schoolCreatedSlug}</code>
                 </div>
                 <div className="mt-3 flex gap-2">
                   <button
-                    onClick={() => nav(`/${masjidCreatedSlug}/sekolah`)}
+                    onClick={() => nav(`/${schoolCreatedSlug}/sekolah`)}
                     className="rounded-lg px-4 py-2 text-sm"
                     style={{ backgroundColor: theme.primary, color: "#fff" }}
                   >
@@ -287,7 +287,7 @@ export default function Unauthorized() {
                   </button>
                   <button
                     onClick={() => {
-                      setMasjidCreatedSlug(null);
+                      setschoolCreatedSlug(null);
                       setMode("none");
                     }}
                     className="rounded-lg px-4 py-2 text-sm border"
@@ -303,14 +303,14 @@ export default function Unauthorized() {
               </div>
             ) : (
               <form
-                onSubmit={createMasjid}
+                onSubmit={createschool}
                 className="grid sm:grid-cols-2 gap-3"
               >
                 <Field
-                  label="Nama Masjid"
+                  label="Nama school"
                   value={mName}
                   onChange={setMName}
-                  placeholder="cth. Masjid Al-Hikmah"
+                  placeholder="cth. school Al-Hikmah"
                   surface={surface}
                   text={text}
                 />
@@ -339,7 +339,7 @@ export default function Unauthorized() {
                     className="rounded-lg px-5 py-2.5 text-sm"
                     style={{ backgroundColor: theme.primary, color: "#fff" }}
                   >
-                    Buat Masjid (Dummy)
+                    Buat school (Dummy)
                   </button>
                 </div>
               </form>

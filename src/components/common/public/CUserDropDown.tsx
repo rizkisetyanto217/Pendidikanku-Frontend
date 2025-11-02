@@ -85,7 +85,7 @@ export default function PublicUserDropdown({
   const { isMobile } = useResponsive();
   const queryClient = useQueryClient();
 
-  const base = `/masjid/${slug}`;
+  const base = `/school/${slug}`;
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const [open, setOpen] = useState(false);
@@ -99,11 +99,10 @@ export default function PublicUserDropdown({
   const [editInitial, setEditInitial] = useState<EditProfileData | undefined>();
 
   // converter dari MyProfileData -> EditProfileData
- const fromMyProfileToEdit = (d: MyProfileData): EditProfileData => ({
-   user: { full_name: d.user?.full_name, email: d.user?.email },
-   profile: d.profile ? { ...d.profile } : undefined, // ⬅️ aman bila undefined
- });
-
+  const fromMyProfileToEdit = (d: MyProfileData): EditProfileData => ({
+    user: { full_name: d.user?.full_name, email: d.user?.email },
+    profile: d.profile ? { ...d.profile } : undefined, // ⬅️ aman bila undefined
+  });
 
   const handleLogout = async () => {
     setIsLoggingOut(true);

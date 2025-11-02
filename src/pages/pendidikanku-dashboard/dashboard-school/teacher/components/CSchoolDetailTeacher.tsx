@@ -76,17 +76,17 @@ const DetailTeacher: React.FC = () => {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
 
-  const masjidId = useMemo(() => {
+  const schoolId = useMemo(() => {
     const u: any = user || {};
-    return u.masjid_id || u.lembaga_id || u?.masjid?.id || u?.lembaga?.id || "";
+    return u.school_id || u.lembaga_id || u?.school?.id || u?.lembaga?.id || "";
   }, [user]);
 
   const { data: resp } = useQuery({
-    queryKey: ["masjid-teachers", masjidId],
-    enabled: !!masjidId,
+    queryKey: ["school-teachers", schoolId],
+    enabled: !!schoolId,
     queryFn: async () => {
-      const res = await axios.get("/api/a/masjid-teachers/by-masjid", {
-        params: masjidId ? { masjid_id: masjidId } : undefined,
+      const res = await axios.get("/api/a/school-teachers/by-school", {
+        params: schoolId ? { school_id: schoolId } : undefined,
       });
       return res.data;
     },
@@ -94,7 +94,7 @@ const DetailTeacher: React.FC = () => {
 
   const teachersFromApi: TeacherItem[] =
     resp?.data?.teachers?.map((t: any) => ({
-      id: t.masjid_teachers_id,
+      id: t.school_teachers_id,
       nip: t.nip ?? "N/A",
       name: t.user_name,
       subject: t.subject ?? "Umum",

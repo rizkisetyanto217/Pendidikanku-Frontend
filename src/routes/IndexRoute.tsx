@@ -6,10 +6,9 @@ import Unauthorized from "./UnAuthorized";
 import NotFound from "@/pages/NotFound";
 
 // Layout & Pages
-import MasjidkuLayout from "@/layout/CPendWebLayout";
-import MasjidkuHome from "@/pages/pendidikanku-profile/website/PendWebHome";
-import MasjidkuWebHome from "@/pages/pendidikanku-profile/website/website/PendWebHome";
-import RegisterAdminMasjid from "@/pages/pendidikanku-dashboard/auth/register/RegisterAdminMasjid";
+import PendWebLayout from "@/layout/CPendWebLayout";
+import PendWebHome from "@/pages/pendidikanku-profile/website/PendWebHome";
+import Registerschool from "@/pages/pendidikanku-dashboard/auth/register/RegisterSchool";
 import RegisterUser from "@/pages/pendidikanku-dashboard/auth/register/RegisterUser";
 import SupportPage from "@/pages/pendidikanku-profile/website/website/pages/navbar-page/PendWebSupport";
 import Panduan from "@/pages/pendidikanku-profile/website/website/pages/navbar-page/PendWebGuide";
@@ -17,25 +16,25 @@ import Fitur from "@/pages/pendidikanku-profile/website/website/pages/navbar-pag
 import About from "@/pages/pendidikanku-profile/website/website/pages/navbar-page/PendWebAbout";
 import Contact from "@/pages/pendidikanku-profile/website/website/pages/navbar-page/PendWebContact";
 
-import MasjidLayout from "@/pages/pendidikanku-profile/linktree/PendLinkLayout";
-import MasjidLinkTree from "@/pages/pendidikanku-profile/linktree/PendLinkTreeHome";
-import MasjidQuizLectureSessions from "@/pages/pendidikanku-dashboard/quizzes/TeacherMasjidQuizLectureSessions";
-import MasjidResultQuizLectureSessions from "@/pages/pendidikanku-dashboard/quizzes/TeacherMasjidResultQuizLectureSessions";
+import schoolLayout from "@/pages/pendidikanku-profile/linktree/PendLinkLayout";
+import PendLinkTree from "@/pages/pendidikanku-profile/linktree/PendLinkTreeHome";
+// import schoolQuizLectureSessions from "@/pages/pendidikanku-dashboard/quizzes/TeacherschoolQuizLectureSessions";
+// import schoolResultQuizLectureSessions from "@/pages/pendidikanku-dashboard/quizzes/TeacherschoolResultQuizLectureSessions";
 
 import { TeacherRoutes } from "./TeacherRoutes";
 import { StudentRoutes } from "./StudentRoutes";
 import { SchoolRoutes } from "./SchoolRoutes";
 import Login from "@/pages/pendidikanku-dashboard/auth/Login";
 import Forbidden403 from "@/pages/Forbidden403";
-import RequireMasjidRoles from "./RequireMasjidRoles";
+import RequireschoolRoles from "./RequireSchoolRoles";
 
 export default function AppRoutes() {
   return (
     <Routes>
-      {/* --- Public Masjidku --- */}
-      <Route element={<MasjidkuLayout />}>
-        <Route index element={<MasjidkuHome />} />
-        <Route path="website" element={<MasjidkuWebHome />} />
+      {/* --- Public schoolku --- */}
+      <Route element={<PendWebLayout />}>
+        <Route index element={<PendWebHome />} />
+        <Route path="website" element={<PendWebHome />} />
         <Route path="website/dukungan" element={<SupportPage />} />
         <Route path="website/panduan" element={<Panduan />} />
         <Route path="website/fitur" element={<Fitur />} />
@@ -46,54 +45,51 @@ export default function AppRoutes() {
       {/* --- Public Auth --- */}
       <Route path="/login" element={<Login />} />
       <Route path="/register-user" element={<RegisterUser />} />
-      <Route
-        path="/website/daftar-sekarang"
-        element={<RegisterAdminMasjid />}
-      />
+      <Route path="/register-school" element={<Registerschool />} />
 
       {/* --- LinkTree --- */}
-      <Route path="/" element={<MasjidLayout />}>
-        <Route path="masjid/:slug" index element={<MasjidLinkTree />} />
-        <Route path="masjid/:slug">
+      <Route path="/" element={<PendWebLayout />}>
+        <Route path="school/:slug" index element={<PendLinkTree />} />
+        <Route path="school/:slug">
           <Route path="login" element={<Login />} />
-          <Route path="login/:id" element={<RegisterAdminMasjid />} />
-          <Route path="register-masjid" element={<RegisterAdminMasjid />} />
-          <Route
+          {/* <Route path="login/:id" element={<RegisterAdminMasji />} />
+          <Route path="register-school" element={<RegisterAdminschool />} /> */}
+          {/* <Route
             path="soal-materi/:lecture_session_slug/latihan-soal"
-            element={<MasjidQuizLectureSessions />}
+            element={<schoolQuizLectureSessions />}
           />
           <Route
             path="soal-materi/:lecture_session_slug/latihan-soal/hasil"
-            element={<MasjidResultQuizLectureSessions />}
-          />
+            element={<schoolResultQuizLectureSessions />}
+          /> */}
         </Route>
       </Route>
 
-      {/* --- Protected (dengan masjidId) --- */}
-      {/* Ganti :masjid_id -> :masjidId agar konsisten */}
-      <Route path=":masjid_id" element={<ProtectedRoute />}>
+      {/* --- Protected (dengan schoolId) --- */}
+      {/* Ganti :school_id -> :schoolId agar konsisten */}
+      <Route path=":school_id" element={<ProtectedRoute />}>
         {/* ===== Guru cluster: hanya teacher/admin/dkm ===== */}
         <Route
-          element={<RequireMasjidRoles allow={["teacher", "admin", "dkm"]} />}
+          element={<RequireschoolRoles allow={["teacher", "admin", "dkm"]} />}
         >
           {TeacherRoutes}
         </Route>
 
         {/* ===== Murid cluster: student/admin/dkm ===== */}
         <Route
-          element={<RequireMasjidRoles allow={["student", "admin", "dkm"]} />}
+          element={<RequireschoolRoles allow={["student", "admin", "dkm"]} />}
         >
           {StudentRoutes}
         </Route>
 
         {/* ===== Sekolah/Manajemen: admin/dkm ===== */}
-        <Route element={<RequireMasjidRoles allow={["admin", "dkm"]} />}>
+        <Route element={<RequireschoolRoles allow={["admin", "dkm"]} />}>
           {SchoolRoutes}
         </Route>
       </Route>
 
       {/* --- Forbidden harus di atas wildcard --- */}
-      <Route path=":masjid_id/forbidden" element={<Forbidden403 />} />
+      <Route path=":school_id/forbidden" element={<Forbidden403 />} />
 
       {/* --- 404 & Unauthorized --- */}
       <Route path="/unauthorized" element={<Unauthorized />} />

@@ -82,7 +82,7 @@
     "lecture_sessions_question_answers": [
       "A. Jika tanpa syahwat dan aman dari fitnah",
       "B. Jika di majelis ilmu",
-      "C. Jika di masjid",
+      "C. Jika di school",
       "D. Jika bersama mahram"
     ],
     "lecture_sessions_question_correct": "A",
@@ -272,5 +272,4 @@
     "lecture_sessions_question_lecture_session_id": "aa02f97b-ad14-40ca-9e1b-6bfbdd4888c3",
     "lecture_sessions_question_quiz_id": "e08ebf35-e341-4b98-a8b8-84bff4dedb88"
   }
-
 ]

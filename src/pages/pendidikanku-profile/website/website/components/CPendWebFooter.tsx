@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
-import masjid from "@/assets/Gambar-Masjid.jpeg"
+import school from "@/assets/Gambar-school.jpeg";
 
 export default function WebsiteFooter() {
   const { isDark, themeName } = useHtmlDarkMode();
@@ -30,7 +30,7 @@ export default function WebsiteFooter() {
               style={{ color: theme.black1 }}
             >
               <img
-                src={masjid}
+                src={school}
                 alt="Logo SekolahIslamku"
                 className="h-12 w-12 rounded-full object-cover"
                 loading="lazy"

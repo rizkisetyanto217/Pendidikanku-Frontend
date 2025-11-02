@@ -4,7 +4,7 @@ import { Menu, X, Sun, Moon } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
-import masjid from "@/assets/Gambar-Masjid.jpeg";
+import school from "@/assets/Gambar-school.jpeg";
 
 /* ================= NAV ITEMS ================= */
 const navItems = [
@@ -123,7 +123,7 @@ export default function WebsiteNavbar() {
           className="flex items-center gap-2 font-bold text-lg"
         >
           <img
-            src={masjid}
+            src={school}
             alt="Logo"
             className="h-12 w-12 rounded-full object-cover"
           />

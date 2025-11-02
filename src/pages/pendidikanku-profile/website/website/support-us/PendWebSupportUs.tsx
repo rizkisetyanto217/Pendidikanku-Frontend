@@ -20,7 +20,7 @@ import {
 import WebsiteNavbar from "@/components/common/public/CWebsiteNavbar";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
-import WebsiteFooter from "../components/CMasjidkuWebFooter";
+import WebsiteFooter from "../components/CschoolkuWebFooter";
 
 /* =====================================================================
  * Utilities (follow SekolahIslamkuHome style)
@@ -47,7 +47,7 @@ const Section: React.FC<
 /* =====================================================================
  * Page
  * ===================================================================== */
-export default function MasjidkuWebSupportUs() {
+export default function schoolkuWebSupportUs() {
   const { isDark, themeName } = useHtmlDarkMode();
   const theme = pickTheme(themeName as ThemeName, isDark);
 

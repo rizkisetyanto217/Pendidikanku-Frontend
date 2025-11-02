@@ -18,7 +18,7 @@ import {
 
 /* ===== Type harus sama dengan AcademicSchool ===== */
 type AcademicTerm = {
-  academic_terms_masjid_id: string;
+  academic_terms_school_id: string;
   academic_terms_academic_year: string;
   academic_terms_name: string;
   academic_terms_start_date: string;
@@ -29,7 +29,7 @@ type AcademicTerm = {
 
 /* ===== Dummy fallback kalau masuk tanpa state ===== */
 const DUMMY_TERM: AcademicTerm = {
-  academic_terms_masjid_id: "e9876a6e-ab91-4226-84f7-cda296ec747e",
+  academic_terms_school_id: "e9876a6e-ab91-4226-84f7-cda296ec747e",
   academic_terms_academic_year: "2025/2026",
   academic_terms_name: "Ganjil",
   academic_terms_start_date: "2025-07-15T00:00:00+07:00",

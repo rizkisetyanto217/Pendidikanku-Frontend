@@ -23,7 +23,7 @@ import Swal from "sweetalert2";
 
 /* ==================== TYPES ==================== */
 type ClassRoom = {
-  class_rooms_masjid_id: string;
+  class_rooms_school_id: string;
   class_rooms_name: string;
   class_rooms_code: string;
   class_rooms_location: string;
@@ -38,7 +38,7 @@ type ClassRoom = {
 /* ==================== DUMMY DATA ==================== */
 const DUMMY_ROOMS: ClassRoom[] = [
   {
-    class_rooms_masjid_id: "e9876a6e-ab91-4226-84f7-cda296ec747e",
+    class_rooms_school_id: "e9876a6e-ab91-4226-84f7-cda296ec747e",
     class_rooms_name: "Ruang Tahfidz A",
     class_rooms_code: "R-TFZ-A",
     class_rooms_location: "Gedung Utama Lt. 2",
@@ -50,7 +50,7 @@ const DUMMY_ROOMS: ClassRoom[] = [
     class_rooms_features: ["AC", "Proyektor", "Whiteboard", "Karpet"],
   },
   {
-    class_rooms_masjid_id: "e9876a6e-ab91-4226-84f7-cda296ec747e",
+    class_rooms_school_id: "e9876a6e-ab91-4226-84f7-cda296ec747e",
     class_rooms_name: "Kelas Daring Malam",
     class_rooms_code: "VR-NIGHT-01",
     class_rooms_location: "https://meet.google.com/abc-defg-hij",
@@ -120,8 +120,8 @@ const RoomModal: React.FC<RoomModalProps> = ({
     }
 
     const payload: ClassRoom = {
-      class_rooms_masjid_id:
-        defaultValue?.class_rooms_masjid_id ??
+      class_rooms_school_id:
+        defaultValue?.class_rooms_school_id ??
         "e9876a6e-ab91-4226-84f7-cda296ec747e",
       class_rooms_name: nama,
       class_rooms_code: kode,

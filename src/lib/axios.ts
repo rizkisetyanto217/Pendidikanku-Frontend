@@ -47,33 +47,33 @@ const isFormData = (d: any) =>
   typeof FormData !== "undefined" && d instanceof FormData;
 
 /* ==========================================
-   🏷️ MASJID CONTEXT (cookie + display)
+   🏷️ school CONTEXT (cookie + display)
 ========================================== */
-const ACTIVE_MASJID_COOKIE = "active_masjid_id";
+const ACTIVE_school_COOKIE = "active_school_id";
 const ACTIVE_ROLE_COOKIE = "active_role";
 
-const ACTIVE_MASJID_NAME_SS = "active_masjid_name";
-const ACTIVE_MASJID_ICON_SS = "active_masjid_icon";
+const ACTIVE_school_NAME_SS = "active_school_name";
+const ACTIVE_school_ICON_SS = "active_school_icon";
 
-export function setActiveMasjidDisplay(name?: string, icon?: string) {
+export function setActiveschoolDisplay(name?: string, icon?: string) {
   if (typeof sessionStorage === "undefined") return;
   if (typeof name === "string")
-    sessionStorage.setItem(ACTIVE_MASJID_NAME_SS, name);
+    sessionStorage.setItem(ACTIVE_school_NAME_SS, name);
   if (typeof icon === "string")
-    sessionStorage.setItem(ACTIVE_MASJID_ICON_SS, icon);
+    sessionStorage.setItem(ACTIVE_school_ICON_SS, icon);
 }
-export function getActiveMasjidDisplay() {
+export function getActiveschoolDisplay() {
   if (typeof sessionStorage === "undefined")
     return { name: null as string | null, icon: null as string | null };
   return {
-    name: sessionStorage.getItem(ACTIVE_MASJID_NAME_SS),
-    icon: sessionStorage.getItem(ACTIVE_MASJID_ICON_SS),
+    name: sessionStorage.getItem(ACTIVE_school_NAME_SS),
+    icon: sessionStorage.getItem(ACTIVE_school_ICON_SS),
   };
 }
-export function clearActiveMasjidDisplay() {
+export function clearActiveschoolDisplay() {
   if (typeof sessionStorage === "undefined") return;
-  sessionStorage.removeItem(ACTIVE_MASJID_NAME_SS);
-  sessionStorage.removeItem(ACTIVE_MASJID_ICON_SS);
+  sessionStorage.removeItem(ACTIVE_school_NAME_SS);
+  sessionStorage.removeItem(ACTIVE_school_ICON_SS);
 }
 
 /* ==========================================
@@ -126,9 +126,9 @@ export async function ensureCsrf(): Promise<string | null> {
    👤 Simple Context (me/simple-context) + cache
 ========================================== */
 export type Membership = {
-  masjid_id: string;
-  masjid_name: string;
-  masjid_icon_url?: string;
+  school_id: string;
+  school_name: string;
+  school_icon_url?: string;
   roles?: string[];
 };
 
@@ -182,34 +182,34 @@ export async function fetchSimpleContext(
 /* ==========================================
    🏷️ Set/Clear Active Context + broadcast
 ========================================== */
-export function setActiveMasjidContext(
-  masjidId: string,
+export function setActiveschoolContext(
+  schoolId: string,
   role?: string,
   opts?: { name?: string; icon?: string }
 ) {
-  if (masjidId) setCookie(ACTIVE_MASJID_COOKIE, masjidId);
+  if (schoolId) setCookie(ACTIVE_school_COOKIE, schoolId);
   if (role) setCookie(ACTIVE_ROLE_COOKIE, role);
-  if (opts?.name || opts?.icon) setActiveMasjidDisplay(opts.name, opts.icon);
+  if (opts?.name || opts?.icon) setActiveschoolDisplay(opts.name, opts.icon);
 
   clearSimpleContextCache();
   window.dispatchEvent(
-    new CustomEvent("masjid:changed", {
-      detail: { masjidId, role, meta: opts },
+    new CustomEvent("school:changed", {
+      detail: { schoolId, role, meta: opts },
     })
   );
 }
 
-export function clearActiveMasjidContext() {
-  delCookie(ACTIVE_MASJID_COOKIE);
+export function clearActiveschoolContext() {
+  delCookie(ACTIVE_school_COOKIE);
   delCookie(ACTIVE_ROLE_COOKIE);
-  clearActiveMasjidDisplay();
+  clearActiveschoolDisplay();
 
   clearSimpleContextCache();
-  window.dispatchEvent(new CustomEvent("masjid:changed", { detail: null }));
+  window.dispatchEvent(new CustomEvent("school:changed", { detail: null }));
 }
 
-export function getActiveMasjidId(): string | null {
-  return getCookie(ACTIVE_MASJID_COOKIE);
+export function getActiveschoolId(): string | null {
+  return getCookie(ACTIVE_school_COOKIE);
 }
 export function getActiveRole(): string | null {
   return getCookie(ACTIVE_ROLE_COOKIE);
@@ -324,10 +324,10 @@ api.interceptors.request.use(async (config) => {
 
   // 3) Scope tenant (opsional)
   if (!isAuthArea) {
-    const mid = getActiveMasjidId();
+    const mid = getActiveschoolId();
     if (mid) {
       config.headers = config.headers ?? {};
-      (config.headers as any)["X-Masjid-ID"] = mid;
+      (config.headers as any)["X-school-ID"] = mid;
     }
   }
 
@@ -400,7 +400,7 @@ export async function apiLogout() {
     console.warn("[logout] failed:", e);
   } finally {
     clearTokens();
-    clearActiveMasjidContext();
+    clearActiveschoolContext();
     clearSimpleContextCache();
     window.dispatchEvent(
       new CustomEvent("auth:logout", { detail: { source: "axios" } })

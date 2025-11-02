@@ -36,7 +36,7 @@ export type UsageItem = {
 
 export type BookAPI = {
   books_id: string;
-  books_masjid_id: string;
+  books_school_id: string;
   books_title: string;
   books_author?: string | null;
   books_desc?: string | null;
@@ -52,7 +52,7 @@ type BookDetailResp = { data: BookAPI; message?: string };
 const DUMMY_BOOKS: BookAPI[] = [
   {
     books_id: "dummy-1",
-    books_masjid_id: "masjid-1",
+    books_school_id: "school-1",
     books_title: "Matematika Dasar",
     books_author: "Ahmad Fauzi",
     books_desc: "Buku dasar untuk memahami konsep matematika SD.",

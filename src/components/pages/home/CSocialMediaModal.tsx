@@ -7,14 +7,14 @@ interface SocialMediaModalProps {
   show: boolean;
   onClose: () => void;
   data: {
-    masjid_instagram_url?: string;
-    masjid_whatsapp_url?: string;
-    masjid_youtube_url?: string;
-    masjid_facebook_url?: string;
-    masjid_tiktok_url?: string;
+    school_instagram_url?: string;
+    school_whatsapp_url?: string;
+    school_youtube_url?: string;
+    school_facebook_url?: string;
+    school_tiktok_url?: string;
     // ✅ tambahkan ini
-    masjid_whatsapp_group_ikhwan_url?: string;
-    masjid_whatsapp_group_akhwat_url?: string;
+    school_whatsapp_group_ikhwan_url?: string;
+    school_whatsapp_group_akhwat_url?: string;
   };
 }
 
@@ -49,32 +49,32 @@ export default function SocialMediaModal({
 
   const items: ItemConf[] = [
     {
-      key: "masjid_instagram_url",
+      key: "school_instagram_url",
       label: "Instagram",
       prefix: "https://instagram.com/",
       iconSrc: "/icons/instagram.svg",
       normalize: (v) => v.replace(/^@/, ""),
     },
     {
-      key: "masjid_whatsapp_url",
+      key: "school_whatsapp_url",
       label: "WhatsApp",
       prefix: "https://wa.me/",
       iconSrc: "/icons/whatsapp.svg",
       normalize: (v) => v.replace(/[^\d]/g, "").replace(/^0/, "62"),
     },
     {
-      key: "masjid_youtube_url",
+      key: "school_youtube_url",
       label: "YouTube",
       iconSrc: "/icons/youtube.svg",
     },
     {
-      key: "masjid_facebook_url",
+      key: "school_facebook_url",
       label: "Facebook",
       prefix: "https://facebook.com/",
       iconSrc: "/icons/facebook.svg",
     },
     {
-      key: "masjid_tiktok_url",
+      key: "school_tiktok_url",
       label: "TikTok",
       prefix: "https://tiktok.com/@",
       iconSrc: "/icons/tiktok.svg",
@@ -83,7 +83,7 @@ export default function SocialMediaModal({
 
     // ✅ Grup WhatsApp Ikhwan
     {
-      key: "masjid_whatsapp_group_ikhwan_url",
+      key: "school_whatsapp_group_ikhwan_url",
       label: "Grup WhatsApp Ikhwan",
       iconSrc: "/icons/whatsapp.svg",
       customHref: (v) =>
@@ -91,7 +91,7 @@ export default function SocialMediaModal({
     },
     // ✅ Grup WhatsApp Akhwat
     {
-      key: "masjid_whatsapp_group_akhwat_url",
+      key: "school_whatsapp_group_akhwat_url",
       label: "Grup WhatsApp Akhwat",
       iconSrc: "/icons/whatsapp.svg",
       customHref: (v) =>
@@ -125,7 +125,7 @@ export default function SocialMediaModal({
       className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4"
       role="dialog"
       aria-modal="true"
-      aria-label="Sosial Media Masjid"
+      aria-label="Sosial Media school"
     >
       <div
         ref={modalRef}
@@ -146,7 +146,7 @@ export default function SocialMediaModal({
           <X size={22} />
         </button>
 
-        <h2 className="text-lg font-semibold mb-5">Sosial Media Masjid</h2>
+        <h2 className="text-lg font-semibold mb-5">Sosial Media school</h2>
 
         <div className="space-y-3">
           {items.map((item) => {

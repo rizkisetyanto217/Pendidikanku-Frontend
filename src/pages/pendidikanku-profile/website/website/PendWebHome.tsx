@@ -19,14 +19,14 @@ import sekolah5 from "@/assets/sekolah5.png";
 import keuangan from "@/assets/keuangan.jpg";
 
 import WebsiteNavbar from "@/components/common/public/CWebsiteNavbar";
-import WebsiteFooter from "./components/CMasjidkuWebFooter";
+import WebsiteFooter from "./components/CPendWebFooter";
 
 import useHtmlThema from "@/hooks/useHTMLThema";
 import { pickTheme, ThemeName } from "@/constants/thema";
 
 import TestimonialSlider, {
   TestimonialItem,
-} from "./components/CMasjidkuTestimonialSlider";
+} from "./components/CPendWebTestimonialSlider";
 import { Link } from "react-router-dom";
 
 /** =================== Data =================== */

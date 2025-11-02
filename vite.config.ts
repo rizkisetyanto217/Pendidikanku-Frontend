@@ -15,7 +15,7 @@ export default defineConfig({
     proxy: {
       // semua request ke /api diarahkan ke Railway
       "/api": {
-        target: "https://masjidkubackend4-production.up.railway.app",
+        target: "https://schoolkubackend4-production.up.railway.app",
         changeOrigin: true,
         secure: true,
         // tetap biarkan prefix /api (backend kamu memang /api/…)

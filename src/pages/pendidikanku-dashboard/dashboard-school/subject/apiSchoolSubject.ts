@@ -23,7 +23,7 @@
 
 // export type SubjectsAPIItem = {
 //   subject_id: string;
-//   subject_masjid_id: string;
+//   subject_school_id: string;
 //   subject_code: string | null;
 //   subject_name: string;
 //   subject_desc?: string | null;
@@ -40,7 +40,7 @@
 
 // export type ClassSubjectItem = {
 //   class_subject_id: string;
-//   class_subject_masjid_id: string;
+//   class_subject_school_id: string;
 //   class_subject_parent_id: string;
 //   class_subject_subject_id: string;
 //   class_subject_slug: string;
@@ -75,51 +75,51 @@
 // };
 
 // /* ================= Reusable Mutations ================= */
-// export function useCreateSubjectMutation(masjid_id: string) {
+// export function useCreateSubjectMutation(school_id: string) {
 //   const qc = useQueryClient();
 //   return useMutation({
 //     mutationFn: async (form: FormData) => {
 //       const { data } = await axios.post(
-//         `${ADMIN_PREFIX}/${masjid_id}/subjects`,
+//         `${ADMIN_PREFIX}/${school_id}/subjects`,
 //         form,
 //         { headers: { "Content-Type": "multipart/form-data" } }
 //       );
 //       return data;
 //     },
 //     onSuccess: () => {
-//       qc.invalidateQueries({ queryKey: ["subjects-merged", masjid_id] });
+//       qc.invalidateQueries({ queryKey: ["subjects-merged", school_id] });
 //     },
 //   });
 // }
 
-// export function useUpdateSubjectMutation(masjid_id: string, subjectId: string) {
+// export function useUpdateSubjectMutation(school_id: string, subjectId: string) {
 //   const qc = useQueryClient();
 //   return useMutation({
 //     mutationFn: async (form: FormData) => {
 //       const { data } = await axios.patch(
-//         `${ADMIN_PREFIX}/${masjid_id}/subjects/${subjectId}`,
+//         `${ADMIN_PREFIX}/${school_id}/subjects/${subjectId}`,
 //         form,
 //         { headers: { "Content-Type": "multipart/form-data" } }
 //       );
 //       return data;
 //     },
 //     onSuccess: () => {
-//       qc.invalidateQueries({ queryKey: ["subjects-merged", masjid_id] });
+//       qc.invalidateQueries({ queryKey: ["subjects-merged", school_id] });
 //     },
 //   });
 // }
 
-// export function useDeleteSubjectMutation(masjid_id: string, subjectId: string) {
+// export function useDeleteSubjectMutation(school_id: string, subjectId: string) {
 //   const qc = useQueryClient();
 //   return useMutation({
 //     mutationFn: async () => {
 //       const { data } = await axios.delete(
-//         `${ADMIN_PREFIX}/${masjid_id}/subjects/${subjectId}`
+//         `${ADMIN_PREFIX}/${school_id}/subjects/${subjectId}`
 //       );
 //       return data;
 //     },
 //     onSuccess: () => {
-//       qc.invalidateQueries({ queryKey: ["subjects-merged", masjid_id] });
+//       qc.invalidateQueries({ queryKey: ["subjects-merged", school_id] });
 //     },
 //   });
 // }

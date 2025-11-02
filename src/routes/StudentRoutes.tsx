@@ -5,21 +5,21 @@ import StudentProgressDetail from "@/pages/pendidikanku-dashboard/dashboard-stud
 import StudentAllSchedule from "@/pages/pendidikanku-dashboard/dashboard-student/dashboard/StudentAllSchedule";
 import StudentProfil from "@/pages/pendidikanku-dashboard/dashboard-student/profil/StudentProfil";
 import StudentAssignmentClass from "@/pages/pendidikanku-dashboard/dashboard-student/assignment/StudentAssignmentClass";
-import DetailScheduleStudent from "@/pages/pendidikanku-dashboard/dashboard-student/dashboard/StudentDetailSchedule";
-import AnnouncementsStudent from "@/pages/pendidikanku-dashboard/dashboard-student/dashboard/StudentAnnouncements";
-import DetailAnnouncementStudent from "@/pages/pendidikanku-dashboard/dashboard-student/dashboard/StudentDetailAnnouncement";
-import InvoiceTagihan from "@/pages/pendidikanku-dashboard/dashboard-student/dashboard/StudentInvoiceTagihan";
+import StudentDetailSchedule from "@/pages/pendidikanku-dashboard/dashboard-student/dashboard/StudentDetailSchedule";
+import StudentAnnouncements from "@/pages/pendidikanku-dashboard/dashboard-student/dashboard/StudentAnnouncements";
+import StudentDetailAnnouncements from "@/pages/pendidikanku-dashboard/dashboard-student/dashboard/StudentDetailAnnouncement";
+import StudentInvoiceTagihan from "@/pages/pendidikanku-dashboard/dashboard-student/dashboard/StudentInvoiceTagihan";
 import StudentRaport from "@/pages/pendidikanku-dashboard/dashboard-student/progress/raport/StudentRaport";
 import StudentDetail from "@/pages/pendidikanku-dashboard/dashboard-student/dashboard/StudentDetail";
 import StudentFInance from "@/pages/pendidikanku-dashboard/dashboard-student/finance/StudentFinance";
 import StudentSchedule from "@/pages/pendidikanku-dashboard/dashboard-student/schedule/StudentSchedule";
-import ListFinance from "@/pages/pendidikanku-dashboard/dashboard-student/dashboard/StudentListFinnance";
+import StudentListFinance from "@/pages/pendidikanku-dashboard/dashboard-student/dashboard/StudentListFinnance";
 import StudentAnnouncement from "@/pages/pendidikanku-dashboard/dashboard-student/announcement/StudentAnnouncement";
 import StudentDetailAnnouncement from "@/pages/pendidikanku-dashboard/dashboard-student/announcement/StudentDetailAnnouncement";
 import StudentAbsence from "@/pages/pendidikanku-dashboard/dashboard-student/progress/absence/StudentAbsence";
 import StudentNotesSummary from "@/pages/pendidikanku-dashboard/dashboard-student/progress/notes-summary/StudentNotesSummary";
 import StudentMenuGrids from "@/pages/pendidikanku-dashboard/dashboard-student/menu/StudentMenuGrids";
-import MyClass from "@/pages/pendidikanku-dashboard/dashboard-student/class/StudentMyClass";
+import StudentMyClass from "@/pages/pendidikanku-dashboard/dashboard-student/class/StudentMyClass";
 import StudentMateri from "@/pages/pendidikanku-dashboard/dashboard-student/class/StudentMateri";
 import StudentAssignment from "@/pages/pendidikanku-dashboard/dashboard-student/class/StudentAssignment";
 import StudentQuizPage from "@/pages/pendidikanku-dashboard/dashboard-student/class/StudentQuizPage";
@@ -58,7 +58,7 @@ export const StudentRoutes = (
     {/* Halaman semua jadwal */}
     <Route path="semua-jadwal" element={<StudentAllSchedule />} />
     {/* Detail jadwal tertentu berdasarkan ID */}
-    <Route path="semua-jadwal/:id" element={<DetailScheduleStudent />} />
+    <Route path="semua-jadwal/:id" element={<StudentDetailSchedule />} />
     {/* Jadwal utama (khusus tampilan kelas saya / tab jadwal) */}
     <Route path="jadwal" element={<StudentSchedule />} />
 
@@ -82,11 +82,11 @@ export const StudentRoutes = (
     {/* Halaman keuangan ringkas */}
     <Route path="keuangan" element={<StudentFInance />} />
     {/* Daftar seluruh tagihan */}
-    <Route path="keuangan-list" element={<ListFinance />} />
+    <Route path="keuangan-list" element={<StudentListFinance />} />
     {/* Detail tagihan berdasarkan ID */}
-    <Route path="keuangan-list/:id" element={<InvoiceTagihan />} />
+    <Route path="keuangan-list/:id" element={<StudentInvoiceTagihan />} />
     {/* Tagihan langsung dari route lain */}
-    <Route path="tagihan/:id" element={<InvoiceTagihan />} />
+    <Route path="tagihan/:id" element={<StudentInvoiceTagihan />} />
 
     {/* =====================
         MENU UTAMA KELAS SAYA
@@ -96,7 +96,7 @@ export const StudentRoutes = (
       <Route index element={<StudentMenuGrids />} />
 
       {/* Halaman daftar kelas */}
-      <Route path="kelas-saya" element={<MyClass />} />
+      <Route path="kelas-saya" element={<StudentMyClass />} />
 
       {/* Halaman keuangan ringkas */}
       <Route path="keuangan" element={<StudentFInance />} />

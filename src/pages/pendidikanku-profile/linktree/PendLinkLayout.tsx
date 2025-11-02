@@ -1,9 +1,9 @@
-// MasjidLayout.tsx
+// schoolLayout.tsx
 import { Outlet } from "react-router-dom";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 
-export default function MasjidLayout() {
+export default function schoolLayout() {
   const { isDark, themeName } = useHtmlDarkMode();
   const theme = pickTheme(themeName as ThemeName, isDark);
   return (

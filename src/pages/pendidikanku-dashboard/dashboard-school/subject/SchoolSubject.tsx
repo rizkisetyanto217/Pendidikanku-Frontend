@@ -43,7 +43,7 @@ export type SubjectRow = {
 
 type SubjectsAPIItem = {
   subject_id: string;
-  subject_masjid_id: string;
+  subject_school_id: string;
   subject_code: string | null;
   subject_name: string;
   subject_desc?: string | null;
@@ -60,7 +60,7 @@ type SubjectsAPIResp = {
 
 type ClassSubjectItem = {
   class_subject_id: string;
-  class_subject_masjid_id: string;
+  class_subject_school_id: string;
   class_subject_parent_id: string;
   class_subject_subject_id: string;
   class_subject_slug: string;
@@ -95,51 +95,51 @@ const sumHours = (arr: ClassSubjectItem[]) => {
 };
 
 /* ================= Reusable Mutations ================= */
-function useCreateSubjectMutation(masjid_id: string) {
+function useCreateSubjectMutation(school_id: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (form: FormData) => {
       const { data } = await axios.post(
-        `${ADMIN_PREFIX}/${masjid_id}/subjects`,
+        `${ADMIN_PREFIX}/${school_id}/subjects`,
         form,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
       return data;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["subjects-merged", masjid_id] });
+      qc.invalidateQueries({ queryKey: ["subjects-merged", school_id] });
     },
   });
 }
 
-function useUpdateSubjectMutation(masjid_id: string, subjectId: string) {
+function useUpdateSubjectMutation(school_id: string, subjectId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (form: FormData) => {
       const { data } = await axios.patch(
-        `${ADMIN_PREFIX}/${masjid_id}/subjects/${subjectId}`,
+        `${ADMIN_PREFIX}/${school_id}/subjects/${subjectId}`,
         form,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
       return data;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["subjects-merged", masjid_id] });
+      qc.invalidateQueries({ queryKey: ["subjects-merged", school_id] });
     },
   });
 }
 
-function useDeleteSubjectMutation(masjid_id: string, subjectId: string) {
+function useDeleteSubjectMutation(school_id: string, subjectId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async () => {
       const { data } = await axios.delete(
-        `${ADMIN_PREFIX}/${masjid_id}/subjects/${subjectId}`
+        `${ADMIN_PREFIX}/${school_id}/subjects/${subjectId}`
       );
       return data;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["subjects-merged", masjid_id] });
+      qc.invalidateQueries({ queryKey: ["subjects-merged", school_id] });
     },
   });
 }
@@ -343,12 +343,12 @@ function SubjectCard({
 function CreateSubjectModal({
   open,
   palette,
-  masjidId,
+  schoolId,
   onClose,
 }: {
   open: boolean;
   palette: Palette;
-  masjidId: string;
+  schoolId: string;
   onClose: () => void;
 }) {
   const [code, setCode] = useState("");
@@ -356,7 +356,7 @@ function CreateSubjectModal({
   const [desc, setDesc] = useState("");
   const [file, setFile] = useState<File | null>(null);
 
-  const createMutation = useCreateSubjectMutation(masjidId);
+  const createMutation = useCreateSubjectMutation(schoolId);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -470,13 +470,13 @@ function CreateSubjectModal({
 function EditSubjectModal({
   open,
   palette,
-  masjidId,
+  schoolId,
   subject,
   onClose,
 }: {
   open: boolean;
   palette: Palette;
-  masjidId: string;
+  schoolId: string;
   subject: SubjectRow | null;
   onClose: () => void;
 }) {
@@ -495,7 +495,7 @@ function EditSubjectModal({
     setFile(null);
   }, [subject?.id]);
 
-  const updateMutation = useUpdateSubjectMutation(masjidId, subject?.id ?? "");
+  const updateMutation = useUpdateSubjectMutation(schoolId, subject?.id ?? "");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -654,8 +654,8 @@ const SchoolSubject: React.FC = () => {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
-  const { masjid_id } = useParams<{ masjid_id: string }>();
-  // const masjidId = masjid_id; // pakai alias lokal biar konsisten di bawah
+  const { school_id } = useParams<{ school_id: string }>();
+  // const schoolId = school_id; // pakai alias lokal biar konsisten di bawah
 
   const [detailData, setDetailData] = useState<SubjectRow | null>(null);
   const [openCreate, setOpenCreate] = useState(false);
@@ -664,23 +664,23 @@ const SchoolSubject: React.FC = () => {
 
   // panggil hook dengan argumen terkini (aman, hook tetap dipanggil setiap render)
   const delMut = useDeleteSubjectMutation(
-    masjid_id ?? "",
+    school_id ?? "",
     deleteData?.id ?? ""
   );
 
   const mergedQ = useQuery({
-    queryKey: ["subjects-merged", masjid_id],
-    enabled: !!masjid_id,
+    queryKey: ["subjects-merged", school_id],
+    enabled: !!school_id,
     queryFn: async (): Promise<SubjectRow[]> => {
       const [subjectsResp, classSubjectsResp] = await Promise.all([
         axios
-          .get<SubjectsAPIResp>(`${API_PREFIX}/${masjid_id}/subjects/list`, {
+          .get<SubjectsAPIResp>(`${API_PREFIX}/${school_id}/subjects/list`, {
             params: { limit: 500, offset: 0 },
           })
           .then((r) => r.data),
         axios
           .get<ClassSubjectsAPIResp>(
-            `${API_PREFIX}/${masjid_id}/class-subjects/list`,
+            `${API_PREFIX}/${school_id}/class-subjects/list`,
             { params: { limit: 1000, offset: 0 } }
           )
           .then((r) => r.data),
@@ -788,34 +788,34 @@ const SchoolSubject: React.FC = () => {
       />
 
       {/* Modal Create */}
-      {masjid_id && (
+      {school_id && (
         <CreateSubjectModal
           open={openCreate}
           palette={palette}
-          masjidId={masjid_id}
+          schoolId={school_id}
           onClose={() => setOpenCreate(false)}
         />
       )}
 
       {/* Modal Edit */}
-      {masjid_id && (
+      {school_id && (
         <EditSubjectModal
           open={!!editData}
           palette={palette}
-          masjidId={masjid_id}
+          schoolId={school_id}
           subject={editData}
           onClose={() => setEditData(null)}
         />
       )}
 
       {/* Modal Delete */}
-      {masjid_id && (
+      {school_id && (
         <DeleteConfirmModal
           open={!!deleteData}
           palette={palette}
           onClose={() => setDeleteData(null)}
           onConfirm={async () => {
-            if (!masjid_id || !deleteData) return;
+            if (!school_id || !deleteData) return;
             try {
               await delMut.mutateAsync(); // ← tidak perlu kirim variabel lagi
             } finally {

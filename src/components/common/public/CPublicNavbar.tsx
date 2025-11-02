@@ -6,16 +6,16 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import PublicUserDropdown from "./CUserDropDown";
 
 interface PublicNavbarProps {
-  masjidName: string;
-  masjidSlug?: string; // 🔁 optional, biar bisa fallback dari URL
+  schoolName: string;
+  schoolSlug?: string; // 🔁 optional, biar bisa fallback dari URL
   hideOnScroll?: boolean;
   showLogin?: boolean; // ✅ baru: bisa sembunyikan tombol login
   loginEnabled?: boolean; // ✅ baru: paksa enable/disable (default true)
 }
 
 export default function PublicNavbar({
-  masjidName,
-  masjidSlug,
+  schoolName,
+  schoolSlug,
   hideOnScroll = false,
   showLogin = true, // default: tampilkan login
   loginEnabled = true, // default: tombol login aktif
@@ -25,14 +25,14 @@ export default function PublicNavbar({
 
   // 🔁 Resolve slug dengan prioritas: props → useParams → pathname
   const resolvedSlug = useMemo(() => {
-    if (masjidSlug && masjidSlug.trim()) return masjidSlug.trim();
+    if (schoolSlug && schoolSlug.trim()) return schoolSlug.trim();
     if (slugFromParams && slugFromParams.trim()) return slugFromParams.trim();
     const parts = window.location.pathname.split("/").filter(Boolean);
-    // cari pola /masjid/:slug/...
-    const masjidIdx = parts.indexOf("masjid");
-    if (masjidIdx !== -1 && parts[masjidIdx + 1]) return parts[masjidIdx + 1];
+    // cari pola /school/:slug/...
+    const schoolIdx = parts.indexOf("school");
+    if (schoolIdx !== -1 && parts[schoolIdx + 1]) return parts[schoolIdx + 1];
     return ""; // terakhir kalau benar2 ga ketemu
-  }, [masjidSlug, slugFromParams]);
+  }, [schoolSlug, slugFromParams]);
 
   const { isDark, themeName } = useHtmlDarkMode();
   const theme = pickTheme(themeName as ThemeName, isDark);
@@ -78,10 +78,10 @@ export default function PublicNavbar({
 
   const handleLoginClick = () => {
     if (resolvedSlug) {
-      navigate(`/masjid/${resolvedSlug}/login`);
+      navigate(`/school/${resolvedSlug}/login`);
     } else {
       // fallback aman kalau slug belum kebaca → arahkan ke /login umum
-      console.warn("[PublicNavbar] masjidSlug unresolved, fallback to /login");
+      console.warn("[PublicNavbar] schoolSlug unresolved, fallback to /login");
       navigate(`/login`);
     }
   };
@@ -95,7 +95,7 @@ export default function PublicNavbar({
       }`}
       style={{ backgroundColor: theme.white1, color: theme.black1 }}
     >
-      <h2 className="text-lg font-semibold">{masjidName}</h2>
+      <h2 className="text-lg font-semibold">{schoolName}</h2>
 
       <div className="flex items-center gap-2" ref={dropdownRef}>
         {!isLoading && isLoggedIn ? (

@@ -63,7 +63,7 @@ export default function ModalChooseRole({
             >
               <Building2 className="w-5 h-5 text-white" />
             </div>
-            <span className="font-semibold">Jadi DKM / Admin Masjid</span>
+            <span className="font-semibold">Jadi DKM / Admin school</span>
           </button>
           <button
             type="button"

@@ -1,15 +1,15 @@
-// --- di src/hooks/useActiveMasjidInfo.tsx --- //
+// --- di src/hooks/useActiveschoolInfo.tsx --- //
 import { useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
-  getActiveMasjidId,
-  getActiveMasjidDisplay,
+  getActiveschoolId,
+  getActiveschoolDisplay,
   fetchSimpleContext,
 } from "@/lib/axios";
 
-export function useActiveMasjidInfo() {
-  const activeId = getActiveMasjidId();
-  const display = getActiveMasjidDisplay(); // fallback instan {name, icon}
+export function useActiveschoolInfo() {
+  const activeId = getActiveschoolId();
+  const display = getActiveschoolDisplay(); // fallback instan {name, icon}
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["me", "simple-context", activeId], // ikat ke id
@@ -20,26 +20,26 @@ export function useActiveMasjidInfo() {
   });
 
   useEffect(() => {
-    const onMasjidChanged = () => refetch();
+    const onschoolChanged = () => refetch();
     const onAuth = () => refetch();
     const onLogout = () => refetch();
 
-    window.addEventListener("masjid:changed", onMasjidChanged as any);
+    window.addEventListener("school:changed", onschoolChanged as any);
     window.addEventListener("auth:authorized", onAuth as any);
     window.addEventListener("auth:logout", onLogout as any);
 
     return () => {
-      window.removeEventListener("masjid:changed", onMasjidChanged as any);
+      window.removeEventListener("school:changed", onschoolChanged as any);
       window.removeEventListener("auth:authorized", onAuth as any);
       window.removeEventListener("auth:logout", onLogout as any);
     };
   }, [refetch]);
 
   const memberships = data?.memberships ?? [];
-  const active = memberships.find((m) => m.masjid_id === activeId);
+  const active = memberships.find((m) => m.school_id === activeId);
 
-  const name = active?.masjid_name ?? display.name ?? null;
-  const icon = active?.masjid_icon_url ?? display.icon ?? null;
+  const name = active?.school_name ?? display.name ?? null;
+  const icon = active?.school_icon_url ?? display.icon ?? null;
 
   return useMemo(
     () => ({

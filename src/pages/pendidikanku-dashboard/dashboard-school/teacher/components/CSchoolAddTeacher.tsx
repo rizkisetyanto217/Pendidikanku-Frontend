@@ -13,7 +13,7 @@ type Props = {
   open: boolean;
   palette: Palette;
   subjects: string[];
-  masjidId: string; // ⬅️ WAJIB: untuk POST
+  schoolId: string; // ⬅️ WAJIB: untuk POST
   onClose: () => void;
   onCreated?: (created: any) => void; // opsional callback setelah tambah
   onDeleted?: (deletedId: string) => void; // opsional callback setelah hapus
@@ -46,7 +46,7 @@ export default function AddTeacher({
   open,
   palette,
   subjects,
-  masjidId,
+  schoolId,
   onClose,
   onCreated,
   onDeleted,
@@ -132,15 +132,15 @@ export default function AddTeacher({
     mutationFn: async () => {
       if (!selectedUserId) throw new Error("Pilih user terlebih dahulu");
       const payload = {
-        masjid_teachers_masjid_id: masjidId,
-        masjid_teachers_user_id: selectedUserId,
+        school_teachers_school_id: schoolId,
+        school_teachers_user_id: selectedUserId,
       };
-      const res = await axios.post("/api/a/masjid-teachers", payload);
+      const res = await axios.post("/api/a/school-teachers", payload);
       return res.data;
     },
     onSuccess: (data) => {
-      // invalidasi list guru per masjid
-      qc.invalidateQueries({ queryKey: ["masjid-teachers", masjidId] });
+      // invalidasi list guru per school
+      qc.invalidateQueries({ queryKey: ["school-teachers", schoolId] });
       onCreated?.(data);
       onClose();
     },
@@ -148,19 +148,19 @@ export default function AddTeacher({
 
   // komponen kecil untuk hapus guru tertentu (pakai di tempat lain juga bisa)
   const removeTeacher = useMutation({
-    mutationFn: async (masjidTeacherId: string) => {
-      await axios.delete(`/api/a/masjid-teachers/${masjidTeacherId}`);
-      return masjidTeacherId;
+    mutationFn: async (schoolTeacherId: string) => {
+      await axios.delete(`/api/a/school-teachers/${schoolTeacherId}`);
+      return schoolTeacherId;
     },
     onSuccess: (deletedId) => {
-      qc.invalidateQueries({ queryKey: ["masjid-teachers", masjidId] });
+      qc.invalidateQueries({ queryKey: ["school-teachers", schoolId] });
       onDeleted?.(deletedId);
     },
   });
 
   if (!open) return null;
 
-  const canSave = !!selectedUserId && !!masjidId && !addTeacher.isPending;
+  const canSave = !!selectedUserId && !!schoolId && !addTeacher.isPending;
 
   return (
     <div
@@ -424,26 +424,26 @@ function Field({
 }
 
 /* ================= Optional: tombol hapus terpisah =================
-   Pakai di daftar guru: <RemoveMasjidTeacherButton id={row.id} masjidId={masjidId} />
+   Pakai di daftar guru: <RemoveschoolTeacherButton id={row.id} schoolId={schoolId} />
 */
-export function RemoveMasjidTeacherButton({
+export function RemoveschoolTeacherButton({
   id,
-  masjidId,
+  schoolId,
   palette,
   onDeleted,
 }: {
-  id: string; // masjid_teachers_id
-  masjidId: string;
+  id: string; // school_teachers_id
+  schoolId: string;
   palette: Palette;
   onDeleted?: (deletedId: string) => void;
 }) {
   const qc = useQueryClient();
   const removeTeacher = useMutation({
     mutationFn: async () => {
-      await axios.delete(`/api/a/masjid-teachers/${id}`);
+      await axios.delete(`/api/a/school-teachers/${id}`);
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["masjid-teachers", masjidId] });
+      qc.invalidateQueries({ queryKey: ["school-teachers", schoolId] });
       onDeleted?.(id);
     },
   });

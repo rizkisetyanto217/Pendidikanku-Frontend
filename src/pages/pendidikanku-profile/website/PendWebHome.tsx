@@ -18,7 +18,7 @@ import {
   ExternalLink,
   ChevronRight,
 } from "lucide-react";
-// import MasjidkuHomePrayerCard from "@/components/pages/home/MasjidkuHomePrayerCard";
+// import schoolkuHomePrayerCard from "@/components/pages/home/schoolkuHomePrayerCard";
 import LinktreeNavbar from "@/components/common/public/CLintreeNavbar";
 
 /* =========================================================
@@ -98,7 +98,7 @@ async function shareViaNative(title: string, text: string, url: string) {
 /* =========================================================
    Component
 ========================================================= */
-export default function MasjidkuHome() {
+export default function schoolkuHome() {
   const { slug } = useParams();
   const [openShare, setOpenShare] = useState(false);
   const [copiedText, setCopiedText] = useState(false);
@@ -108,16 +108,16 @@ export default function MasjidkuHome() {
   const theme = pickTheme(themeName as ThemeName, isDark);
 
   // Demo data — gantikan dari API jika sudah tersedia
-  const masjidku = {
-    masjidku_name: "MasjidKu",
-    masjidku_description:
-      "Lembaga untuk Digitalisasi Masjid dan Lembaga Islam Indonesia",
-    masjidku_image_url: "/image/Gambar-Masjid.jpeg",
-    masjidku_instagram_url: "https://instagram.com/masjidbaitussalam",
-    masjidku_whatsapp_url: "https://wa.me/6281234567890",
-    masjidku_youtube_url: "https://youtube.com/@masjidbaitussalam",
+  const schoolku = {
+    schoolku_name: "schoolKu",
+    schoolku_description:
+      "Lembaga untuk Digitalisasi school dan Lembaga Islam Indonesia",
+    schoolku_image_url: "/image/Gambar-school.jpeg",
+    schoolku_instagram_url: "https://instagram.com/schoolbaitussalam",
+    schoolku_whatsapp_url: "https://wa.me/6281234567890",
+    schoolku_youtube_url: "https://youtube.com/@schoolbaitussalam",
     // Optional
-    masjidku_donation_url: "",
+    schoolku_donation_url: "",
   };
 
   const shareUrl = useMemo(
@@ -125,10 +125,10 @@ export default function MasjidkuHome() {
     []
   );
 
-  const shareTitle = masjidku.masjidku_name;
+  const shareTitle = schoolku.schoolku_name;
   const shareText = useMemo(
-    () => `${masjidku.masjidku_name} — ${masjidku.masjidku_description}`,
-    [masjidku.masjidku_name, masjidku.masjidku_description]
+    () => `${schoolku.schoolku_name} — ${schoolku.schoolku_description}`,
+    [schoolku.schoolku_name, schoolku.schoolku_description]
   );
 
   // ====== Share handlers ======
@@ -190,8 +190,8 @@ export default function MasjidkuHome() {
   return (
     <>
       <LinktreeNavbar
-      // title={masjidku.masjidku_name}
-      // subtitle={masjidku.masjidku_description}
+      // title={schoolku.schoolku_name}
+      // subtitle={schoolku.schoolku_description}
       // coverOverlap
       // showBack
       // onShare={() => setOpenShare(true)} // kalau mau pakai modal share kamu sendiri
@@ -202,7 +202,7 @@ export default function MasjidkuHome() {
         <div className="h-44 sm:h-56 w-full overflow-hidden">
           <div
             className="h-full w-full bg-center bg-cover"
-            style={{ backgroundImage: `url(${masjidku.masjidku_image_url})` }}
+            style={{ backgroundImage: `url(${schoolku.schoolku_image_url})` }}
           />
         </div>
         {/* overlay gradient */}
@@ -220,8 +220,8 @@ export default function MasjidkuHome() {
               }}
             >
               <ShimmerImage
-                src={masjidku.masjidku_image_url}
-                alt="Logo / Foto Masjid"
+                src={schoolku.schoolku_image_url}
+                alt="Logo / Foto school"
                 className="w-full h-full object-cover"
               />
             </div>
@@ -234,7 +234,7 @@ export default function MasjidkuHome() {
                   color: isDark ? theme.black1 : theme.black1,
                 }}
               >
-                {masjidku.masjidku_name}
+                {schoolku.schoolku_name}
               </h1>
 
               <p
@@ -245,7 +245,7 @@ export default function MasjidkuHome() {
                   opacity: 0.9,
                 }}
               >
-                {masjidku.masjidku_description}
+                {schoolku.schoolku_description}
               </p>
             </div>
           </div>
@@ -258,7 +258,7 @@ export default function MasjidkuHome() {
               onClick={() =>
                 openWhatsAppNumber(
                   "6281234567890",
-                  `Assalamualaikum, saya ingin bertanya tentang kegiatan di ${masjidku.masjidku_name}.`
+                  `Assalamualaikum, saya ingin bertanya tentang kegiatan di ${schoolku.schoolku_name}.`
                 )
               }
               className="flex items-center justify-center gap-2 rounded-xl py-2 text-sm font-medium shadow-sm hover:shadow transition ring-1"
@@ -285,7 +285,7 @@ export default function MasjidkuHome() {
             </button>
 
             <a
-              href="/masjid"
+              href="/school"
               className="flex items-center justify-center gap-2 rounded-xl py-2 text-sm font-medium shadow-sm hover:shadow transition ring-1"
               style={{
                 backgroundColor: theme.white1,
@@ -293,11 +293,11 @@ export default function MasjidkuHome() {
                 borderColor: theme.white3,
               }}
             >
-              <ExternalLink size={16} /> Eksplor Masjid
+              <ExternalLink size={16} /> Eksplor school
             </a>
 
             <a
-              href={masjidku.masjidku_instagram_url}
+              href={schoolku.schoolku_instagram_url}
               target="_blank"
               rel="noreferrer"
               className="flex items-center justify-center gap-2 rounded-xl py-2 text-sm font-medium shadow-sm hover:shadow transition ring-1"
@@ -319,7 +319,7 @@ export default function MasjidkuHome() {
         <div className="pt-6" />
 
         {/* Prayer schedule */}
-        {/* <MasjidkuHomePrayerCard location="DKI Jakarta" slug={slug || ""} /> */}
+        {/* <schoolkuHomePrayerCard location="DKI Jakarta" slug={slug || ""} /> */}
 
         {/* Menu Utama */}
         <section className="mt-6">
@@ -341,12 +341,12 @@ export default function MasjidkuHome() {
               href="/website"
             />
             <CartLink
-              label="Masjid yang telah bekerjasama"
+              label="school yang telah bekerjasama"
               icon={<BookOpen size={18} />}
-              href="/masjid"
+              href="/school"
             />
             <CartLink
-              label="Ikut Program Digitalisasi 100 Masjid"
+              label="Ikut Program Digitalisasi 100 school"
               icon={<CreditCard size={18} />}
               href="/program"
             />
@@ -364,10 +364,10 @@ export default function MasjidkuHome() {
         </section>
 
         {/* Optional: Donasi */}
-        {masjidku.masjidku_donation_url && (
+        {schoolku.schoolku_donation_url && (
           <section className="mt-6">
             <a
-              href={masjidku.masjidku_donation_url}
+              href={schoolku.schoolku_donation_url}
               target="_blank"
               rel="noreferrer"
               className="w-full inline-flex items-center justify-between gap-3 rounded-xl px-4 py-3 ring-1 transition hover:shadow"

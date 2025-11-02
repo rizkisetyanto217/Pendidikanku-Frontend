@@ -4,7 +4,7 @@ import { Outlet, useNavigate } from "react-router-dom";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import axios from "@/lib/axios";
-// import { useEffectiveMasjidId } from "@/hooks/useEffectiveMasjidId";
+// import { useEffectiveschoolId } from "@/hooks/useEffectiveschoolId";
 
 import {
   SectionCard,
@@ -48,7 +48,7 @@ export type AnnouncementUI = {
 
 type AnnouncementAPI = {
   announcement_id: string;
-  announcement_masjid_id: string;
+  announcement_school_id: string;
   announcement_theme_id?: string | null;
   announcement_class_section_id?: string | null;
   announcement_created_by_user_id?: string | null;
@@ -67,7 +67,7 @@ type AnnouncementsAPIResponse = {
 
 type AnnouncementThemeAPI = {
   announcement_themes_id: string;
-  announcement_themes_masjid_id: string;
+  announcement_themes_school_id: string;
   announcement_themes_name: string;
   announcement_themes_slug: string;
   announcement_themes_color?: string | null;
@@ -440,7 +440,7 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
     }
   }, [flash]);
 
-  // useEffectiveMasjidId();
+  // useEffectiveschoolId();
 
   const homeQ = useQuery({ queryKey: QK.HOME, queryFn: fetchSchoolHome });
   const statsQ = useLembagaStats();

@@ -3,7 +3,7 @@ import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import { useEffect, useMemo } from "react";
 
-export default function MasjidResultQuizDetailLectureSessions() {
+export default function schoolResultQuizDetailLectureSessions() {
   const { state } = useLocation();
   const navigate = useNavigate();
   const { isDark, themeName } = useHtmlDarkMode();
@@ -33,9 +33,9 @@ export default function MasjidResultQuizDetailLectureSessions() {
       from ||
       backTo ||
       (slug && lecture_session_slug
-        ? `/masjid/${slug}/soal-materi/${lecture_session_slug}`
+        ? `/school/${slug}/soal-materi/${lecture_session_slug}`
         : lecture_slug
-          ? `/masjid/${slug}/tema/${lecture_slug}`
+          ? `/school/${slug}/tema/${lecture_slug}`
           : "/")
     );
   }, [from, backTo, slug, lecture_session_slug, lecture_slug]);

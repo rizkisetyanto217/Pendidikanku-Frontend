@@ -27,7 +27,7 @@ type FormState = {
   confirm_password: string;
 };
 
-export default function Register() {
+export default function Registerschool() {
   const [form, setForm] = useState<FormState>({
     user_name: "",
     email: "",

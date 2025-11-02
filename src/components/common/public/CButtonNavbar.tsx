@@ -20,30 +20,30 @@ export default function BottomNavbar({
   const [visible, setVisible] = useState(true);
 
   const tabs = [
-    { key: "beranda", label: "Beranda", icon: Home, path: `/masjid/${slug}` },
+    { key: "beranda", label: "Beranda", icon: Home, path: `/school/${slug}` },
     {
       key: "materi",
       label: "Kajian",
       icon: BookOpen,
-      path: `/masjid/${slug}/soal-materi`,
+      path: `/school/${slug}/soal-materi`,
     },
     // {
     //   key: "donasi",
     //   label: "Donasi",
     //   icon: MapPin,
-    //   path: `/masjid/${slug}/donasi`,
+    //   path: `/school/${slug}/donasi`,
     // },
     {
       key: "post",
       label: "Postingan",
       icon: Calendar,
-      path: `/masjid/${slug}/post`,
+      path: `/school/${slug}/post`,
     },
     {
       key: "aktivitas",
       label: "Aktivitas",
       icon: FileText,
-      path: `/masjid/${slug}/aktivitas`,
+      path: `/school/${slug}/aktivitas`,
     },
   ];
 

@@ -33,7 +33,7 @@ interface QuizPayload {
   questions: LectureQuizQuestion[];
 }
 
-export default function MasjidQuizLectureSessions() {
+export default function schoolQuizLectureSessions() {
   const { lecture_session_slug = "", slug = "" } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -49,7 +49,7 @@ export default function MasjidQuizLectureSessions() {
   const backTo =
     qpBackTo ||
     (location.state as any)?.backTo ||
-    `/masjid/${slug}/soal-materi/${lecture_session_slug}`;
+    `/school/${slug}/soal-materi/${lecture_session_slug}`;
 
   // State
   const [index, setIndex] = useState(0);
@@ -149,7 +149,7 @@ export default function MasjidQuizLectureSessions() {
         console.error("❌ submitQuizResult failed:", e);
       } finally {
         navigate(
-          `/masjid/${slug}/soal-materi/${lecture_session_slug}/latihan-soal/hasil`,
+          `/school/${slug}/soal-materi/${lecture_session_slug}/latihan-soal/hasil`,
           {
             state: {
               correct: correctCount,

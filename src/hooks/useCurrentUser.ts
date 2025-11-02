@@ -7,7 +7,7 @@ export type CurrentUser = {
   id: string;
   email?: string;
   user_name?: string;
-  memberships?: Array<{ masjid_id: string; role: string }>;
+  memberships?: Array<{ school_id: string; role: string }>;
 };
 
 export function useCurrentUser() {

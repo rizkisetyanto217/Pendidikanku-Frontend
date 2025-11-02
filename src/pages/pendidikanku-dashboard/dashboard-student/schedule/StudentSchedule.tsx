@@ -100,7 +100,7 @@ const studentScheduleApi = {
         date: new Date(y, m - 1, 26, 10, 0).toISOString(),
         time: "10:00",
         teacher: "Ust. Husein",
-        room: "Masjid Utama",
+        room: "school Utama",
         type: "event",
         description: "Kajian akhlakul karimah bersama ustadz tamu",
       },

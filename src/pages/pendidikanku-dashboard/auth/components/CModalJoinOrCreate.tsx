@@ -10,13 +10,13 @@ export default function ModalJoinOrCreate({
   open,
   mode,
   onClose,
-  onCreateMasjid,
+  onCreateschool,
   onJoinSekolah,
 }: {
   open: boolean;
   mode: "dkm" | "teacher" | "student";
   onClose: () => void;
-  onCreateMasjid: (data: { name: string; file?: File }) => Promise<void> | void;
+  onCreateschool: (data: { name: string; file?: File }) => Promise<void> | void;
   onJoinSekolah: (
     code: string,
     role: "teacher" | "student"
@@ -24,7 +24,7 @@ export default function ModalJoinOrCreate({
 }) {
   const { isDark, themeName } = useHtmlThema();
   const palette = pickTheme(themeName as ThemeName, isDark);
-  const [masjidName, setMasjidName] = useState("");
+  const [schoolName, setschoolName] = useState("");
   const [iconFile, setIconFile] = useState<File | null>(null);
   const [accessCode, setAccessCode] = useState("");
   const [loading, setLoading] = useState(false);
@@ -37,7 +37,7 @@ export default function ModalJoinOrCreate({
       style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
       role="dialog"
       aria-modal="true"
-      aria-label={mode === "dkm" ? "Buat Masjid Baru" : "Gabung ke Sekolah"}
+      aria-label={mode === "dkm" ? "Buat school Baru" : "Gabung ke Sekolah"}
     >
       <div
         className="rounded-3xl p-8 w-full max-w-md space-y-6 shadow-2xl animate-in zoom-in-95 duration-200"
@@ -55,22 +55,22 @@ export default function ModalJoinOrCreate({
                 <Building2 className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold">Buat Masjid Baru</h2>
+                <h2 className="text-xl font-bold">Buat school Baru</h2>
                 <p className="text-sm" style={{ color: palette.silver2 }}>
-                  Daftarkan masjid Anda ke sistem
+                  Daftarkan school Anda ke sistem
                 </p>
               </div>
             </div>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-2">
-                  Nama Masjid
+                  Nama school
                 </label>
                 <input
                   type="text"
-                  placeholder="Contoh: Masjid Al-Ikhlas"
-                  value={masjidName}
-                  onChange={(e) => setMasjidName(e.target.value)}
+                  placeholder="Contoh: school Al-Ikhlas"
+                  value={schoolName}
+                  onChange={(e) => setschoolName(e.target.value)}
                   className="w-full rounded-xl px-4 py-3 outline-none transition-all"
                   style={{
                     background: palette.white2,
@@ -81,7 +81,7 @@ export default function ModalJoinOrCreate({
               </div>
               <div>
                 <label className="block text-sm font-medium mb-2">
-                  Logo Masjid (Opsional)
+                  Logo school (Opsional)
                 </label>
                 <input
                   type="file"
@@ -93,12 +93,12 @@ export default function ModalJoinOrCreate({
             </div>
             <button
               type="button"
-              disabled={!masjidName.trim() || loading}
+              disabled={!schoolName.trim() || loading}
               onClick={async () => {
                 setLoading(true);
                 try {
-                  await onCreateMasjid({
-                    name: masjidName,
+                  await onCreateschool({
+                    name: schoolName,
                     file: iconFile || undefined,
                   });
                 } finally {
@@ -112,7 +112,7 @@ export default function ModalJoinOrCreate({
                 boxShadow: `0 4px 10px ${palette.success2}`,
               }}
             >
-              {loading ? "Membuat Masjid..." : "Buat Masjid"}
+              {loading ? "Membuat school..." : "Buat school"}
             </button>
           </>
         ) : (

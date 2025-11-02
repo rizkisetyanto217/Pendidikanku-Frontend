@@ -18,39 +18,39 @@ import {
 } from "lucide-react";
 
 import AuthLayout from "@/layout/CAuthLayout";
-import api, { setTokens, setActiveMasjidContext } from "@/lib/axios";
+import api, { setTokens, setActiveschoolContext } from "@/lib/axios";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import ModalJoinOrCreate from "./components/CModalJoinOrCreate";
 import ModalChooseRole from "./components/CModalChoose";
 import ModalDemoAccounts from "./components/CModalDemoAccount";
 
-type MasjidRole = "dkm" | "admin" | "teacher" | "student" | "user";
-type MasjidItem = {
-  masjid_id: string;
-  masjid_name: string;
-  masjid_icon_url?: string;
-  roles: MasjidRole[];
+type schoolRole = "dkm" | "admin" | "teacher" | "student" | "user";
+type schoolItem = {
+  school_id: string;
+  school_name: string;
+  school_icon_url?: string;
+  roles: schoolRole[];
 };
 
 /* =========================
-   Modal: Pilih Masjid & Role
+   Modal: Pilih school & Role
 ========================= */
-function ModalSelectRoleMasjid({
+function ModalSelectRoleschool({
   open,
   onClose,
   onSelect,
 }: {
   open: boolean;
   onClose: () => void;
-  onSelect: (masjidId: string, role: MasjidRole) => void;
+  onSelect: (schoolId: string, role: schoolRole) => void;
 }) {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette = pickTheme(themeName as ThemeName, isDark);
-  const [masjids, setMasjids] = React.useState<MasjidItem[]>([]);
+  const [schools, setschools] = React.useState<schoolItem[]>([]);
   const [selected, setSelected] = React.useState<{
-    masjid_id: string;
-    role: MasjidRole;
+    school_id: string;
+    role: schoolRole;
   } | null>(null);
   const [loading, setLoading] = React.useState(false);
 
@@ -63,17 +63,17 @@ function ModalSelectRoleMasjid({
       .then((res) => {
         if (!mounted) return;
         const memberships = res.data?.data?.memberships ?? [];
-        const mapped: MasjidItem[] = memberships.map((m: any) => ({
-          masjid_id: m.masjid_id,
-          masjid_name: m.masjid_name,
-          masjid_icon_url: m.masjid_icon_url,
-          roles: (m.roles ?? []) as MasjidRole[],
+        const mapped: schoolItem[] = memberships.map((m: any) => ({
+          school_id: m.school_id,
+          school_name: m.school_name,
+          school_icon_url: m.school_icon_url,
+          roles: (m.roles ?? []) as schoolRole[],
         }));
-        setMasjids(mapped);
+        setschools(mapped);
       })
       .catch(() => {
         if (!mounted) return;
-        setMasjids([]);
+        setschools([]);
       })
       .finally(() => {
         if (!mounted) return;
@@ -92,7 +92,7 @@ function ModalSelectRoleMasjid({
       style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
       role="dialog"
       aria-modal="true"
-      aria-label="Pilih Masjid dan Role"
+      aria-label="Pilih school dan Role"
     >
       <div
         className="rounded-3xl w-full max-w-md p-8 shadow-2xl animate-in zoom-in-95 duration-200"
@@ -108,11 +108,11 @@ function ModalSelectRoleMasjid({
             <Building2 className="w-5 h-5 text-white" />
           </div>
           <h2 className="text-xl font-bold" style={{ color: palette.black1 }}>
-            Pilih Masjid & Role
+            Pilih school & Role
           </h2>
         </div>
         <p className="text-sm mb-6" style={{ color: palette.silver2 }}>
-          Pilih masjid dan peran yang ingin kamu gunakan untuk melanjutkan.
+          Pilih school dan peran yang ingin kamu gunakan untuk melanjutkan.
         </p>
 
         {loading ? (
@@ -130,36 +130,36 @@ function ModalSelectRoleMasjid({
           </div>
         ) : (
           <div className="max-h-80 overflow-y-auto space-y-3 pr-2">
-            {masjids.map((m) => (
+            {schools.map((m) => (
               <div
-                key={m.masjid_id}
+                key={m.school_id}
                 onClick={() =>
                   setSelected((prev) => {
                     const keepCurrentRole =
-                      prev?.masjid_id === m.masjid_id && prev?.role
+                      prev?.school_id === m.school_id && prev?.role
                         ? prev.role
                         : undefined;
-                    const fallbackRole: MasjidRole =
-                      keepCurrentRole ?? (m.roles?.[0] as MasjidRole) ?? "user";
-                    return { masjid_id: m.masjid_id, role: fallbackRole };
+                    const fallbackRole: schoolRole =
+                      keepCurrentRole ?? (m.roles?.[0] as schoolRole) ?? "user";
+                    return { school_id: m.school_id, role: fallbackRole };
                   })
                 }
                 className="border-2 rounded-2xl p-4 transition-all duration-200 cursor-pointer"
                 style={{
                   borderColor:
-                    selected?.masjid_id === m.masjid_id
+                    selected?.school_id === m.school_id
                       ? palette.primary
                       : palette.silver1,
                   background:
-                    selected?.masjid_id === m.masjid_id
+                    selected?.school_id === m.school_id
                       ? palette.primary2
                       : palette.white2,
                 }}
               >
                 <div className="flex items-center gap-3 mb-3">
                   <img
-                    src={m.masjid_icon_url || "/image/Gambar-Masjid.jpeg"}
-                    alt={m.masjid_name}
+                    src={m.school_icon_url || "/image/Gambar-school.jpeg"}
+                    alt={m.school_name}
                     className="w-12 h-12 rounded-xl object-cover border-2 shadow-sm"
                     style={{ borderColor: palette.white3 }}
                   />
@@ -167,39 +167,39 @@ function ModalSelectRoleMasjid({
                     className="font-semibold text-base"
                     style={{ color: palette.black1 }}
                   >
-                    {m.masjid_name}
+                    {m.school_name}
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {(m.roles?.length ? m.roles : (["user"] as MasjidRole[])).map(
+                  {(m.roles?.length ? m.roles : (["user"] as schoolRole[])).map(
                     (r) => (
                       <button
                         key={r}
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setSelected({ masjid_id: m.masjid_id, role: r });
+                          setSelected({ school_id: m.school_id, role: r });
                         }}
                         className="px-4 py-1.5 text-xs font-medium rounded-lg border-2 transition-all duration-200"
                         style={{
                           background:
-                            selected?.masjid_id === m.masjid_id &&
+                            selected?.school_id === m.school_id &&
                             selected?.role === r
                               ? palette.primary
                               : "transparent",
                           color:
-                            selected?.masjid_id === m.masjid_id &&
+                            selected?.school_id === m.school_id &&
                             selected?.role === r
                               ? palette.white1
                               : palette.black1,
                           borderColor:
-                            selected?.masjid_id === m.masjid_id &&
+                            selected?.school_id === m.school_id &&
                             selected?.role === r
                               ? palette.primary
                               : palette.silver1,
                         }}
                         aria-pressed={
-                          selected?.masjid_id === m.masjid_id &&
+                          selected?.school_id === m.school_id &&
                           selected?.role === r
                         }
                       >
@@ -230,7 +230,7 @@ function ModalSelectRoleMasjid({
             type="button"
             disabled={!selected}
             onClick={() =>
-              selected && onSelect(selected.masjid_id, selected.role)
+              selected && onSelect(selected.school_id, selected.role)
             }
             className="flex-1 rounded-xl px-4 py-2.5 text-sm font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             style={{
@@ -263,7 +263,7 @@ export default function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const [openSelectMasjid, setOpenSelectMasjid] = useState(false);
+  const [openSelectschool, setOpenSelectschool] = useState(false);
   const [openPilihTujuan, setOpenPilihTujuan] = useState(false);
   const [openJoinAtauBuat, setOpenJoinAtauBuat] = useState(false);
   const [selectedTujuan, setSelectedTujuan] = useState<
@@ -316,12 +316,12 @@ export default function Login() {
 
       if (memberships.length === 1) {
         const m = memberships[0];
-        const role: MasjidRole = (m.roles?.[0] as MasjidRole) ?? "user";
-        await handleSelectMasjidRole(m.masjid_id, role);
+        const role: schoolRole = (m.roles?.[0] as schoolRole) ?? "user";
+        await handleSelectschoolRole(m.school_id, role);
         return;
       }
 
-      setOpenSelectMasjid(true);
+      setOpenSelectschool(true);
     } catch (err: any) {
       console.error(err);
       setError(err?.response?.data?.message || err?.message || "Login gagal.");
@@ -336,27 +336,27 @@ export default function Login() {
     setOpenJoinAtauBuat(true);
   }
 
-  async function handleCreateMasjid(data: { name: string; file?: File }) {
+  async function handleCreateschool(data: { name: string; file?: File }) {
     try {
       const fd = new FormData();
-      fd.append("masjid_name", data.name);
+      fd.append("school_name", data.name);
       if (data.file) fd.append("icon", data.file);
 
-      const res = await api.post("/u/masjids/user", fd, {
+      const res = await api.post("/u/schools/user", fd, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
       const item = res.data?.data?.item;
-      if (!item) throw new Error("Masjid gagal dibuat.");
+      if (!item) throw new Error("school gagal dibuat.");
 
-      const masjidId = item.masjid_id;
-      await setActiveMasjidContext(masjidId, "dkm");
+      const schoolId = item.school_id;
+      await setActiveschoolContext(schoolId, "dkm");
 
       setOpenJoinAtauBuat(false);
-      navigate(`/${masjidId}/sekolah`, { replace: true });
+      navigate(`/${schoolId}/sekolah`, { replace: true });
     } catch (err: any) {
       alert(
-        err?.response?.data?.message || err?.message || "Gagal membuat masjid."
+        err?.response?.data?.message || err?.message || "Gagal membuat school."
       );
     }
   }
@@ -369,9 +369,9 @@ export default function Login() {
       const memberships = ctx.data?.data?.memberships ?? [];
       if (memberships.length > 0) {
         const m = memberships[0];
-        await setActiveMasjidContext(m.masjid_id, role);
+        await setActiveschoolContext(m.school_id, role);
         const path = role === "teacher" ? "guru" : "murid";
-        navigate(`/${m.masjid_id}/${path}`, { replace: true });
+        navigate(`/${m.school_id}/${path}`, { replace: true });
       }
     } catch (err: any) {
       alert(
@@ -382,22 +382,22 @@ export default function Login() {
     }
   }
 
-  async function handleSelectMasjidRole(masjidId: string, role: MasjidRole) {
+  async function handleSelectschoolRole(schoolId: string, role: schoolRole) {
     try {
       const res = await api.get("/auth/me/simple-context");
       const m = (res.data?.data?.memberships ?? []).find(
-        (x: any) => x.masjid_id === masjidId
+        (x: any) => x.school_id === schoolId
       );
       try {
         localStorage.setItem("active_role", role);
       } catch {}
-      await setActiveMasjidContext(masjidId, role, {
-        name: m?.masjid_name ?? undefined,
-        icon: m?.masjid_icon_url ?? undefined,
+      await setActiveschoolContext(schoolId, role, {
+        name: m?.school_name ?? undefined,
+        icon: m?.school_icon_url ?? undefined,
       });
       const path =
         role === "teacher" ? "guru" : role === "student" ? "murid" : "sekolah";
-      navigate(`/${masjidId}/${path}`, { replace: true });
+      navigate(`/${schoolId}/${path}`, { replace: true });
     } catch (err) {
       console.error(err);
     }
@@ -715,10 +715,10 @@ export default function Login() {
         </span>
       </div>
       {/* Modals */}
-      <ModalSelectRoleMasjid
-        open={openSelectMasjid}
-        onClose={() => setOpenSelectMasjid(false)}
-        onSelect={handleSelectMasjidRole}
+      <ModalSelectRoleschool
+        open={openSelectschool}
+        onClose={() => setOpenSelectschool(false)}
+        onSelect={handleSelectschoolRole}
       />
       <ModalChooseRole
         open={openPilihTujuan}
@@ -729,7 +729,7 @@ export default function Login() {
         open={openJoinAtauBuat}
         mode={selectedTujuan || "dkm"}
         onClose={() => setOpenJoinAtauBuat(false)}
-        onCreateMasjid={handleCreateMasjid}
+        onCreateschool={handleCreateschool}
         onJoinSekolah={handleJoinSekolah}
       />
     </AuthLayout>

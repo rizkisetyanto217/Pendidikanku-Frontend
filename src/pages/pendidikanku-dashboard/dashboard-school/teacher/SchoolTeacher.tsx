@@ -29,38 +29,38 @@ import UploadFileGuru from "./components/CSchoolUploadFileTeacher";
 
 /* ================= Types (API) ================= */
 export interface TeacherApiRow {
-  masjid_teacher_id: string;
-  masjid_teacher_masjid_id: string;
-  masjid_teacher_user_teacher_id: string;
+  school_teacher_id: string;
+  school_teacher_school_id: string;
+  school_teacher_user_teacher_id: string;
 
-  masjid_teacher_code: string | null;
-  masjid_teacher_slug: string | null;
+  school_teacher_code: string | null;
+  school_teacher_slug: string | null;
 
-  masjid_teacher_employment: "tetap" | "honor" | string;
-  masjid_teacher_is_active: boolean;
-  masjid_teacher_joined_at: string | null;
-  masjid_teacher_left_at: string | null;
-  masjid_teacher_is_verified: boolean;
-  masjid_teacher_verified_at: string | null;
-  masjid_teacher_is_public: boolean;
-  masjid_teacher_notes: string | null;
+  school_teacher_employment: "tetap" | "honor" | string;
+  school_teacher_is_active: boolean;
+  school_teacher_joined_at: string | null;
+  school_teacher_left_at: string | null;
+  school_teacher_is_verified: boolean;
+  school_teacher_verified_at: string | null;
+  school_teacher_is_public: boolean;
+  school_teacher_notes: string | null;
 
-  masjid_teacher_user_teacher_name_snapshot: string | null;
-  masjid_teacher_user_teacher_avatar_url_snapshot: string | null;
-  masjid_teacher_user_teacher_whatsapp_url_snapshot: string | null;
-  masjid_teacher_user_teacher_title_prefix_snapshot: string | null;
-  masjid_teacher_user_teacher_title_suffix_snapshot: string | null;
+  school_teacher_user_teacher_name_snapshot: string | null;
+  school_teacher_user_teacher_avatar_url_snapshot: string | null;
+  school_teacher_user_teacher_whatsapp_url_snapshot: string | null;
+  school_teacher_user_teacher_title_prefix_snapshot: string | null;
+  school_teacher_user_teacher_title_suffix_snapshot: string | null;
 
-  masjid_teacher_masjid_name_snapshot: string | null;
-  masjid_teacher_masjid_slug_snapshot: string | null;
+  school_teacher_school_name_snapshot: string | null;
+  school_teacher_school_slug_snapshot: string | null;
 
   // bisa array asli atau string "[]"
-  masjid_teacher_sections: any[] | string;
-  masjid_teacher_csst: any[] | string;
+  school_teacher_sections: any[] | string;
+  school_teacher_csst: any[] | string;
 
-  masjid_teacher_created_at: string;
-  masjid_teacher_updated_at: string;
-  masjid_teacher_deleted_at: string | null;
+  school_teacher_created_at: string;
+  school_teacher_updated_at: string;
+  school_teacher_deleted_at: string | null;
 }
 
 type PublicTeachersResponse = {
@@ -144,12 +144,12 @@ function parsePhoneFromWa(wa?: string | null) {
   }
 }
 
-/* ================= Slug/Masjid Hook ================= */
+/* ================= Slug/school Hook ================= */
 function useSchoolPath() {
-  const { masjid_id } = useParams<{ masjid_id?: string }>();
-  const base = masjid_id ?? "";
+  const { school_id } = useParams<{ school_id?: string }>();
+  const base = school_id ?? "";
   const makePath = (path: string) => `/${base}/sekolah/${path}`;
-  return { base, makePath, masjid_id: base };
+  return { base, makePath, school_id: base };
 }
 
 /* ================= UI Bits ================= */
@@ -458,21 +458,21 @@ const TeachersPage: React.FC<SchoolTeacherProps> = ({ showBack = false }) => {
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
 
-  // Ambil masjid_id dari PATH: /:masjid_id/sekolah/menu-utama/guru
-  const { masjid_id: masjidIdParam } = useParams<{ masjid_id?: string }>();
-  const masjidId = masjidIdParam ?? "";
+  // Ambil school_id dari PATH: /:school_id/sekolah/menu-utama/guru
+  const { school_id: schoolIdParam } = useParams<{ school_id?: string }>();
+  const schoolId = schoolIdParam ?? "";
 
   const [openAdd, setOpenAdd] = useState(false);
   const [openImport, setOpenImport] = useState(false);
   const [q, setQ] = useState("");
 
   // Early return: path belum benar
-  if (!masjidId) {
+  if (!schoolId) {
     return (
       <div className="p-4">
         <p className="text-sm">
-          <b>masjid_id</b> tidak ditemukan di path. Pastikan URL seperti:
-          <code className="ml-1">/MASJID_ID/sekolah/menu-utama/guru</code>
+          <b>school_id</b> tidak ditemukan di path. Pastikan URL seperti:
+          <code className="ml-1">/school_ID/sekolah/menu-utama/guru</code>
         </p>
       </div>
     );
@@ -487,13 +487,13 @@ const TeachersPage: React.FC<SchoolTeacherProps> = ({ showBack = false }) => {
     isFetching,
     error,
   } = useQuery<PublicTeachersResponse, AxiosError>({
-    queryKey: ["public-masjid-teachers", masjidId],
+    queryKey: ["public-school-teachers", schoolId],
     enabled: true,
     staleTime: 2 * 60 * 1000,
     retry: 1,
     queryFn: async () => {
       const res = await axios.get<PublicTeachersResponse>(
-        `/public/${masjidId}/masjid-teachers/list`,
+        `/public/${schoolId}/school-teachers/list`,
         { params: { page: 1, per_page: 50 } }
       );
       return res.data;
@@ -510,35 +510,35 @@ const TeachersPage: React.FC<SchoolTeacherProps> = ({ showBack = false }) => {
   const teachersFromApi: TeacherItem[] = useMemo(() => {
     const rows = resp?.data ?? [];
     return rows.map((t) => {
-      const csstArr = safeParseArray(t.masjid_teacher_csst);
+      const csstArr = safeParseArray(t.school_teacher_csst);
       const subject =
         csstArr?.[0]?.class_subject_name_snapshot ??
         csstArr?.[0]?.subject_name_snapshot ??
         "Umum";
 
       return {
-        id: t.masjid_teacher_id,
-        code: t.masjid_teacher_code,
-        slug: t.masjid_teacher_slug,
+        id: t.school_teacher_id,
+        code: t.school_teacher_code,
+        slug: t.school_teacher_slug,
 
         name: buildTeacherName(
-          t.masjid_teacher_user_teacher_title_prefix_snapshot,
-          t.masjid_teacher_user_teacher_name_snapshot,
-          t.masjid_teacher_user_teacher_title_suffix_snapshot
+          t.school_teacher_user_teacher_title_prefix_snapshot,
+          t.school_teacher_user_teacher_name_snapshot,
+          t.school_teacher_user_teacher_title_suffix_snapshot
         ),
-        avatarUrl: t.masjid_teacher_user_teacher_avatar_url_snapshot,
+        avatarUrl: t.school_teacher_user_teacher_avatar_url_snapshot,
         phone: parsePhoneFromWa(
-          t.masjid_teacher_user_teacher_whatsapp_url_snapshot
+          t.school_teacher_user_teacher_whatsapp_url_snapshot
         ),
         subject,
 
-        employment: t.masjid_teacher_employment,
-        isActive: t.masjid_teacher_is_active,
-        isPublic: t.masjid_teacher_is_public,
-        isVerified: t.masjid_teacher_is_verified,
+        employment: t.school_teacher_employment,
+        isActive: t.school_teacher_is_active,
+        isPublic: t.school_teacher_is_public,
+        isVerified: t.school_teacher_is_verified,
 
-        joinedAt: t.masjid_teacher_joined_at,
-        leftAt: t.masjid_teacher_left_at,
+        joinedAt: t.school_teacher_joined_at,
+        leftAt: t.school_teacher_left_at,
       } as TeacherItem;
     });
   }, [resp]);
@@ -575,7 +575,7 @@ const TeachersPage: React.FC<SchoolTeacherProps> = ({ showBack = false }) => {
           "IPS",
           "Agama",
         ]}
-        masjidId={masjidId}
+        schoolId={schoolId}
         onCreated={() => refetch()}
       />
       <UploadFileGuru

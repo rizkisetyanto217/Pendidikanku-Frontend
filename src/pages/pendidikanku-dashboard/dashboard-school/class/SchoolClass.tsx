@@ -57,7 +57,7 @@ type ApiSchedule = {
 
 type ApiClassSection = {
   class_section_id: string;
-  class_section_masjid_id: string;
+  class_section_school_id: string;
   class_section_class_id: string;
   class_section_teacher_id?: string | null;
   class_section_assistant_teacher_id?: string | null;
@@ -96,7 +96,7 @@ type ApiListSections = {
 /* ====== PUBLIC class-parents (levels) ====== */
 type ApiClassParent = {
   class_parent_id: string;
-  class_parent_masjid_id: string;
+  class_parent_school_id: string;
   class_parent_name: string;
   class_parent_code?: string | null;
   class_parent_slug: string;
@@ -123,7 +123,7 @@ function mapClassParent(x: ApiClassParent): Level {
 /* ====== PUBLIC classes (middle layer) ====== */
 type ApiClass = {
   class_id: string;
-  class_masjid_id: string;
+  class_school_id: string;
   class_parent_id: string;
   class_slug: string;
   class_name: string; // bisa kosong
@@ -191,12 +191,12 @@ const uid = (p = "tmp") =>
 
 /* ================= Fetchers ================= */
 async function fetchClassSections({
-  masjidId,
+  schoolId,
   q,
   status,
   classId,
 }: {
-  masjidId: string;
+  schoolId: string;
   q?: string;
   status?: ClassStatus | "all";
   classId?: string; // kalau BE support filter by class_parent_id (level) akan ikut dipakai
@@ -206,21 +206,21 @@ async function fetchClassSections({
   if (status && status !== "all") params.active_only = status === "active";
   if (classId) params.class_parent_id = classId;
   const res = await axios.get<ApiListSections>(
-    `/public/${masjidId}/class-sections/list`,
+    `/public/${schoolId}/class-sections/list`,
     { params }
   );
   return res.data?.data ?? [];
 }
 
-async function fetchLevelsPublic(masjidId: string): Promise<Level[]> {
+async function fetchLevelsPublic(schoolId: string): Promise<Level[]> {
   const res = await axios.get<{ data: ApiClassParent[] }>(
-    `/public/${masjidId}/class-parents/list`
+    `/public/${schoolId}/class-parents/list`
   );
   return (res.data?.data ?? []).map(mapClassParent);
 }
 
 async function fetchClassesPublic(
-  masjidId: string,
+  schoolId: string,
   params?: { q?: string; status?: ClassStatus | "all"; levelId?: string }
 ): Promise<ApiClass[]> {
   const p: Record<string, any> = {};
@@ -229,7 +229,7 @@ async function fetchClassesPublic(
     p.active_only = params.status === "active";
   if (params?.levelId) p.class_parent_id = params.levelId;
   const res = await axios.get<ApiListClasses>(
-    `/public/${masjidId}/classes/list`,
+    `/public/${schoolId}/classes/list`,
     { params: p }
   );
   return res.data?.data ?? [];
@@ -310,12 +310,12 @@ const SchoolClass: React.FC<{
   const [openTambah, setOpenTambah] = useState(false);
   const [openTambahLevel, setOpenTambahLevel] = useState(false);
 
-  // ambil masjid_id dari path
-  const { masjid_id, slug = "" } = useParams<{
-    masjid_id?: string;
+  // ambil school_id dari path
+  const { school_id, slug = "" } = useParams<{
+    school_id?: string;
     slug: string;
   }>();
-  const masjidId = masjid_id ?? "";
+  const schoolId = school_id ?? "";
 
   const q = (sp.get("q") ?? "").trim();
   const status = (sp.get("status") ?? "all") as ClassStatus | "all";
@@ -327,9 +327,9 @@ const SchoolClass: React.FC<{
 
   // Levels dari endpoint publik
   const levelsQ = useQuery({
-    queryKey: ["levels-public", masjidId],
-    enabled: Boolean(masjidId),
-    queryFn: () => fetchLevelsPublic(masjidId),
+    queryKey: ["levels-public", schoolId],
+    enabled: Boolean(schoolId),
+    queryFn: () => fetchLevelsPublic(schoolId),
     staleTime: 60_000,
     refetchOnWindowFocus: false,
   });
@@ -346,11 +346,11 @@ const SchoolClass: React.FC<{
     isFetching,
     refetch,
   } = useQuery({
-    queryKey: ["class-sections", masjidId, q, status, levelId],
-    enabled: Boolean(masjidId),
+    queryKey: ["class-sections", schoolId, q, status, levelId],
+    enabled: Boolean(schoolId),
     queryFn: () =>
       fetchClassSections({
-        masjidId,
+        schoolId,
         q,
         status,
         classId: levelId || undefined, // kalau BE belum support, tetap aman
@@ -361,9 +361,9 @@ const SchoolClass: React.FC<{
 
   // Classes (middle layer)
   const classesQ = useQuery({
-    queryKey: ["classes-public", masjidId, q, status, levelId],
-    enabled: Boolean(masjidId),
-    queryFn: () => fetchClassesPublic(masjidId, { q, status, levelId }),
+    queryKey: ["classes-public", schoolId, q, status, levelId],
+    enabled: Boolean(schoolId),
+    queryFn: () => fetchClassesPublic(schoolId, { q, status, levelId }),
     staleTime: 60_000,
     refetchOnWindowFocus: false,
   });
@@ -498,7 +498,7 @@ const SchoolClass: React.FC<{
       fee: payload?.fee ?? null,
       is_active: payload?.is_active ?? true,
     };
-    qc.setQueryData<Level[]>(["levels-public", masjidId], (old = []) => [
+    qc.setQueryData<Level[]>(["levels-public", schoolId], (old = []) => [
       lvl,
       ...(old ?? []),
     ]);
@@ -510,7 +510,7 @@ const SchoolClass: React.FC<{
     const dummy: ApiClassSection = {
       class_section_id: (row as any).id ?? uid("sec"),
       class_section_class_id: (row as any).classId ?? "",
-      class_section_masjid_id: (row as any).masjidId ?? masjidId,
+      class_section_school_id: (row as any).schoolId ?? schoolId,
       class_section_teacher_id: (row as any).teacherId ?? null,
       class_section_slug: (row as any).slug ?? toSlug(row.name ?? "kelas-baru"),
       class_section_name: row.name ?? "Kelas Baru",
@@ -529,7 +529,7 @@ const SchoolClass: React.FC<{
     };
 
     qc.setQueryData<ApiClassSection[]>(
-      ["class-sections", masjidId, q, status, levelId],
+      ["class-sections", schoolId, q, status, levelId],
       (old = []) => [dummy, ...(old ?? [])]
     );
 

@@ -22,9 +22,9 @@ import { Check, X, Save, RefreshCcw, ArrowLeft } from "lucide-react";
 
 /* ========== Types ========== */
 type AttendanceDetail = {
-  user_attendance_masjid_id: string;
+  user_attendance_school_id: string;
   user_attendance_session_id: string;
-  user_attendance_masjid_student_id: string;
+  user_attendance_school_student_id: string;
 
   user_attendance_status: "present" | "absent" | "excused" | "late";
   user_attendance_type_id?: string | null;
@@ -39,9 +39,9 @@ type AttendanceDetail = {
 
 /* ========== Dummy API ========== */
 let dummyData: AttendanceDetail = {
-  user_attendance_masjid_id: "747d6c09-1370-46c2-8268-6b7345a2d325",
+  user_attendance_school_id: "747d6c09-1370-46c2-8268-6b7345a2d325",
   user_attendance_session_id: "0f4b7f8a-0b21-4f36-9d0f-8a7d6a4c1c9e",
-  user_attendance_masjid_student_id: "a3d9f6b2-4d2b-4a1f-9d2e-2d7c0f7e1a11",
+  user_attendance_school_student_id: "a3d9f6b2-4d2b-4a1f-9d2e-2d7c0f7e1a11",
 
   user_attendance_status: "present",
   user_attendance_type_id: "5a2f3b74-0e5a-4c1a-9f1c-0c9f7a3b2d10",

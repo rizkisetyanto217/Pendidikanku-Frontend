@@ -362,7 +362,7 @@ const TryoutTahfizhExam: React.FC = () => {
       targetPeserta: "Tim Musabaqah",
       materiTahfiz: ["Juz 1-5", "Tilawah", "Tahfiz 5 Juz"],
       pengawas: ["Ustadz Hafiz", "Qori Abdullah"],
-      lokasi: "Masjid Sekolah",
+      lokasi: "school Sekolah",
       durasi: "3 jam",
       maxPeserta: 15,
       jumlahPendaftar: 12,

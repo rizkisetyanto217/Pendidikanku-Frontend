@@ -31,23 +31,23 @@ import ShimmerImage from "@/components/common/main/ShimmerImage";
 const currentUrl = typeof window !== "undefined" ? window.location.href : "";
 
 // Types
-interface Masjid {
-  masjid_id: string;
-  masjid_name: string;
-  masjid_bio_short?: string;
-  masjid_location?: string;
-  masjid_image_url?: string;
-  masjid_google_maps_url?: string;
-  masjid_slug: string;
-  masjid_instagram_url?: string;
-  masjid_whatsapp_url?: string;
-  masjid_youtube_url?: string;
-  masjid_facebook_url?: string;
-  masjid_tiktok_url?: string;
-  masjid_donation_link?: string;
-  masjid_created_at: string;
-  masjid_whatsapp_group_ikhwan_url?: string;
-  masjid_whatsapp_group_akhwat_url?: string;
+interface school {
+  school_id: string;
+  school_name: string;
+  school_bio_short?: string;
+  school_location?: string;
+  school_image_url?: string;
+  school_google_maps_url?: string;
+  school_slug: string;
+  school_instagram_url?: string;
+  school_whatsapp_url?: string;
+  school_youtube_url?: string;
+  school_facebook_url?: string;
+  school_tiktok_url?: string;
+  school_donation_link?: string;
+  school_created_at: string;
+  school_whatsapp_group_ikhwan_url?: string;
+  school_whatsapp_group_akhwat_url?: string;
 }
 
 interface Kajian {
@@ -159,13 +159,13 @@ export default function PublicLinktree() {
   };
 
   const {
-    data: masjidData,
-    isLoading: loadingMasjid,
-    error: masjidError,
-  } = useQuery<Masjid>({
-    queryKey: ["masjid", slug],
+    data: schoolData,
+    isLoading: loadingschool,
+    error: schoolError,
+  } = useQuery<school>({
+    queryKey: ["school", slug],
     queryFn: async () => {
-      const res = await axios.get(`/public/masjids/${slug}`);
+      const res = await axios.get(`/public/schools/${slug}`);
       return res.data?.data;
     },
     enabled: !!slug,
@@ -189,10 +189,10 @@ export default function PublicLinktree() {
   });
 
   const handleShareClick = () => {
-    if (!masjidData) return;
+    if (!schoolData) return;
     if (navigator.share) {
       navigator
-        .share({ title: masjidData.masjid_name, url: currentUrl })
+        .share({ title: schoolData.school_name, url: currentUrl })
         .catch(() => {
           setShowShareMenu((s) => !s);
         });
@@ -238,39 +238,39 @@ export default function PublicLinktree() {
   }, [showShareMenu]);
 
   const waURL = useMemo(
-    () => buildSosmedUrl("whatsapp", masjidData?.masjid_whatsapp_url),
-    [masjidData?.masjid_whatsapp_url]
+    () => buildSosmedUrl("whatsapp", schoolData?.school_whatsapp_url),
+    [schoolData?.school_whatsapp_url]
   );
   const igURL = useMemo(
-    () => buildSosmedUrl("instagram", masjidData?.masjid_instagram_url),
-    [masjidData?.masjid_instagram_url]
+    () => buildSosmedUrl("instagram", schoolData?.school_instagram_url),
+    [schoolData?.school_instagram_url]
   );
   const ytURL = useMemo(
-    () => buildSosmedUrl("youtube", masjidData?.masjid_youtube_url),
-    [masjidData?.masjid_youtube_url]
+    () => buildSosmedUrl("youtube", schoolData?.school_youtube_url),
+    [schoolData?.school_youtube_url]
   );
   const fbURL = useMemo(
-    () => buildSosmedUrl("facebook", masjidData?.masjid_facebook_url),
-    [masjidData?.masjid_facebook_url]
+    () => buildSosmedUrl("facebook", schoolData?.school_facebook_url),
+    [schoolData?.school_facebook_url]
   );
   const ttURL = useMemo(
-    () => buildSosmedUrl("tiktok", masjidData?.masjid_tiktok_url),
-    [masjidData?.masjid_tiktok_url]
+    () => buildSosmedUrl("tiktok", schoolData?.school_tiktok_url),
+    [schoolData?.school_tiktok_url]
   );
 
-  const donateURL = masjidData?.masjid_donation_link || undefined;
+  const donateURL = schoolData?.school_donation_link || undefined;
 
   const openMapsHref = useMemo(() => {
-    const q = masjidData?.masjid_location?.trim();
+    const q = schoolData?.school_location?.trim();
     if (!q) return undefined;
     return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
-  }, [masjidData?.masjid_location]);
+  }, [schoolData?.school_location]);
 
-  if (loadingMasjid || loadingKajian || loadingUser) return <LoadingSkeleton />;
-  if (masjidError || !masjidData)
+  if (loadingschool || loadingKajian || loadingUser) return <LoadingSkeleton />;
+  if (schoolError || !schoolData)
     return (
       <div className="max-w-2xl mx-auto px-4 pt-24 pb-20 text-center">
-        <p className="text-lg font-medium">Masjid tidak ditemukan.</p>
+        <p className="text-lg font-medium">school tidak ditemukan.</p>
         <button
           onClick={() => navigate(-1)}
           className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl border hover:bg-gray-50 dark:hover:bg-gray-800"
@@ -282,7 +282,7 @@ export default function PublicLinktree() {
 
   return (
     <>
-      <PublicNavbar masjidName={masjidData.masjid_name} />
+      <PublicNavbar schoolName={schoolData.school_name} />
 
       <div className="w-full max-w-2xl mx-auto min-h-screen pb-28 overflow-auto bg-no-repeat bg-center pt-16">
         <div className="px-4">
@@ -293,8 +293,8 @@ export default function PublicLinktree() {
           >
             <div className="h-40 sm:h-52 w-full bg-gray-100 dark:bg-gray-800">
               <ShimmerImage
-                src={masjidData.masjid_image_url || "/images/cover-masjid.jpg"}
-                alt={masjidData.masjid_name}
+                src={schoolData.school_image_url || "/images/cover-school.jpg"}
+                alt={schoolData.school_name}
                 className="w-full h-full object-cover"
               />
             </div>
@@ -359,19 +359,19 @@ export default function PublicLinktree() {
                 <div className="w-16 h-16 rounded-xl overflow-hidden border bg-white/40 backdrop-blur">
                   <ShimmerImage
                     src={
-                      masjidData.masjid_image_url || "/images/masjid-avatar.png"
+                      schoolData.school_image_url || "/images/school-avatar.png"
                     }
-                    alt={masjidData.masjid_name}
+                    alt={schoolData.school_name}
                     className="w-full h-full object-cover"
                   />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h1 className="text-white font-bold text-xl leading-tight line-clamp-2">
-                    {masjidData.masjid_name}
+                    {schoolData.school_name}
                   </h1>
-                  {masjidData.masjid_bio_short && (
+                  {schoolData.school_bio_short && (
                     <p className="text-white/90 text-sm line-clamp-1">
-                      {masjidData.masjid_bio_short}
+                      {schoolData.school_bio_short}
                     </p>
                   )}
                 </div>
@@ -395,8 +395,8 @@ export default function PublicLinktree() {
               <a
                 href={
                   buildWhatsAppContact(
-                    masjidData.masjid_whatsapp_url,
-                    `Assalamualaikum, saya ingin bertanya tentang kegiatan di ${masjidData.masjid_name}.`
+                    schoolData.school_whatsapp_url,
+                    `Assalamualaikum, saya ingin bertanya tentang kegiatan di ${schoolData.school_name}.`
                   ) || waURL
                 }
                 target="_blank"
@@ -549,7 +549,7 @@ export default function PublicLinktree() {
                         key={kajian.lecture_session_id}
                         onClick={() =>
                           navigate(
-                            `/masjid/${slug}/jadwal-kajian/${kajian.lecture_session_id}`
+                            `/school/${slug}/jadwal-kajian/${kajian.lecture_session_id}`
                           )
                         }
                         className="flex-shrink-0 snap-start w-[200px] sm:w-[220px] md:w-[240px] rounded-xl overflow-hidden border cursor-pointer hover:opacity-90 transition"
@@ -599,7 +599,7 @@ export default function PublicLinktree() {
                   <span
                     className="text-sm underline cursor-pointer hover:opacity-80 transition"
                     style={{ color: theme.black2 }}
-                    onClick={() => navigate(`/masjid/${slug}/jadwal-kajian`)}
+                    onClick={() => navigate(`/school/${slug}/jadwal-kajian`)}
                   >
                     Lihat semua kajian
                   </span>
@@ -615,19 +615,19 @@ export default function PublicLinktree() {
 
           <BorderLine />
 
-          {/* SECTION: INFO MASJID */}
+          {/* SECTION: INFO school */}
           <div className="mb-4 mt-4">
             <h2
               className="text-lg font-semibold"
               style={{ color: theme.black1 }}
             >
-              Tentang Masjid
+              Tentang school
             </h2>
             <p className="text-sm mt-1" style={{ color: theme.black2 }}>
-              Dikelola oleh DKM Masjid untuk ummat muslim
+              Dikelola oleh DKM school untuk ummat muslim
             </p>
 
-            {masjidData.masjid_location && (
+            {schoolData.school_location && (
               <a
                 href={openMapsHref}
                 target="_blank"
@@ -637,7 +637,7 @@ export default function PublicLinktree() {
               >
                 <span className="inline-flex items-center gap-1">
                   <MapPin size={16} />
-                  <span>{masjidData.masjid_location}</span>
+                  <span>{schoolData.school_location}</span>
                   <ExternalLink size={14} className="opacity-70" />
                 </span>
                 <span className="underline text-sm mt-0.5">
@@ -659,17 +659,17 @@ export default function PublicLinktree() {
             </h2>
             <div className="space-y-2 pt-2">
               <CartLink
-                label="Profil Masjid"
+                label="Profil school"
                 icon={<MapPin size={18} />}
-                href={`/masjid/${masjidData.masjid_slug}/profil`}
+                href={`/school/${schoolData.school_slug}/profil`}
               />
               <CartLink
                 label="Jadwal Kajian"
                 icon={<BookOpen size={18} />}
-                href={`/masjid/${masjidData.masjid_slug}/jadwal-kajian`}
+                href={`/school/${schoolData.school_slug}/jadwal-kajian`}
               />
               <CartLink
-                label="Grup Masjid & Sosial Media"
+                label="Grup school & Sosial Media"
                 icon={<Share2 size={18} />}
                 onClick={() => setShowSocialModal(true)}
               />
@@ -678,9 +678,9 @@ export default function PublicLinktree() {
                 icon={<Phone size={18} />}
                 href={
                   buildWhatsAppContact(
-                    masjidData.masjid_whatsapp_url,
-                    `Assalamualaikum, saya ingin bertanya tentang kegiatan di ${masjidData.masjid_name}.`
-                  ) || `/masjid/${masjidData.masjid_slug}/profil`
+                    schoolData.school_whatsapp_url,
+                    `Assalamualaikum, saya ingin bertanya tentang kegiatan di ${schoolData.school_name}.`
+                  ) || `/school/${schoolData.school_slug}/profil`
                 }
                 internal={false}
               />
@@ -700,15 +700,15 @@ export default function PublicLinktree() {
             show={showSocialModal}
             onClose={() => setShowSocialModal(false)}
             data={{
-              masjid_instagram_url: masjidData.masjid_instagram_url,
-              masjid_whatsapp_url: masjidData.masjid_whatsapp_url,
-              masjid_youtube_url: masjidData.masjid_youtube_url,
-              masjid_facebook_url: masjidData.masjid_facebook_url,
-              masjid_tiktok_url: masjidData.masjid_tiktok_url,
-              masjid_whatsapp_group_ikhwan_url:
-                masjidData.masjid_whatsapp_group_ikhwan_url,
-              masjid_whatsapp_group_akhwat_url:
-                masjidData.masjid_whatsapp_group_akhwat_url,
+              school_instagram_url: schoolData.school_instagram_url,
+              school_whatsapp_url: schoolData.school_whatsapp_url,
+              school_youtube_url: schoolData.school_youtube_url,
+              school_facebook_url: schoolData.school_facebook_url,
+              school_tiktok_url: schoolData.school_tiktok_url,
+              school_whatsapp_group_ikhwan_url:
+                schoolData.school_whatsapp_group_ikhwan_url,
+              school_whatsapp_group_akhwat_url:
+                schoolData.school_whatsapp_group_akhwat_url,
             }}
           />
 

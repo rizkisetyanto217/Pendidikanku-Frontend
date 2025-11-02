@@ -8,13 +8,13 @@ import {
   Loader2,
   CheckCircle,
 } from "lucide-react";
-import api, { fetchSimpleContext, setActiveMasjidContext } from "@/lib/axios";
+import api, { fetchSimpleContext, setActiveschoolContext } from "@/lib/axios";
 import { SectionCard } from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 import { NAVS, type NavItem } from "./navsConfig";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import { pickTheme, ThemeName, type Palette } from "@/constants/thema";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useActiveMasjidInfo } from "@/hooks/useActiveMasjidInfo";
+import { useActiveschoolInfo } from "@/hooks/useActiveSchoolInfo";
 
 /* ================= helpers & types ================= */
 type Kind = "sekolah" | "murid" | "guru";
@@ -24,7 +24,7 @@ type UserProfile = {
   avatar?: string;
   role: string;
 };
-export type MasjidRole = "dkm" | "admin" | "teacher" | "student" | "user";
+export type schoolRole = "dkm" | "admin" | "teacher" | "student" | "user";
 
 type ParentSidebarProps = {
   kind?: Kind | "auto";
@@ -36,10 +36,10 @@ type ParentSidebarProps = {
 };
 
 type Membership = {
-  masjid_id: string;
-  masjid_name: string;
-  masjid_icon_url?: string | null;
-  roles: MasjidRole[];
+  school_id: string;
+  school_name: string;
+  school_icon_url?: string | null;
+  roles: schoolRole[];
 };
 
 type SimpleContext = {
@@ -66,10 +66,10 @@ const getSimpleContext: () => Promise<SimpleContext> = async () => {
   const raw: any = resp?.data?.data ?? resp?.data ?? resp ?? {};
 
   const memberships: Membership[] = (raw?.memberships ?? []).map((m: any) => ({
-    masjid_id: m.masjid_id,
-    masjid_name: m.masjid_name,
-    masjid_icon_url: m.masjid_icon_url ?? null,
-    roles: (m.roles ?? []) as MasjidRole[],
+    school_id: m.school_id,
+    school_name: m.school_name,
+    school_icon_url: m.school_icon_url ?? null,
+    roles: (m.roles ?? []) as schoolRole[],
   }));
 
   const ctx: SimpleContext = {
@@ -142,11 +142,11 @@ function ModalSwitchContext({
   open: boolean;
   onClose: () => void;
   onSelect: (
-    masjidId: string,
-    role: MasjidRole,
+    schoolId: string,
+    role: schoolRole,
     display: { name?: string; icon?: string | null }
   ) => void;
-  current?: { masjidId?: string | null; role?: MasjidRole };
+  current?: { schoolId?: string | null; role?: schoolRole };
 }) {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette = pickTheme(themeName as ThemeName, isDark);
@@ -166,10 +166,10 @@ function ModalSwitchContext({
   });
 
   const memberships: Membership[] = (data?.memberships ?? []).map((m) => ({
-    masjid_id: m.masjid_id,
-    masjid_name: m.masjid_name,
-    masjid_icon_url: m.masjid_icon_url ?? undefined,
-    roles: (m.roles ?? []) as MasjidRole[],
+    school_id: m.school_id,
+    school_name: m.school_name,
+    school_icon_url: m.school_icon_url ?? undefined,
+    roles: (m.roles ?? []) as schoolRole[],
   }));
   const isSingleMode =
     memberships.length === 1 && (memberships[0].roles?.length || 0) === 1;
@@ -182,7 +182,7 @@ function ModalSwitchContext({
       style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
       role="dialog"
       aria-modal="true"
-      aria-label="Ganti Masjid / Role"
+      aria-label="Ganti school / Role"
     >
       <div
         className="rounded-3xl w-full max-w-md p-6 shadow-2xl"
@@ -198,7 +198,7 @@ function ModalSwitchContext({
             <Building2 className="w-5 h-5 text-white" />
           </div>
           <h3 className="text-lg font-semibold">
-            {isSingleMode ? "Konteks Saat Ini" : "Pilih Masjid & Role"}
+            {isSingleMode ? "Konteks Saat Ini" : "Pilih school & Role"}
           </h3>
         </div>
 
@@ -218,7 +218,7 @@ function ModalSwitchContext({
             const m = memberships[0];
             const r = m.roles[0];
             const isActive =
-              current?.masjidId === m.masjid_id && current?.role === r;
+              current?.schoolId === m.school_id && current?.role === r;
             return (
               <>
                 <div
@@ -230,14 +230,14 @@ function ModalSwitchContext({
                 >
                   <div className="flex items-center gap-3 mb-3">
                     <img
-                      src={m.masjid_icon_url || "/image/Gambar-Masjid.jpeg"}
-                      alt={m.masjid_name}
+                      src={m.school_icon_url || "/image/Gambar-school.jpeg"}
+                      alt={m.school_name}
                       className="w-12 h-12 rounded-lg object-cover border"
                       style={{ borderColor: palette.white3 }}
                     />
                     <div className="min-w-0">
                       <div className="font-semibold truncate">
-                        {m.masjid_name}
+                        {m.school_name}
                       </div>
                       <div
                         className="text-xs"
@@ -263,9 +263,9 @@ function ModalSwitchContext({
                     <button
                       type="button"
                       onClick={() =>
-                        onSelect(m.masjid_id, r, {
-                          name: m.masjid_name,
-                          icon: m.masjid_icon_url ?? undefined,
+                        onSelect(m.school_id, r, {
+                          name: m.school_name,
+                          icon: m.school_icon_url ?? undefined,
                         })
                       }
                       className="w-full rounded-xl px-4 py-2.5 text-sm font-semibold"
@@ -297,32 +297,32 @@ function ModalSwitchContext({
           <>
             <div className="max-h-80 overflow-y-auto pr-1 space-y-3">
               {memberships.map((m) => {
-                const isActiveMasjid = !!(
-                  current?.masjidId && m.masjid_id === current.masjidId
+                const isActiveschool = !!(
+                  current?.schoolId && m.school_id === current.schoolId
                 );
                 return (
                   <div
-                    key={m.masjid_id}
+                    key={m.school_id}
                     className="rounded-2xl border p-3"
                     style={{
-                      borderColor: isActiveMasjid
+                      borderColor: isActiveschool
                         ? palette.primary
                         : palette.silver1,
-                      background: isActiveMasjid
+                      background: isActiveschool
                         ? palette.primary2
                         : palette.white2,
                     }}
                   >
                     <div className="flex items-center gap-3 mb-2">
                       <img
-                        src={m.masjid_icon_url || "/image/Gambar-Masjid.jpeg"}
-                        alt={m.masjid_name}
+                        src={m.school_icon_url || "/image/Gambar-school.jpeg"}
+                        alt={m.school_name}
                         className="w-10 h-10 rounded-lg object-cover border"
                         style={{ borderColor: palette.white3 }}
                       />
                       <div className="font-medium flex items-center gap-2 min-w-0">
-                        <span className="truncate">{m.masjid_name}</span>
-                        {isActiveMasjid && (
+                        <span className="truncate">{m.school_name}</span>
+                        {isActiveschool && (
                           <span
                             className="text-[10px] px-2 py-0.5 rounded-full"
                             style={{
@@ -339,18 +339,18 @@ function ModalSwitchContext({
                     <div className="flex flex-wrap gap-2">
                       {(m.roles?.length
                         ? m.roles
-                        : (["user"] as MasjidRole[])
+                        : (["user"] as schoolRole[])
                       ).map((r) => {
                         const isActiveRole =
-                          isActiveMasjid && r === current?.role;
+                          isActiveschool && r === current?.role;
                         return (
                           <button
                             key={r}
                             type="button"
                             onClick={() =>
-                              onSelect(m.masjid_id, r, {
-                                name: m.masjid_name,
-                                icon: m.masjid_icon_url ?? undefined,
+                              onSelect(m.school_id, r, {
+                                name: m.school_name,
+                                icon: m.school_icon_url ?? undefined,
                               })
                             }
                             className="px-3 py-1.5 text-xs rounded-lg border transition-colors"
@@ -427,9 +427,9 @@ export default function ParentSidebar({
         : null;
 
   // Active context
-  const active = useActiveMasjidInfo();
+  const active = useActiveschoolInfo();
   useEffect(() => {
-    DBG.log("useActiveMasjidInfo()", active);
+    DBG.log("useActiveschoolInfo()", active);
   }, [active]);
 
   // Satu sumber data simple-context (hindari 429)
@@ -459,8 +459,8 @@ export default function ParentSidebar({
       ? localStorage.getItem("active_role")
       : null) || undefined;
   const roles = (active.roles ?? []) as string[];
-  const derivedRole: MasjidRole =
-    (storedRole as MasjidRole) ||
+  const derivedRole: schoolRole =
+    (storedRole as schoolRole) ||
     (roles.includes("teacher")
       ? "teacher"
       : roles.includes("student")
@@ -528,19 +528,19 @@ export default function ParentSidebar({
 
   const handleSwitch = useCallback(
     async (
-      masjidId: string,
-      role: MasjidRole,
+      schoolId: string,
+      role: schoolRole,
       display: { name?: string; icon?: string | null }
     ) => {
-      DBG.log("handleSwitch", { masjidId, role, display });
+      DBG.log("handleSwitch", { schoolId, role, display });
       try {
         localStorage.setItem("active_role", role);
       } catch {}
-      await setActiveMasjidContext(masjidId, role, {
+      await setActiveschoolContext(schoolId, role, {
         name: display?.name,
         icon: display?.icon ?? undefined,
       });
-      window.dispatchEvent(new Event("masjid:changed"));
+      window.dispatchEvent(new Event("school:changed"));
 
       const seg =
         role === "teacher" ? "guru" : role === "student" ? "murid" : "sekolah";
@@ -555,7 +555,7 @@ export default function ParentSidebar({
         }),
       ]);
 
-      navigate(`/${masjidId}/${seg}`, { replace: true });
+      navigate(`/${schoolId}/${seg}`, { replace: true });
     },
     [navigate, qc]
   );
@@ -671,31 +671,31 @@ export default function ParentSidebar({
               </div>
             )}
 
-            {/* Active Masjid header card */}
+            {/* Active school header card */}
             <div className="p-2">
               <SectionCard palette={palette} className="p-3">
                 <div className="flex items-center gap-3">
                   <img
-                    src={active.icon || "/image/Gambar-Masjid.jpeg"}
-                    alt={active.name || "Masjid"}
+                    src={active.icon || "/image/Gambar-school.jpeg"}
+                    alt={active.name || "school"}
                     className="w-10 h-10 rounded-xl object-cover border"
                     style={{ borderColor: palette.white3 }}
                     onLoad={(e) =>
                       DBG.log(
-                        "Masjid icon loaded",
+                        "school icon loaded",
                         (e.currentTarget as HTMLImageElement).src
                       )
                     }
                     onError={(e) =>
                       DBG.log(
-                        "Masjid icon ERROR",
+                        "school icon ERROR",
                         (e.currentTarget as HTMLImageElement).src
                       )
                     }
                   />
                   <div className="min-w-0 flex-1">
                     <div className="text-sm font-semibold truncate">
-                      {active.name || "Masjid Aktif"}
+                      {active.name || "school Aktif"}
                     </div>
                     <div className="text-xs" style={{ color: palette.silver2 }}>
                       {translateRole(derivedRole)}
@@ -836,7 +836,7 @@ export default function ParentSidebar({
         open={openSwitcher}
         onClose={() => setOpenSwitcher(false)}
         onSelect={handleSwitch}
-        current={{ masjidId: active.id, role: derivedRole }}
+        current={{ schoolId: active.id, role: derivedRole }}
       />
     </>
   );

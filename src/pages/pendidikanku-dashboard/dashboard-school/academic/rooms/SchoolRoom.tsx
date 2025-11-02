@@ -29,7 +29,7 @@ const USE_DUMMY = false;
 /* ===================== TYPES (UI) ================= */
 export type Room = {
   id: string;
-  masjid_id?: string;
+  school_id?: string;
   name: string;
   code?: string;
   slug?: string;
@@ -65,7 +65,7 @@ export type Room = {
 /* ========== TYPES (payload dari API publik) ========= */
 type ClassRoomApi = {
   class_room_id: string;
-  class_room_masjid_id: string;
+  class_room_school_id: string;
   class_room_name: string;
   class_room_code?: string | null;
   class_room_slug?: string | null;
@@ -113,8 +113,8 @@ type ApiRoomPayload = {
 
 /* ===================== QK ========================= */
 const QK = {
-  ROOMS_PUBLIC: (masjidId: string, q: string, page: number, perPage: number) =>
-    ["public-rooms", masjidId, q, page, perPage] as const,
+  ROOMS_PUBLIC: (schoolId: string, q: string, page: number, perPage: number) =>
+    ["public-rooms", schoolId, q, page, perPage] as const,
 };
 
 /* ===================== HELPERS ==================== */
@@ -143,7 +143,7 @@ function normalizeSchedule(s: any[] | null | undefined): Room["schedule"] {
 function mapApiRoomToRoom(x: ClassRoomApi): Room {
   return {
     id: x.class_room_id,
-    masjid_id: x.class_room_masjid_id,
+    school_id: x.class_room_school_id,
     name: x.class_room_name,
     code: x.class_room_code ?? undefined,
     slug: x.class_room_slug ?? undefined,
@@ -172,19 +172,19 @@ function mapApiRoomToRoom(x: ClassRoomApi): Room {
 
 /* ================== API QUERY (public) ============ */
 function usePublicRoomsQuery(
-  masjidId: string,
+  schoolId: string,
   q: string,
   page: number,
   perPage: number
 ) {
   return useQuery<PublicRoomsResponse>({
-    queryKey: QK.ROOMS_PUBLIC(masjidId, q, page, perPage),
-    enabled: !!masjidId && !USE_DUMMY,
+    queryKey: QK.ROOMS_PUBLIC(schoolId, q, page, perPage),
+    enabled: !!schoolId && !USE_DUMMY,
     staleTime: 60_000,
     retry: 1,
     queryFn: async () => {
       const res = await axios.get<PublicRoomsResponse>(
-        `/public/${masjidId}/class-rooms/list`,
+        `/public/${schoolId}/class-rooms/list`,
         { params: { q: q || undefined, page, per_page: perPage } }
       );
       return res.data;
@@ -367,7 +367,7 @@ export default function RoomSchool({
   backTo,
   backLabel = "Kembali",
 }: RoomSchoolProps) {
-  const { masjid_id } = useParams<{ masjid_id?: string }>();
+  const { school_id } = useParams<{ school_id?: string }>();
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
@@ -377,7 +377,7 @@ export default function RoomSchool({
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
 
-  const roomsQ = usePublicRoomsQuery(masjid_id ?? "", q, page, perPage);
+  const roomsQ = usePublicRoomsQuery(school_id ?? "", q, page, perPage);
 
   // Data ter-normalisasi untuk UI
   const rooms: Room[] = useMemo(
@@ -413,15 +413,15 @@ export default function RoomSchool({
       };
 
       if (form.id) {
-        await axios.put(`/a/${masjid_id}/class-rooms/${form.id}`, payload);
+        await axios.put(`/a/${school_id}/class-rooms/${form.id}`, payload);
       } else {
-        await axios.post(`/a/${masjid_id}/class-rooms`, payload);
+        await axios.post(`/a/${school_id}/class-rooms`, payload);
       }
     },
     onSuccess: async () => {
       closeModal();
       await qc.invalidateQueries({
-        queryKey: QK.ROOMS_PUBLIC(masjid_id ?? "", q, page, perPage),
+        queryKey: QK.ROOMS_PUBLIC(school_id ?? "", q, page, perPage),
       });
     },
   });
@@ -429,11 +429,11 @@ export default function RoomSchool({
   const delRoom = useMutation({
     mutationFn: async (id: string) => {
       // baseURL sudah .../api, jadi pathnya mulai dari /a/...
-      await axios.delete(`/a/${masjid_id}/class-rooms/${id}`);
+      await axios.delete(`/a/${school_id}/class-rooms/${id}`);
     },
     onSuccess: async () => {
       await qc.invalidateQueries({
-        queryKey: QK.ROOMS_PUBLIC(masjid_id ?? "", q, page, perPage),
+        queryKey: QK.ROOMS_PUBLIC(school_id ?? "", q, page, perPage),
       });
     },
   });
@@ -456,7 +456,7 @@ export default function RoomSchool({
         delRoom.mutate(room.id, {
           onSuccess: async () => {
             await qc.invalidateQueries({
-              queryKey: QK.ROOMS_PUBLIC(masjid_id ?? "", q, page, perPage),
+              queryKey: QK.ROOMS_PUBLIC(school_id ?? "", q, page, perPage),
             });
             Swal.fire({
               icon: "success",
@@ -483,11 +483,11 @@ export default function RoomSchool({
   };
 
   // Guard path
-  if (!masjid_id) {
+  if (!school_id) {
     return (
       <div className="p-4 text-sm">
-        <b>masjid_id</b> tidak ada di path. Contoh:
-        <code className="ml-1">/MASJID_ID/sekolah/menu-utama/ruangan</code>
+        <b>school_id</b> tidak ada di path. Contoh:
+        <code className="ml-1">/school_ID/sekolah/menu-utama/ruangan</code>
       </div>
     );
   }
