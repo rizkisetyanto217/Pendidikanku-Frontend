@@ -97,7 +97,7 @@ export default function StudentMenuGrids() {
               <div className="mb-4 font-semibold text-lg">
                 Akses Cepat Murid
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
+              <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
                 {items.map((it) => (
                   <MenuTile key={it.key} item={it} palette={palette} />
                 ))}

@@ -1,5 +1,4 @@
-// src/pages/auth/Login.tsx
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   EyeIcon,
@@ -17,7 +16,6 @@ import api, { setTokens, setActiveMasjidContext } from "@/lib/axios";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 
-/* ===================== Types ===================== */
 type MasjidRole = "dkm" | "admin" | "teacher" | "student" | "user";
 type MasjidItem = {
   masjid_id: string;
@@ -40,14 +38,14 @@ function ModalSelectRoleMasjid({
 }) {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette = pickTheme(themeName as ThemeName, isDark);
-  const [masjids, setMasjids] = useState<MasjidItem[]>([]);
-  const [selected, setSelected] = useState<{
+  const [masjids, setMasjids] = React.useState<MasjidItem[]>([]);
+  const [selected, setSelected] = React.useState<{
     masjid_id: string;
     role: MasjidRole;
   } | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = React.useState(false);
 
-  useEffect(() => {
+  React.useEffect(() => {
     let mounted = true;
     if (!open) return;
     setLoading(true);
@@ -573,7 +571,7 @@ export default function Login() {
       const { access_token } = res.data?.data ?? {};
       if (!access_token) throw new Error("Token tidak ditemukan.");
 
-      // Set AT in-memory; RT sudah di-cookie HttpOnly oleh backend
+      // Set AT in-memory; RT di-cookie HttpOnly
       setTokens(access_token);
 
       // Ambil konteks membership
@@ -589,7 +587,7 @@ export default function Login() {
       if (memberships.length === 1) {
         const m = memberships[0];
         const role: MasjidRole = (m.roles?.[0] as MasjidRole) ?? "user";
-        handleSelectMasjidRole(m.masjid_id, role);
+        await handleSelectMasjidRole(m.masjid_id, role);
         return;
       }
 
@@ -623,8 +621,7 @@ export default function Login() {
       if (!item) throw new Error("Masjid gagal dibuat.");
 
       const masjidId = item.masjid_id;
-      // set context via cookie
-      setActiveMasjidContext(masjidId, "dkm");
+      await setActiveMasjidContext(masjidId, "dkm");
 
       setOpenJoinAtauBuat(false);
       navigate(`/${masjidId}/sekolah`, { replace: true });
@@ -637,14 +634,14 @@ export default function Login() {
 
   async function handleJoinSekolah(code: string, role: "teacher" | "student") {
     try {
+      // asumsi endpoint join untuk murid; jika guru beda endpoint silakan branch
       await api.post("/u/student-class-sections/join", { student_code: code });
 
       const ctx = await api.get("/auth/me/simple-context");
       const memberships = ctx.data?.data?.memberships ?? [];
       if (memberships.length > 0) {
         const m = memberships[0];
-        setActiveMasjidContext(m.masjid_id, role);
-
+        await setActiveMasjidContext(m.masjid_id, role);
         const path = role === "teacher" ? "guru" : "murid";
         navigate(`/${m.masjid_id}/${path}`, { replace: true });
       }
@@ -657,20 +654,26 @@ export default function Login() {
     }
   }
 
-  // DI LOGIN.TSX
-  function handleSelectMasjidRole(masjidId: string, role: MasjidRole) {
-    api.get("/auth/me/simple-context").then((res) => {
+  async function handleSelectMasjidRole(masjidId: string, role: MasjidRole) {
+    try {
+      const res = await api.get("/auth/me/simple-context");
       const m = (res.data?.data?.memberships ?? []).find(
         (x: any) => x.masjid_id === masjidId
       );
-      setActiveMasjidContext(masjidId, role, {
+      // simpan role pilihan (optional, untuk default di sidebar)
+      try {
+        localStorage.setItem("active_role", role);
+      } catch {}
+      await setActiveMasjidContext(masjidId, role, {
         name: m?.masjid_name ?? undefined,
         icon: m?.masjid_icon_url ?? undefined,
       });
       const path =
         role === "teacher" ? "guru" : role === "student" ? "murid" : "sekolah";
       navigate(`/${masjidId}/${path}`, { replace: true });
-    });
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   return (

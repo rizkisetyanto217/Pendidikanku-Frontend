@@ -2,11 +2,9 @@
 import axiosLib, { AxiosError, AxiosInstance, AxiosRequestConfig } from "axios";
 
 /* ==========================================
-   🔧 BASE
+   🔧 BASE (pakai Vite proxy di DEV)
 ========================================== */
-export const API_BASE =
-  import.meta.env.VITE_API_BASE_URL ??
-  "https://masjidkubackend4-production.up.railway.app/api";
+export const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "/api";
 
 const api: AxiosInstance = axiosLib.create({
   baseURL: API_BASE,
@@ -54,7 +52,6 @@ const isFormData = (d: any) =>
 const ACTIVE_MASJID_COOKIE = "active_masjid_id";
 const ACTIVE_ROLE_COOKIE = "active_role";
 
-// simpan nama & icon masjid aktif untuk render cepat di UI (per-tab)
 const ACTIVE_MASJID_NAME_SS = "active_masjid_name";
 const ACTIVE_MASJID_ICON_SS = "active_masjid_icon";
 
@@ -104,18 +101,17 @@ export function clearTokens() {
 ========================================== */
 let csrfTokenMem: string | null = null;
 
-// ⬇️ ganti fungsi ini
 export async function ensureCsrf(): Promise<string | null> {
   if (csrfTokenMem) return csrfTokenMem;
 
-  // 1) Coba baca dari cookie dulu (paling cepat, no network)
+  // 1) Coba baca dari cookie dulu (paling cepat)
   const fromCookie = getCookie("XSRF-TOKEN");
   if (fromCookie) {
     csrfTokenMem = fromCookie;
     return csrfTokenMem;
   }
 
-  // 2) Kalau belum ada, baru hit /auth/csrf
+  // 2) Kalau belum ada, hit /auth/csrf
   try {
     const res = await apiNoAuth.get("/auth/csrf", { withCredentials: true });
     csrfTokenMem =
@@ -136,23 +132,49 @@ export type Membership = {
   roles?: string[];
 };
 
-let _ctxCache: { at: number; data: { memberships: Membership[] } } | null =
-  null;
 const CTX_TTL_MS = 5 * 60 * 1000; // 5 menit
 
 export function clearSimpleContextCache() {
   _ctxCache = null;
 }
 
-export async function fetchSimpleContext(force = false) {
+type SimpleContextPayload = {
+  user_id?: string;
+  user_name?: string;
+  name?: string;
+  email?: string;
+  avatar?: string;
+  user_avatar_url?: string;
+  profile_photo_url?: string;
+  memberships: Membership[];
+};
+
+let _ctxCache: { at: number; data: SimpleContextPayload } | null = null;
+
+export async function fetchSimpleContext(
+  force = false
+): Promise<SimpleContextPayload> {
   const now = Date.now();
   if (!force && _ctxCache && now - _ctxCache.at < CTX_TTL_MS) {
     return _ctxCache.data;
   }
-  const res = await api.get("/auth/me/simple-context");
-  const data = {
-    memberships: (res.data?.data?.memberships ?? []) as Membership[],
+
+  const res = await api.get("/auth/me/simple-context", {
+    withCredentials: true,
+  });
+
+  const raw = res?.data?.data ?? res?.data ?? {};
+  const data: SimpleContextPayload = {
+    user_id: raw?.user_id,
+    user_name: raw?.user_name,
+    name: raw?.name,
+    email: raw?.email,
+    avatar: raw?.avatar,
+    user_avatar_url: raw?.user_avatar_url,
+    profile_photo_url: raw?.profile_photo_url,
+    memberships: (raw?.memberships ?? []) as Membership[],
   };
+
   _ctxCache = { at: now, data };
   return data;
 }
@@ -163,13 +185,13 @@ export async function fetchSimpleContext(force = false) {
 export function setActiveMasjidContext(
   masjidId: string,
   role?: string,
-  opts?: { name?: string; icon?: string } // opsional ikut set display
+  opts?: { name?: string; icon?: string }
 ) {
   if (masjidId) setCookie(ACTIVE_MASJID_COOKIE, masjidId);
   if (role) setCookie(ACTIVE_ROLE_COOKIE, role);
   if (opts?.name || opts?.icon) setActiveMasjidDisplay(opts.name, opts.icon);
 
-  clearSimpleContextCache(); // invalidasi cache agar hook refetch
+  clearSimpleContextCache();
   window.dispatchEvent(
     new CustomEvent("masjid:changed", {
       detail: { masjidId, role, meta: opts },
@@ -198,17 +220,13 @@ export function getActiveRole(): string | null {
 ========================================== */
 let isRefreshing = false;
 let refreshPromise: Promise<string | null> | null = null;
-const waiters: Array<(t: string | null) => void> = [];
-const notifyWaiters = (t: string | null) => {
-  while (waiters.length) waiters.shift()!(t);
-};
 
 async function doRefresh(): Promise<string | null> {
   if (isRefreshing && refreshPromise) return refreshPromise;
   isRefreshing = true;
 
   refreshPromise = (async () => {
-    // Pastikan kita punya XSRF, idealnya dari cookie (instant)
+    // Pastikan punya XSRF (ambil dari cookie kalau ada)
     const xsrf = (await ensureCsrf()) || "";
 
     const headers: Record<string, string> = {
@@ -225,13 +243,13 @@ async function doRefresh(): Promise<string | null> {
       const newAT = res.data?.data?.access_token ?? null;
       if (newAT) setTokens(newAT);
 
-      // 🔄 server set cookie XSRF baru → sync ke mem
+      // sinkronkan XSRF terbaru bila server set-cookie
       const fromCookie = getCookie("XSRF-TOKEN");
       if (fromCookie) csrfTokenMem = fromCookie;
 
       return newAT;
     } catch (err: any) {
-      // ✅ fallback: kalau 403 CSRF, re-seed lalu retry sekali
+      // Fallback 403 CSRF → seed ulang lalu retry sekali
       if (err?.response?.status === 403) {
         await apiNoAuth.get("/auth/csrf", { withCredentials: true });
         const token = getCookie("XSRF-TOKEN");
@@ -276,13 +294,6 @@ async function doRefresh(): Promise<string | null> {
 }
 
 /* ==========================================
-   🧩 INTERCEPTORS
-========================================== */
-/* ==========================================
-   🔁 RESPONSE INTERCEPTOR: auto refresh + retry
-========================================== */
-
-/* ==========================================
    🧩 REQUEST INTERCEPTOR
 ========================================== */
 api.interceptors.request.use(async (config) => {
@@ -311,7 +322,7 @@ api.interceptors.request.use(async (config) => {
     (config.headers as any)["X-CSRF-Token"] = csrfTokenMem;
   }
 
-  // 3) Scope tenant (opsional, kalau backend baca header ini)
+  // 3) Scope tenant (opsional)
   if (!isAuthArea) {
     const mid = getActiveMasjidId();
     if (mid) {
@@ -333,6 +344,48 @@ api.interceptors.request.use(async (config) => {
 });
 
 /* ==========================================
+   🔁 RESPONSE INTERCEPTOR: auto CSRF seed + auto refresh (retry 1x)
+========================================== */
+api.interceptors.response.use(
+  (res) => res,
+  async (error: AxiosError) => {
+    const res = error.response;
+    const cfg: any = error.config || {};
+    const url = String(cfg.url || "");
+    const isAuthArea = url.startsWith("/auth/");
+    const alreadyRetried = cfg._retried === true;
+
+    // 403 → kemungkinan CSRF kedaluwarsa → seed ulang dan retry sekali
+    if (res?.status === 403 && !alreadyRetried && !isAuthArea) {
+      cfg._retried = true;
+      try {
+        await apiNoAuth.get("/auth/csrf", { withCredentials: true });
+        const token = getCookie("XSRF-TOKEN");
+        if (token) csrfTokenMem = token;
+        cfg.headers = cfg.headers ?? {};
+        cfg.headers["X-CSRF-Token"] = csrfTokenMem || "";
+        return api(cfg);
+      } catch {
+        // fallthrough ke reject
+      }
+    }
+
+    // 401 → coba refresh AT sekali lalu retry
+    if (res?.status === 401 && !alreadyRetried && !isAuthArea) {
+      cfg._retried = true;
+      const t = await doRefresh();
+      if (t) {
+        cfg.headers = cfg.headers ?? {};
+        cfg.headers.Authorization = `Bearer ${t}`;
+        return api(cfg);
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
+
+/* ==========================================
    🚪 LOGOUT
 ========================================== */
 export async function apiLogout() {
@@ -348,7 +401,7 @@ export async function apiLogout() {
   } finally {
     clearTokens();
     clearActiveMasjidContext();
-    clearSimpleContextCache(); // pastikan cache bersih
+    clearSimpleContextCache();
     window.dispatchEvent(
       new CustomEvent("auth:logout", { detail: { source: "axios" } })
     );
@@ -364,7 +417,7 @@ export default api;
 export async function restoreSession(): Promise<boolean> {
   if (getAccessToken()) return true;
   const t0 = performance.now();
-  const t = await doRefresh(); // ensureCsrf() tak perlu lagi di sini
+  const t = await doRefresh();
   console.debug(
     "[restoreSession] done in",
     Math.round(performance.now() - t0),

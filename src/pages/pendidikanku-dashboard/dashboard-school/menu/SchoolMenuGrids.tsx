@@ -141,7 +141,7 @@ export default function SchoolMenuGrids() {
             <div className="mb-2 font-semibold text-lg">Akses Cepat</div>
 
             {/* Grid menu */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
+            <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
               {items.map((it) => (
                 <MenuTile key={it.key} item={it} palette={palette} />
               ))}

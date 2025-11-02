@@ -1,6 +1,4 @@
-// src/pages/pendidikanku-dashboard/components/home/ParentSideBar.tsx
-
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { NavLink, useMatch, useParams, useNavigate } from "react-router-dom";
 import {
   LogOut,
@@ -15,18 +13,19 @@ import { SectionCard } from "@/pages/pendidikanku-dashboard/components/ui/CPrimi
 import { NAVS, type NavItem } from "./navsConfig";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import { pickTheme, ThemeName, type Palette } from "@/constants/thema";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useActiveMasjidInfo } from "@/hooks/useActiveMasjidInfo";
+import { DeleteConfirmModal } from "@/pages/pendidikanku-dashboard/components/common/CDeleteConfirmModal";
 
 /* ================= helpers & types ================= */
 type Kind = "sekolah" | "murid" | "guru";
 type UserProfile = {
   name: string;
-  email: string;
+  email?: string;
   avatar?: string;
   role: string;
 };
-type MasjidRole = "dkm" | "admin" | "teacher" | "student" | "user";
+export type MasjidRole = "dkm" | "admin" | "teacher" | "student" | "user";
 
 type ParentSidebarProps = {
   kind?: Kind | "auto";
@@ -46,41 +45,57 @@ type Membership = {
 
 type SimpleContext = {
   memberships: Membership[];
+  user_id?: string;
   user_name?: string;
   name?: string;
   email?: string;
   avatar?: string;
+  user_avatar_url?: string;
   profile_photo_url?: string;
 };
 
-// ---- QUERY FN WRAPPER (normalize ke tipe lokal SimpleContext)
+/* ============== DEBUG ============== */
+const DEBUG = true;
+const DBG = {
+  log: (...a: any[]) => DEBUG && console.log("[Sidebar]", ...a),
+};
+
+/* ---- API normalize ---- */
 const getSimpleContext: () => Promise<SimpleContext> = async () => {
-  const raw: any = await fetchSimpleContext();
+  const resp: any = await fetchSimpleContext();
+  const raw: any = resp?.data?.data ?? resp?.data ?? resp ?? {};
 
   const memberships: Membership[] = (raw?.memberships ?? []).map((m: any) => ({
     masjid_id: m.masjid_id,
     masjid_name: m.masjid_name,
     masjid_icon_url: m.masjid_icon_url ?? null,
-    roles: (m.roles ?? []) as string[] as MasjidRole[],
+    roles: (m.roles ?? []) as MasjidRole[],
   }));
 
-  return {
+  const ctx: SimpleContext = {
     memberships,
+    user_id: raw?.user_id,
     user_name: raw?.user_name,
     name: raw?.name,
     email: raw?.email,
+    user_avatar_url: raw?.user_avatar_url,
     avatar: raw?.avatar,
     profile_photo_url: raw?.profile_photo_url,
-  } as SimpleContext;
+  };
+
+  DBG.log("normalized simple-context:", ctx);
+  return ctx;
 };
 
-function normalizePath(path: string) {
-  return path.replace(/\/+$/, "");
+function normalizePath(p: string) {
+  return p.replace(/\/+$/, "");
 }
 function looksLikeOrgId(s?: string) {
-  if (!s) return false;
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
-    s
+  return (
+    !!s &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+      s
+    )
   );
 }
 const kindToRouteSegment: Record<Kind, string> = {
@@ -93,16 +108,18 @@ function buildBase(id: string | undefined, segment: string) {
 }
 function buildTo(base: string, path: string) {
   if (path === "." || path === "") return normalizePath(base);
-  const cleaned = path.replace(/^\/+/, "");
-  return normalizePath(`${base}/${cleaned}`);
+  return normalizePath(`${base}/${path.replace(/^\/+/, "")}`);
 }
 const getInitials = (n?: string) =>
-  n
-    ?.split(" ")
-    .map((p) => p[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase() || "U";
+  n?.trim()
+    ? n
+        .trim()
+        .split(/\s+/)
+        .map((p) => p[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase()
+    : "U";
 export const translateRole = (r?: string): string =>
   (
     ({
@@ -113,9 +130,9 @@ export const translateRole = (r?: string): string =>
     }) as Record<string, string>
   )[(r ?? "").toLowerCase()] ?? "User";
 
-/* =============== Modal: Switch Masjid/Role (satu komponen dua mode) =============== */
-type MembershipItem = Membership;
-
+/* ===================================================================
+   MODAL SWITCH CONTEXT
+   =================================================================== */
 function ModalSwitchContext({
   open,
   onClose,
@@ -133,26 +150,26 @@ function ModalSwitchContext({
 }) {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette = pickTheme(themeName as ThemeName, isDark);
+  const qc = useQueryClient();
 
+  const initial = qc.getQueryData<SimpleContext>(["me", "simple-context"]);
   const { data, isLoading } = useQuery<SimpleContext, Error>({
-    queryKey: ["me", "simple-context", "switcher"],
+    queryKey: ["me", "simple-context"],
     queryFn: getSimpleContext,
-    staleTime: 5 * 60 * 1000,
-    enabled: open,
+    initialData: initial,
+    enabled: open && !initial,
+    staleTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    retry: 1,
   });
 
-  const memberships: MembershipItem[] = (data?.memberships ?? []).map((m) => ({
+  const memberships: Membership[] = (data?.memberships ?? []).map((m) => ({
     masjid_id: m.masjid_id,
     masjid_name: m.masjid_name,
     masjid_icon_url: m.masjid_icon_url ?? undefined,
     roles: (m.roles ?? []) as MasjidRole[],
   }));
-
-  // Tentukan mode: single vs multi
-  const totalRoles = memberships.reduce(
-    (acc, m) => acc + (m.roles?.length || 0),
-    0
-  );
   const isSingleMode =
     memberships.length === 1 && (memberships[0].roles?.length || 0) === 1;
 
@@ -196,15 +213,13 @@ function ModalSwitchContext({
             Belum ada keanggotaan.
           </p>
         ) : isSingleMode ? (
-          // ===== SINGLE MODE (satu masjid, satu role) =====
-          <>
-            {(() => {
-              const m = memberships[0];
-              const r = m.roles[0];
-              const isActive =
-                current?.masjidId === m.masjid_id && current?.role === r;
-
-              return (
+          (() => {
+            const m = memberships[0];
+            const r = m.roles[0];
+            const isActive =
+              current?.masjidId === m.masjid_id && current?.role === r;
+            return (
+              <>
                 <div
                   className="rounded-2xl border p-4 mb-4"
                   style={{
@@ -243,7 +258,6 @@ function ModalSwitchContext({
                       </span>
                     )}
                   </div>
-
                   {!isActive && (
                     <button
                       type="button"
@@ -263,24 +277,22 @@ function ModalSwitchContext({
                     </button>
                   )}
                 </div>
-              );
-            })()}
-
-            <div className="flex justify-end">
-              <button
-                onClick={onClose}
-                className="px-4 py-2 text-sm rounded-lg"
-                style={{
-                  border: `1px solid ${palette.silver1}`,
-                  background: palette.white2,
-                }}
-              >
-                Tutup
-              </button>
-            </div>
-          </>
+                <div className="flex justify-end">
+                  <button
+                    onClick={onClose}
+                    className="px-4 py-2 text-sm rounded-lg"
+                    style={{
+                      border: `1px solid ${palette.silver1}`,
+                      background: palette.white2,
+                    }}
+                  >
+                    Tutup
+                  </button>
+                </div>
+              </>
+            );
+          })()
         ) : (
-          // ===== MULTI MODE (banyak masjid / banyak role) =====
           <>
             <div className="max-h-80 overflow-y-auto pr-1 space-y-3">
               {memberships.map((m) => {
@@ -323,7 +335,6 @@ function ModalSwitchContext({
                         )}
                       </div>
                     </div>
-
                     <div className="flex flex-wrap gap-2">
                       {(m.roles?.length
                         ? m.roles
@@ -364,7 +375,6 @@ function ModalSwitchContext({
                 );
               })}
             </div>
-
             <div className="mt-4 flex justify-end">
               <button
                 onClick={onClose}
@@ -384,7 +394,62 @@ function ModalSwitchContext({
   );
 }
 
-/* ================= Component ================= */
+/* ================= Small component: User Options Menu ================= */
+function UserOptionsMenu({
+  palette,
+  onLogout,
+  onSwitchContext,
+  loggingOut,
+  className = "",
+}: {
+  palette: Palette;
+  onLogout: () => void;
+  onSwitchContext: () => void;
+  loggingOut: boolean;
+  className?: string;
+}) {
+  return (
+    <div
+      id="sidebar-user-menu"
+      role="menu"
+      aria-label="Menu pengguna"
+      className={`z-50 rounded-2xl shadow-xl ${className}`}
+      style={{
+        background: palette.white1,
+        border: `1px solid ${palette.silver1}`,
+      }}
+    >
+      <ul className="py-1">
+        <li>
+          <button
+            type="button"
+            onClick={onSwitchContext}
+            className="w-full text-left px-4 py-2 rounded-xl"
+            style={{ color: palette.black1 }}
+          >
+            Ganti Masjid / Role
+          </button>
+        </li>
+        <li>
+          <button
+            type="button"
+            onClick={onLogout}
+            disabled={loggingOut}
+            className="w-full text-left px-4 py-2 rounded-xl font-medium"
+            style={{
+              color: "#DC2626",
+              opacity: loggingOut ? 0.7 : 1,
+            }}
+          >
+            Logout
+          </button>
+        </li>
+      </ul>
+    </div>
+  );
+}
+
+/* ================= SIDEBAR ================= */
 export default function ParentSidebar({
   kind = "auto",
   className = "",
@@ -396,8 +461,10 @@ export default function ParentSidebar({
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
+  const qc = useQueryClient();
+  const [logoutOpen, setLogoutOpen] = useState(false);
 
-  // URL params & detection
+  // URL params
   const params = useParams<{ id?: string }>();
   const matchAnyId = useMatch("/:id/*");
   const possibleId = params.id ?? matchAnyId?.params.id;
@@ -414,29 +481,39 @@ export default function ParentSidebar({
         ? "guru"
         : null;
 
-  // ====== Active Masjid/Role via hook & cached simple-context
-  const active = useActiveMasjidInfo(); // {loading, id, name, icon, roles}
+  // Active context
+  const active = useActiveMasjidInfo();
+  useEffect(() => {
+    DBG.log("useActiveMasjidInfo()", active);
+  }, [active]);
+
+  // Simple-context
   const { data: ctxData } = useQuery<SimpleContext, Error>({
-    // pakai cache yang sama agar dapat user name/email tanpa extra call kalau sudah ada
-    queryKey: ["me", "simple-context", active.id],
+    queryKey: ["me", "simple-context"],
     queryFn: getSimpleContext,
-    enabled: Boolean(active.id),
-    staleTime: 5 * 60 * 1000,
+    staleTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
+    refetchOnMount: true,
+    retry: 1,
   });
 
   const userName = ctxData?.user_name || ctxData?.name || "User";
   const userEmail = ctxData?.email || "";
+  const avatarUrl =
+    ctxData?.user_avatar_url ||
+    ctxData?.avatar ||
+    ctxData?.profile_photo_url ||
+    undefined;
+
+  useEffect(() => {
+    DBG.log("Avatar chosen", avatarUrl);
+  }, [avatarUrl]);
+
   const storedRole =
     (typeof window !== "undefined"
       ? localStorage.getItem("active_role")
       : null) || undefined;
-
-  // Pastikan roles berupa string[]
-  // Pastikan roles berupa string[]
   const roles = (active.roles ?? []) as string[];
-
-  // ✅ pastikan tipe final = MasjidRole
   const derivedRole: MasjidRole =
     (storedRole as MasjidRole) ||
     (roles.includes("teacher")
@@ -452,45 +529,58 @@ export default function ParentSidebar({
   const [loggingOut, setLoggingOut] = useState(false);
   const [openSwitcher, setOpenSwitcher] = useState(false);
 
-  // Resolve kind priority: explicit prop > url > active role
+  // dropdown user
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userBtnRef = useRef<HTMLButtonElement | null>(null);
+
   useEffect(() => {
-    if (kind !== "auto") {
-      setResolvedKind(kind);
-      return;
-    }
-    if (urlKind) {
-      setResolvedKind(urlKind);
-      return;
-    }
-    // fallback to active role
-    if (derivedRole === "teacher") setResolvedKind("guru");
+    if (kind !== "auto") setResolvedKind(kind);
+    else if (urlKind) setResolvedKind(urlKind);
+    else if (derivedRole === "teacher") setResolvedKind("guru");
     else if (derivedRole === "student") setResolvedKind("murid");
     else setResolvedKind("sekolah");
   }, [kind, urlKind, derivedRole]);
 
-  // Set userProfile from cached context
   useEffect(() => {
-    setUserProfile({
+    const next: UserProfile = {
       name: userName,
       email: userEmail,
       role: derivedRole,
-      avatar: ctxData?.avatar || ctxData?.profile_photo_url,
-    });
-  }, [
-    userName,
-    userEmail,
-    derivedRole,
-    ctxData?.avatar,
-    ctxData?.profile_photo_url,
-  ]);
+      avatar: avatarUrl,
+    };
+    setUserProfile(next);
+    DBG.log("Set userProfile", next);
+  }, [userName, userEmail, derivedRole, avatarUrl]);
 
-  // ==== Base path uses active.id first, fallback to URL :id ====
+  // click-outside + Esc
+  useEffect(() => {
+    function onDocClick(e: MouseEvent) {
+      if (!userBtnRef.current) return;
+      const menu = document.getElementById("sidebar-user-menu");
+      const target = e.target as Node;
+      if (
+        !userBtnRef.current.contains(target) &&
+        !(menu && menu.contains(target))
+      ) {
+        setUserMenuOpen(false);
+      }
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setUserMenuOpen(false);
+    }
+    document.addEventListener("mousedown", onDocClick);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDocClick);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, []);
+
   const effectiveOrgId = active.id ?? safeOrgIdFromUrl;
   const base = useMemo(
     () => buildBase(effectiveOrgId, kindToRouteSegment[resolvedKind]),
     [effectiveOrgId, resolvedKind]
   );
-
   const navsWithTo = useMemo(
     () =>
       (NAVS[resolvedKind] ?? []).map((n: NavItem) => ({
@@ -500,7 +590,6 @@ export default function ParentSidebar({
     [resolvedKind, base]
   );
 
-  // ==== Actions ====
   const goLogout = useCallback(async () => {
     try {
       setLoggingOut(true);
@@ -521,38 +610,39 @@ export default function ParentSidebar({
   }, [mode, onCloseMobile]);
 
   const handleSwitch = useCallback(
-    (
+    async (
       masjidId: string,
       role: MasjidRole,
       display: { name?: string; icon?: string | null }
     ) => {
-      // persist role untuk konsistensi
+      DBG.log("handleSwitch", { masjidId, role, display });
       try {
         localStorage.setItem("active_role", role);
       } catch {}
-      // set context (cookie/display)
-      setActiveMasjidContext(masjidId, role, {
+      await setActiveMasjidContext(masjidId, role, {
         name: display?.name,
         icon: display?.icon ?? undefined,
       });
       window.dispatchEvent(new Event("masjid:changed"));
 
-      // update UI instan
-      if (role === "teacher") setResolvedKind("guru");
-      else if (role === "student") setResolvedKind("murid");
-      else setResolvedKind("sekolah");
-
-      setOpenSwitcher(false);
-
-      // navigate ke segmen sesuai role
       const seg =
         role === "teacher" ? "guru" : role === "student" ? "murid" : "sekolah";
+      setOpenSwitcher(false);
+
+      await Promise.allSettled([
+        qc.invalidateQueries({ queryKey: ["me", "simple-context"] }),
+        qc.prefetchQuery({
+          queryKey: ["me", "simple-context"],
+          queryFn: getSimpleContext,
+        }),
+      ]);
+
       navigate(`/${masjidId}/${seg}`, { replace: true });
     },
-    [navigate]
+    [navigate, qc]
   );
 
-  // ==== UI: Rail item ====
+  // helper rail item
   const RailItem = ({
     to,
     Icon,
@@ -581,6 +671,13 @@ export default function ParentSidebar({
     </NavLink>
   );
 
+  // ===== aside class (fix layout) =====
+  const asideBase = desktopOnly
+    ? "hidden lg:flex"
+    : `fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 ${
+        open ? "translate-x-0" : "-translate-x-full"
+      } flex`; // penting: flex
+
   return (
     <>
       {/* backdrop mobile */}
@@ -594,11 +691,7 @@ export default function ParentSidebar({
       )}
 
       <aside
-        className={`${
-          desktopOnly
-            ? "hidden lg:flex"
-            : `fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 ${open ? "translate-x-0" : "-translate-x-full"}`
-        } flex-col ${className}`}
+        className={`${asideBase} relative flex-col shrink-0 ${className}`}
         style={{
           width: desktopOnly ? (open ? "16rem" : "3.5rem") : "16rem",
           background: palette.white1,
@@ -608,8 +701,8 @@ export default function ParentSidebar({
       >
         {/* ====== COLLAPSED RAIL ====== */}
         {desktopOnly && !open && (
-          <div className="flex h-full w-14 flex-col items-center justify-between py-3">
-            <div className="space-y-2">
+          <div className="flex h-full w-14 flex-col py-3 overflow-hidden">
+            <div className="space-y-2 overflow-y-auto">
               {navsWithTo.map(({ to, icon: Icon, label, end }) => (
                 <RailItem
                   key={to}
@@ -621,26 +714,54 @@ export default function ParentSidebar({
               ))}
             </div>
 
-            <button
-              onClick={goLogout}
-              className="w-10 h-10 rounded-xl grid place-items-center mx-auto"
-              style={{
-                background: palette.white1,
-                boxShadow: `inset 0 0 0 1px ${palette.silver1}`,
-                color: "#DC2626",
-                opacity: loggingOut ? 0.7 : 1,
-              }}
-              title="Logout"
-              aria-label="Logout"
-            >
-              <LogOut size={18} />
-            </button>
+            {/* Avatar rail (selalu di paling bawah) */}
+            <div className="mt-auto relative">
+              <button
+                ref={userBtnRef}
+                onClick={() => setUserMenuOpen((v) => !v)}
+                aria-haspopup="menu"
+                aria-expanded={userMenuOpen}
+                className="w-10 h-10 rounded-xl grid place-items-center mx-auto"
+                style={{
+                  background: palette.white1,
+                  boxShadow: `inset 0 0 0 1px ${palette.silver1}`,
+                }}
+                title="User menu"
+                aria-label="User menu"
+              >
+                {userProfile?.avatar ? (
+                  <img
+                    src={userProfile.avatar}
+                    alt={userProfile.name}
+                    className="h-10 w-10 rounded-xl object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <span className="text-xs font-semibold">
+                    {getInitials(userProfile?.name)}
+                  </span>
+                )}
+              </button>
+
+              {userMenuOpen && (
+                <UserOptionsMenu
+                  palette={palette}
+                  loggingOut={loggingOut}
+                  onLogout={() => setLogoutOpen(true)} // <-- buka modal
+                  onSwitchContext={() => {
+                    setUserMenuOpen(false);
+                    setOpenSwitcher(true);
+                  }}
+                  className="absolute left-16 bottom-0 w-56"
+                />
+              )}
+            </div>
           </div>
         )}
 
         {/* ====== EXPANDED ====== */}
         {(!desktopOnly || open) && (
-          <>
+          <div className="flex h-full flex-col">
             {/* Mobile header */}
             {!desktopOnly && (
               <div
@@ -733,17 +854,22 @@ export default function ParentSidebar({
               </SectionCard>
             </div>
 
-            {/* Footer: user & logout */}
+            {/* Footer: user (selalu paling bawah, non-scroll) */}
             <div
-              className="p-3"
+              className="p-3 relative mt-auto"
               style={{
                 borderTop: `1px solid ${palette.silver1}`,
                 background: palette.white2,
               }}
             >
               {userProfile && (
-                <div
-                  className="mb-3 p-3 rounded-2xl flex items-center gap-3"
+                <button
+                  ref={userBtnRef}
+                  type="button"
+                  onClick={() => setUserMenuOpen((v) => !v)}
+                  aria-haspopup="menu"
+                  aria-expanded={userMenuOpen}
+                  className="w-full p-3 rounded-2xl flex items-center gap-3 text-left"
                   style={{
                     background: palette.white1,
                     boxShadow: `inset 0 0 0 1px ${palette.silver1}`,
@@ -759,10 +885,7 @@ export default function ParentSidebar({
                         src={userProfile.avatar}
                         alt={userProfile.name}
                         className="h-full w-full object-cover"
-                        onError={(e) => {
-                          (e.currentTarget as HTMLImageElement).style.display =
-                            "none";
-                        }}
+                        referrerPolicy="no-referrer"
                       />
                     ) : (
                       getInitials(userProfile.name)
@@ -779,36 +902,40 @@ export default function ParentSidebar({
                       {translateRole(userProfile.role)}
                     </p>
                   </div>
-                </div>
+                  <ChevronDown className="w-4 h-4" />
+                </button>
               )}
 
-              <button
-                onClick={goLogout}
-                disabled={loggingOut}
-                className="w-full flex items-center justify-center gap-2 rounded-2xl py-2.5 font-medium transition-all"
-                style={{
-                  background: palette.white1,
-                  boxShadow: `inset 0 0 0 1px ${palette.silver1}`,
-                  color: "#DC2626",
-                  opacity: loggingOut ? 0.7 : 1,
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.background = palette.white2)
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.background = palette.white1)
-                }
-                aria-label="Logout"
-              >
-                <LogOut size={18} />
-                <span>Logout</span>
-              </button>
+              {userMenuOpen && (
+                <UserOptionsMenu
+                  palette={palette}
+                  loggingOut={loggingOut}
+                  onLogout={() => setLogoutOpen(true)} // <-- buka modal
+                  onSwitchContext={() => {
+                    setUserMenuOpen(false);
+                    setOpenSwitcher(true);
+                  }}
+                  className="absolute bottom-16 left-3 right-3"
+                />
+              )}
             </div>
-          </>
+          </div>
         )}
       </aside>
 
-      {/* Switcher Modal (otomatis pilih mode) */}
+      <DeleteConfirmModal
+        open={logoutOpen}
+        onClose={() => setLogoutOpen(false)}
+        onConfirm={goLogout} // <-- benar-benar logout di sini
+        palette={palette}
+        title="Konfirmasi Logout"
+        message="Keluar dari sesi ini? Kamu bisa login lagi kapan saja."
+        confirmLabel="Logout"
+        cancelLabel="Batal"
+        loading={loggingOut}
+      />
+
+      {/* Switcher Modal */}
       <ModalSwitchContext
         open={openSwitcher}
         onClose={() => setOpenSwitcher(false)}
