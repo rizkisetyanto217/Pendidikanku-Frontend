@@ -13,7 +13,6 @@ import {
   Btn,
   type Palette,
 } from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
 
 import {
   ArrowLeft,

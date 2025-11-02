@@ -2,29 +2,26 @@ import { Route } from "react-router-dom";
 import DashboardLayout from "@/layout/CDashboardLayout";
 import StudentDashboard from "@/pages/pendidikanku-dashboard/dashboard-student/StudentMainDashboard";
 import StudentProgressDetail from "@/pages/pendidikanku-dashboard/dashboard-student/progress/StudentProgress";
-import StudentAllSchedule from "@/pages/pendidikanku-dashboard/dashboard-student/dashboard/StudentAllSchedule";
+import StudentAllSchedule from "@/pages/pendidikanku-dashboard/dashboard-student/academic/book/StudentAllSchedule";
 import StudentProfil from "@/pages/pendidikanku-dashboard/dashboard-student/profil/StudentProfil";
 import StudentAssignmentClass from "@/pages/pendidikanku-dashboard/dashboard-student/assignment/StudentAssignmentClass";
-import StudentDetailSchedule from "@/pages/pendidikanku-dashboard/dashboard-student/dashboard/StudentDetailSchedule";
-import StudentAnnouncements from "@/pages/pendidikanku-dashboard/dashboard-student/dashboard/StudentAnnouncements";
-import StudentDetailAnnouncements from "@/pages/pendidikanku-dashboard/dashboard-student/dashboard/StudentDetailAnnouncement";
-import StudentInvoiceTagihan from "@/pages/pendidikanku-dashboard/dashboard-student/dashboard/StudentInvoice";
+import StudentDetailSchedule from "@/pages/pendidikanku-dashboard/dashboard-student/academic/schedule/StudentDetailSchedule";
+import StudentAnnouncements from "@/pages/pendidikanku-dashboard/dashboard-student/announcement/StudentAnnouncement";
+
+
 import StudentRaport from "@/pages/pendidikanku-dashboard/dashboard-student/progress/raport/StudentRaport";
-import StudentDetail from "@/pages/pendidikanku-dashboard/dashboard-student/dashboard/StudentDetail";
+
 import StudentFInance from "@/pages/pendidikanku-dashboard/dashboard-student/finance/StudentFinance";
 import StudentSchedule from "@/pages/pendidikanku-dashboard/dashboard-student/schedule/StudentSchedule";
-import StudentListFinance from "@/pages/pendidikanku-dashboard/dashboard-student/dashboard/StudentListFinance";
-import StudentAnnouncement from "@/pages/pendidikanku-dashboard/dashboard-student/announcement/StudentAnnouncement";
-import StudentDetailAnnouncement from "@/pages/pendidikanku-dashboard/dashboard-student/announcement/StudentDetailAnnouncement";
+import StudentListFinance from "@/pages/pendidikanku-dashboard/dashboard-student/finance/StudentListFinance";
+
 import StudentAbsence from "@/pages/pendidikanku-dashboard/dashboard-student/progress/absence/StudentAbsence";
 import StudentNotesSummary from "@/pages/pendidikanku-dashboard/dashboard-student/progress/notes-summary/StudentNotesSummary";
 import StudentMenuGrids from "@/pages/pendidikanku-dashboard/dashboard-student/menu/StudentMenuGrids";
 import StudentMyClass from "@/pages/pendidikanku-dashboard/dashboard-student/class/StudentMyClass";
-import StudentMateri from "@/pages/pendidikanku-dashboard/dashboard-student/class/StudentMaterial";
-import StudentAssignment from "@/pages/pendidikanku-dashboard/dashboard-student/class/StudentAssignment";
+import StudentMaterial from "@/pages/pendidikanku-dashboard/dashboard-student/class/StudentMaterial";
 import StudentQuizPage from "@/pages/pendidikanku-dashboard/dashboard-student/class/StudentQuizPage";
 import StudentAttandenceClass from "@/pages/pendidikanku-dashboard/dashboard-student/class/StudentAttandenceClass";
-import StudentExam from "@/pages/pendidikanku-dashboard/dashboard-student/class/StudentExam";
 import StudentCertificate from "@/pages/pendidikanku-dashboard/dashboard-student/certificate/StudentCertificate";
 
 // ======================
@@ -56,7 +53,7 @@ export const StudentRoutes = (
         JADWAL & DETAILNYA
     ===================== */}
     {/* Halaman semua jadwal */}
-    <Route path="semua-jadwal" element={<StudentAllSchedule />} />
+    <Route path="jadwal" element={<StudentAllSchedule />} />
     {/* Detail jadwal tertentu berdasarkan ID */}
     <Route path="semua-jadwal/:id" element={<StudentDetailSchedule />} />
     {/* Jadwal utama (khusus tampilan kelas saya / tab jadwal) */}
@@ -68,7 +65,6 @@ export const StudentRoutes = (
     {/* Profil murid */}
     <Route path="profil-murid" element={<StudentProfil />} />
     {/* Detail umum murid */}
-    <Route path="detail" element={<StudentDetail />} />
 
     {/* =====================
         TUGAS / ASSIGNMENT
@@ -84,9 +80,7 @@ export const StudentRoutes = (
     {/* Daftar seluruh tagihan */}
     <Route path="keuangan-list" element={<StudentListFinance />} />
     {/* Detail tagihan berdasarkan ID */}
-    <Route path="keuangan-list/:id" element={<StudentInvoiceTagihan />} />
-    {/* Tagihan langsung dari route lain */}
-    <Route path="tagihan/:id" element={<StudentInvoiceTagihan />} />
+
 
     {/* =====================
         MENU UTAMA KELAS SAYA
@@ -105,14 +99,13 @@ export const StudentRoutes = (
       <Route path="jadwal" element={<StudentSchedule />} />
 
       {/* Detail per kelas (dengan dynamic :id) */}
-      <Route path="kelas-saya/:id/materi" element={<StudentMateri />} />
-      <Route path="kelas-saya/:id/tugas" element={<StudentAssignment />} />
+      <Route path="kelas-saya/:id/materi" element={<StudentMaterial />} />
+      <Route path="kelas-saya/:id/tugas" element={<StudentAssignmentClass />} />
       <Route path="kelas-saya/:id/quiz" element={<StudentQuizPage />} />
       <Route
         path="kelas-saya/:id/kehadiran"
         element={<StudentAttandenceClass />}
       />
-      <Route path="kelas-saya/:id/ujian" element={<StudentExam />} />
 
       {/* Profil murid dari menu utama */}
       <Route path="profil-murid" element={<StudentProfil />} />

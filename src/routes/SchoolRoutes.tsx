@@ -4,7 +4,7 @@ import DashboardLayout from "@/layout/CDashboardLayout";
 // Pages
 import SchoolDashboard from "@/pages/pendidikanku-dashboard/dashboard-school/SchoolMainDashboard";
 import SchoolStudent from "@/pages/pendidikanku-dashboard/dashboard-school/coming-soon/student-(pending)/SchoolStudent";
-import SchoolAllSchedule from "@/pages/pendidikanku-dashboard/dashboard-school/dashboard/SchoolAllSchedule";
+import SchoolAllSchedule from "@/pages/pendidikanku-dashboard/dashboard-school/academic/schedule/SchoolAllSchedule";
 import SchoolProfile from "@/pages/pendidikanku-dashboard/dashboard-school/profile/SchoolProfile";
 import SchoolFinance from "@/pages/pendidikanku-dashboard/dashboard-school/finance/SchoolFinance";
 import SchoolDetailBill from "@/pages/pendidikanku-dashboard/dashboard-school/finance/SchoolDetailBill";
@@ -13,15 +13,11 @@ import SchoolDetailTeacher from "@/pages/pendidikanku-dashboard/dashboard-school
 import SchoolAcademic from "@/pages/pendidikanku-dashboard/dashboard-school/academic/SchoolAcademic";
 import DetailAcademic from "@/pages/pendidikanku-dashboard/dashboard-school/academic/components/SchoolDetailAcademic";
 import SchoolManagementAcademic from "@/pages/pendidikanku-dashboard/dashboard-school/academic/SchoolManagementAcademic";
-import SchoolDetailSchedule from "@/pages/pendidikanku-dashboard/dashboard-school/dashboard/SchoolDetailSchedule";
-import SchoolAllInvoices from "@/pages/pendidikanku-dashboard/dashboard-school/dashboard/SchoolAllInvoices";
-import SchoolBill from "@/pages/pendidikanku-dashboard/dashboard-school/finance/SchoolBill";
-import SchoolTryoutTahfizhExam from "@/pages/pendidikanku-dashboard/dashboard-school/dashboard/SchoolTryoutTahfizhExam";
-import SchoolAllAnnouncement from "@/pages/pendidikanku-dashboard/dashboard-school/dashboard/SchoolAllAnnouncement";
+import SchoolDetailSchedule from "@/pages/pendidikanku-dashboard/dashboard-school/academic/schedule/SchoolDetailSchedule";
+import SchoolAllAnnouncement from "@/pages/pendidikanku-dashboard/dashboard-school/coming-soon/announcement-(pending)/SchoolAllAnnouncement";
 import SchoolClasses from "@/pages/pendidikanku-dashboard/dashboard-school/class/SchoolClass";
 import SchoolManageClass from "@/pages/pendidikanku-dashboard/dashboard-school/class/detail/SchoolDetailClass";
-import SchoolQuizPage from "@/pages/pendidikanku-dashboard/dashboard-school/class/components/CSchoolQuizPage";
-import SchoolQuizDetailPage from "@/pages/pendidikanku-dashboard/dashboard-school/class/components/CSchoolQuizDetailPage";
+
 import SchoolAttendance from "@/pages/pendidikanku-dashboard/dashboard-school/coming-soon/attendance-(pending)/SchoolAttendance";
 import SchoolAnnouncement from "@/pages/pendidikanku-dashboard/dashboard-school/coming-soon/announcement-(pending)/SchoolAnnouncement";
 import SchoolBooks from "@/pages/pendidikanku-dashboard/dashboard-school/books/SchoolBooks";
@@ -52,7 +48,10 @@ export const SchoolRoutes = (
     {/*^ Belum diimplementasikan  */}
     <Route path="jadwal" element={<SchoolAllSchedule />} />
     {/*^ Belum diimplementasikan  */}
-    <Route path="jadwal/detail/:scheduleId" element={<SchoolDetailSchedule />} />
+    <Route
+      path="jadwal/detail/:scheduleId"
+      element={<SchoolDetailSchedule />}
+    />
 
     {/* === Profil Sekolah === */}
     <Route path="profil-sekolah" element={<SchoolProfile />} />
@@ -61,7 +60,7 @@ export const SchoolRoutes = (
     <Route path="keuangan" element={<SchoolFinance />} />
 
     {/* Halaman belum bisa */}
-    <Route path="keuangan/detail/:id" element={<SchoolDetailTeacher />} />
+    <Route path="keuangan/detail/:id" element={<SchoolDetailBill />} />
 
     {/* === Guru === */}
     <Route path="guru">
@@ -76,20 +75,11 @@ export const SchoolRoutes = (
       <Route path="kelola" element={<SchoolManagementAcademic />} />
     </Route>
 
-    {/* === Tagihan & Invoice === */}
-    <Route path="tagihan">
-      <Route index element={<SchoolAllInvoices />} />
-      <Route path=":id" element={<SchoolBill />} />
-    </Route>
-
     {/* === Lainnya === */}
-    <Route path="tryout-tahfizh-exam" element={<SchoolTryoutTahfizhExam />} />
     <Route path="all-announcement" element={<SchoolAllAnnouncement />} />
     <Route path="kelas">
       <Route index element={<SchoolClasses />} />
       <Route path="detail/:id" element={<SchoolManageClass />} />
-      <Route path="quiz/:id" element={<SchoolQuizPage />} />
-      <Route path="quiz/:id/do" element={<SchoolQuizDetailPage />} />
     </Route>
 
     {/* === Kehadiran === */}

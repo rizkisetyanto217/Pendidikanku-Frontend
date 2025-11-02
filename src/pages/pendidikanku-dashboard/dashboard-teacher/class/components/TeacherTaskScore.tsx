@@ -18,8 +18,6 @@ import {
   Btn,
   type Palette,
 } from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
-import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/CParentSideBar";
 
 type AssignmentState = {
   id?: string;
@@ -298,17 +296,10 @@ export default function CTeacherTaskScore() {
       className="w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <ParentTopBar
-        palette={palette}
-        title="Penilaian Tugas"
-        gregorianDate={new Date().toISOString()}
-      />
+
 
       <main className="mx-auto max-w-7xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-6">
-          <aside className="lg:w-64 mb-6 lg:mb-0">
-            <ParentSidebar />
-          </aside>
 
           <div className="flex-1 space-y-6">
             {/* Header */}

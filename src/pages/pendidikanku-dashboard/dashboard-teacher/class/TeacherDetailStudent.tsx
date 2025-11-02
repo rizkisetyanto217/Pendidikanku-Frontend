@@ -6,8 +6,7 @@ import {
   Badge,
   type Palette,
 } from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
-import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/CParentSideBar";
+
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import { ArrowLeft, GraduationCap, Clock, Activity } from "lucide-react";
@@ -62,18 +61,11 @@ const CTeacherDetailStudent: React.FC = () => {
       className="w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <ParentTopBar
-        palette={palette}
-        title="Detail Siswa"
-        gregorianDate={new Date().toISOString()}
-      />
+
 
       <main className="mx-auto Replace px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-6">
-          {/* Sidebar */}
-          <aside className="lg:w-64 mb-6 lg:mb-0">
-            <ParentSidebar />
-          </aside>
+
 
           {/* Content */}
           <div className="flex-1 space-y-6">

@@ -29,13 +29,13 @@ import {
   fetchAssignmentsByClass,
   type Assignment,
   type AssignmentStatus,
-} from "../types/assignments";
-import ModalEditAssignmentClass from "./CTeacherModalEditAssignmentClass";
-import { EditAssignmentPayload } from "./CTeacherModalEditAssignment";
+} from "../class/types/assignments";
+import ModalEditAssignmentClass from "../class/components/CTeacherModalEditAssignmentClass";
+import { EditAssignmentPayload } from "../class/components/CTeacherModalEditAssignment";
 import Swal from "sweetalert2";
 import ModalAddAssignmentClass, {
   AddAssignmentClassPayload,
-} from "./CTeacherModalAddAssignmentClass";
+} from "./components/CTeacherModalAddAssignmentClass";
 
 /* ========= Dummy teacher classes ========= */
 type AttendanceStatus = "hadir" | "sakit" | "izin" | "alpa" | "online";

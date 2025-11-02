@@ -3,8 +3,7 @@ import React, { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import { pickTheme } from "@/constants/thema";
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
-import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/CParentSideBar";
+
 import {
   SectionCard,
   Badge,

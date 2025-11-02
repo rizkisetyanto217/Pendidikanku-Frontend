@@ -35,7 +35,6 @@ const atLocalNoon = (d: Date) => {
 };
 const toLocalNoonISO = (d: Date) => atLocalNoon(d).toISOString();
 
-
 const dateShort = (iso?: string) =>
   iso
     ? new Date(iso).toLocaleDateString("id-ID", {
@@ -80,7 +79,7 @@ import {
   fetchStudentsByClasses,
   type ClassStudentsMap,
   type StudentSummary,
-} from "../types/teacherClass";
+} from "./types/teacherClass";
 
 /* ========= Dummy fetch kelas (tetap sama; ganti dengan API nyata jika ada) ========= */
 async function fetchTeacherClasses(): Promise<TeacherClassSummary[]> {

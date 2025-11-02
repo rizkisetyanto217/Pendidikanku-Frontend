@@ -8,8 +8,7 @@ import {
   type Palette,
   Badge,
 } from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
-import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/CParentSideBar";
+
 import {
   ArrowLeft,
   Users,
@@ -285,19 +284,11 @@ const CTeacherHomeroomTeacher: React.FC = () => {
       className="w-full transition-colors duration-200"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      {/* TopBar */}
-      <ParentTopBar
-        palette={palette}
-        title="Wali Kelas"
-        gregorianDate={currentDate}
-      />
+
 
       <main className="mx-auto max-w-7xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-8">
-          {/* Sidebar */}
-          <aside className="lg:w-64 mb-6 lg:mb-0 lg:sticky lg:top-20 shrink-0">
-            <ParentSidebar />
-          </aside>
+
 
           {/* Konten utama */}
           <section className="flex-1 space-y-8">

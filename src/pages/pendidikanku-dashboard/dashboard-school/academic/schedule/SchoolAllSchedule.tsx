@@ -15,11 +15,11 @@ import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParent
 import {
   mockTodaySchedule,
   type TodayScheduleItem,
-} from "../calender/TodaySchedule";
+} from "../../calender/TodaySchedule";
 
 // Edit (ubah item yang ada)
-import ModalEditSchedule from "./CSchoolModalEditSchedule";
-import AddSchedule from "@/pages/pendidikanku-dashboard/dashboard-teacher/dashboard/TeacherAddSchedule";
+import ModalEditSchedule from "./components/CSchoolModalEditSchedule";
+import AddSchedule from "@/pages/pendidikanku-dashboard/dashboard-teacher/schedule/TeacherAddSchedule";
 
 /** State yang dikirim dari komponen lain via <Link state={...}> */
 type LocationState = {

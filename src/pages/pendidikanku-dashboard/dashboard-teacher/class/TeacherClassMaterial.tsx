@@ -1,13 +1,11 @@
 // src/pages/sekolahislamku/teacher/ClassMateri.tsx
 import { useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import { pickTheme } from "@/constants/thema";
-// + NEW imports
 import Swal from "sweetalert2";
 import "sweetalert2/dist/sweetalert2.min.css";
-import { useQueryClient } from "@tanstack/react-query";
 
 import {
   SectionCard,
@@ -25,14 +23,11 @@ import {
   Plus,
   Search,
   Filter,
-  MapPin,
-  GraduationCap,
   ClipboardList,
   Timer,
   BarChart2,
   Pencil,
   Trash2,
-  Trash,
   Eye,
 } from "lucide-react";
 
@@ -100,7 +95,7 @@ type ClassMaterial = {
   author?: string;
 };
 
-/* ====== NEW: Quiz Types ====== */
+/* ====== Quiz Types ====== */
 type Quiz = {
   id: string;
   title: string;
@@ -119,24 +114,27 @@ type Quiz = {
 const QK = {
   CLASSES: ["teacher-classes-list"] as const,
   MATERIALS: (classId: string) => ["teacher-class-materials", classId] as const,
-  QUIZZES: (classId: string) => ["teacher-class-quizzes", classId] as const, // NEW
+  QUIZZES: (classId: string) => ["teacher-class-quizzes", classId] as const,
 };
 
-/* ====== Dummy fetch ====== */
+/* ====== Dummy fetch (ENRICHED) ====== */
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
 async function fetchTeacherClasses(): Promise<TeacherClassSummary[]> {
+  await sleep(600); // biar kelihatan loading
   const now = new Date();
   const mk = (d: Date, addDay = 0) => {
     const x = new Date(d);
     x.setDate(x.getDate() + addDay);
     return x.toISOString();
   };
-  return Promise.resolve([
+  return [
     {
       id: "tpa-a",
       name: "TPA A",
       room: "Aula 1",
       homeroom: "Ustadz Abdullah",
-      assistants: ["Ustadzah Amina"],
+      assistants: ["Ustadzah Amina", "Ust. Rasyid"],
       studentsCount: 22,
       todayAttendance: { hadir: 18, online: 1, sakit: 1, izin: 1, alpa: 1 },
       nextSession: {
@@ -169,14 +167,36 @@ async function fetchTeacherClasses(): Promise<TeacherClassSummary[]> {
       academicTerm: "2025/2026 — Ganjil",
       cohortYear: 2025,
     },
-  ]);
+    {
+      id: "tpa-c",
+      name: "TPA C",
+      room: "Kelas 3",
+      homeroom: "Ustadzah Zahra",
+      assistants: ["Ustadz Naufal"],
+      studentsCount: 24,
+      todayAttendance: { hadir: 19, online: 0, sakit: 2, izin: 2, alpa: 1 },
+      nextSession: {
+        dateISO: mk(now, 2),
+        time: "13:00",
+        title: "Akhlak — Adab Harian",
+        room: "Kelas 3",
+      },
+      materialsCount: 6,
+      assignmentsCount: 2,
+      academicTerm: "2025/2026 — Ganjil",
+      cohortYear: 2024,
+    },
+  ];
 }
 
 async function fetchMaterialsByClass(
   classId: string
 ): Promise<ClassMaterial[]> {
-  const now = new Date().toISOString();
-  const yesterday = new Date(Date.now() - 864e5).toISOString();
+  await sleep(500);
+  const now = new Date();
+  const iso = (d: Date) => d.toISOString();
+  const yesterday = new Date(Date.now() - 864e5);
+
   const base: Record<string, ClassMaterial[]> = {
     "tpa-a": [
       {
@@ -185,17 +205,20 @@ async function fetchMaterialsByClass(
         description:
           "Materi pokok tentang mad thabi'i: definisi, cara membaca, dan contoh.",
         type: "pdf",
-        createdAt: yesterday,
-        attachments: [{ name: "mad-thabii.pdf" }],
+        createdAt: iso(yesterday),
+        updatedAt: iso(new Date(yesterday.getTime() + 2 * 60 * 60 * 1000)),
+        attachments: [
+          { name: "mad-thabii.pdf", url: "https://example.com/mad-thabii.pdf" },
+        ],
         author: "Ustadz Abdullah",
       },
       {
         id: "m-002",
         title: "Video Makharijul Huruf (Ringkas)",
         type: "video",
-        createdAt: now,
+        createdAt: iso(now),
         attachments: [
-          { name: "YouTube Link", url: "https://youtu.be/dQw4w9WgXcQ" },
+          { name: "YouTube Link", url: "https://youtu.be/8ZjpI6fgYSY" },
         ],
         author: "Ustadzah Amina",
       },
@@ -204,8 +227,27 @@ async function fetchMaterialsByClass(
         title: "Latihan Tajwid: Idgham",
         description: "Kumpulan soal latihan idgham bighunnah & bilaghunnah.",
         type: "doc",
-        createdAt: now,
+        createdAt: iso(now),
         attachments: [{ name: "latihan-idgham.docx" }],
+        author: "Ustadz Abdullah",
+      },
+      {
+        id: "m-004",
+        title: "Tautan Interaktif: Game Tajwid",
+        description: "Permainan sederhana untuk mengenal hukum tajwid.",
+        type: "link",
+        createdAt: iso(new Date(now.getTime() - 2 * 3600 * 1000)),
+        attachments: [
+          { name: "Game Tajwid", url: "https://example.com/game-tajwid" },
+        ],
+        author: "Ust. Rasyid",
+      },
+      {
+        id: "m-005",
+        title: "Presentasi: Mad dan Qalqalah",
+        type: "ppt",
+        createdAt: iso(new Date(now.getTime() - 3 * 3600 * 1000)),
+        attachments: [{ name: "mad-qalqalah.pptx" }],
         author: "Ustadz Abdullah",
       },
     ],
@@ -213,21 +255,66 @@ async function fetchMaterialsByClass(
       {
         id: "m-101",
         title: "Hafalan Juz 30 — Target Minggu Ini",
+        description: "Fokus pada An-Naba' s/d An-Nazi'at.",
         type: "ppt",
-        createdAt: yesterday,
+        createdAt: iso(yesterday),
         attachments: [{ name: "target-pekan.pptx" }],
         author: "Ustadz Salman",
       },
+      {
+        id: "m-102",
+        title: "Panduan Muroja'ah Harian",
+        type: "pdf",
+        createdAt: iso(now),
+        attachments: [{ name: "panduan-murojaah.pdf" }],
+        author: "Ustadzah Maryam",
+      },
+      {
+        id: "m-103",
+        title: "Link Kumpulan Murattal",
+        type: "link",
+        createdAt: iso(new Date(now.getTime() - 5 * 3600 * 1000)),
+        attachments: [
+          { name: "Playlist", url: "https://example.com/murattal" },
+        ],
+        author: "Ustadz Salman",
+      },
+    ],
+    "tpa-c": [
+      {
+        id: "m-201",
+        title: "Adab Harian — Poster",
+        description: "Poster singkat adab berpakaian dan makan.",
+        type: "pdf",
+        createdAt: iso(now),
+        attachments: [{ name: "poster-adab.pdf" }],
+        author: "Ustadzah Zahra",
+      },
+      {
+        id: "m-202",
+        title: "Video Teladan Akhlak",
+        type: "video",
+        createdAt: iso(new Date(now.getTime() - 2 * 864e5)),
+        attachments: [
+          { name: "YouTube Link", url: "https://youtu.be/dQw4w9WgXcQ" },
+        ],
+        author: "Ustadz Naufal",
+      },
     ],
   };
-  return Promise.resolve(base[classId] ?? []);
+
+  // sort terbaru dulu
+  return (base[classId] ?? []).sort(
+    (a, b) => +new Date(b.createdAt) - +new Date(a.createdAt)
+  );
 }
 
-/* ====== NEW: Dummy fetch quizzes ====== */
 async function fetchQuizzesByClass(classId: string): Promise<Quiz[]> {
+  await sleep(650);
   const now = new Date();
-  const inDays = (n: number) =>
-    toLocalNoonISO(new Date(now.getTime() + n * 864e5));
+  const inDaysISO = (n: number) =>
+    atLocalNoon(new Date(now.getTime() + n * 864e5)).toISOString();
+
   const base: Record<string, Quiz[]> = {
     "tpa-a": [
       {
@@ -235,7 +322,7 @@ async function fetchQuizzesByClass(classId: string): Promise<Quiz[]> {
         title: "Kuis Tajwid Dasar",
         description: "Huruf mad, panjang bacaan, dan contoh.",
         createdAt: toLocalNoonISO(now),
-        dueAt: inDays(1),
+        dueAt: inDaysISO(1),
         durationMin: 15,
         totalQuestions: 10,
         attempts: 12,
@@ -248,13 +335,26 @@ async function fetchQuizzesByClass(classId: string): Promise<Quiz[]> {
         title: "Makharijul Huruf",
         description: "Tempat keluarnya huruf hijaiyah.",
         createdAt: toLocalNoonISO(now),
-        dueAt: inDays(3),
+        dueAt: inDaysISO(3),
         durationMin: 20,
         totalQuestions: 12,
         attempts: 0,
         avgScore: 0,
         published: false,
         author: "Ustadzah Amina",
+      },
+      {
+        id: "q-003",
+        title: "Hukum Nun Sukun & Tanwin",
+        description: "Idzhar, Idgham, Iqlab, Ikhfa'.",
+        createdAt: toLocalNoonISO(new Date(now.getTime() - 864e5)),
+        dueAt: inDaysISO(5),
+        durationMin: 18,
+        totalQuestions: 8,
+        attempts: 5,
+        avgScore: 81,
+        published: true,
+        author: "Ust. Rasyid",
       },
     ],
     "tpa-b": [
@@ -263,7 +363,7 @@ async function fetchQuizzesByClass(classId: string): Promise<Quiz[]> {
         title: "Hafalan Juz 30 (Mingguan)",
         description: "An-Naba' s/d An-Nazi'at.",
         createdAt: toLocalNoonISO(now),
-        dueAt: inDays(2),
+        dueAt: inDaysISO(2),
         durationMin: 25,
         totalQuestions: 15,
         attempts: 7,
@@ -271,9 +371,38 @@ async function fetchQuizzesByClass(classId: string): Promise<Quiz[]> {
         published: true,
         author: "Ustadz Salman",
       },
+      {
+        id: "q-102",
+        title: "Tajwid untuk Hafalan",
+        description: "Mad jaiz, wajib, dan lazim.",
+        createdAt: toLocalNoonISO(new Date(now.getTime() - 2 * 864e5)),
+        dueAt: inDaysISO(4),
+        durationMin: 20,
+        totalQuestions: 10,
+        attempts: 0,
+        avgScore: 0,
+        published: false,
+        author: "Ustadzah Maryam",
+      },
+    ],
+    "tpa-c": [
+      {
+        id: "q-201",
+        title: "Akhlak & Adab Dasar",
+        description: "Adab makan, berpakaian, dan salam.",
+        createdAt: toLocalNoonISO(now),
+        dueAt: inDaysISO(1),
+        durationMin: 12,
+        totalQuestions: 8,
+        attempts: 3,
+        avgScore: 90,
+        published: true,
+        author: "Ustadzah Zahra",
+      },
     ],
   };
-  return Promise.resolve(base[classId] ?? []);
+
+  return base[classId] ?? [];
 }
 
 /* ====== Komponen Utama ====== */
@@ -301,7 +430,7 @@ export default function CTeacherClassMaterial() {
     staleTime: 2 * 60_000,
   });
 
-  // NEW: quizzes
+  // quizzes
   const { data: quizzes = [], isFetching: isFetchingQuiz } = useQuery({
     queryKey: QK.QUIZZES(id),
     queryFn: () => fetchQuizzesByClass(id),
@@ -330,7 +459,7 @@ export default function CTeacherClassMaterial() {
   }, [materials, q, type]);
 
   const todayISO = toLocalNoonISO(new Date());
-  const { slug, id: classId } = useParams<{ slug: string; id: string }>();
+  const { slug } = useParams<{ slug: string }>();
 
   /* ====== Actions: Materials ====== */
   const handleDownload = (m: ClassMaterial) => {
@@ -358,7 +487,7 @@ export default function CTeacherClassMaterial() {
     a.remove();
   };
 
-  /* ====== NEW: Actions - Quizzes ====== */
+  /* ====== Actions - Quizzes ====== */
   const handleAddQuiz = async () => {
     const { value: payload, isConfirmed } = await Swal.fire({
       title: "Tambah Quiz",
@@ -505,14 +634,7 @@ export default function CTeacherClassMaterial() {
     if (!isConfirmed || !payload) return;
 
     qc.setQueryData<Quiz[]>(QK.QUIZZES(id), (old = []) =>
-      old.map((x) =>
-        x.id === qz.id
-          ? {
-              ...x,
-              ...payload,
-            }
-          : x
-      )
+      old.map((x) => (x.id === qz.id ? { ...x, ...payload } : x))
     );
 
     await Swal.fire({
@@ -596,7 +718,7 @@ export default function CTeacherClassMaterial() {
     });
   };
 
-  /* ====== Actions: Materials (delete/edit/add) dari contoh awal ====== */
+  /* ====== Actions: Materials (add/edit/delete) ====== */
   const [openModal, setOpenModal] = useState(false);
   const handleAddMateri = async (payload: any) => {
     try {
@@ -729,8 +851,7 @@ export default function CTeacherClassMaterial() {
     });
   };
 
-  // Lazy import modal supaya contoh tetap jalan tanpa definisi komponen
-  // (Jika kamu sudah punya ModalAddClassMateri & ModalEditClassMateri asli, hapus komentar di bawah)
+  // Dummy modal (biar file ini standalone). Jika kamu sudah punya komponen modal asli, ganti ini.
   const ModalAddClassMateri = (_: any) => null as any;
   const ModalEditClassMateri = (_: any) => null as any;
 
@@ -747,8 +868,8 @@ export default function CTeacherClassMaterial() {
         showBack
       />
 
-      {/* Jika kamu sudah punya komponen modals ini, hapus 2 deklarasi dummy di atas dan uncomment 2 komponen di bawah */}
-      {/* <ModalAddClassMateri
+      {/* Jika punya modal asli, gunakan ini:
+      <ModalAddClassMateri
         open={openModal}
         onClose={() => setOpenModal(false)}
         onSubmit={handleAddMateri}
@@ -1012,7 +1133,7 @@ export default function CTeacherClassMaterial() {
             </div>
 
             {/* ===================== */}
-            {/* NEW: SECTION QUIZ     */}
+            {/* SECTION: QUIZ         */}
             {/* ===================== */}
             <SectionCard palette={palette}>
               <div className="p-4 md:p-5 space-y-4">

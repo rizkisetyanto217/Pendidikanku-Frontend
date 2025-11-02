@@ -12,31 +12,31 @@ import TeacherAttendanceDetail from "@/pages/pendidikanku-dashboard/dashboard-te
 
 // Grading
 import TeacherGrading from "@/pages/pendidikanku-dashboard/dashboard-teacher/grade/TeacherGrade";
-import TeacherDetailGrading from "@/pages/pendidikanku-dashboard/dashboard-teacher/grade/components/CTeacherDetailGrading";
+import TeacherDetailGrading from "@/pages/pendidikanku-dashboard/dashboard-teacher/grade/CTeacherDetailGrading";
 
 // Class & Assignments
 import TeacherClass from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/TeacherClass";
-import TeacherDetailClass from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/components/CTeacherDetailClass";
-import TeacherClassAttandence from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/components/CTeacherClassAttandence";
-import TeacherDetailMateri from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/components/CTeacherDetailMaterial";
-import TeacherClassMateri from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/components/CTeacherClassMaterial";
-import TeacherAssignmentClass from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/components/CTeacherAssignmentClass";
-import TeacherDetailAssignmentClass from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/components/CTeacherDetailAssignmentClass";
-import TeacherStudentScore from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/components/CTeacherStudentScore";
-import TeacherDetailStudent from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/components/CTeacherDetailStudent";
-import TeacherTaskScore from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/components/CTeacherTaskScore";
-import TeacherAttendanceManagement from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/components/CTeacherAttendanceManagement";
-import TeacherHomeroom from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/components/CTeacherHomeroomTeacher";
-import TeacherManagementClass from "@/pages/pendidikanku-dashboard/dashboard-teacher/dashboard/TeacherManagementClass";
-import TeacherDetailClassQuiz from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/components/CTeacherDetailClassQuiz";
-import TeacherAllAssignment from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/components/CTeacherAllAssignment";
+import TeacherDetailClass from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/TeacherDetailClass";
+import TeacherClassAttandence from "@/pages/pendidikanku-dashboard/dashboard-teacher/attendance/TeacherClassAttandence";
+import TeacherDetailMateri from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/TeacherDetailMaterial";
+import TeacherClassMaterial from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/TeacherClassMaterial";
+import TeacherAssignmentClass from "@/pages/pendidikanku-dashboard/dashboard-teacher/asssigment/TeacherAssignmentClass";
+
+import TeacherStudentScore from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/components/TeacherStudentScore";
+import TeacherDetailStudent from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/TeacherDetailStudent";
+import TeacherTaskScore from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/components/TeacherTaskScore";
+
+import TeacherHomeroom from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/TeacherHomeroomTeacher";
+import TeacherManagementClass from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/TeacherManagementClass";
+import TeacherDetailClassQuiz from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/TeacherDetailClassQuiz";
+import TeacherAllAssignment from "@/pages/pendidikanku-dashboard/dashboard-teacher/asssigment/TeacherAllAssignment";
 
 // Schedule
 import TeacherSchedule from "@/pages/pendidikanku-dashboard/dashboard-teacher/schedule/TeacherSchedule";
 import TeacherScheduleThreeDays from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/components/CTeacherScheduleThreeDays";
-import TeacherDetailScheduleThreeDays from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/components/CTeacherDetailScheduleThreeDays";
+import TeacherDetailScheduleThreeDays from "@/pages/pendidikanku-dashboard/dashboard-teacher/schedule/TeacherDetailScheduleThreeDays";
 import TeacherScheduleSevenDays from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/components/CTeacherScheduleSevenDays";
-import TeacherDetailScheduleSevenDays from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/components/CTeacherDetailScheduleSevenDays";
+import TeacherDetailScheduleSevenDays from "@/pages/pendidikanku-dashboard/dashboard-teacher/schedule/TeacherDetailScheduleSevenDays";
 
 // Menu utama guru
 import TeacherMenuGrids from "@/pages/pendidikanku-dashboard/dashboard-teacher/menu/TeacherMenuGrids";
@@ -92,14 +92,17 @@ export const TeacherRoutes = (
       <Route index element={<TeacherClass />} />
       <Route path=":id" element={<TeacherDetailClass />} />
       <Route path=":id/absensi" element={<TeacherClassAttandence />} />
-      <Route path=":id/material/:materialId" element={<TeacherDetailMateri />} />
-      <Route path=":id/materi" element={<TeacherClassMateri />} />
-      <Route path=":id/tugas" element={<TeacherAssignmentClass />} />
       <Route
-        path=":id/assignment/:assignmentId"
-        element={<TeacherDetailAssignmentClass />}
+        path=":id/material/:materialId"
+        element={<TeacherDetailMateri />}
       />
-      <Route path=":id/student/:studentId/score" element={<TeacherStudentScore />} />
+      <Route path=":id/materi" element={<TeacherClassMaterial />} />
+      <Route path=":id/tugas" element={<TeacherAssignmentClass />} />
+
+      <Route
+        path=":id/student/:studentId/score"
+        element={<TeacherStudentScore />}
+      />
     </Route>
 
     {/* Tugas & Manajemen */}
@@ -108,7 +111,7 @@ export const TeacherRoutes = (
       <Route path="detail" element={<TeacherDetailStudent />} />
     </Route>
     <Route path="kelas/detail/score" element={<TeacherTaskScore />} />
-    <Route path="attendance-management" element={<TeacherAttendanceManagement />} />
+
     <Route path="kelas/homeroom" element={<TeacherHomeroom />} />
     <Route path="kelola-kelas/:name" element={<TeacherManagementClass />} />
     <Route path="quizClass/detail" element={<TeacherDetailClassQuiz />} />

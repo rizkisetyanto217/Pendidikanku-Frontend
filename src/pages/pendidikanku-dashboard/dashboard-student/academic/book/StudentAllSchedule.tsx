@@ -10,8 +10,7 @@ import {
   type Palette,
   Btn,
 } from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
-import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/CParentSideBar";
+
 
 // 🔗 ambil tipe & data helper
 import {
@@ -23,14 +22,6 @@ type LocationState = {
   items?: TodayScheduleItem[];
   title?: string;
 };
-
-const topbarDateFmt = (iso: string) =>
-  new Date(iso).toLocaleDateString("id-ID", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
 
 export default function StudentAllSchedule() {
   const { state } = useLocation() as { state?: LocationState };
@@ -47,17 +38,11 @@ export default function StudentAllSchedule() {
       className="w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <ParentTopBar
-        palette={palette}
-        title={state?.title ?? "Jadwal Hari Ini"}
-        gregorianDate={new Date().toISOString()}
-      />
+
 
       <main className="w-full px-4 md:px-6 py-4   md:py-8">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
-          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-            <ParentSidebar />
-          </aside>
+    
 
           <div className="flex-1 flex flex-col space-y-6 min-w-0">
             <div className="md:flex hidden items-center gap-3">

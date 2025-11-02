@@ -45,25 +45,6 @@ const toLocalNoonISO = (d: Date) => atLocalNoon(d).toISOString();
 const normalizeISOToLocalNoon = (iso?: string) =>
   iso ? toLocalNoonISO(new Date(iso)) : undefined;
 
-const dateLong = (iso?: string) =>
-  iso
-    ? new Date(iso).toLocaleDateString("id-ID", {
-        weekday: "long",
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      })
-    : "-";
-
-const hijriLong = (iso?: string) =>
-  iso
-    ? new Date(iso).toLocaleDateString("id-ID-u-ca-islamic-umalqura", {
-        weekday: "long",
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      })
-    : "-";
 
 const idr = (n?: number) =>
   n == null

@@ -26,7 +26,7 @@ import {
 } from "./class/types/teacher";
 import ParentTopBar from "../components/home/CParentTopBar";
 import ParentSidebar from "../components/home/CParentSideBar";
-import AddSchedule from "./dashboard/TeacherAddSchedule";
+import AddSchedule from "./schedule/TeacherAddSchedule";
 import { useNavigate, useParams } from "react-router-dom";
 
 /* ================= Date/Time Utils (timezone-safe) ================ */

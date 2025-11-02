@@ -17,8 +17,6 @@ import {
   type Palette,
 } from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
-import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/CParentSideBar";
 
 // TODO: ganti ke modal edit yang kamu pakai untuk guru
 // import ModalEditSchedule from "@/pages/.../ModalEditSchedule";
@@ -91,19 +89,7 @@ export default function CTeacherDetailScheduleSevenDays() {
       className="w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <ParentTopBar
-        palette={palette}
-        gregorianDate={new Date().toISOString()}
-        title="Detail Jadwal (7 Hari)"
-        dateFmt={(iso) =>
-          new Date(iso).toLocaleDateString("id-ID", {
-            weekday: "long",
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-          })
-        }
-      />
+
 
       {/* TODO: aktifkan kalau kamu sudah punya modal edit versi guru */}
       {/* <ModalEditSchedule
@@ -119,9 +105,6 @@ export default function CTeacherDetailScheduleSevenDays() {
 
       <main className="mx-auto Replace px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
-          <aside className="lg:w-64 mb-6 lg:mb-0 lg:sticky lg:top-16 shrink-0">
-            <ParentSidebar />
-          </aside>
 
           <div className="flex-1 min-w-0 space-y-4">
             <div className="flex items-center justify-between gap-2">

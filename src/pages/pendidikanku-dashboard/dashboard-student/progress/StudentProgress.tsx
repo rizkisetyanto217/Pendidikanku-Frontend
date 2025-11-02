@@ -24,8 +24,6 @@ import {
   type Palette,
 } from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 
-import ParentTopBar from "../../components/home/CParentTopBar";
-import ParentSidebar from "../../components/home/CParentSideBar";
 
 /* ===== Types ===== */
 type AttendanceStatus = "hadir" | "sakit" | "izin" | "alpa" | "online";

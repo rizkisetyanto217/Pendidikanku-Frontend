@@ -2,8 +2,7 @@ import React, { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import { pickTheme, ThemeName } from "@/constants/thema";
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
-import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/CParentSideBar";
+
 import {
   Btn,
   SectionCard,
@@ -145,19 +144,10 @@ const CTeacherDetailClassQuiz: React.FC = () => {
       className="w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <ParentTopBar
-        palette={palette}
-        title="Detail Quiz"
-        gregorianDate={headerDateISO}
-        showBack
-      />
 
       <main className="px-4 md:px-6 md:py-8">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
-          {/* Sidebar */}
-          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-            <ParentSidebar />
-          </aside>
+
 
           {/* Content */}
           <div className="flex-1 min-w-0 space-y-6">

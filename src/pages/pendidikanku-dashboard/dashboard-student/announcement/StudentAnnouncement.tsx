@@ -10,8 +10,7 @@ import {
   Btn,
   type Palette,
 } from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
-import ParentTopBar from "../../components/home/CParentTopBar";
-import ParentSidebar from "../../components/home/CParentSideBar";
+
 
 /* ========= Types ========= */
 type AnnType = "info" | "warning" | "success";
@@ -40,15 +39,6 @@ const atLocalNoon = (d: Date) => {
   return x;
 };
 const toLocalNoonISO = (d: Date) => atLocalNoon(d).toISOString();
-const hijriWithWeekday = (iso?: string) =>
-  iso
-    ? new Date(iso).toLocaleDateString("id-ID-u-ca-islamic-umalqura", {
-        weekday: "long",
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      })
-    : "-";
 
 /* ======== Fake API ======== */
 async function fetchAnnouncements({
@@ -132,19 +122,11 @@ export default function StudentAnnouncement() {
       className="w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      {/* Top Bar */}
-      <ParentTopBar
-        palette={palette}
-        gregorianDate={qISO}
-        title="Pengumuman"
-        hijriDate={hijriWithWeekday(qISO)} // ✅ Hijriah + nama hari
-      />
+
 
       {/* Content + Sidebar */}
       <main className="mx-auto Replace px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
-          {/* Sidebar kiri (sticky di desktop) */}
-          <ParentSidebar />
 
           {/* Konten utama */}
           <div className="flex-1 space-y-6">
