@@ -8,7 +8,6 @@ import StudentAssignmentClass from "@/pages/pendidikanku-dashboard/dashboard-stu
 import StudentDetailSchedule from "@/pages/pendidikanku-dashboard/dashboard-student/academic/schedule/StudentDetailSchedule";
 import StudentAnnouncements from "@/pages/pendidikanku-dashboard/dashboard-student/announcement/StudentAnnouncement";
 
-
 import StudentRaport from "@/pages/pendidikanku-dashboard/dashboard-student/progress/raport/StudentRaport";
 
 import StudentFInance from "@/pages/pendidikanku-dashboard/dashboard-student/finance/StudentFinance";
@@ -23,6 +22,7 @@ import StudentMaterial from "@/pages/pendidikanku-dashboard/dashboard-student/cl
 import StudentQuizPage from "@/pages/pendidikanku-dashboard/dashboard-student/class/StudentQuizPage";
 import StudentAttandenceClass from "@/pages/pendidikanku-dashboard/dashboard-student/class/StudentAttandenceClass";
 import StudentCertificate from "@/pages/pendidikanku-dashboard/dashboard-student/certificate/StudentCertificate";
+import StudentRoutesPlayground from "@/pages/pendidikanku-dashboard/dashboard-student/StudentRoutesPlayground";
 
 // ======================
 // Routing untuk halaman MURID (Student Dashboard)
@@ -81,7 +81,6 @@ export const StudentRoutes = (
     <Route path="keuangan-list" element={<StudentListFinance />} />
     {/* Detail tagihan berdasarkan ID */}
 
-
     {/* =====================
         MENU UTAMA KELAS SAYA
     ===================== */}
@@ -123,5 +122,6 @@ export const StudentRoutes = (
       <Route index element={<StudentAnnouncement />} />
       <Route path="detail/:id" element={<StudentDetailAnnouncement />} />
     </Route> */}
+    <Route path="dev/semua-link" element={<StudentRoutesPlayground />} />
   </Route>
 );

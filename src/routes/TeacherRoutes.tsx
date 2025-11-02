@@ -46,6 +46,7 @@ import TeacherSettings from "@/pages/pendidikanku-dashboard/dashboard-teacher/me
 import TeacherAssignment from "@/pages/pendidikanku-dashboard/dashboard-teacher/menu/assignments/TeacherAssignment";
 import TeacherCertificate from "@/pages/pendidikanku-dashboard/dashboard-teacher/menu/certificate/TeacherCertificate";
 import TeacherSubjectsList from "@/pages/pendidikanku-dashboard/dashboard-teacher/TeacherSubject/TeacherSubjects";
+import TeacherRoutesPlayground from "@/pages/pendidikanku-dashboard/dashboard-teacher/TeacherRoutesPlayground";
 
 export const TeacherRoutes = (
   <Route path="guru" element={<DashboardLayout />}>
@@ -137,5 +138,6 @@ export const TeacherRoutes = (
     <Route path="guru-mapel">
       <Route index element={<TeacherSubjectsList />} />
     </Route>
+    <Route path="dev/semua-link" element={<TeacherRoutesPlayground />} />
   </Route>
 );

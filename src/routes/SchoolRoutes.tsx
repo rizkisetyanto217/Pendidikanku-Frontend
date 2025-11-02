@@ -35,6 +35,7 @@ import CalenderAcademic from "@/pages/pendidikanku-dashboard/dashboard-school/ca
 import SchoolStatistik from "@/pages/pendidikanku-dashboard/dashboard-school/coming-soon/statistic-(pending)/SchoolStatistic";
 import SchoolSettings from "@/pages/pendidikanku-dashboard/dashboard-school/coming-soon/settings-(pending)/SchoolSettings";
 import SchoolActiveClass from "@/pages/pendidikanku-dashboard/dashboard-school/class/active-class/SchoolActiveClass";
+import SchoolRoutesPlayground from "@/pages/pendidikanku-dashboard/dashboard-school/SchoolRoutesPlayground";
 
 export const SchoolRoutes = (
   <Route path="sekolah" element={<DashboardLayout />}>
@@ -131,5 +132,6 @@ export const SchoolRoutes = (
         <Route path="kelola" element={<SchoolManagementAcademic />} />
       </Route>
     </Route>
+    <Route path="dev/semua-link" element={<SchoolRoutesPlayground />} />
   </Route>
 );
