@@ -1,5 +1,5 @@
 // src/lib/axios.ts
-import axiosLib, { AxiosError, AxiosInstance, AxiosRequestConfig } from "axios";
+import axiosLib, { AxiosError, AxiosInstance } from "axios";
 
 /* ==========================================
    🔧 BASE (pakai Vite proxy di DEV)
@@ -12,11 +12,41 @@ const api: AxiosInstance = axiosLib.create({
   timeout: 60_000,
 });
 
-const apiNoAuth = axiosLib.create({
+const apiNoAuth: AxiosInstance = axiosLib.create({
   baseURL: API_BASE,
   withCredentials: true,
   timeout: 60_000,
 });
+
+/* ==========================================
+   🛠️ URL helpers (robust untuk absolute/relative)
+========================================== */
+function pathOf(u: string): string {
+  if (!u) return "/";
+  try {
+    if (u.startsWith("http://") || u.startsWith("https://")) {
+      return new URL(u).pathname || "/";
+    }
+  } catch {}
+  return u;
+}
+function stripApiPrefix(p: string): string {
+  return p.startsWith("/api/") ? p.slice(4) : p;
+}
+function normalizePath(u: string): string {
+  return stripApiPrefix(pathOf(u));
+}
+function isAuthPath(p: string): boolean {
+  return p.startsWith("/auth/");
+}
+function isLoginPath(p: string): boolean {
+  return p === "/auth/login";
+}
+function isRefreshPath(p: string): boolean {
+  return p === "/auth/refresh-token";
+}
+const isFormData = (d: any) =>
+  typeof FormData !== "undefined" && d instanceof FormData;
 
 /* ==========================================
    🧰 COOKIE UTILS (non-HttpOnly, utk context)
@@ -43,8 +73,6 @@ function setCookie(
 function delCookie(name: string, path = "/") {
   document.cookie = `${name}=; Path=${path}; Max-Age=0; SameSite=Lax;`;
 }
-const isFormData = (d: any) =>
-  typeof FormData !== "undefined" && d instanceof FormData;
 
 /* ==========================================
    🏷️ school CONTEXT (cookie + display)
@@ -76,6 +104,39 @@ export function clearActiveschoolDisplay() {
   sessionStorage.removeItem(ACTIVE_school_ICON_SS);
 }
 
+export function getActiveschoolId(): string | null {
+  return getCookie(ACTIVE_school_COOKIE);
+}
+export function getActiveRole(): string | null {
+  return getCookie(ACTIVE_ROLE_COOKIE);
+}
+
+export function setActiveschoolContext(
+  schoolId: string,
+  role?: string,
+  opts?: { name?: string; icon?: string }
+) {
+  if (schoolId) setCookie(ACTIVE_school_COOKIE, schoolId);
+  if (role) setCookie(ACTIVE_ROLE_COOKIE, role);
+  if (opts?.name || opts?.icon) setActiveschoolDisplay(opts.name, opts.icon);
+
+  clearSimpleContextCache();
+  window.dispatchEvent(
+    new CustomEvent("school:changed", {
+      detail: { schoolId, role, meta: opts },
+    })
+  );
+}
+
+export function clearActiveschoolContext() {
+  delCookie(ACTIVE_school_COOKIE);
+  delCookie(ACTIVE_ROLE_COOKIE);
+  clearActiveschoolDisplay();
+
+  clearSimpleContextCache();
+  window.dispatchEvent(new CustomEvent("school:changed", { detail: null }));
+}
+
 /* ==========================================
    🔐 ACCESS TOKEN — IN MEMORY ONLY
 ========================================== */
@@ -104,14 +165,14 @@ let csrfTokenMem: string | null = null;
 export async function ensureCsrf(): Promise<string | null> {
   if (csrfTokenMem) return csrfTokenMem;
 
-  // 1) Coba baca dari cookie dulu (paling cepat)
+  // 1) coba dari cookie
   const fromCookie = getCookie("XSRF-TOKEN");
   if (fromCookie) {
     csrfTokenMem = fromCookie;
     return csrfTokenMem;
   }
 
-  // 2) Kalau belum ada, hit /auth/csrf
+  // 2) seed dari /auth/csrf
   try {
     const res = await apiNoAuth.get("/auth/csrf", { withCredentials: true });
     csrfTokenMem =
@@ -180,42 +241,6 @@ export async function fetchSimpleContext(
 }
 
 /* ==========================================
-   🏷️ Set/Clear Active Context + broadcast
-========================================== */
-export function setActiveschoolContext(
-  schoolId: string,
-  role?: string,
-  opts?: { name?: string; icon?: string }
-) {
-  if (schoolId) setCookie(ACTIVE_school_COOKIE, schoolId);
-  if (role) setCookie(ACTIVE_ROLE_COOKIE, role);
-  if (opts?.name || opts?.icon) setActiveschoolDisplay(opts.name, opts.icon);
-
-  clearSimpleContextCache();
-  window.dispatchEvent(
-    new CustomEvent("school:changed", {
-      detail: { schoolId, role, meta: opts },
-    })
-  );
-}
-
-export function clearActiveschoolContext() {
-  delCookie(ACTIVE_school_COOKIE);
-  delCookie(ACTIVE_ROLE_COOKIE);
-  clearActiveschoolDisplay();
-
-  clearSimpleContextCache();
-  window.dispatchEvent(new CustomEvent("school:changed", { detail: null }));
-}
-
-export function getActiveschoolId(): string | null {
-  return getCookie(ACTIVE_school_COOKIE);
-}
-export function getActiveRole(): string | null {
-  return getCookie(ACTIVE_ROLE_COOKIE);
-}
-
-/* ==========================================
    🔄 REFRESH via Cookie HttpOnly + XSRF
 ========================================== */
 let isRefreshing = false;
@@ -226,7 +251,6 @@ async function doRefresh(): Promise<string | null> {
   isRefreshing = true;
 
   refreshPromise = (async () => {
-    // Pastikan punya XSRF (ambil dari cookie kalau ada)
     const xsrf = (await ensureCsrf()) || "";
 
     const headers: Record<string, string> = {
@@ -249,7 +273,7 @@ async function doRefresh(): Promise<string | null> {
 
       return newAT;
     } catch (err: any) {
-      // Fallback 403 CSRF → seed ulang lalu retry sekali
+      // Fallback 403 → seed ulang lalu retry sekali
       if (err?.response?.status === 403) {
         await apiNoAuth.get("/auth/csrf", { withCredentials: true });
         const token = getCookie("XSRF-TOKEN");
@@ -297,14 +321,15 @@ async function doRefresh(): Promise<string | null> {
    🧩 REQUEST INTERCEPTOR
 ========================================== */
 api.interceptors.request.use(async (config) => {
-  const url = String(config.url || "");
+  const path = normalizePath(String(config.url || ""));
   const method = (config.method || "get").toUpperCase();
-  const isAuthArea = url.startsWith("/auth/");
-  const isLogin = url.endsWith("/auth/login");
-  const isRefresh = url.endsWith("/auth/refresh-token");
 
-  // 1) Authorization
-  if (!isLogin && !isRefresh) {
+  const inAuth = isAuthPath(path);
+  const onLogin = isLoginPath(path);
+  const onRefresh = isRefreshPath(path);
+
+  // 1) Authorization (kecuali login/refresh)
+  if (!onLogin && !onRefresh) {
     const at = getAccessToken();
     if (at) {
       config.headers = config.headers ?? {};
@@ -312,51 +337,53 @@ api.interceptors.request.use(async (config) => {
     }
   }
 
-  // 2) CSRF untuk non-auth & method mutating
-  const needsCsrf = !isAuthArea && !["GET", "HEAD", "OPTIONS"].includes(method);
+  // 2) CSRF utk non-auth & mutating
+  const needsCsrf = !inAuth && !["GET", "HEAD", "OPTIONS"].includes(method);
   if (needsCsrf && !csrfTokenMem) {
     await ensureCsrf();
   }
-  if (!isAuthArea && csrfTokenMem) {
+  if (!inAuth && csrfTokenMem) {
     config.headers = config.headers ?? {};
     (config.headers as any)["X-CSRF-Token"] = csrfTokenMem;
   }
 
-  // 3) Scope tenant (opsional)
-  if (!isAuthArea) {
-    const mid = getActiveschoolId();
-    if (mid) {
+  // 3) Scope tenant (opsional, non-auth saja)
+  if (!inAuth) {
+    const sid = getActiveschoolId();
+    if (sid) {
       config.headers = config.headers ?? {};
-      (config.headers as any)["X-school-ID"] = mid;
+      (config.headers as any)["X-school-ID"] = sid; // sesuaikan dgn backend
     }
   }
 
-  // 4) Content-Type default (kecuali FormData)
-  if (
-    !isFormData((config as any).data) &&
-    !(config.headers && "Content-Type" in (config.headers as any))
-  ) {
-    config.headers = config.headers ?? {};
-    (config.headers as any)["Content-Type"] = "application/json";
+  // 4) Content-Type default (skip FormData)
+  if (!isFormData((config as any).data)) {
+    const headers = (config.headers = config.headers ?? {});
+    if (!("Content-Type" in (headers as any))) {
+      (headers as any)["Content-Type"] = "application/json";
+    }
   }
 
   return config;
 });
 
 /* ==========================================
-   🔁 RESPONSE INTERCEPTOR: auto CSRF seed + auto refresh (retry 1x)
+   🔁 RESPONSE INTERCEPTOR
+   - auto CSRF seed + retry
+   - auto refresh + retry
+   - tidak berlaku untuk /auth/*
 ========================================== */
 api.interceptors.response.use(
   (res) => res,
   async (error: AxiosError) => {
     const res = error.response;
     const cfg: any = error.config || {};
-    const url = String(cfg.url || "");
-    const isAuthArea = url.startsWith("/auth/");
+    const path = normalizePath(String(cfg.url || ""));
+    const inAuth = isAuthPath(path);
     const alreadyRetried = cfg._retried === true;
 
-    // 403 → kemungkinan CSRF kedaluwarsa → seed ulang dan retry sekali
-    if (res?.status === 403 && !alreadyRetried && !isAuthArea) {
+    // 403 → kemungkinan CSRF kedaluwarsa → seed ulang dan retry sekali (non-auth)
+    if (res?.status === 403 && !alreadyRetried && !inAuth) {
       cfg._retried = true;
       try {
         await apiNoAuth.get("/auth/csrf", { withCredentials: true });
@@ -370,8 +397,8 @@ api.interceptors.response.use(
       }
     }
 
-    // 401 → coba refresh AT sekali lalu retry
-    if (res?.status === 401 && !alreadyRetried && !isAuthArea) {
+    // 401 → coba refresh AT sekali lalu retry (non-auth)
+    if (res?.status === 401 && !alreadyRetried && !inAuth) {
       cfg._retried = true;
       const t = await doRefresh();
       if (t) {

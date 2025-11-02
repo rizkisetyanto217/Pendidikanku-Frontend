@@ -4,7 +4,7 @@ import { Menu, X, Sun, Moon } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
-import school from "@/assets/Gambar-school.jpeg";
+import school from "@/assets/Pendidikanku.jpeg";
 
 /* ================= NAV ITEMS ================= */
 const navItems = [
