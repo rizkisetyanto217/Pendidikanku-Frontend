@@ -29,7 +29,7 @@ export type StudentDetailState = {
   className?: string;
 };
 
-const DetailStudent: React.FC = () => {
+const CTeacherDetailStudent: React.FC = () => {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
@@ -215,4 +215,4 @@ const DetailStudent: React.FC = () => {
   );
 };
 
-export default DetailStudent;
+export default CTeacherDetailStudent;

@@ -39,7 +39,7 @@ const fmtLong = (iso?: string) =>
 
 const timeOk = (t: string) => /^\d{2}:\d{2}$/.test(t);
 
-const ModalEditSchedule: React.FC<ModalEditScheduleProps> = ({
+const CSchoolModalEditSchedule: React.FC<ModalEditScheduleProps> = ({
   open,
   onClose,
   palette,
@@ -231,4 +231,4 @@ const ModalEditSchedule: React.FC<ModalEditScheduleProps> = ({
   );
 };
 
-export default ModalEditSchedule;
+export default CSchoolModalEditSchedule;

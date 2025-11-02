@@ -34,7 +34,7 @@ const fmtDateLong = (iso?: string) =>
       })
     : "-";
 
-export default function DetailAssignment() {
+export default function CTeacherDetailAssignment() {
   const { id: assignmentId } = useParams<{ id: string }>();
   const { state } = useLocation();
   const navigate = useNavigate();

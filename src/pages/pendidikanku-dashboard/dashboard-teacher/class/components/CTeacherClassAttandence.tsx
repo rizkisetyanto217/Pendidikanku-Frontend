@@ -149,7 +149,7 @@ function StudentRow({
 }
 
 /* ========== Page ========== */
-export default function ClassAttandence() {
+export default function CTeacherClassAttandence() {
   const { id: classId } = useParams<{ id: string }>();
   const navigate = useNavigate();
 

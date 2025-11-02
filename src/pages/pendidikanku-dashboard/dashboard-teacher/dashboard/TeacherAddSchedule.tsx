@@ -21,7 +21,7 @@ const generateSlug = (text: string) =>
     .replace(/\s+/g, "-")
     .replace(/[^\w-]+/g, "");
 
-export default function AddSchedule({
+export default function TeacherAddSchedule({
   open,
   onClose,
   onSubmit,

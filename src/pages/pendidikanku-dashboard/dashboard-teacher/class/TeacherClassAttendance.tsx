@@ -161,46 +161,6 @@ function saveDoc(doc: AttendanceDoc) {
 /* ========================================
    UI bits (kecil & reusable)
 ======================================== */
-function StatusBadge({ s, palette }: { s: AttendanceCore; palette: Palette }) {
-  const map: Record<
-    AttendanceCore,
-    {
-      v: "success" | "info" | "warning" | "secondary" | "destructive";
-      label: string;
-      icon?: React.ReactNode;
-    }
-  > = {
-    hadir: {
-      v: "success",
-      label: "Hadir",
-      icon: <CheckCircle2 size={12} className="mr-1" />,
-    },
-    sakit: {
-      v: "warning",
-      label: "Sakit",
-      icon: <Thermometer size={12} className="mr-1" />,
-    },
-    izin: {
-      v: "secondary",
-      label: "Izin",
-      icon: <FileCheck2 size={12} className="mr-1" />,
-    },
-    alpa: {
-      v: "destructive",
-      label: "Alpa",
-      icon: <XCircle size={12} className="mr-1" />,
-    },
-  };
-  const m = map[s];
-  return (
-    <Badge palette={palette} variant={m.v}>
-      <span className="inline-flex items-center">
-        {m.icon}
-        {m.label}
-      </span>
-    </Badge>
-  );
-}
 
 function StatusSelector({
   value,
@@ -519,7 +479,7 @@ function StudentDetailEditor({
 /* ========================================
    Main Page
 ======================================== */
-export default function TeacherAttendancePage({
+export default function TeacherClassAttendance({
   classId: initialClassId = "tpa-a",
 }: {
   classId?: string;

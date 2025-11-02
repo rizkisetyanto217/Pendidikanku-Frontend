@@ -45,7 +45,7 @@ type ValidationError = {
   message: string;
 };
 
-export default function TaskScore() {
+export default function CTeacherTaskScore() {
   const { id: assignmentId } = useParams<{ id: string }>();
   const { state } = useLocation();
   const navigate = useNavigate();

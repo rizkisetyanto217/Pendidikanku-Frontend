@@ -12,7 +12,7 @@ interface Props {
   paymentOptions: { value: string; label: string }[];
 }
 
-const SchoolReceiptExport: React.FC<Props> = ({
+const CSchoolReceiptExport: React.FC<Props> = ({
   open,
   onClose,
   onSubmit,
@@ -87,4 +87,4 @@ const SchoolReceiptExport: React.FC<Props> = ({
   );
 };
 
-export default SchoolReceiptExport;
+export default CSchoolReceiptExport;

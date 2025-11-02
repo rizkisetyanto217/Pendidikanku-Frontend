@@ -94,7 +94,7 @@ function Field({
 }
 
 /* ============== Modal ============== */
-export default function ModalEditAssignmentClass({
+export default function CTeacherModalEditAssignmentClass({
   open,
   onClose,
   palette,

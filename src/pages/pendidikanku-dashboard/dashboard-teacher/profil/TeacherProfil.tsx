@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import api from "@/lib/axios";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
-import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/CParentSideBar";
+
 import {
   SectionCard,
   Btn,
@@ -31,25 +30,6 @@ const toLocalNoonISO = (d: Date) => atLocalNoon(d).toISOString();
 const normalizeISOToLocalNoon = (iso?: string) =>
   iso ? toLocalNoonISO(new Date(iso)) : undefined;
 
-const fmtLong = (iso?: string) =>
-  iso
-    ? new Date(iso).toLocaleDateString("id-ID", {
-        weekday: "long",
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      })
-    : "";
-
-const hijriLong = (iso?: string) =>
-  iso
-    ? new Date(iso).toLocaleDateString("id-ID-u-ca-islamic-umalqura", {
-        weekday: "long",
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      })
-    : "";
 
 /* ==========================================
    MAIN COMPONENT

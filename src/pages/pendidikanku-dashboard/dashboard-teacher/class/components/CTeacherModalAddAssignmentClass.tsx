@@ -20,7 +20,7 @@ type Props = {
   onSubmit: (payload: AddAssignmentClassPayload) => void;
 };
 
-export default function ModalAddAssignmentClass({
+export default function CTeacherModalAddAssignmentClass({
   open,
   onClose,
   palette,

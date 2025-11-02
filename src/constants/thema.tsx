@@ -1,5 +1,13 @@
 // src/constants/colorsThema.ts
-export type ThemeName = "default" | "sunrise" | "midnight";
+export type ThemeName =
+  | "default"
+  | "sunrise"
+  | "midnight"
+  | "emerald"
+  | "ocean"
+  | "forest"
+  | "rose"
+  | "sand";
 
 export type Palette = {
   primary: string;
@@ -157,10 +165,235 @@ const midnightDark: Palette = {
   specialColor: "#7AA2F7",
 };
 
+// ===== EMERALD (fresh green) =====
+const emeraldLight: Palette = {
+  primary: "#059669",
+  primary2: "#05966933",
+  secondary: "#34D399",
+  tertiary: "#6EE7B7",
+  quaternary: "#10B981",
+  success1: "#16A34A",
+  success2: "#D1FAE5",
+  white1: "#FFFFFF",
+  white2: "#F8FFFB",
+  white3: "#ECFDF5",
+  black1: "#1F2937",
+  black2: "#374151",
+  error1: "#DC2626",
+  error2: "#FFE4E6",
+  warning1: "#F59E0B",
+  silver1: "#E5E7EB",
+  silver2: "#9CA3AF",
+  silver4: "#6B7280",
+  specialColor: "#A7F3D0",
+};
+const emeraldDark: Palette = {
+  primary: "#34D399",
+  primary2: "#34D39933",
+  secondary: "#10B981",
+  tertiary: "#059669",
+  quaternary: "#22C55E",
+  success1: "#22C55E",
+  success2: "#0B2E22",
+  white1: "#0C1110",
+  white2: "#111816",
+  white3: "#14201B",
+  black1: "#E6F4EE",
+  black2: "#CFEADF",
+  error1: "#F87171",
+  error2: "#2B1718",
+  warning1: "#D97706",
+  silver1: "#20352E",
+  silver2: "#93B1A4",
+  silver4: "#A7C7BA",
+  specialColor: "#7EEAD3",
+};
+
+// ===== OCEAN (aqua/teal-blue) =====
+const oceanLight: Palette = {
+  primary: "#0EA5E9",
+  primary2: "#0EA5E933",
+  secondary: "#06B6D4",
+  tertiary: "#22D3EE",
+  quaternary: "#14B8A6",
+  success1: "#22C55E",
+  success2: "#DFFAF5",
+  white1: "#F8FEFF",
+  white2: "#EFF9FF",
+  white3: "#E6F6FE",
+  black1: "#1F2A33",
+  black2: "#2B3945",
+  error1: "#DC2626",
+  error2: "#FFE8E8",
+  warning1: "#F59E0B",
+  silver1: "#D4E7F0",
+  silver2: "#7FA6B8",
+  silver4: "#557587",
+  specialColor: "#7DD3FC",
+};
+const oceanDark: Palette = {
+  primary: "#06B6D4",
+  primary2: "#06B6D433",
+  secondary: "#0EA5E9",
+  tertiary: "#0891B2",
+  quaternary: "#0D9488",
+  success1: "#22C55E",
+  success2: "#0A2728",
+  white1: "#081018",
+  white2: "#0D1620",
+  white3: "#112131",
+  black1: "#DCEBFA",
+  black2: "#BFD9F0",
+  error1: "#F87171",
+  error2: "#1E262F",
+  warning1: "#D97706",
+  silver1: "#203041",
+  silver2: "#7FA6B8",
+  silver4: "#9AB8C8",
+  specialColor: "#67E8F9",
+};
+
+// ===== FOREST (deep earthy green) =====
+const forestLight: Palette = {
+  primary: "#166534",
+  primary2: "#16653433",
+  secondary: "#4D7C0F",
+  tertiary: "#84CC16",
+  quaternary: "#22C55E",
+  success1: "#16A34A",
+  success2: "#E8F7EA",
+  white1: "#FFFFFF",
+  white2: "#F7FBF7",
+  white3: "#EDF6ED",
+  black1: "#1F2A24",
+  black2: "#2C3A31",
+  error1: "#B91C1C",
+  error2: "#FCE2E2",
+  warning1: "#D97706",
+  silver1: "#DDE6DD",
+  silver2: "#8FA190",
+  silver4: "#607061",
+  specialColor: "#B7E4C7",
+};
+const forestDark: Palette = {
+  primary: "#22C55E",
+  primary2: "#22C55E33",
+  secondary: "#84CC16",
+  tertiary: "#166534",
+  quaternary: "#4D7C0F",
+  success1: "#16A34A",
+  success2: "#0D2415",
+  white1: "#0B130D",
+  white2: "#111B12",
+  white3: "#152116",
+  black1: "#E6F2EA",
+  black2: "#CBE4D1",
+  error1: "#F87171",
+  error2: "#2E1717",
+  warning1: "#CA8A04",
+  silver1: "#243226",
+  silver2: "#8FB39A",
+  silver4: "#A7C7B0",
+  specialColor: "#94D3AC",
+};
+
+// ===== ROSE (pinkish accent) =====
+const roseLight: Palette = {
+  primary: "#E11D48",
+  primary2: "#E11D4833",
+  secondary: "#F43F5E",
+  tertiary: "#FB7185",
+  quaternary: "#F472B6",
+  success1: "#16A34A",
+  success2: "#EAF7EF",
+  white1: "#FFF7FA",
+  white2: "#FFEFF4",
+  white3: "#FFE4ED",
+  black1: "#2A1F25",
+  black2: "#3A2A32",
+  error1: "#DC2626",
+  error2: "#FECACA",
+  warning1: "#F59E0B",
+  silver1: "#F1DFE5",
+  silver2: "#A68A94",
+  silver4: "#7B616B",
+  specialColor: "#FDA4AF",
+};
+const roseDark: Palette = {
+  primary: "#FB7185",
+  primary2: "#FB718533",
+  secondary: "#F43F5E",
+  tertiary: "#E11D48",
+  quaternary: "#F472B6",
+  success1: "#22C55E",
+  success2: "#2A0F16",
+  white1: "#160D10",
+  white2: "#1E1217",
+  white3: "#271820",
+  black1: "#F7E6EC",
+  black2: "#EBCAD4",
+  error1: "#F87171",
+  error2: "#3A1414",
+  warning1: "#D97706",
+  silver1: "#3A2830",
+  silver2: "#C7A6B2",
+  silver4: "#E0C4CF",
+  specialColor: "#FBCFE8",
+};
+
+// ===== SAND (warm neutral) =====
+const sandLight: Palette = {
+  primary: "#A16207",
+  primary2: "#A1620733",
+  secondary: "#D97706",
+  tertiary: "#F59E0B",
+  quaternary: "#EAB308",
+  success1: "#16A34A",
+  success2: "#F0FBEF",
+  white1: "#FFFBF3",
+  white2: "#FEF7E8",
+  white3: "#F5EDDA",
+  black1: "#2F2616",
+  black2: "#463A21",
+  error1: "#B91C1C",
+  error2: "#FADAD6",
+  warning1: "#D97706",
+  silver1: "#E8E0D3",
+  silver2: "#9B8E7B",
+  silver4: "#6F6558",
+  specialColor: "#FFE3A3",
+};
+const sandDark: Palette = {
+  primary: "#D4A017",
+  primary2: "#D4A01733",
+  secondary: "#EAB308",
+  tertiary: "#A16207",
+  quaternary: "#D97706",
+  success1: "#22C55E",
+  success2: "#1C170C",
+  white1: "#161208",
+  white2: "#1E190E",
+  white3: "#27200F",
+  black1: "#F5EDDA",
+  black2: "#E7D8B7",
+  error1: "#F87171",
+  error2: "#3A2B1D",
+  warning1: "#F59E0B",
+  silver1: "#3B3428",
+  silver2: "#B9A98E",
+  silver4: "#D4C6AA",
+  specialColor: "#FFE3A3",
+};
+
 export const colors: Record<ThemeName, ThemeVariant> = {
   default: { light: defaultLight, dark: defaultDark },
   sunrise: { light: sunriseLight, dark: sunriseDark },
   midnight: { light: midnightLight, dark: midnightDark },
+  emerald: { light: emeraldLight, dark: emeraldDark },
+  ocean: { light: oceanLight, dark: oceanDark },
+  forest: { light: forestLight, dark: forestDark },
+  rose: { light: roseLight, dark: roseDark },
+  sand: { light: sandLight, dark: sandDark },
 };
 
 // helper optional

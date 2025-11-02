@@ -7,7 +7,7 @@ import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 
 // modal
-import SchoolReceiptExport from "./modal/CSchoolReceiptExport";
+import SchoolReceiptExport from "./components/CSchoolReceiptExport";
 
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";

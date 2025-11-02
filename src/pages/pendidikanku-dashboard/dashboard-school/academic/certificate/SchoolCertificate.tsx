@@ -91,18 +91,6 @@ const genCertNo = (cls: ClassCard, idx: number) => {
 
 const PASS = 75; // ambang kelulusan default
 
-/* ================= ENDPOINTS (pastikan sesuai backend) =================
-- GET  /api/a/certificate/classes?month=YYYY-MM
-- GET  /api/a/certificate/classes/:classId/finals
-- POST /api/a/certificates/publish       { class_id, student_id }
-- POST /api/a/certificates/revoke        { class_id, student_id }
-- POST /api/a/certificates/publish-bulk  { class_id, student_ids: [] }
-- POST /api/a/certificates/revoke-bulk   { class_id, student_ids: [] }
-- GET  /api/a/certificates/:classId/:studentId/pdf
-- GET  /api/a/certificates/:classId/:studentId/print
-- GET  /api/a/certificates/class/:classId/pdf
-======================================================================= */
-
 /** Icon-only button helper */
 function IconBtn({
   title,

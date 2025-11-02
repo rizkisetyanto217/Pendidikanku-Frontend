@@ -16,7 +16,7 @@ type AttendanceStatus = "hadir" | "sakit" | "izin" | "alpa" | "online";
 type StudentRow = { id: string; name: string; status: AttendanceStatus };
 type LocationState = { className?: string; students?: StudentRow[] };
 
-export default function AttendanceManagement() {
+export default function CTeacherAttendanceManagement() {
   const navigate = useNavigate();
   const { state } = useLocation() as { state?: LocationState };
   const { isDark, themeName } = useHtmlDarkMode();

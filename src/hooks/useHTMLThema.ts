@@ -1,11 +1,24 @@
 // src/hooks/useHtmlThema.ts
 import { useSyncExternalStore } from "react";
+import type { ThemeName } from "@/constants/thema";
 
 export type ThemeMode = "light" | "dark" | "system";
-export type ThemeName = "default" | "sunrise" | "midnight";
 
+// kunci penyimpanan
 const MODE_KEY = "theme"; // light/dark/system
 const THEME_KEY = "theme-name"; // nama tema tambahan
+
+// daftar tema valid (sinkron dengan constants/colorsThema.ts)
+const THEME_NAMES: ThemeName[] = [
+  "default",
+  "sunrise",
+  "midnight",
+  "emerald",
+  "ocean",
+  "forest",
+  "rose",
+  "sand",
+];
 
 const isBrowser =
   typeof window !== "undefined" && typeof document !== "undefined";
@@ -18,6 +31,16 @@ const safeGet = (k: string) => {
     return null;
   }
 };
+
+function normalizeThemeName(raw: string | null): ThemeName {
+  const v = (raw || "").trim() as ThemeName;
+  return (THEME_NAMES as readonly string[]).includes(v) ? v : "default";
+}
+
+function normalizeMode(raw: string | null): ThemeMode {
+  const v = (raw || "").trim();
+  return v === "light" || v === "dark" || v === "system" ? v : "system";
+}
 
 function computeIsDark(mode: ThemeMode): boolean {
   if (!isBrowser) return false;
@@ -36,11 +59,14 @@ type State = {
 type Listener = () => void;
 
 const store = (() => {
-  // state global
+  // state global (init dari localStorage)
+  const initMode = normalizeMode(safeGet(MODE_KEY));
+  const initTheme = normalizeThemeName(safeGet(THEME_KEY));
+
   let state: State = {
-    mode: (safeGet(MODE_KEY) as ThemeMode) || "system",
-    themeName: (safeGet(THEME_KEY) as ThemeName) || "default",
-    isDark: computeIsDark((safeGet(MODE_KEY) as ThemeMode) || "system"),
+    mode: initMode,
+    themeName: initTheme,
+    isDark: computeIsDark(initMode),
   };
 
   const listeners = new Set<Listener>();
@@ -59,7 +85,7 @@ const store = (() => {
   // panggil sekali saat init
   applySideEffects(state);
 
-  // kalau mode system, dengarkan perubahan OS
+  // listener untuk mode=system
   let mq: MediaQueryList | null = null;
   function ensureSystemListener(active: boolean) {
     if (!isBrowser) return;
@@ -83,14 +109,20 @@ const store = (() => {
   ensureSystemListener(state.mode === "system");
 
   function setMode(mode: ThemeMode) {
-    const next: State = { ...state, mode, isDark: computeIsDark(mode) };
+    const nextMode = normalizeMode(mode);
+    const next: State = {
+      ...state,
+      mode: nextMode,
+      isDark: computeIsDark(nextMode),
+    };
     state = next;
-    ensureSystemListener(mode === "system");
+    ensureSystemListener(nextMode === "system");
     applySideEffects(state);
     emit();
   }
   function setThemeName(themeName: ThemeName) {
-    state = { ...state, themeName };
+    const nextTheme = normalizeThemeName(themeName);
+    state = { ...state, themeName: nextTheme };
     applySideEffects(state);
     emit();
   }
@@ -129,5 +161,7 @@ export default function useHtmlThema() {
     setThemeName: store.setThemeName,
     mode: snap.mode,
     setMode: store.setMode,
+    // bonus: expose daftar tema kalau mau render dropdown
+    themeNames: THEME_NAMES as readonly ThemeName[],
   };
 }

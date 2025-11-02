@@ -35,15 +35,6 @@ const atLocalNoon = (d: Date) => {
 };
 const toLocalNoonISO = (d: Date) => atLocalNoon(d).toISOString();
 
-const dateLong = (iso?: string) =>
-  iso
-    ? new Date(iso).toLocaleDateString("id-ID", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    : "-";
 
 const dateShort = (iso?: string) =>
   iso
@@ -169,7 +160,7 @@ const QK = {
 };
 
 /* =================== Page =================== */
-export default function DetailClass() {
+export default function CTeacherDetailClass() {
   const { id = "" } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation() as {

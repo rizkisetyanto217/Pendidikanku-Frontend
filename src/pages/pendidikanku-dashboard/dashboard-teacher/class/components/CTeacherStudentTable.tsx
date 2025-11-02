@@ -49,7 +49,7 @@ type Props = {
   showLastScore?: boolean;
 };
 
-export default function StudentsTable({
+export default function CTeacherStudentTable({
   palette,
   rows,
   emptyText = "Tidak ada data siswa.",

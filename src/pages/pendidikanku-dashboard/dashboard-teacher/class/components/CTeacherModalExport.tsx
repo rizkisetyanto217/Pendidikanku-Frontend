@@ -14,7 +14,7 @@ interface ModalExportProps {
   palette: Palette;
 }
 
-const ModalExport: React.FC<ModalExportProps> = ({
+const CTeacherModalExport: React.FC<ModalExportProps> = ({
   open,
   onClose,
   onSubmit,
@@ -87,4 +87,4 @@ const ModalExport: React.FC<ModalExportProps> = ({
   );
 };
 
-export default ModalExport;
+export default CTeacherModalExport;

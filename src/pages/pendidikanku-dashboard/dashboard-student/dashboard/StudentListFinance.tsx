@@ -85,7 +85,7 @@ const dateLong = (iso?: string) =>
     : "-";
 
 /* ================= Page ================= */
-export default function ListFinance() {
+export default function StudentListFinance() {
   const { state } = useLocation() as { state?: LocationState };
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);

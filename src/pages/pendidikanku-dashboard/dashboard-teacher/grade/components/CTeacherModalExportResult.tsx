@@ -14,7 +14,7 @@ type Props = {
   onExport: (form: FormData) => void;
 };
 
-export default function ModalExportResult({
+export default function CTeacherModalExportResult({
   open,
   onClose,
   palette,

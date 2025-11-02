@@ -133,7 +133,7 @@ const dateShort = (iso?: string) =>
     : "-";
 
 /* ========= Page ========= */
-export default function AssignmentClass() {
+export default function CTeacherAssignmentClass() {
   const { id = "" } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { isDark, themeName } = useHtmlDarkMode();

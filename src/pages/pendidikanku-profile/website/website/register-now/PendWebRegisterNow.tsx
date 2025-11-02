@@ -13,7 +13,7 @@ import {
 import WebsiteNavbar from "@/components/common/public/CWebsiteNavbar";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
-import WebsiteFooter from "../components/CschoolkuWebFooter";
+import WebsiteFooter from "../components/CPendWebFooter";
 
 /* Helpers layout */
 const FullBleed: React.FC<React.PropsWithChildren<{ className?: string }>> = ({

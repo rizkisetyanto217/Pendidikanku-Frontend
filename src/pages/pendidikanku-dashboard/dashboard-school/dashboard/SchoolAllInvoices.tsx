@@ -223,7 +223,7 @@ const Total = ({ data, palette }: { data: Tagihan[]; palette: Palette }) => {
 };
 
 /* ===== Page ===== */
-export default function AllInvoices() {
+export default function SchoolAllInvoices() {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const { state } = useLocation() as { state: LocationState };

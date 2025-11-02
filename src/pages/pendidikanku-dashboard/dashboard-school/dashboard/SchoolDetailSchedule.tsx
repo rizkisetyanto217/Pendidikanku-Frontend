@@ -10,9 +10,8 @@ import {
   Badge,
   type Palette,
 } from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
-import ModalEditSchedule from "@/pages/pendidikanku-dashboard/dashboard-school/dashboard/SchoolModalEditSchedule";
-import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/CParentSideBar";
+
+import ModalEditSchedule from "@/pages/pendidikanku-dashboard/dashboard-school/dashboard/CSchoolModalEditSchedule";
 
 export type TodayScheduleItem = {
   title: string;
@@ -28,7 +27,7 @@ const decodeId = (id: string) => {
   }
 };
 
-export default function DetailSchedule() {
+export default function SchoolDetailSchedule() {
   const { scheduleId = "" } = useParams<{ scheduleId: string }>();
   const navigate = useNavigate();
   const { state } = useLocation();

@@ -148,7 +148,7 @@ const normalizeItem = (c: any, fallback: Date): ScheduleItem => {
 };
 
 /* ================= Component ================= */
-export default function ScheduleThreeDays() {
+export default function CTeacherScheduleThreeDays() {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();

@@ -84,7 +84,7 @@ const computeStatus = (a: {
 /* =========================
    Page
 ========================= */
-export default function AllAssignment() {
+export default function CTeacherAllAssignment() {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();

@@ -27,15 +27,7 @@ import {
 } from "lucide-react";
 
 /* ================= Helpers ================= */
-const topbarDateFmt = (iso?: string) =>
-  iso
-    ? new Date(iso).toLocaleDateString("id-ID", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    : "";
+
 
 const toLocalNoonISO = (d: Date) => {
   const x = new Date(d);

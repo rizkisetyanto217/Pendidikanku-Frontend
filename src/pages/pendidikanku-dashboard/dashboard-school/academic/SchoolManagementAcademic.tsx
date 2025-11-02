@@ -265,7 +265,7 @@ const RoomModal: React.FC<RoomModalProps> = ({
 };
 
 /* ==================== PAGE ==================== */
-export default function ManagementAcademic() {
+export default function SchoolManagementAcademic() {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();

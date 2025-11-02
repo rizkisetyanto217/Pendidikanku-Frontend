@@ -31,7 +31,7 @@ const idDate = (d: Date) =>
     year: "numeric",
   });
 
-export default function ScheduleEditorModal({
+export default function CTeacherScheduleEditorModal({
   open,
   onClose,
   palette,

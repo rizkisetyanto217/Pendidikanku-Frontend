@@ -97,7 +97,7 @@ const fmtDate = (iso: string) =>
     day: "numeric",
   });
 
-const DetailAnnouncementTeacher: React.FC = () => {
+const TeacherDetailAnnouncement: React.FC = () => {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const location = useLocation() as {
@@ -248,4 +248,4 @@ const DetailAnnouncementTeacher: React.FC = () => {
   );
 };
 
-export default DetailAnnouncementTeacher;
+export default TeacherDetailAnnouncement;

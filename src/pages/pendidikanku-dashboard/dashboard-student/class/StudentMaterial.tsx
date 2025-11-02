@@ -85,7 +85,7 @@ const MATERIALS_BY_CLASS: Record<string, Material[]> = {
   ],
 };
 
-const StudentMateri: React.FC = () => {
+const StudentMaterial: React.FC = () => {
   const { slug, id } = useParams<{ slug: string; id: string }>();
   const navigate = useNavigate();
   const { isDark, themeName } = useHtmlDarkMode();
@@ -305,4 +305,4 @@ const StudentMateri: React.FC = () => {
   );
 };
 
-export default StudentMateri;
+export default StudentMaterial;

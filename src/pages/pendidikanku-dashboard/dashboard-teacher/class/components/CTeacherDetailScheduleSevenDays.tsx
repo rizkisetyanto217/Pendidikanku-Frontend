@@ -48,7 +48,7 @@ const fmtDateLong = (iso?: string) =>
       })
     : "-";
 
-export default function DetailScheduleSevenDays() {
+export default function CTeacherDetailScheduleSevenDays() {
   const { scheduleId = "" } = useParams<{ scheduleId: string }>();
   const navigate = useNavigate();
   const { state } = useLocation();

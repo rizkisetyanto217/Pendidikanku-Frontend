@@ -25,7 +25,7 @@ type Props = {
   onSuccess: (id?: string) => void;
 };
 
-export default function BookModal({
+export default function CSchoolBookModal({
   open,
   mode,
   palette,

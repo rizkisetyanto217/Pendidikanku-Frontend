@@ -31,7 +31,7 @@ interface PaymentModalProps {
   defaultDate?: string;
 }
 
-const Payment: React.FC<PaymentModalProps> = ({
+const CSchoolPayment: React.FC<PaymentModalProps> = ({
   open,
   onClose,
   onSubmit,
@@ -289,4 +289,4 @@ const Payment: React.FC<PaymentModalProps> = ({
     : node;
 };
 
-export default Payment;
+export default CSchoolPayment;

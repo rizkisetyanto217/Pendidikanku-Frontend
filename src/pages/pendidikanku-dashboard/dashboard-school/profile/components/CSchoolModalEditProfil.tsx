@@ -193,7 +193,7 @@ function FieldSelect({
 }
 
 /* ===================== Modal ===================== */
-export default function ModalEditProfilSchool({
+export default function CSchoolModalEditProfil({
   open,
   onClose,
   palette,

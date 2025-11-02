@@ -1,3 +1,4 @@
+// src/pages/pendidikanku-dashboard/components/home/CParentSideBar.tsx
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { NavLink, useMatch, useParams, useNavigate } from "react-router-dom";
 import {
@@ -15,6 +16,7 @@ import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import { pickTheme, ThemeName, type Palette } from "@/constants/thema";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useActiveschoolInfo } from "@/hooks/useActiveSchoolInfo";
+import CAccountMenu from "@/pages/pendidikanku-dashboard/components/common/CAccountMenu"; // ⬅️ NEW
 
 /* ================= helpers & types ================= */
 type Kind = "sekolah" | "murid" | "guru";
@@ -41,7 +43,6 @@ type Membership = {
   school_icon_url?: string | null;
   roles: schoolRole[];
 };
-
 type SimpleContext = {
   memberships: Membership[];
   user_id?: string;
@@ -55,23 +56,18 @@ type SimpleContext = {
 
 /* ============== DEBUG ============== */
 const DEBUG = true;
-const DBG = {
-  log: (...a: any[]) => DEBUG && console.log("[Sidebar]", ...a),
-};
+const DBG = { log: (...a: any[]) => DEBUG && console.log("[Sidebar]", ...a) };
 
 /* ---- API normalize ---- */
 const getSimpleContext: () => Promise<SimpleContext> = async () => {
   const resp: any = await fetchSimpleContext();
-  // tahan 3 bentuk: resp.data.data -> resp.data -> resp
   const raw: any = resp?.data?.data ?? resp?.data ?? resp ?? {};
-
   const memberships: Membership[] = (raw?.memberships ?? []).map((m: any) => ({
     school_id: m.school_id,
     school_name: m.school_name,
     school_icon_url: m.school_icon_url ?? null,
     roles: (m.roles ?? []) as schoolRole[],
   }));
-
   const ctx: SimpleContext = {
     memberships,
     user_id: raw?.user_id,
@@ -82,7 +78,6 @@ const getSimpleContext: () => Promise<SimpleContext> = async () => {
     avatar: raw?.avatar,
     profile_photo_url: raw?.profile_photo_url,
   };
-
   DBG.log("normalized simple-context:", ctx);
   return ctx;
 };
@@ -107,8 +102,9 @@ function buildBase(id: string | undefined, segment: string) {
   return id ? `/${id}/${segment}` : `/${segment}`;
 }
 function buildTo(base: string, path: string) {
-  if (path === "." || path === "") return normalizePath(base);
-  return normalizePath(`${base}/${path.replace(/^\/+/, "")}`);
+  return path === "." || path === ""
+    ? normalizePath(base)
+    : normalizePath(`${base}/${path.replace(/^\/+/, "")}`);
 }
 const getInitials = (n?: string) =>
   n?.trim()
@@ -131,7 +127,7 @@ export const translateRole = (r?: string): string =>
   )[(r ?? "").toLowerCase()] ?? "User";
 
 /* ===================================================================
-   MODAL SWITCH CONTEXT (di atas supaya aman HMR/hoisting)
+   MODAL SWITCH CONTEXT
    =================================================================== */
 function ModalSwitchContext({
   open,
@@ -152,7 +148,6 @@ function ModalSwitchContext({
   const palette = pickTheme(themeName as ThemeName, isDark);
   const qc = useQueryClient();
 
-  // Pakai cache global; fetch hanya jika modal dibuka & belum ada
   const initial = qc.getQueryData<SimpleContext>(["me", "simple-context"]);
   const { data, isLoading } = useQuery<SimpleContext, Error>({
     queryKey: ["me", "simple-context"],
@@ -409,7 +404,7 @@ export default function ParentSidebar({
   const navigate = useNavigate();
   const qc = useQueryClient();
 
-  // URL params
+  // URL & route kinds
   const params = useParams<{ id?: string }>();
   const matchAnyId = useMatch("/:id/*");
   const possibleId = params.id ?? matchAnyId?.params.id;
@@ -432,13 +427,13 @@ export default function ParentSidebar({
     DBG.log("useActiveschoolInfo()", active);
   }, [active]);
 
-  // Satu sumber data simple-context (hindari 429)
+  // Simple context (satu sumber)
   const { data: ctxData } = useQuery<SimpleContext, Error>({
     queryKey: ["me", "simple-context"],
     queryFn: getSimpleContext,
     staleTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
-    refetchOnMount: true, // pastikan fetch saat mount
+    refetchOnMount: true,
     retry: 1,
   });
 
@@ -449,10 +444,6 @@ export default function ParentSidebar({
     ctxData?.avatar ||
     ctxData?.profile_photo_url ||
     undefined;
-
-  useEffect(() => {
-    DBG.log("Avatar chosen", avatarUrl);
-  }, [avatarUrl]);
 
   const storedRole =
     (typeof window !== "undefined"
@@ -473,6 +464,7 @@ export default function ParentSidebar({
   const [resolvedKind, setResolvedKind] = useState<Kind>("sekolah");
   const [loggingOut, setLoggingOut] = useState(false);
   const [openSwitcher, setOpenSwitcher] = useState(false);
+  const [openAccountMenu, setOpenAccountMenu] = useState(false); // ⬅️ NEW
 
   useEffect(() => {
     if (kind !== "auto") setResolvedKind(kind);
@@ -541,12 +533,9 @@ export default function ParentSidebar({
         icon: display?.icon ?? undefined,
       });
       window.dispatchEvent(new Event("school:changed"));
-
       const seg =
         role === "teacher" ? "guru" : role === "student" ? "murid" : "sekolah";
       setOpenSwitcher(false);
-
-      // segarkan cache agar header/footer langsung update
       await Promise.allSettled([
         qc.invalidateQueries({ queryKey: ["me", "simple-context"] }),
         qc.prefetchQuery({
@@ -554,13 +543,11 @@ export default function ParentSidebar({
           queryFn: getSimpleContext,
         }),
       ]);
-
       navigate(`/${schoolId}/${seg}`, { replace: true });
     },
     [navigate, qc]
   );
 
-  // Rail item
   const RailItem = ({
     to,
     Icon,
@@ -591,7 +578,6 @@ export default function ParentSidebar({
 
   return (
     <>
-      {/* backdrop mobile */}
       {!desktopOnly && open && (
         <div
           className="fixed inset-0 z-40 lg:hidden"
@@ -610,7 +596,7 @@ export default function ParentSidebar({
         }}
         aria-label="Sidebar navigasi"
       >
-        {/* ====== COLLAPSED RAIL ====== */}
+        {/* COLLAPSED RAIL */}
         {desktopOnly && !open && (
           <div className="flex h-full w-14 flex-col items-center justify-between py-3">
             <div className="space-y-2">
@@ -641,10 +627,9 @@ export default function ParentSidebar({
           </div>
         )}
 
-        {/* ====== EXPANDED ====== */}
+        {/* EXPANDED */}
         {(!desktopOnly || open) && (
           <>
-            {/* Mobile header */}
             {!desktopOnly && (
               <div
                 className="flex items-center justify-between p-3 lg:hidden"
@@ -680,18 +665,6 @@ export default function ParentSidebar({
                     alt={active.name || "school"}
                     className="w-10 h-10 rounded-xl object-cover border"
                     style={{ borderColor: palette.white3 }}
-                    onLoad={(e) =>
-                      DBG.log(
-                        "school icon loaded",
-                        (e.currentTarget as HTMLImageElement).src
-                      )
-                    }
-                    onError={(e) =>
-                      DBG.log(
-                        "school icon ERROR",
-                        (e.currentTarget as HTMLImageElement).src
-                      )
-                    }
                   />
                   <div className="min-w-0 flex-1">
                     <div className="text-sm font-semibold truncate">
@@ -748,7 +721,7 @@ export default function ParentSidebar({
               </SectionCard>
             </div>
 
-            {/* Footer: user & logout */}
+            {/* Footer: user (click → AccountMenu) & logout */}
             <div
               className="p-3"
               style={{
@@ -757,8 +730,10 @@ export default function ParentSidebar({
               }}
             >
               {userProfile && (
-                <div
-                  className="mb-3 p-3 rounded-2xl flex items-center gap-3"
+                <button
+                  type="button"
+                  onClick={() => setOpenAccountMenu(true)} // ⬅️ buka Account Menu
+                  className="mb-3 p-3 w-full rounded-2xl flex items-center gap-3 text-left"
                   style={{
                     background: palette.white1,
                     boxShadow: `inset 0 0 0 1px ${palette.silver1}`,
@@ -775,17 +750,6 @@ export default function ParentSidebar({
                         alt={userProfile.name}
                         className="h-full w-full object-cover"
                         referrerPolicy="no-referrer"
-                        onLoad={(e) =>
-                          DBG.log(
-                            "Avatar loaded",
-                            (e.currentTarget as HTMLImageElement).src
-                          )
-                        }
-                        onError={(e) => {
-                          const el = e.currentTarget as HTMLImageElement;
-                          DBG.log("Avatar ERROR", el.src);
-                          el.style.display = "none";
-                        }}
                       />
                     ) : (
                       getInitials(userProfile.name)
@@ -802,7 +766,7 @@ export default function ParentSidebar({
                       {translateRole(userProfile.role)}
                     </p>
                   </div>
-                </div>
+                </button>
               )}
 
               <button
@@ -837,6 +801,33 @@ export default function ParentSidebar({
         onClose={() => setOpenSwitcher(false)}
         onSelect={handleSwitch}
         current={{ schoolId: active.id, role: derivedRole }}
+      />
+
+      {/* ⬇️ Account Menu (baru) */}
+      <CAccountMenu
+        open={openAccountMenu}
+        onClose={() => setOpenAccountMenu(false)}
+        user={{
+          name: userProfile?.name ?? "User",
+          email: userProfile?.email,
+          avatar: userProfile?.avatar,
+        }}
+        plan={{
+          name: "Free", // TODO: ganti dari state nyata kalau sudah ada
+          subtitle: "Akses dasar untuk fitur inti",
+          onManage: () => {
+            setOpenAccountMenu(false);
+            navigate("/billing/plan");
+          },
+        }}
+        onProfile={() => {
+          setOpenAccountMenu(false);
+          navigate("/settings/profile");
+        }}
+        onLogout={() => {
+          setOpenAccountMenu(false);
+          goLogout();
+        }}
       />
     </>
   );

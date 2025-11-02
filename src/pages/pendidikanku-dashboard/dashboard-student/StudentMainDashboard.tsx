@@ -153,21 +153,6 @@ const QK = {
 };
 
 /* ================= Utils ================ */
-const slugify = (text: string) =>
-  text
-    .toLowerCase()
-    .trim()
-    .replace(/[_—–]/g, "-")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-+|-+$/g, "");
-
-const themeToType = (a: AnnouncementAPI): AnnouncementUI["type"] => {
-  const n = a.theme?.name?.toLowerCase() ?? "";
-  if (n.includes("warning") || n.includes("perhatian")) return "warning";
-  if (n.includes("success") || n.includes("berhasil")) return "success";
-  return "info";
-};
 
 const yyyyMmDdLocal = (d = new Date()) => {
   const pad = (n: number) => String(n).padStart(2, "0");
@@ -192,15 +177,6 @@ const dateFmt = (iso: string): string => {
     return iso;
   }
 };
-const hijriLong = (iso?: string) =>
-  iso
-    ? new Date(iso).toLocaleDateString("id-ID-u-ca-islamic-umalqura", {
-        weekday: "long",
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      })
-    : "-";
 
 const formatIDR = (n: number) =>
   new Intl.NumberFormat("id-ID", {
@@ -257,28 +233,7 @@ async function fetchSchoolHome(): Promise<SchoolHome> {
   };
 }
 
-/* ============ Hooks ============ */
-// function useAnnouncements() {
-//   return useQuery<AnnouncementUI[]>({
-//     queryKey: QK.ANNOUNCEMENTS,
-//     queryFn: async () => {
-//       const res = await axios.get<AnnouncementsAPIResponse>(
-//         "/api/a/announcements",
-//         { params: { limit: 20, offset: 0 }, withCredentials: true }
-//       );
-//       const items = res.data?.data ?? [];
-//       return items.map<AnnouncementUI>((a) => ({
-//         id: a.announcement_id,
-//         title: a.announcement_title,
-//         date: a.announcement_date,
-//         body: a.announcement_content,
-//         themeId: a.announcement_theme_id ?? undefined,
-//         type: themeToType(a),
-//         slug: slugify(a.announcement_title),
-//       }));
-//     },
-//   });
-// }
+
 
 function useLembagaStats() {
   return useQuery<LembagaStats | null>({
@@ -310,29 +265,7 @@ function useTodaySessions() {
 }
 
 /* ============ Shared UI ============ */
-function Flash({
-  palette,
-  flash,
-}: {
-  palette: Palette;
-  flash: { type: "success" | "error"; msg: string } | null;
-}) {
-  if (!flash) return null;
-  const isOk = flash.type === "success";
-  return (
-    <div className="mx-auto max-w-6xl px-4">
-      <div
-        className="mb-3 rounded-lg px-3 py-2 text-sm"
-        style={{
-          background: isOk ? palette.success2 : palette.error2,
-          color: isOk ? palette.success1 : palette.error1,
-        }}
-      >
-        {flash.msg}
-      </div>
-    </div>
-  );
-}
+
 function KpiTile({
   palette,
   label,
@@ -413,7 +346,7 @@ function MiniStat({
 }
 
 /* ================= Page ================= */
-const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
+const SchoolMainDashboard: React.FC<SchoolDashboardProps> = ({
   showBack = false,
   backTo,
   backLabel = "Kembali",
@@ -561,4 +494,4 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
     </div>
   );
 };
-export default SchoolDashboard;
+export default SchoolMainDashboard;

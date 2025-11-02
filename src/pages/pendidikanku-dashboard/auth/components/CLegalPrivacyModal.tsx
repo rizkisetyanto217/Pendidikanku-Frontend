@@ -1,7 +1,9 @@
+// components/LegalModal.tsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { X, ShieldCheck } from "lucide-react";
-import { pickTheme, ThemeName } from "@/constants/thema";
+import { pickTheme, ThemeName, type Palette } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
+import CBaseModal from "@/components/common/main/CBaseModal";
 
 export type LegalModalProps = {
   open: boolean;
@@ -30,36 +32,55 @@ export default function LegalModal({
   privacyContent,
 }: LegalModalProps) {
   const { isDark, themeName } = useHtmlDarkMode();
-  const theme = pickTheme(themeName as ThemeName, isDark);
+  const palette = pickTheme(themeName as ThemeName, isDark);
 
   const [tab, setTab] = useState<"tos" | "privacy">(initialTab);
   useEffect(() => setTab(initialTab), [initialTab, open]);
 
-  // close on ESC
+  // ESC untuk close
   useEffect(() => {
     if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
   const panelRef = useRef<HTMLDivElement>(null);
+
   const styles = useMemo(
     () => ({
-      overlay: {
-        backgroundColor: isDark ? "#00000088" : "#00000066",
-      },
       panel: {
-        backgroundColor: theme.white1,
-        borderColor: theme.white3,
-        color: theme.black1,
+        background: palette.white1,
+        color: palette.black1,
+        border: `1px solid ${palette.white3}`,
       },
-      muted: { color: theme.silver2 },
-      tabBase: "px-3 py-1.5 rounded-full text-sm font-medium transition border",
+      headerBorder: { borderColor: palette.white3 },
+      muted: { color: palette.silver2 },
+      tabBase:
+        "px-3 py-1.5 rounded-full text-sm font-medium transition border focus:outline-none",
+      tabUnselected: {
+        background: "transparent",
+        color: palette.black1,
+        borderColor: palette.white3,
+      },
+      tabSelected: {
+        background: palette.primary,
+        color: palette.white1,
+        borderColor: "transparent",
+        boxShadow: `0 0 0 3px ${palette.primary2}`,
+      },
+      bodyScroll: { scrollbarWidth: "thin" as any },
+      btnCancel: {
+        background: isDark ? palette.white2 : palette.white1,
+        color: palette.black1,
+        border: `1px solid ${palette.white3}`,
+      },
+      btnAccept: {
+        background: palette.primary,
+        color: palette.white1,
+      },
     }),
-    [theme, isDark]
+    [palette, isDark]
   );
 
   if (!open) return null;
@@ -67,7 +88,7 @@ export default function LegalModal({
   const DefaultTerms = () => (
     <div
       className="space-y-3 text-sm leading-relaxed"
-      style={{ color: theme.black1 }}
+      style={{ color: palette.black1 }}
     >
       <p>
         Selamat datang di <strong>SekolahIslamku Suite</strong>. Dengan
@@ -105,7 +126,7 @@ export default function LegalModal({
   const DefaultPrivacy = () => (
     <div
       className="space-y-3 text-sm leading-relaxed"
-      style={{ color: theme.black1 }}
+      style={{ color: palette.black1 }}
     >
       <p>
         Kebijakan Privasi ini menjelaskan bagaimana kami menangani informasi
@@ -140,29 +161,25 @@ export default function LegalModal({
   );
 
   return (
-    <div
-      className="fixed inset-0 z-[60] flex items-center justify-center p-4"
-      aria-modal="true"
-      role="dialog"
-      aria-labelledby="legal-title"
-      style={styles.overlay}
-      onClick={(e) => {
-        // close only if clicking backdrop (not panel)
-        if (e.target === e.currentTarget) onClose();
-      }}
+    <CBaseModal
+      open={open}
+      onClose={onClose}
+      ariaLabel="Kebijakan Layanan"
+      maxWidthClassName="max-w-3xl"
+      contentClassName="p-0 overflow-hidden"
+      contentStyle={styles.panel}
     >
-      <div
-        ref={panelRef}
-        className="w-full max-w-3xl rounded-2xl border shadow-xl overflow-hidden"
-        style={styles.panel}
-      >
+      <div ref={panelRef} className="w-full">
         {/* Header */}
         <div
           className="flex items-center justify-between px-5 py-4 border-b"
-          style={{ borderColor: theme.white3 }}
+          style={styles.headerBorder}
         >
           <div className="flex items-center gap-2">
-            <ShieldCheck className="h-5 w-5" style={{ color: theme.primary }} />
+            <ShieldCheck
+              className="h-5 w-5"
+              style={{ color: palette.primary }}
+            />
             <h2 id="legal-title" className="text-base font-semibold">
               Kebijakan Layanan
             </h2>
@@ -170,8 +187,8 @@ export default function LegalModal({
           <button
             onClick={onClose}
             aria-label="Tutup"
-            className="p-2 rounded-lg hover:opacity-80"
-            style={{ color: theme.silver2 }}
+            className="p-2 rounded-lg hover:opacity-80 focus:outline-none"
+            style={{ color: palette.silver2 }}
           >
             <X className="h-5 w-5" />
           </button>
@@ -180,28 +197,43 @@ export default function LegalModal({
         {/* Tabs */}
         <div className="px-5 pt-4 flex items-center gap-2">
           <button
-            className={`${styles.tabBase} ${
-              tab === "tos" ? "border-transparent" : "bg-transparent"
-            }`}
+            className={styles.tabBase}
             onClick={() => setTab("tos")}
-            style={{
-              backgroundColor: tab === "tos" ? theme.primary : "transparent",
-              color: tab === "tos" ? theme.white1 : theme.black1,
-              borderColor: theme.white3,
+            style={tab === "tos" ? styles.tabSelected : styles.tabUnselected}
+            onMouseEnter={(e) => {
+              if (tab !== "tos") {
+                (e.currentTarget.style.boxShadow as any) =
+                  `0 0 0 3px ${palette.primary2}`;
+                (e.currentTarget.style.borderColor as any) = palette.quaternary;
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (tab !== "tos") {
+                (e.currentTarget.style.boxShadow as any) = "none";
+                (e.currentTarget.style.borderColor as any) = palette.white3;
+              }
             }}
           >
             Syarat & Ketentuan
           </button>
           <button
-            className={`${styles.tabBase} ${
-              tab === "privacy" ? "border-transparent" : "bg-transparent"
-            }`}
+            className={styles.tabBase}
             onClick={() => setTab("privacy")}
-            style={{
-              backgroundColor:
-                tab === "privacy" ? theme.primary : "transparent",
-              color: tab === "privacy" ? theme.white1 : theme.black1,
-              borderColor: theme.white3,
+            style={
+              tab === "privacy" ? styles.tabSelected : styles.tabUnselected
+            }
+            onMouseEnter={(e) => {
+              if (tab !== "privacy") {
+                (e.currentTarget.style.boxShadow as any) =
+                  `0 0 0 3px ${palette.primary2}`;
+                (e.currentTarget.style.borderColor as any) = palette.quaternary;
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (tab !== "privacy") {
+                (e.currentTarget.style.boxShadow as any) = "none";
+                (e.currentTarget.style.borderColor as any) = palette.white3;
+              }
             }}
           >
             Kebijakan Privasi
@@ -215,7 +247,7 @@ export default function LegalModal({
         {/* Body */}
         <div
           className="px-5 pb-5 pt-4 max-h-[70vh] overflow-y-auto space-y-4"
-          style={{ scrollbarWidth: "thin" as any }}
+          style={styles.bodyScroll}
         >
           {tab === "tos"
             ? (termsContent ?? <DefaultTerms />)
@@ -225,30 +257,26 @@ export default function LegalModal({
         {/* Footer */}
         <div
           className="px-5 py-4 border-t flex items-center justify-end gap-2"
-          style={{ borderColor: theme.white3 }}
+          style={styles.headerBorder}
         >
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-xl border"
-            style={{
-              backgroundColor: isDark ? theme.white2 : theme.white1,
-              color: theme.black1,
-              borderColor: theme.white3,
-            }}
+            className="px-4 py-2 rounded-xl border focus:outline-none"
+            style={styles.btnCancel}
           >
             Tutup
           </button>
           {showAccept && (
             <button
               onClick={onAccept}
-              className="px-4 py-2 rounded-xl font-medium"
-              style={{ backgroundColor: theme.primary, color: theme.white1 }}
+              className="px-4 py-2 rounded-xl font-medium focus:outline-none"
+              style={styles.btnAccept}
             >
               Saya Setuju
             </button>
           )}
         </div>
       </div>
-    </div>
+    </CBaseModal>
   );
 }

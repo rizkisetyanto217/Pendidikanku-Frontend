@@ -4,7 +4,7 @@ import {
   Btn,
   type Palette,
 } from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
-import InputField from "@/components/common/main/InputField";
+import InputField from "@/components/common/main/CInputField";
 
 export type StudentForm = {
   name: string;
@@ -22,7 +22,7 @@ type Props = {
   onSubmit: (val: StudentForm) => Promise<void> | void;
 };
 
-const AddStudent: React.FC<Props> = ({
+const TeacherAddStudent: React.FC<Props> = ({
   open,
   onClose,
   palette,
@@ -159,4 +159,4 @@ const AddStudent: React.FC<Props> = ({
   );
 };
 
-export default AddStudent;
+export default TeacherAddStudent;

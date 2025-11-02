@@ -19,15 +19,6 @@ import {
 } from "lucide-react";
 
 /* ===== Helpers ===== */
-const dateLong = (iso?: string) =>
-  iso
-    ? new Date(iso).toLocaleDateString("id-ID", {
-        weekday: "long",
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      })
-    : "";
 
 /* ===== Dummy types & data ===== */
 type Question = { id: string; text: string; options: string[]; answer: number };
@@ -64,7 +55,7 @@ const DUMMY: Record<string, Quiz> = {
 };
 
 /* ===== Page ===== */
-const DetailClassQuiz: React.FC = () => {
+const CTeacherDetailClassQuiz: React.FC = () => {
   const { id } = useParams<{ id: string }>(); // :id dari route /:slug/guru/quizClass/:id
   const navigate = useNavigate();
   const { isDark, themeName } = useHtmlDarkMode();
@@ -334,4 +325,4 @@ const DetailClassQuiz: React.FC = () => {
   );
 };
 
-export default DetailClassQuiz;
+export default CTeacherDetailClassQuiz;

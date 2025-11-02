@@ -94,7 +94,7 @@ const statusVariant = (s: BillItem["status"]) =>
   s === "paid" ? "success" : s === "overdue" ? "destructive" : "warning";
 
 /* ============== Page ============== */
-export default function InvoiceTagihan() {
+export default function StudentInvoice() {
   const { id } = useParams<{ id: string }>();
   const { state } = useLocation() as { state?: LocationState };
   const navigate = useNavigate();

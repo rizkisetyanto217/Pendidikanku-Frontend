@@ -12,8 +12,7 @@ import {
   type Palette,
 } from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 import { useMemo } from "react";
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
-import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/CParentSideBar";
+
 
 /* ================= Types ================= */
 type AttendanceStatus = "hadir" | "sakit" | "izin" | "alpa" | "online";

@@ -33,7 +33,7 @@ const dateFmt = (iso?: string) =>
     year: "numeric",
   });
 
-export default function DetailAnnouncementStudent() {
+export default function StudentDetailAnnouncement() {
   const { id } = useParams<{ id: string }>();
   const { state } = useLocation() as { state?: LocationState };
   const navigate = useNavigate();

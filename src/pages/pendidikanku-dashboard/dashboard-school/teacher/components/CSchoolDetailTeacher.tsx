@@ -69,7 +69,7 @@ const hijriWithWeekday = (iso?: string) =>
     : "-";
 
 /* ================= Component ================= */
-const DetailTeacher: React.FC = () => {
+const CSchoolDetailTeacher: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: user } = useCurrentUser();
@@ -221,4 +221,4 @@ const DetailTeacher: React.FC = () => {
   );
 };
 
-export default DetailTeacher;
+export default CSchoolDetailTeacher;

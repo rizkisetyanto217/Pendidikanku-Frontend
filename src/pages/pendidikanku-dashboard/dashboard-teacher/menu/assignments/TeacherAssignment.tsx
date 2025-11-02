@@ -6,8 +6,6 @@ import { useQuery } from "@tanstack/react-query";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
-import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/CParentSideBar";
 import {
   SectionCard,
   Btn,
@@ -30,15 +28,6 @@ import {
 } from "lucide-react";
 
 /* ===== Helpers ===== */
-const dateLong = (iso?: string) =>
-  iso
-    ? new Date(iso).toLocaleDateString("id-ID", {
-        weekday: "long",
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      })
-    : "";
 
 const dateShort = (iso?: string) =>
   iso
@@ -49,27 +38,6 @@ const dateShort = (iso?: string) =>
       })
     : "";
 
-const hijriWithWeekday = (iso?: string) =>
-  iso
-    ? new Date(iso).toLocaleDateString("id-ID-u-ca-islamic-umalqura", {
-        weekday: "long",
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      })
-    : "-";
-
-const isOverdue = (dueDate: string) => {
-  return new Date(dueDate) < new Date();
-};
-
-const isDueSoon = (dueDate: string) => {
-  const due = new Date(dueDate);
-  const today = new Date();
-  const diffTime = due.getTime() - today.getTime();
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  return diffDays <= 3 && diffDays > 0;
-};
 
 const TODAY_ISO = new Date().toISOString();
 

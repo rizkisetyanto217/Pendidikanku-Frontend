@@ -7,7 +7,7 @@ import {
   Btn,
   type Palette,
 } from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
-import InputField from "@/components/common/main/InputField";
+import InputField from "@/components/common/main/CInputField";
 
 /* ==============================================
    ModalRegister (pakai InputField untuk form)

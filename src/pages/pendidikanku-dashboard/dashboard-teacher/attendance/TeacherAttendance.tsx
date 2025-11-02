@@ -19,8 +19,7 @@ import {
   Btn,
   type Palette,
 } from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
-import ParentSidebar from "../../components/home/CParentSideBar";
+
 import MiniBar from "../../components/ui/CMiniBar";
 import StatPill from "../../components/ui/CStatPill";
 

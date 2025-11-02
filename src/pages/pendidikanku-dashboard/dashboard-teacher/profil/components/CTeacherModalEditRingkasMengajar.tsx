@@ -23,7 +23,7 @@ type ModalEditInformasiMengajarProps = {
   teacherId?: string; // optional untuk identifikasi guru
 };
 
-const ModalEditInformasiMengajar: React.FC<ModalEditInformasiMengajarProps> = ({
+const CTeacherModalEditRingkasMengajar: React.FC<ModalEditInformasiMengajarProps> = ({
   open,
   onClose,
   initial,
@@ -189,4 +189,4 @@ const ModalEditInformasiMengajar: React.FC<ModalEditInformasiMengajarProps> = ({
   );
 };
 
-export default ModalEditInformasiMengajar;
+export default CTeacherModalEditRingkasMengajar;

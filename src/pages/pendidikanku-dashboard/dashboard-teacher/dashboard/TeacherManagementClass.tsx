@@ -18,7 +18,7 @@ import ModalEditManagementClass, {
 import AddStudent from "./TeacherAddStudent";
 import Swal from "sweetalert2";
 
-const ManagementClass = () => {
+const TeacherManagementClass = () => {
   const { className } = useParams();
   const location = useLocation() as {
     state?: { className?: string; students?: number; lastSubject?: string };
@@ -390,4 +390,4 @@ const ManagementClass = () => {
   );
 };
 
-export default ManagementClass;
+export default TeacherManagementClass;

@@ -35,7 +35,7 @@ const dateLong = (isoStr?: string) =>
     : "-";
 
 /* ========= Page ========= */
-export default function DetailAssignmentClass() {
+export default function CTeacherDetailAssignmentClass() {
   const { id: classId = "", assignmentId = "" } = useParams<{
     id: string;
     assignmentId: string;

@@ -8,7 +8,7 @@ import TeacherProfil from "@/pages/pendidikanku-dashboard/dashboard-teacher/prof
 
 // Attendance
 import TeacherAttendance from "@/pages/pendidikanku-dashboard/dashboard-teacher/attendance/TeacherAttendance";
-import TeacherAttendanceDetail from "@/pages/pendidikanku-dashboard/dashboard-teacher/attendance/components/CAttendanceDetail";
+import TeacherAttendanceDetail from "@/pages/pendidikanku-dashboard/dashboard-teacher/attendance/components/CTeacherAttendanceDetail";
 
 // Grading
 import TeacherGrading from "@/pages/pendidikanku-dashboard/dashboard-teacher/grade/TeacherGrade";
@@ -18,8 +18,8 @@ import TeacherDetailGrading from "@/pages/pendidikanku-dashboard/dashboard-teach
 import TeacherClass from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/TeacherClass";
 import TeacherDetailClass from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/components/CTeacherDetailClass";
 import TeacherClassAttandence from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/components/CTeacherClassAttandence";
-import TeacherDetailMateri from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/components/CTeacherDetailMateri";
-import TeacherClassMateri from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/components/CTeacherClassMateri";
+import TeacherDetailMateri from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/components/CTeacherDetailMaterial";
+import TeacherClassMateri from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/components/CTeacherClassMaterial";
 import TeacherAssignmentClass from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/components/CTeacherAssignmentClass";
 import TeacherDetailAssignmentClass from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/components/CTeacherDetailAssignmentClass";
 import TeacherStudentScore from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/components/CTeacherStudentScore";
@@ -45,7 +45,7 @@ import TeacherClassDetail from "@/pages/pendidikanku-dashboard/dashboard-teacher
 import TeacherSettings from "@/pages/pendidikanku-dashboard/dashboard-teacher/menu/settings/TeacherSettings";
 import TeacherAssignment from "@/pages/pendidikanku-dashboard/dashboard-teacher/menu/assignments/TeacherAssignment";
 import TeacherCertificate from "@/pages/pendidikanku-dashboard/dashboard-teacher/menu/certificate/TeacherCertificate";
-import TeacherSubjectsList from "@/pages/pendidikanku-dashboard/dashboard-teacher/TeacherSubject/TeacherSubjectsList";
+import TeacherSubjectsList from "@/pages/pendidikanku-dashboard/dashboard-teacher/TeacherSubject/TeacherSubjects";
 
 export const TeacherRoutes = (
   <Route path="guru" element={<DashboardLayout />}>

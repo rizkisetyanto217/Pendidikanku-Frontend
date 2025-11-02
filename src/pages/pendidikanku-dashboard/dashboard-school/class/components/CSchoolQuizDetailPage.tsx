@@ -38,17 +38,8 @@ const DUMMY_QUIZZES = [
   },
 ];
 
-const dateLong = (iso?: string) =>
-  iso
-    ? new Date(iso).toLocaleDateString("id-ID", {
-        weekday: "long",
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      })
-    : "";
 
-const QuizDetailPage: React.FC = () => {
+const CSchoolQuizDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { isDark, themeName } = useHtmlDarkMode();
@@ -160,4 +151,4 @@ const QuizDetailPage: React.FC = () => {
   );
 };
 
-export default QuizDetailPage;
+export default CSchoolQuizDetailPage;

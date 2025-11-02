@@ -16,7 +16,7 @@ import {
   Badge,
   type Palette,
 } from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
-import ModalEditSchedule from "@/pages/pendidikanku-dashboard/dashboard-school/dashboard/SchoolModalEditSchedule";
+import ModalEditSchedule from "@/pages/pendidikanku-dashboard/dashboard-school/dashboard/CSchoolModalEditSchedule";
 import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
 import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/CParentSideBar";
 
@@ -45,7 +45,7 @@ const fmtDateLong = (iso?: string) =>
       })
     : "-";
 
-export default function DetailScheduleThreeDays() {
+export default function CTeacherDetailScheduleThreeDays() {
   const { scheduleId = "" } = useParams<{ scheduleId: string }>();
   const navigate = useNavigate();
   const { state } = useLocation();

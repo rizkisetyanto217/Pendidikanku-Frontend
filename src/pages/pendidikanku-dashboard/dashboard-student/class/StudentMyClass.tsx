@@ -111,7 +111,7 @@ const ZOOM_INFO: Record<
   },
 };
 
-const MyClass: React.FC = () => {
+const StudentMyClass: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { isDark, themeName } = useHtmlDarkMode();
@@ -402,4 +402,4 @@ const MyClass: React.FC = () => {
   );
 };
 
-export default MyClass;
+export default StudentMyClass;

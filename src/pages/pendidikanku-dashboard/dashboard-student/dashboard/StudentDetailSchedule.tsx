@@ -24,7 +24,7 @@ type TodayScheduleItem = {
 
 type LocationState = { item?: TodayScheduleItem };
 
-export default function DetailScheduleStudent() {
+export default function StudentDetailSchedule() {
   const { scheduleId = "" } = useParams<{ scheduleId: string }>();
   const location = useLocation();
   const state = (location.state ?? {}) as LocationState | undefined;

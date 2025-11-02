@@ -154,16 +154,7 @@ const atLocalNoon = (d: Date) => {
   x.setHours(12, 0, 0, 0);
   return x;
 };
-const toLocalNoonISO = (d: Date) => atLocalNoon(d).toISOString();
-const hijriWithWeekday = (iso?: string) =>
-  iso
-    ? new Date(iso).toLocaleDateString("id-ID-u-ca-islamic-umalqura", {
-        weekday: "long",
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      })
-    : "-";
+
 function grade(num: number) {
   if (num >= 90) return { label: "A", variant: "success" as const };
   if (num >= 80) return { label: "B", variant: "info" as const };

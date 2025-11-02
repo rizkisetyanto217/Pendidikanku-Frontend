@@ -33,7 +33,7 @@ type ModalEditProfilLengkapProps = {
   teacherId?: string; // optional untuk identifikasi guru
 };
 
-const ModalEditProfilLengkap: React.FC<ModalEditProfilLengkapProps> = ({
+const CTeacherModalEditProfil: React.FC<ModalEditProfilLengkapProps> = ({
   open,
   onClose,
   initial,
@@ -342,4 +342,4 @@ const ModalEditProfilLengkap: React.FC<ModalEditProfilLengkapProps> = ({
   );
 };
 
-export default ModalEditProfilLengkap;
+export default CTeacherModalEditProfil;

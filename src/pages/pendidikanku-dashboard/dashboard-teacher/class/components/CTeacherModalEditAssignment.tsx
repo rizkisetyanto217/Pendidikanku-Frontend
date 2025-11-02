@@ -52,7 +52,7 @@ const localInputToISO = (val: string) => {
   return d.toISOString();
 };
 
-export default function ModalEditAssignment({
+export default function CTeacherModalEditAssignment({
   open,
   onClose,
   palette,

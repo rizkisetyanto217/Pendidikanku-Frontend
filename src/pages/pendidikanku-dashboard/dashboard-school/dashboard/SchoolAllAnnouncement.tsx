@@ -13,7 +13,7 @@ import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParent
 import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/CParentSideBar";
 import Swal from "sweetalert2";
 import axios from "@/lib/axios";
-import InputField from "@/components/common/main/InputField";
+import InputField from "@/components/common/main/CInputField";
 
 /* ================= Types ================= */
 type PriorityLevel = "Rendah" | "Sedang" | "Tinggi" | "Urgent";
@@ -787,7 +787,7 @@ function SearchFilter({
 }
 
 /* =================== Main Page =================== */
-const AllAnnouncement: React.FC = () => {
+const SchoolAllAnnouncement: React.FC = () => {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
@@ -1241,4 +1241,4 @@ const AllAnnouncement: React.FC = () => {
   );
 };
 
-export default AllAnnouncement;
+export default SchoolAllAnnouncement;

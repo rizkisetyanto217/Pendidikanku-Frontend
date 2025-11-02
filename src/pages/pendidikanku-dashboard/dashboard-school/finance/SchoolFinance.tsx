@@ -29,9 +29,9 @@ import {
 } from "lucide-react";
 
 // Modals
-import Export from "./modal/CSchoolExport";
-import Pembayaran from "./modal/CSchoolPayment";
-import CreateInvoiceModal from "./modal/CSchoolBill";
+import Export from "./components/CSchoolExport";
+import Pembayaran from "./components/CSchoolPayment";
+import CreateInvoiceModal from "./components/CSchoolBill";
 
 /* ================== Date helpers ================== */
 const atLocalNoon = (d: Date) => {

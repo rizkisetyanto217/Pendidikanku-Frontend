@@ -420,7 +420,7 @@ function MiniStat({
 }
 
 /* ================= Page ================= */
-const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
+const SchoolMainDashboard: React.FC<SchoolDashboardProps> = ({
   showBack = false,
   backTo,
   backLabel = "Kembali",
@@ -443,9 +443,8 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
   // useEffectiveschoolId();
 
   const homeQ = useQuery({ queryKey: QK.HOME, queryFn: fetchSchoolHome });
-  const statsQ = useLembagaStats();
+
   const todaySessionsQ = useTodaySessions();
-  const announcementsQ = useAnnouncements();
 
   // Jadwal
   const scheduleItems: TodayScheduleItem[] = useMemo(() => {
@@ -454,9 +453,6 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
       ? mapSessionsToTodaySchedule(apiItems)
       : mockTodaySchedule;
   }, [todaySessionsQ.data]);
-
-  const topbarGregorianISO = toLocalNoonISO(new Date());
-  const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
     <div
@@ -595,4 +591,4 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
   );
 };
 
-export default SchoolDashboard;
+export default SchoolMainDashboard;

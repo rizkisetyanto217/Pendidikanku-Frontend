@@ -7,7 +7,7 @@ import {
   type Palette,
 } from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
-import InputField from "@/components/common/main/InputField";
+import InputField from "@/components/common/main/CInputField";
 
 type MateriType = "pdf" | "doc" | "ppt" | "link" | "video";
 
@@ -24,7 +24,7 @@ type Props = {
   palette: Palette;
 };
 
-export default function ModalAddClassMateri({
+export default function CTeacherModalAddClassMaterial({
   open,
   onClose,
   onSubmit,

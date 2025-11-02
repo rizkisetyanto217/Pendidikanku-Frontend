@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback, JSX } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   LogOut,
@@ -7,11 +7,11 @@ import {
   MoreVertical,
   Moon,
   Sun,
+  MonitorCog,
   User,
 } from "lucide-react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { pickTheme, ThemeName } from "@/constants/thema";
-import useHtmlDarkMode from "@/hooks/useHTMLThema";
+import useHtmlThema from "@/hooks/useHTMLThema"; // ⬅️ versi hook terbaru
 import { useQueryClient } from "@tanstack/react-query";
 import SharePopover from "./CSharePopover";
 import { useResponsive } from "@/hooks/isResponsive";
@@ -19,11 +19,7 @@ import { apiLogout } from "@/lib/axios";
 
 import MyProfile, { MyProfileData } from "./CMyProfile";
 import ModalEditProfile, { EditProfileData } from "./CModalEditProfile";
-
-interface PublicUserDropdownProps {
-  variant?: "default" | "icon";
-  withBg?: boolean;
-}
+import { pickTheme, ThemeName } from "@/constants/thema";
 
 /* ================= Helpers ================= */
 const buildMyProfileData = (u: any): MyProfileData | undefined => {
@@ -68,14 +64,36 @@ const buildInitialEdit = (u: any): EditProfileData | undefined => {
   };
 };
 
+type ModeOption = {
+  value: "light" | "dark" | "system";
+  label: string;
+  icon: JSX.Element;
+};
+
 /* ================= Component ================= */
+interface PublicUserDropdownProps {
+  variant?: "default" | "icon";
+  withBg?: boolean;
+}
+
 export default function PublicUserDropdown({
   variant = "default",
   withBg = true,
 }: PublicUserDropdownProps) {
-  const { isDark, setDarkMode, themeName, setThemeName } = useHtmlDarkMode();
+  // ===== THEME / MODE =====
+  const {
+    isDark,
+    setDarkMode,
+    mode,
+    setMode,
+    themeName,
+    setThemeName,
+    themeNames,
+  } = useHtmlThema();
+
   const theme = pickTheme(themeName as ThemeName, isDark);
 
+  // ===== USER / ROUTER =====
   const { data: user } = useCurrentUser();
   const isLoggedIn = !!user;
   const profileData = useMemo(() => buildMyProfileData(user as any), [user]);
@@ -85,15 +103,15 @@ export default function PublicUserDropdown({
   const { isMobile } = useResponsive();
   const queryClient = useQueryClient();
 
-  const base = `/school/${slug}`;
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const base = slug ? `/school/${slug}` : "";
 
+  // ===== UI STATE =====
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  // Modal states
+  // Modals
   const [profileOpen, setProfileOpen] = useState(false);
-  // state
   const [editOpen, setEditOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [editInitial, setEditInitial] = useState<EditProfileData | undefined>();
@@ -101,12 +119,14 @@ export default function PublicUserDropdown({
   // converter dari MyProfileData -> EditProfileData
   const fromMyProfileToEdit = (d: MyProfileData): EditProfileData => ({
     user: { full_name: d.user?.full_name, email: d.user?.email },
-    profile: d.profile ? { ...d.profile } : undefined, // ⬅️ aman bila undefined
+    profile: d.profile ? { ...d.profile } : undefined,
   });
+
+  const close = useCallback(() => setOpen(false), []);
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
-    setOpen(false);
+    close();
     try {
       await apiLogout();
       queryClient.removeQueries({ queryKey: ["currentUser"], exact: true });
@@ -118,37 +138,53 @@ export default function PublicUserDropdown({
     }
   };
 
-  // close dropdown when clicking outside
+  // close dropdown when clicking outside / pressing Escape
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (
         dropdownRef.current &&
         !dropdownRef.current.contains(e.target as Node)
       ) {
-        setOpen(false);
+        close();
       }
     };
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") close();
+    };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    document.addEventListener("keydown", handleKey);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKey);
+    };
+  }, [close]);
 
   const menuItemClass =
-    "w-full flex items-center gap-2 px-4 py-2 text-left transition";
+    "w-full flex items-center gap-2 px-4 py-2 text-left transition rounded-md";
   const hoverStyle = (e: React.MouseEvent<HTMLButtonElement>) =>
     (e.currentTarget.style.backgroundColor = theme.white2);
   const outStyle = (e: React.MouseEvent<HTMLButtonElement>) =>
     (e.currentTarget.style.backgroundColor = "transparent");
+
+  const modeOptions: ModeOption[] = [
+    { value: "light", label: "Mode Terang", icon: <Sun className="w-4 h-4" /> },
+    { value: "dark", label: "Mode Gelap", icon: <Moon className="w-4 h-4" /> },
+    {
+      value: "system",
+      label: "Ikuti Sistem",
+      icon: <MonitorCog className="w-4 h-4" />,
+    },
+  ];
 
   return (
     <div className="relative" ref={dropdownRef}>
       {/* Trigger */}
       <button
         onClick={() => setOpen((v) => !v)}
-        className={`h-9 w-9 grid place-items-center rounded-xl transition ${
-          variant === "default" ? "px-2" : ""
-        }`}
+        className={`h-9 ${variant === "default" ? "w-9" : "w-9"} grid place-items-center rounded-xl transition`}
         aria-haspopup="menu"
         aria-expanded={open}
+        aria-label="Buka menu pengguna"
         style={{
           backgroundColor: withBg ? theme.white3 : "transparent",
           color: theme.black1,
@@ -160,44 +196,44 @@ export default function PublicUserDropdown({
       {/* Dropdown */}
       {open && (
         <div
-          className="absolute right-0 mt-2 w-56 rounded-lg border z-50"
+          className="absolute right-0 mt-2 w-64 rounded-lg border z-50 p-1"
           role="menu"
+          aria-label="Menu pengguna"
           style={{
             backgroundColor: theme.white1,
             borderColor: theme.silver1,
-            boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
           }}
         >
-          <ul className="py-2 text-sm" style={{ color: theme.black1 }}>
-            {!isLoggedIn && (
+          <ul className="py-1 text-sm" style={{ color: theme.black1 }}>
+            {/* Login / Pengaturan */}
+            {!isLoggedIn ? (
               <li>
                 <button
                   onClick={() => {
-                    setOpen(false);
+                    close();
                     navigate("/login");
                   }}
                   className={menuItemClass}
-                  onMouseOver={hoverStyle}
-                  onMouseOut={outStyle}
+                  onMouseEnter={hoverStyle}
+                  onMouseLeave={outStyle}
                 >
                   <LogOut className="w-4 h-4" /> Login
                 </button>
               </li>
-            )}
-
-            {isLoggedIn && (
+            ) : (
               <li>
                 <button
                   onClick={() => {
-                    setOpen(false);
+                    close();
                     const url = isMobile
                       ? `${base}/aktivitas/pengaturan/menu`
                       : `${base}/aktivitas/pengaturan/profil-saya`;
                     navigate(url);
                   }}
                   className={menuItemClass}
-                  onMouseOver={hoverStyle}
-                  onMouseOut={outStyle}
+                  onMouseEnter={hoverStyle}
+                  onMouseLeave={outStyle}
                 >
                   <Settings className="w-4 h-4" /> Pengaturan
                 </button>
@@ -208,12 +244,12 @@ export default function PublicUserDropdown({
             <li>
               <button
                 onClick={() => {
-                  setOpen(false);
-                  navigate(`${base}/bantuan`);
+                  close();
+                  navigate(`${base || ""}/bantuan`);
                 }}
                 className={menuItemClass}
-                onMouseOver={hoverStyle}
-                onMouseOut={outStyle}
+                onMouseEnter={hoverStyle}
+                onMouseLeave={outStyle}
               >
                 <HelpCircle className="w-4 h-4" /> Bantuan
               </button>
@@ -223,51 +259,61 @@ export default function PublicUserDropdown({
             <li>
               <button
                 onClick={() => {
-                  setOpen(false);
+                  close();
                   setProfileOpen(true);
                 }}
                 className={menuItemClass}
-                onMouseOver={hoverStyle}
-                onMouseOut={outStyle}
+                onMouseEnter={hoverStyle}
+                onMouseLeave={outStyle}
               >
                 <User className="w-4 h-4" /> Profil Saya
               </button>
             </li>
 
-            {/* Toggle Dark/Light */}
-            <li>
-              <button
-                onClick={() => {
-                  setDarkMode(!isDark);
-                  setOpen(false);
-                }}
-                className={menuItemClass}
-                onMouseOver={hoverStyle}
-                onMouseOut={outStyle}
-              >
-                {isDark ? (
-                  <>
-                    <Sun className="w-4 h-4" /> Mode Terang
-                  </>
-                ) : (
-                  <>
-                    <Moon className="w-4 h-4" /> Mode Gelap
-                  </>
-                )}
-              </button>
+            {/* ===== Mode (Light / Dark / System) ===== */}
+            <li className="px-3 pt-2">
+              <p className="text-xs mb-1" style={{ color: theme.silver2 }}>
+                Mode Tampilan
+              </p>
+              <div className="grid grid-cols-3 gap-1">
+                {modeOptions.map((m) => {
+                  const active = mode === m.value;
+                  return (
+                    <button
+                      key={m.value}
+                      onClick={() => {
+                        setMode(m.value);
+                        // jika user klik mode terang/gelap langsung reflect
+                        if (m.value !== "system")
+                          setDarkMode(m.value === "dark");
+                      }}
+                      className="flex items-center justify-center gap-1 rounded-md px-2 py-1 text-xs border"
+                      aria-pressed={active}
+                      style={{
+                        backgroundColor: active ? theme.primary2 : theme.white2,
+                        borderColor: active ? theme.primary : theme.silver1,
+                        color: active ? theme.black1 : theme.black1,
+                      }}
+                    >
+                      {m.icon}
+                      {m.label.replace("Mode ", "")}
+                    </button>
+                  );
+                })}
+              </div>
             </li>
 
-            {/* Pilih Tema */}
-            <li>
-              <div className="px-4 py-2">
-                <p className="text-xs mb-1" style={{ color: theme.silver2 }}>
-                  Pilih Tema
-                </p>
+            {/* ===== Pilih Tema (dinamis) ===== */}
+            <li className="px-3 pt-3">
+              <p className="text-xs mb-1" style={{ color: theme.silver2 }}>
+                Pilih Tema
+              </p>
+              <div className="flex items-center gap-2">
                 <select
                   value={themeName}
                   onChange={(e) => {
                     setThemeName(e.target.value as ThemeName);
-                    setOpen(false);
+                    close();
                   }}
                   className="w-full border rounded px-2 py-1 text-sm"
                   style={{
@@ -276,36 +322,48 @@ export default function PublicUserDropdown({
                     borderColor: theme.silver1,
                   }}
                 >
-                  <option value="default">Default</option>
-                  <option value="sunrise">Sunrise</option>
-                  <option value="midnight">Midnight</option>
+                  {themeNames.map((t) => (
+                    <option key={t} value={t}>
+                      {t.charAt(0).toUpperCase() + t.slice(1)}
+                    </option>
+                  ))}
                 </select>
-              </div>
-            </li>
-
-            {/* Share */}
-            <li>
-              <div className="px-4 py-2">
-                <SharePopover
-                  title={document.title}
-                  url={window.location.href}
-                  forceCustom
+                {/* dot preview */}
+                <span
+                  className="inline-block w-6 h-6 rounded-md border"
+                  title="Preview warna utama"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, " +
+                      `${pickTheme(themeName, isDark).primary}, ${pickTheme(themeName, isDark).quaternary}` +
+                      ")",
+                    borderColor: theme.silver1,
+                  }}
                 />
               </div>
             </li>
 
+            {/* Share */}
+            <li className="px-3 py-2">
+              <SharePopover
+                title={document.title}
+                url={window.location.href}
+                forceCustom
+              />
+            </li>
+
             {/* Logout */}
             {isLoggedIn && (
-              <li>
+              <li className="px-1 pb-1">
                 <button
                   onClick={handleLogout}
                   disabled={isLoggingOut}
                   className={`${menuItemClass} disabled:opacity-60 disabled:cursor-not-allowed`}
                   style={{ color: theme.error1 }}
-                  onMouseOver={(e) =>
+                  onMouseEnter={(e) =>
                     (e.currentTarget.style.backgroundColor = theme.error2)
                   }
-                  onMouseOut={outStyle}
+                  onMouseLeave={outStyle}
                 >
                   {isLoggingOut ? (
                     <>
@@ -349,9 +407,8 @@ export default function PublicUserDropdown({
         onClose={() => setProfileOpen(false)}
         data={profileData}
         onEdit={(mp) => {
-          // ⬅️ sekarang MyProfile mengirim snapshot
           setProfileOpen(false);
-          setEditInitial(fromMyProfileToEdit(mp)); // placeholder dari snapshot
+          setEditInitial(fromMyProfileToEdit(mp));
           setEditOpen(true);
         }}
       />
@@ -362,8 +419,7 @@ export default function PublicUserDropdown({
           initial={editInitial}
           loading={isSaving}
           onSave={async (payload, opts = {}) => {
-            // ⬅️ default {}
-            const { photoFile } = opts; // aman walau tidak dikirim
+            const { photoFile } = opts;
             try {
               setIsSaving(true);
               // TODO: kirim ke API…

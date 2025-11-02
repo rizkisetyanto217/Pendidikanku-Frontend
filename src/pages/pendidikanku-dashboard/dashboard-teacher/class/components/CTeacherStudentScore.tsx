@@ -14,7 +14,7 @@ import {
 import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
 import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/CParentSideBar";
 
-import InputField from "@/components/common/main/InputField"; // pastikan path benar
+import InputField from "@/components/common/main/CInputField"; // pastikan path benar
 
 type StudentLite = {
   id: string;
@@ -33,7 +33,7 @@ type LocationState = {
   assignments?: AssignmentMini[];
 };
 
-export default function StudentScore() {
+export default function CTeacherStudentScore() {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();

@@ -70,7 +70,7 @@ async function fetchBillById(id: string): Promise<BillItem | null> {
 }
 
 /* ===================== Page ===================== */
-export default function Bill({
+export default function SchoolBill({
   palette: paletteProp,
 }: { palette?: Palette } = {}) {
   const { id, slug } = useParams<{ id: string; slug: string }>();

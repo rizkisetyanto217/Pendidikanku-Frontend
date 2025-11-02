@@ -42,7 +42,7 @@ type ApiUsersSearchResponse = {
 };
 
 /* ================= Component ================ */
-export default function AddTeacher({
+export default function CSchoolAddTeacher({
   open,
   palette,
   subjects,

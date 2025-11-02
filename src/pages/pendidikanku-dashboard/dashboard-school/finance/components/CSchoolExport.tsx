@@ -20,7 +20,7 @@ type ExportModalProps = {
   maxSizeMB?: number;
 };
 
-const Export: React.FC<ExportModalProps> = ({
+const CSchoolExport: React.FC<ExportModalProps> = ({
   open,
   onClose,
   palette,
@@ -209,4 +209,4 @@ const Export: React.FC<ExportModalProps> = ({
   );
 };
 
-export default Export;
+export default CSchoolExport;

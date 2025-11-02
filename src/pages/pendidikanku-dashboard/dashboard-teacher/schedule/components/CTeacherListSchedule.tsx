@@ -21,7 +21,7 @@ const generateSlug = (text: string) =>
     .replace(/\s+/g, "-")
     .replace(/[^\w-]+/g, "");
 
-export default function ListJadwal({
+export default function CTeacherListSchedule({
   palette,
   items,
   title = "Daftar Jadwal",

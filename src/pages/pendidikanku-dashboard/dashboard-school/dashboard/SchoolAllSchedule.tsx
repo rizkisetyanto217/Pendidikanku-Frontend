@@ -18,8 +18,7 @@ import {
 } from "../calender/TodaySchedule";
 
 // Edit (ubah item yang ada)
-import ModalEditSchedule from "./SchoolModalEditSchedule";
-import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/CParentSideBar";
+import ModalEditSchedule from "./CSchoolModalEditSchedule";
 import AddSchedule from "@/pages/pendidikanku-dashboard/dashboard-teacher/dashboard/TeacherAddSchedule";
 
 /** State yang dikirim dari komponen lain via <Link state={...}> */
@@ -35,7 +34,7 @@ const keyOf = (it: TodayScheduleItem) =>
 // detailschedule
 const makeScheduleId = (it: TodayScheduleItem) => encodeURIComponent(keyOf(it));
 
-export default function AllSchedule() {
+export default function SchoolAllSchedule() {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();

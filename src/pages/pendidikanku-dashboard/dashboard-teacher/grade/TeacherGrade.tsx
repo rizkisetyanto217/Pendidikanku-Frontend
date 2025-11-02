@@ -28,8 +28,7 @@ import {
   Eye,
 } from "lucide-react";
 
-import ParentTopBar from "../../components/home/CParentTopBar";
-import ParentSidebar from "../../components/home/CParentSideBar";
+
 import ModalGrading from "./components/CTeacherModalGrading";
 import ModalExportResult from "./components/CTeacherModalExportResult";
 
@@ -334,7 +333,7 @@ function FilterChip({
 }
 
 /* ================= Page ================= */
-export default function TeacherGrading() {
+export default function TeacherGrade() {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
 

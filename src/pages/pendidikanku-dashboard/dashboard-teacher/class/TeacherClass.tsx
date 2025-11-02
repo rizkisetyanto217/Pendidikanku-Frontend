@@ -12,9 +12,6 @@ import {
   type Palette,
 } from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 
-import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
-import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/CParentSideBar";
-
 import {
   Users,
   CalendarDays,
@@ -935,7 +932,7 @@ function LoadingCard({
 /* ==============================
    Main Page Component
 ============================== */
-const TeacherClassesList: React.FC<TeacherClassesProps> = ({
+const TeacherClass: React.FC<TeacherClassesProps> = ({
   showBack = false,
   backTo,
   backLabel = "Kembali",
@@ -1136,4 +1133,4 @@ const TeacherClassesList: React.FC<TeacherClassesProps> = ({
   );
 };
 
-export default TeacherClassesList;
+export default TeacherClass;

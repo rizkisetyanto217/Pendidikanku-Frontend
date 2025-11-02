@@ -154,7 +154,7 @@ const AssistantItem: React.FC<{
   </div>
 );
 
-const HomeroomTeacher: React.FC = () => {
+const CTeacherHomeroomTeacher: React.FC = () => {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
@@ -701,4 +701,4 @@ const HomeroomTeacher: React.FC = () => {
   );
 };
 
-export default HomeroomTeacher;
+export default CTeacherHomeroomTeacher;

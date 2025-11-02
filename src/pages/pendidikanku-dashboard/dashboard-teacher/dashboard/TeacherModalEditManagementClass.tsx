@@ -4,7 +4,7 @@ import {
   Btn,
   type Palette,
 } from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
-import InputField from "@/components/common/main/InputField";
+import InputField from "@/components/common/main/CInputField";
 
 export type ClassInfo = {
   className?: string;
@@ -21,7 +21,7 @@ type Props = {
   onSubmit: (val: ClassInfo) => Promise<void> | void;
 };
 
-const ModalEditManagementClass: React.FC<Props> = ({
+const TeacherModalEditManagementClass: React.FC<Props> = ({
   open,
   onClose,
   palette,
@@ -156,4 +156,4 @@ const ModalEditManagementClass: React.FC<Props> = ({
   );
 };
 
-export default ModalEditManagementClass;
+export default TeacherModalEditManagementClass;

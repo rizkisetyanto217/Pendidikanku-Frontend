@@ -1,8 +1,9 @@
 // src/pages/dashboard/auth/components/RegisterChoiceModal.tsx
 import React, { useEffect, useState, useMemo } from "react";
-import { User, Building2, X, CheckCircle2 } from "lucide-react";
-import { pickTheme, ThemeName } from "@/constants/thema";
+import { User, Building2, CheckCircle2 } from "lucide-react";
+import { pickTheme, ThemeName, type Palette } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
+import CBaseModal from "@/components/common/main/CBaseModal";
 
 type Props = {
   open: boolean;
@@ -19,49 +20,65 @@ export default function RegisterChoiceModal({
   onSelect,
 }: Props) {
   const { isDark, themeName } = useHtmlDarkMode();
-  const theme = pickTheme(themeName as ThemeName, isDark);
-
+  const palette = pickTheme(themeName as ThemeName, isDark);
   const [selected, setSelected] = useState<Choice>(null);
 
   useEffect(() => {
+    if (!open) return;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    if (open) document.addEventListener("keydown", onKey);
+    document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
   useEffect(() => {
-    if (!open) setSelected(null);
-    if (open) {
-      const prev = document.body.style.overflow;
-      document.body.style.overflow = "hidden";
-      return () => {
-        document.body.style.overflow = prev;
-      };
+    if (!open) {
+      setSelected(null);
+      return;
     }
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
   }, [open]);
 
-  // ✅ PENTING: hooks (useMemo) dipanggil SEBELUM early return
   const styles = useMemo(
     () => ({
       cardBase: {
-        backgroundColor: isDark ? `${theme.primary}12` : `${theme.primary}0F`,
-        border: `1px solid ${theme.white3}`,
+        backgroundColor: palette.white1,
+        border: `1px solid ${palette.white3}`,
+      },
+      cardHover: {
+        border: `1px solid ${palette.quaternary}`,
+        boxShadow: `0 0 0 3px ${palette.primary2}`,
       },
       cardSelected: {
-        border: `1px solid ${theme.primary}`,
-        boxShadow: `0 0 0 3px ${theme.primary}22`,
+        border: `1px solid ${palette.primary}`,
+        boxShadow: `0 0 0 3px ${palette.primary2}`,
       },
-      muted: { color: theme.silver2 },
-      chip: {
-        backgroundColor: theme.white2,
-        border: `1px solid ${theme.white3}`,
-        color: theme.black1,
+      iconWrap: {
+        backgroundColor: palette.white2,
+        border: `1px solid ${palette.white3}`,
+      },
+      muted: { color: palette.silver2 },
+      headerBorder: { borderColor: palette.white3 },
+      cancelBtn: {
+        border: `1px solid ${palette.white3}`,
+        color: palette.black1,
+      },
+      nextBtnEnabled: {
+        backgroundColor: palette.primary,
+        color: palette.white1,
+      },
+      nextBtnDisabled: {
+        backgroundColor: palette.white3,
+        color: palette.silver2,
       },
     }),
-    [isDark, theme]
+    [palette]
   );
 
-  if (!open) return null; // ✅ setelah semua hooks
+  if (!open) return null;
 
   const Card = ({
     title,
@@ -89,18 +106,30 @@ export default function RegisterChoiceModal({
         style={{
           ...(styles.cardBase as React.CSSProperties),
           ...(active ? (styles.cardSelected as React.CSSProperties) : {}),
-          color: theme.black1,
+          color: palette.black1,
         }}
         aria-pressed={active}
         aria-label={title}
+        onMouseEnter={(e) => {
+          if (!active) {
+            (e.currentTarget.style.border as any) =
+              `1px solid ${palette.quaternary}`;
+            (e.currentTarget.style.boxShadow as any) =
+              `0 0 0 3px ${palette.primary2}`;
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!active) {
+            (e.currentTarget.style.border as any) =
+              `1px solid ${palette.white3}`;
+            (e.currentTarget.style.boxShadow as any) = "none";
+          }
+        }}
       >
         <div className="flex items-start gap-3">
           <div
             className="h-10 w-10 grid place-items-center rounded-xl shrink-0"
-            style={{
-              backgroundColor: theme.white2,
-              border: `1px solid ${theme.white3}`,
-            }}
+            style={styles.iconWrap as React.CSSProperties}
           >
             {icon}
           </div>
@@ -110,7 +139,7 @@ export default function RegisterChoiceModal({
               {active && (
                 <CheckCircle2
                   className="h-4 w-4"
-                  style={{ color: theme.primary }}
+                  style={{ color: palette.primary }}
                 />
               )}
             </div>
@@ -124,100 +153,80 @@ export default function RegisterChoiceModal({
   };
 
   return (
-    <div
-      className="fixed inset-0 z-[100] flex items-center justify-center px-4"
-      style={{ backgroundColor: isDark ? "#00000080" : "#00000066" }}
-      onMouseDown={(e) => e.target === e.currentTarget && onClose()}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="register-choice-title"
+    <CBaseModal
+      open={open}
+      onClose={onClose}
+      ariaLabel="Pilih Jenis Pendaftaran"
+      maxWidthClassName="max-w-2xl"
+      contentClassName="p-0 overflow-hidden"
+      contentStyle={{ background: palette.white1, color: palette.black1 }}
     >
+      {/* header */}
       <div
-        className="w-full max-w-2xl rounded-2xl overflow-hidden"
-        style={{
-          backgroundColor: theme.white1,
-          color: theme.black1,
-          border: `1px solid ${theme.white3}`,
-        }}
+        className="flex items-center justify-between px-5 py-4 border-b"
+        style={styles.headerBorder}
       >
-        {/* header */}
-        <div
-          className="flex items-center justify-between px-5 py-4 border-b"
-          style={{ borderColor: theme.white3 }}
-        >
-          <div id="register-choice-title" className="font-semibold">
-            Pilih Jenis Pendaftaran
-          </div>
-          <button
-            aria-label="Tutup"
-            onClick={onClose}
-            className="p-2 rounded-lg hover:opacity-80"
-            style={{ color: theme.silver2 }}
-          >
-            <X className="h-5 w-5" />
-          </button>
+        <div className="font-semibold">Pilih Jenis Pendaftaran</div>
+        {/* tombol close sengaja pakai onClose dari CBaseModal wrapper */}
+        {/* Jika mau ikon X juga, tinggal aktifkan tombol ini dan panggil onClose */}
+        {/* <button onClick={onClose} className="p-2 rounded-lg hover:opacity-80" style={{ color: palette.silver2 }}>
+          <X className="h-5 w-5" />
+        </button> */}
+      </div>
+
+      {/* body */}
+      <div className="p-5">
+        <p className="text-sm mb-5" style={styles.muted}>
+          Pilih salah satu: <b>Daftar atas nama Sekolah</b> atau{" "}
+          <b>Daftar sebagai Pengguna</b>.
+        </p>
+
+        <div className="grid sm:grid-cols-2 gap-4">
+          <Card
+            choice="school"
+            title="Daftar atas nama Sekolah"
+            desc="Buat akun institusi untuk mengelola data sekolah, pengguna, dan modul."
+            icon={
+              <Building2
+                className="h-5 w-5"
+                style={{ color: palette.primary }}
+              />
+            }
+          />
+          <Card
+            choice="user"
+            title="Daftar sebagai Pengguna"
+            desc="Buat akun pribadi (orang tua/siswa/guru) untuk akses fitur dasar."
+            icon={
+              <User className="h-5 w-5" style={{ color: palette.primary }} />
+            }
+          />
         </div>
 
-        {/* body */}
-        <div className="p-5">
-          <p className="text-sm mb-5" style={styles.muted}>
-            Pilih salah satu: <b>Daftar atas nama Sekolah</b> atau{" "}
-            <b>Daftar sebagai Pengguna</b>.
-          </p>
-
-          <div className="grid sm:grid-cols-2 gap-4">
-            <Card
-              choice="school"
-              title="Daftar atas nama Sekolah"
-              desc="Buat akun institusi untuk mengelola data sekolah, pengguna, dan modul."
-              icon={
-                <Building2
-                  className="h-5 w-5"
-                  style={{ color: theme.primary }}
-                />
-              }
-            />
-            <Card
-              choice="user"
-              title="Daftar sebagai Pengguna"
-              desc="Buat akun pribadi (orang tua/siswa/guru) untuk akses fitur dasar."
-              icon={
-                <User className="h-5 w-5" style={{ color: theme.primary }} />
-              }
-            />
-          </div>
-
-          {/* footer */}
-          <div className="mt-6 flex items-center justify-between">
-            <span className="text-xs" style={styles.muted}>
-              Dengan melanjutkan, Anda menyetujui S&K dan Kebijakan Privasi.
-            </span>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={onClose}
-                className="rounded-xl px-4 py-2 text-sm"
-                style={{
-                  border: `1px solid ${theme.white3}`,
-                  color: theme.black1,
-                }}
-              >
-                Batal
-              </button>
-              <button
-                onClick={() => selected && onSelect(selected)}
-                disabled={!selected}
-                className="rounded-xl px-4 py-2 text-sm disabled:opacity-60 disabled:cursor-not-allowed"
-                style={{
-                  backgroundColor: selected ? theme.primary : theme.white3,
-                  color: selected ? theme.white1 : theme.silver2,
-                }}
-              >
-                Lanjut
-              </button>
-            </div>
+        {/* footer */}
+        <div className="mt-6 flex items-center justify-between">
+          <span className="text-xs" style={styles.muted}>
+            Dengan melanjutkan, Anda menyetujui S&K dan Kebijakan Privasi.
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onClose}
+              className="rounded-xl px-4 py-2 text-sm"
+              style={styles.cancelBtn}
+            >
+              Batal
+            </button>
+            <button
+              onClick={() => selected && onSelect(selected)}
+              disabled={!selected}
+              className="rounded-xl px-4 py-2 text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+              style={selected ? styles.nextBtnEnabled : styles.nextBtnDisabled}
+            >
+              Lanjut
+            </button>
           </div>
         </div>
       </div>
-    </div>
+    </CBaseModal>
   );
 }

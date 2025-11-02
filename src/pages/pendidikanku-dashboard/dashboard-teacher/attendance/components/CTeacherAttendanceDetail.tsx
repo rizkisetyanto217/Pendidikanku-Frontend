@@ -42,7 +42,7 @@ const dateLong = (iso?: string) =>
       })
     : "-";
 
-export default function AttendanceDetail() {
+export default function CTeacherAttendanceDetail() {
   const { id } = useParams(); // id kelas dari URL
   const { state } = useLocation() as { state: NavState };
   const navigate = useNavigate();

@@ -14,7 +14,7 @@ interface ModalAddMateriProps {
   palette: Palette;
 }
 
-const ModalAddMateri: React.FC<ModalAddMateriProps> = ({
+const CTeacherModalAddMaterial: React.FC<ModalAddMateriProps> = ({
   open,
   onClose,
   onSubmit,
@@ -96,4 +96,4 @@ const ModalAddMateri: React.FC<ModalAddMateriProps> = ({
   );
 };
 
-export default ModalAddMateri;
+export default CTeacherModalAddMaterial;

@@ -277,7 +277,7 @@ async function fetchQuizzesByClass(classId: string): Promise<Quiz[]> {
 }
 
 /* ====== Komponen Utama ====== */
-export default function ClassMateri() {
+export default function CTeacherClassMaterial() {
   const { id = "" } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { isDark, themeName } = useHtmlDarkMode();

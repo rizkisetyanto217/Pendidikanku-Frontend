@@ -105,7 +105,7 @@ const normalizeItem = (
 /* =========================
    Component
 ========================= */
-export default function AllTodaySchedule() {
+export default function CTeacherAllTodaySchedhule() {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const qc = useQueryClient();

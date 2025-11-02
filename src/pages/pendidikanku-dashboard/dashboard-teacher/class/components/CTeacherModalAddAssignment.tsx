@@ -21,7 +21,7 @@ interface ModalAddAssignmentProps {
   palette: Palette;
 }
 
-const ModalAddAssignment: React.FC<ModalAddAssignmentProps> = ({
+const CTeacherModalAddAssignment: React.FC<ModalAddAssignmentProps> = ({
   open,
   onClose,
   onSubmit,
@@ -160,4 +160,4 @@ const ModalAddAssignment: React.FC<ModalAddAssignmentProps> = ({
   );
 };
 
-export default ModalAddAssignment;
+export default CTeacherModalAddAssignment;

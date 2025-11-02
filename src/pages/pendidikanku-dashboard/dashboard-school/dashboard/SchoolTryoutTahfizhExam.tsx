@@ -307,7 +307,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
 };
 
 // Komponen utama
-const TryoutTahfizhExam: React.FC = () => {
+const SchoolTryoutTahfizhExam: React.FC = () => {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
 
@@ -563,4 +563,4 @@ const TryoutTahfizhExam: React.FC = () => {
   );
 };
 
-export default TryoutTahfizhExam;
+export default SchoolTryoutTahfizhExam;

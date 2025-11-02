@@ -35,7 +35,7 @@ const defaultInput: EditClassMaterialInput = {
   author: "",
 };
 
-export default function ModalEditClassMateri({
+export default function CTeacherModalEditClassMaterial({
   open,
   onClose,
   onSubmit,

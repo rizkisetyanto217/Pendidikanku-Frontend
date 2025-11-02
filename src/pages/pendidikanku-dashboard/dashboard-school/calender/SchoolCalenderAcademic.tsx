@@ -36,24 +36,6 @@ type EventRow = {
   category?: string;
 };
 
-const dateLong = (iso?: string) =>
-  iso
-    ? new Date(iso).toLocaleDateString("id-ID", {
-        weekday: "long",
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      })
-    : "-";
-const hijriLong = (iso?: string) =>
-  iso
-    ? new Date(iso).toLocaleDateString("id-ID-u-ca-islamic-umalqura", {
-        weekday: "long",
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      })
-    : "-";
 const toMonthStr = (d = new Date()) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 const monthLabel = (month: string) => {
@@ -130,7 +112,7 @@ const fakeApi = {
 };
 /* ========================================================= */
 
-const CalenderAcademic: React.FC = () => {
+const SchoolCalenderAcademic: React.FC = () => {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
@@ -445,7 +427,7 @@ const CalenderAcademic: React.FC = () => {
   );
 };
 
-export default CalenderAcademic;
+export default SchoolCalenderAcademic;
 
 /* =============== Modal Ringkas =============== */
 function EditModal({

@@ -410,7 +410,7 @@ function TermFormModal({
 }
 
 /* ===================== Page ===================== */
-const AcademicSchool: React.FC<{
+const SchoolAcademic: React.FC<{
   showBack?: boolean;
   backTo?: string;
   backLabel?: string;
@@ -908,4 +908,4 @@ function TermCard({
   );
 }
 
-export default AcademicSchool;
+export default SchoolAcademic;

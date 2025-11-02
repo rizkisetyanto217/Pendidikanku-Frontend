@@ -31,7 +31,7 @@ const isoOnlyDate = (iso?: string) => {
     .slice(0, 10);
 };
 
-export default function ModalEditMateri({
+export default function CTeacherModalEditMaterial({
   open,
   onClose,
   palette,

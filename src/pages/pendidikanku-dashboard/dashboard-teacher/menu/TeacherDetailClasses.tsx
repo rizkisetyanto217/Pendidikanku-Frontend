@@ -102,22 +102,6 @@ const atLocalNoon = (d: Date) => {
   x.setHours(12, 0, 0, 0);
   return x;
 };
-const dateLong = (iso?: string) =>
-  iso
-    ? new Date(iso).toLocaleDateString("id-ID", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    : "-";
-const hijriLong = (iso: string) =>
-  new Date(iso).toLocaleDateString("id-ID-u-ca-islamic-umalqura", {
-    weekday: "long",
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  });
 
 const formatDate = (dateStr: string) => {
   return new Date(dateStr).toLocaleDateString("id-ID", {
@@ -335,7 +319,7 @@ const TabButton = ({
 );
 
 /* =============== Main Page =============== */
-const ClassDetail: React.FC = () => {
+const TeacherDetailClasses: React.FC = () => {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();

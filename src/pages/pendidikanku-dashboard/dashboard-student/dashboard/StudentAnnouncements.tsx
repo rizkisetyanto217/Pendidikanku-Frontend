@@ -38,7 +38,7 @@ const dateFmt = (iso: string) =>
   });
 
 /* ---------- Page ---------- */
-export default function AnnouncementsStudent() {
+export default function StudentAnnouncements() {
   const { state } = useLocation() as { state?: LocationState };
   const navigate = useNavigate();
 

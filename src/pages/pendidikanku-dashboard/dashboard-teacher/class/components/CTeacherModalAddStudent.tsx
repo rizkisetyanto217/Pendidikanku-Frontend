@@ -24,7 +24,7 @@ function slugify(s: string) {
     .replace(/^-+|-+$/g, "");
 }
 
-export default function ModalAddStudent({
+export default function CTeacherModalAddStudent({
   open,
   onClose,
   palette,

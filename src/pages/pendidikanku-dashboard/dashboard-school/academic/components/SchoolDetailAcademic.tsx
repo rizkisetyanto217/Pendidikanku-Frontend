@@ -67,7 +67,7 @@ const toLocalNoonISO = (d: Date) => {
 /* =====================================================
    🧩 Page: StudentDetailAcademic (Rapi seperti RoomSchool)
 ===================================================== */
-export default function StudentDetailAcademic() {
+export default function SchoolDetailAcademic() {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();

@@ -16,7 +16,7 @@ export type ModalGradingProps = {
   onSubmit: (payload: { id: string; score: number }) => void;
 };
 
-export default function ModalGrading({
+export default function CTeacherModalGrading({
   open,
   onClose,
   palette,

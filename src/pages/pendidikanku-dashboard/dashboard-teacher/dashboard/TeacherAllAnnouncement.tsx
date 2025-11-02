@@ -16,7 +16,7 @@ import Swal from "sweetalert2";
 
 // ========== Types ==========
 import type { Announcement as ApiAnnouncement } from "../class/types/teacher";
-import InputField from "@/components/common/main/InputField";
+import InputField from "@/components/common/main/CInputField";
 
 export type PriorityLevel = "Rendah" | "Sedang" | "Tinggi" | "Urgent";
 export type CategoryType = "Tahfidz" | "Tahsin" | "Kajian" | "Umum";
@@ -821,7 +821,7 @@ function SearchFilter({
 }
 
 // ========== Halaman ==========
-export default function AllAnnouncementTeacher({
+export default function TeacherAllAnnouncement({
   items,
   classId,
   title = "Semua Pengumuman",

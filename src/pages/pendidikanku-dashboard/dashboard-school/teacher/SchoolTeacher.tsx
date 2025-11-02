@@ -453,7 +453,7 @@ const TeachersTable = ({
 );
 
 /* ================= Main Component ================= */
-const TeachersPage: React.FC<SchoolTeacherProps> = ({ showBack = false }) => {
+const SchoolTeacher: React.FC<SchoolTeacherProps> = ({ showBack = false }) => {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
@@ -625,4 +625,4 @@ const TeachersPage: React.FC<SchoolTeacherProps> = ({ showBack = false }) => {
   );
 };
 
-export default TeachersPage;
+export default SchoolTeacher;

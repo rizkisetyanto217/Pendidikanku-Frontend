@@ -45,7 +45,7 @@ const dateLong = (iso?: string) =>
       })
     : "-";
 
-export default function DetailGrading() {
+export default function CTeacherDetailGrading() {
   const { id: classId, assignmentId } = useParams<{
     id: string;
     assignmentId: string;

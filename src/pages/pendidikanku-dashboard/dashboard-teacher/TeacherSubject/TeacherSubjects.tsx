@@ -115,7 +115,7 @@ function useTeacherSubjects() {
 /* =====================
    Main Component
 ===================== */
-export default function TeacherSubjectsList() {
+export default function TeacherSubjects() {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
 

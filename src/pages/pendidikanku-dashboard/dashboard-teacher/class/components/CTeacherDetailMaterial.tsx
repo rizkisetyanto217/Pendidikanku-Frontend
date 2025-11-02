@@ -10,7 +10,7 @@ import {
 } from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 
 import { ArrowLeft, Calendar, Paperclip } from "lucide-react";
-import ModalEditMateri, { EditMateriPayload } from "./CTeacherModalEditMateri";
+import ModalEditMateri, { EditMateriPayload } from "./CTeacherModalEditMaterial";
 import Swal from "sweetalert2";
 import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
 import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/CParentSideBar";
@@ -39,7 +39,7 @@ const dateLong = (iso?: string) =>
       })
     : "-";
 
-export default function DetailMateri() {
+export default function CTeacherDetailMaterial() {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
 
