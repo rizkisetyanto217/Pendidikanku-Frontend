@@ -103,15 +103,12 @@ export default function DashboardLayout() {
         </div>
 
         {/* Sidebar mobile */}
-        {/* Sidebar mobile */}
-        <div className="lg:hidden">
-          <ParentSidebar
-            desktopOnly={false}
-            mode="mobile"
-            open={mobileOpen}
-            onCloseMobile={() => setMobileOpen(false)}
-          />
-        </div>
+        <ParentSidebar
+          desktopOnly={false}
+          mode="mobile"
+          open={mobileOpen}
+          onCloseMobile={() => setMobileOpen(false)}
+        />
       </div>
     </TopBarContext.Provider>
   );

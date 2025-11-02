@@ -11,7 +11,7 @@ import {
   Youtube,
   Facebook,
 } from "lucide-react";
-import WebsiteNavbar from "@/components/common/public/WebsiteNavbar";
+import WebsiteNavbar from "@/components/common/public/CWebsiteNavbar";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import WebsiteFooter from "../components/CMasjidkuWebFooter";

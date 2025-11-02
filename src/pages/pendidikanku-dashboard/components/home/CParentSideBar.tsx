@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useCallback, useRef } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { NavLink, useMatch, useParams, useNavigate } from "react-router-dom";
 import {
   LogOut,
@@ -15,7 +15,6 @@ import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import { pickTheme, ThemeName, type Palette } from "@/constants/thema";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useActiveMasjidInfo } from "@/hooks/useActiveMasjidInfo";
-import { DeleteConfirmModal } from "@/pages/pendidikanku-dashboard/components/common/CDeleteConfirmModal";
 
 /* ================= helpers & types ================= */
 type Kind = "sekolah" | "murid" | "guru";
@@ -63,6 +62,7 @@ const DBG = {
 /* ---- API normalize ---- */
 const getSimpleContext: () => Promise<SimpleContext> = async () => {
   const resp: any = await fetchSimpleContext();
+  // tahan 3 bentuk: resp.data.data -> resp.data -> resp
   const raw: any = resp?.data?.data ?? resp?.data ?? resp ?? {};
 
   const memberships: Membership[] = (raw?.memberships ?? []).map((m: any) => ({
@@ -131,7 +131,7 @@ export const translateRole = (r?: string): string =>
   )[(r ?? "").toLowerCase()] ?? "User";
 
 /* ===================================================================
-   MODAL SWITCH CONTEXT
+   MODAL SWITCH CONTEXT (di atas supaya aman HMR/hoisting)
    =================================================================== */
 function ModalSwitchContext({
   open,
@@ -152,6 +152,7 @@ function ModalSwitchContext({
   const palette = pickTheme(themeName as ThemeName, isDark);
   const qc = useQueryClient();
 
+  // Pakai cache global; fetch hanya jika modal dibuka & belum ada
   const initial = qc.getQueryData<SimpleContext>(["me", "simple-context"]);
   const { data, isLoading } = useQuery<SimpleContext, Error>({
     queryKey: ["me", "simple-context"],
@@ -394,61 +395,6 @@ function ModalSwitchContext({
   );
 }
 
-/* ================= Small component: User Options Menu ================= */
-function UserOptionsMenu({
-  palette,
-  onLogout,
-  onSwitchContext,
-  loggingOut,
-  className = "",
-}: {
-  palette: Palette;
-  onLogout: () => void;
-  onSwitchContext: () => void;
-  loggingOut: boolean;
-  className?: string;
-}) {
-  return (
-    <div
-      id="sidebar-user-menu"
-      role="menu"
-      aria-label="Menu pengguna"
-      className={`z-50 rounded-2xl shadow-xl ${className}`}
-      style={{
-        background: palette.white1,
-        border: `1px solid ${palette.silver1}`,
-      }}
-    >
-      <ul className="py-1">
-        <li>
-          <button
-            type="button"
-            onClick={onSwitchContext}
-            className="w-full text-left px-4 py-2 rounded-xl"
-            style={{ color: palette.black1 }}
-          >
-            Ganti Masjid / Role
-          </button>
-        </li>
-        <li>
-          <button
-            type="button"
-            onClick={onLogout}
-            disabled={loggingOut}
-            className="w-full text-left px-4 py-2 rounded-xl font-medium"
-            style={{
-              color: "#DC2626",
-              opacity: loggingOut ? 0.7 : 1,
-            }}
-          >
-            Logout
-          </button>
-        </li>
-      </ul>
-    </div>
-  );
-}
-
 /* ================= SIDEBAR ================= */
 export default function ParentSidebar({
   kind = "auto",
@@ -462,7 +408,6 @@ export default function ParentSidebar({
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const [logoutOpen, setLogoutOpen] = useState(false);
 
   // URL params
   const params = useParams<{ id?: string }>();
@@ -487,13 +432,13 @@ export default function ParentSidebar({
     DBG.log("useActiveMasjidInfo()", active);
   }, [active]);
 
-  // Simple-context
+  // Satu sumber data simple-context (hindari 429)
   const { data: ctxData } = useQuery<SimpleContext, Error>({
     queryKey: ["me", "simple-context"],
     queryFn: getSimpleContext,
     staleTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
-    refetchOnMount: true,
+    refetchOnMount: true, // pastikan fetch saat mount
     retry: 1,
   });
 
@@ -529,10 +474,6 @@ export default function ParentSidebar({
   const [loggingOut, setLoggingOut] = useState(false);
   const [openSwitcher, setOpenSwitcher] = useState(false);
 
-  // dropdown user
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const userBtnRef = useRef<HTMLButtonElement | null>(null);
-
   useEffect(() => {
     if (kind !== "auto") setResolvedKind(kind);
     else if (urlKind) setResolvedKind(urlKind);
@@ -551,30 +492,6 @@ export default function ParentSidebar({
     setUserProfile(next);
     DBG.log("Set userProfile", next);
   }, [userName, userEmail, derivedRole, avatarUrl]);
-
-  // click-outside + Esc
-  useEffect(() => {
-    function onDocClick(e: MouseEvent) {
-      if (!userBtnRef.current) return;
-      const menu = document.getElementById("sidebar-user-menu");
-      const target = e.target as Node;
-      if (
-        !userBtnRef.current.contains(target) &&
-        !(menu && menu.contains(target))
-      ) {
-        setUserMenuOpen(false);
-      }
-    }
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") setUserMenuOpen(false);
-    }
-    document.addEventListener("mousedown", onDocClick);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onDocClick);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, []);
 
   const effectiveOrgId = active.id ?? safeOrgIdFromUrl;
   const base = useMemo(
@@ -629,6 +546,7 @@ export default function ParentSidebar({
         role === "teacher" ? "guru" : role === "student" ? "murid" : "sekolah";
       setOpenSwitcher(false);
 
+      // segarkan cache agar header/footer langsung update
       await Promise.allSettled([
         qc.invalidateQueries({ queryKey: ["me", "simple-context"] }),
         qc.prefetchQuery({
@@ -642,7 +560,7 @@ export default function ParentSidebar({
     [navigate, qc]
   );
 
-  // helper rail item
+  // Rail item
   const RailItem = ({
     to,
     Icon,
@@ -671,13 +589,6 @@ export default function ParentSidebar({
     </NavLink>
   );
 
-  // ===== aside class (fix layout) =====
-  const asideBase = desktopOnly
-    ? "hidden lg:flex"
-    : `fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 ${
-        open ? "translate-x-0" : "-translate-x-full"
-      } flex`; // penting: flex
-
   return (
     <>
       {/* backdrop mobile */}
@@ -691,7 +602,7 @@ export default function ParentSidebar({
       )}
 
       <aside
-        className={`${asideBase} relative flex-col shrink-0 ${className}`}
+        className={`${desktopOnly ? "hidden lg:flex" : `fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 ${open ? "translate-x-0" : "-translate-x-full"}`} flex-col ${className}`}
         style={{
           width: desktopOnly ? (open ? "16rem" : "3.5rem") : "16rem",
           background: palette.white1,
@@ -701,8 +612,8 @@ export default function ParentSidebar({
       >
         {/* ====== COLLAPSED RAIL ====== */}
         {desktopOnly && !open && (
-          <div className="flex h-full w-14 flex-col py-3 overflow-hidden">
-            <div className="space-y-2 overflow-y-auto">
+          <div className="flex h-full w-14 flex-col items-center justify-between py-3">
+            <div className="space-y-2">
               {navsWithTo.map(({ to, icon: Icon, label, end }) => (
                 <RailItem
                   key={to}
@@ -713,55 +624,26 @@ export default function ParentSidebar({
                 />
               ))}
             </div>
-
-            {/* Avatar rail (selalu di paling bawah) */}
-            <div className="mt-auto relative">
-              <button
-                ref={userBtnRef}
-                onClick={() => setUserMenuOpen((v) => !v)}
-                aria-haspopup="menu"
-                aria-expanded={userMenuOpen}
-                className="w-10 h-10 rounded-xl grid place-items-center mx-auto"
-                style={{
-                  background: palette.white1,
-                  boxShadow: `inset 0 0 0 1px ${palette.silver1}`,
-                }}
-                title="User menu"
-                aria-label="User menu"
-              >
-                {userProfile?.avatar ? (
-                  <img
-                    src={userProfile.avatar}
-                    alt={userProfile.name}
-                    className="h-10 w-10 rounded-xl object-cover"
-                    referrerPolicy="no-referrer"
-                  />
-                ) : (
-                  <span className="text-xs font-semibold">
-                    {getInitials(userProfile?.name)}
-                  </span>
-                )}
-              </button>
-
-              {userMenuOpen && (
-                <UserOptionsMenu
-                  palette={palette}
-                  loggingOut={loggingOut}
-                  onLogout={() => setLogoutOpen(true)} // <-- buka modal
-                  onSwitchContext={() => {
-                    setUserMenuOpen(false);
-                    setOpenSwitcher(true);
-                  }}
-                  className="absolute left-16 bottom-0 w-56"
-                />
-              )}
-            </div>
+            <button
+              onClick={goLogout}
+              className="w-10 h-10 rounded-xl grid place-items-center mx-auto"
+              style={{
+                background: palette.white1,
+                boxShadow: `inset 0 0 0 1px ${palette.silver1}`,
+                color: "#DC2626",
+                opacity: loggingOut ? 0.7 : 1,
+              }}
+              title="Logout"
+              aria-label="Logout"
+            >
+              <LogOut size={18} />
+            </button>
           </div>
         )}
 
         {/* ====== EXPANDED ====== */}
         {(!desktopOnly || open) && (
-          <div className="flex h-full flex-col">
+          <>
             {/* Mobile header */}
             {!desktopOnly && (
               <div
@@ -798,6 +680,18 @@ export default function ParentSidebar({
                     alt={active.name || "Masjid"}
                     className="w-10 h-10 rounded-xl object-cover border"
                     style={{ borderColor: palette.white3 }}
+                    onLoad={(e) =>
+                      DBG.log(
+                        "Masjid icon loaded",
+                        (e.currentTarget as HTMLImageElement).src
+                      )
+                    }
+                    onError={(e) =>
+                      DBG.log(
+                        "Masjid icon ERROR",
+                        (e.currentTarget as HTMLImageElement).src
+                      )
+                    }
                   />
                   <div className="min-w-0 flex-1">
                     <div className="text-sm font-semibold truncate">
@@ -854,22 +748,17 @@ export default function ParentSidebar({
               </SectionCard>
             </div>
 
-            {/* Footer: user (selalu paling bawah, non-scroll) */}
+            {/* Footer: user & logout */}
             <div
-              className="p-3 relative mt-auto"
+              className="p-3"
               style={{
                 borderTop: `1px solid ${palette.silver1}`,
                 background: palette.white2,
               }}
             >
               {userProfile && (
-                <button
-                  ref={userBtnRef}
-                  type="button"
-                  onClick={() => setUserMenuOpen((v) => !v)}
-                  aria-haspopup="menu"
-                  aria-expanded={userMenuOpen}
-                  className="w-full p-3 rounded-2xl flex items-center gap-3 text-left"
+                <div
+                  className="mb-3 p-3 rounded-2xl flex items-center gap-3"
                   style={{
                     background: palette.white1,
                     boxShadow: `inset 0 0 0 1px ${palette.silver1}`,
@@ -886,6 +775,17 @@ export default function ParentSidebar({
                         alt={userProfile.name}
                         className="h-full w-full object-cover"
                         referrerPolicy="no-referrer"
+                        onLoad={(e) =>
+                          DBG.log(
+                            "Avatar loaded",
+                            (e.currentTarget as HTMLImageElement).src
+                          )
+                        }
+                        onError={(e) => {
+                          const el = e.currentTarget as HTMLImageElement;
+                          DBG.log("Avatar ERROR", el.src);
+                          el.style.display = "none";
+                        }}
                       />
                     ) : (
                       getInitials(userProfile.name)
@@ -902,38 +802,34 @@ export default function ParentSidebar({
                       {translateRole(userProfile.role)}
                     </p>
                   </div>
-                  <ChevronDown className="w-4 h-4" />
-                </button>
+                </div>
               )}
 
-              {userMenuOpen && (
-                <UserOptionsMenu
-                  palette={palette}
-                  loggingOut={loggingOut}
-                  onLogout={() => setLogoutOpen(true)} // <-- buka modal
-                  onSwitchContext={() => {
-                    setUserMenuOpen(false);
-                    setOpenSwitcher(true);
-                  }}
-                  className="absolute bottom-16 left-3 right-3"
-                />
-              )}
+              <button
+                onClick={goLogout}
+                disabled={loggingOut}
+                className="w-full flex items-center justify-center gap-2 rounded-2xl py-2.5 font-medium transition-all"
+                style={{
+                  background: palette.white1,
+                  boxShadow: `inset 0 0 0 1px ${palette.silver1}`,
+                  color: "#DC2626",
+                  opacity: loggingOut ? 0.7 : 1,
+                }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.background = palette.white2)
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.background = palette.white1)
+                }
+                aria-label="Logout"
+              >
+                <LogOut size={18} />
+                <span>Logout</span>
+              </button>
             </div>
-          </div>
+          </>
         )}
       </aside>
-
-      <DeleteConfirmModal
-        open={logoutOpen}
-        onClose={() => setLogoutOpen(false)}
-        onConfirm={goLogout} // <-- benar-benar logout di sini
-        palette={palette}
-        title="Konfirmasi Logout"
-        message="Keluar dari sesi ini? Kamu bisa login lagi kapan saja."
-        confirmLabel="Logout"
-        cancelLabel="Batal"
-        loading={loggingOut}
-      />
 
       {/* Switcher Modal */}
       <ModalSwitchContext

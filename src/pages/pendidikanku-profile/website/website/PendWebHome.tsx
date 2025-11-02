@@ -18,7 +18,7 @@ import sekolah4 from "@/assets/sekolah4.webp";
 import sekolah5 from "@/assets/sekolah5.png";
 import keuangan from "@/assets/keuangan.jpg";
 
-import WebsiteNavbar from "@/components/common/public/WebsiteNavbar";
+import WebsiteNavbar from "@/components/common/public/CWebsiteNavbar";
 import WebsiteFooter from "./components/CMasjidkuWebFooter";
 
 import useHtmlThema from "@/hooks/useHTMLThema";

@@ -13,12 +13,12 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import { useQueryClient } from "@tanstack/react-query";
-import SharePopover from "./SharePopover";
+import SharePopover from "./CSharePopover";
 import { useResponsive } from "@/hooks/isResponsive";
 import { apiLogout } from "@/lib/axios";
 
-import MyProfile, { MyProfileData } from "./MyProfile";
-import ModalEditProfile, { EditProfileData } from "./ModalEditProfile";
+import MyProfile, { MyProfileData } from "./CMyProfile";
+import ModalEditProfile, { EditProfileData } from "./CModalEditProfile";
 
 interface PublicUserDropdownProps {
   variant?: "default" | "icon";

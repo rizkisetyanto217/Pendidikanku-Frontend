@@ -1,7 +1,7 @@
 // src/pages/public/Contact.tsx
 import React from "react";
 import { Phone, Mail, MapPin, Clock } from "lucide-react";
-import WebsiteNavbar from "@/components/common/public/WebsiteNavbar";
+import WebsiteNavbar from "@/components/common/public/CWebsiteNavbar";
 
 const FullBleed: React.FC<{
   children: React.ReactNode;
@@ -13,7 +13,6 @@ const FullBleed: React.FC<{
     {children}
   </div>
 );
-
 
 export default function Contact() {
   return (

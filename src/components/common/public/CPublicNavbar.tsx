@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import PublicUserDropdown from "./UserDropDown";
+import PublicUserDropdown from "./CUserDropDown";
 
 interface PublicNavbarProps {
   masjidName: string;

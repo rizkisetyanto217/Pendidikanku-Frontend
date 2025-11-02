@@ -6,7 +6,7 @@ import {
   useNavigate,
 } from "react-router-dom";
 import { Menu, ArrowLeft } from "lucide-react";
-import PublicUserDropdown from "@/components/common/public/UserDropDown";
+import PublicUserDropdown from "@/components/common/public/CUserDropDown";
 import { type Palette } from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import { NAVS, type NavItem } from "./navsConfig";

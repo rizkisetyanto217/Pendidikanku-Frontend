@@ -2,7 +2,7 @@ import React, { useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
-import RegisterChoiceModal from "@/pages/pendidikanku-dashboard/auth/components/RegisterModalChoice";
+import RegisterChoiceModal from "@/pages/pendidikanku-dashboard/auth/components/CRegisterModalChoice";
 
 type AuthLayoutProps = {
   children: React.ReactNode;
@@ -38,24 +38,63 @@ export default function AuthLayout({
     [navigate]
   );
 
+  const alpha = (hex: string, a = 0.08) =>
+    hex.startsWith("#")
+      ? `${hex}${Math.round(a * 255)
+          .toString(16)
+          .padStart(2, "0")}`
+      : hex;
+
   return (
     <div
-      className="min-h-[100svh] flex items-center justify-center w-full overflow-hidden"
+      className="min-h-[100svh] w-full flex items-center justify-center overflow-hidden px-4 py-8 sm:py-12 relative"
       style={{
-        background: isDark
-          ? `linear-gradient(180deg, ${theme.white1} 0%, ${theme.white2} 100%)`
-          : `linear-gradient(180deg, ${theme.white2} 0%, ${theme.white1} 100%)`,
+        background: `
+          radial-gradient(1200px 600px at 50% -10%, ${alpha(theme.primary, 0.12)} 0%, transparent 60%),
+          linear-gradient(180deg, ${isDark ? theme.white1 : theme.white2} 0%, ${
+            isDark ? theme.white2 : theme.white1
+          } 100%)
+        `,
         color: theme.black1,
       }}
     >
+      {/* soft blobs */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-32 -left-24 w-[420px] h-[420px] rounded-full blur-[90px]"
+        style={{ background: alpha(theme.quaternary || theme.primary, 0.25) }}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -bottom-24 -right-24 w-[420px] h-[420px] rounded-full blur-[90px]"
+        style={{ background: alpha(theme.primary, 0.25) }}
+      />
+
       <div
         className={[
-          "rounded-xl shadow-md w-full border",
+          "relative rounded-2xl w-full",
           fullWidth ? "max-w-none px-4 sm:px-6 lg:px-8 py-8" : "max-w-md p-8",
           contentClassName,
         ].join(" ")}
-        style={{ backgroundColor: theme.white1, borderColor: theme.white3 }}
+        style={{
+          backgroundColor: theme.white1,
+          boxShadow:
+            "0 1px 0 rgba(0,0,0,0.06), 0 12px 40px rgba(0,0,0,0.18), inset 0 0 0 0.5px rgba(0,0,0,0.06)",
+          borderRadius: 16,
+        }}
       >
+        {/* Accent top bar */}
+        <div
+          className="absolute left-6 right-6 top-0 h-[3px] rounded-b-full"
+          style={{
+            background: `linear-gradient(90deg, ${alpha(theme.primary, 0.6)} 0%, ${alpha(
+              theme.secondary || theme.primary,
+              0.4
+            )} 100%)`,
+            transform: "translateY(-1.5px)",
+          }}
+        />
+
         {children}
 
         <div className="mt-6 text-center">
@@ -66,10 +105,10 @@ export default function AuthLayout({
                 <Link
                   to="/register"
                   onClick={handleOpenChoice}
-                  className="hover:underline"
+                  className="hover:underline font-semibold"
                   style={{ color: theme.primary }}
                 >
-                  Daftar
+                  Daftar sekarang
                 </Link>
               </>
             ) : (
@@ -77,10 +116,10 @@ export default function AuthLayout({
                 Sudah punya?{" "}
                 <Link
                   to="/login"
-                  className="hover:underline"
+                  className="hover:underline font-semibold"
                   style={{ color: theme.primary }}
                 >
-                  Login
+                  Masuk
                 </Link>
               </>
             )}

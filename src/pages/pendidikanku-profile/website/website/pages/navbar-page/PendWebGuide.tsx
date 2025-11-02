@@ -6,7 +6,7 @@ import {
   HelpCircle,
   ShieldCheck,
 } from "lucide-react";
-import WebsiteNavbar from "@/components/common/public/WebsiteNavbar";
+import WebsiteNavbar from "@/components/common/public/CWebsiteNavbar";
 
 const FullBleed: React.FC<{
   children: React.ReactNode;

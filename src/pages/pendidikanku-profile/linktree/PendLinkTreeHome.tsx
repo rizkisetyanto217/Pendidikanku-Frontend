@@ -18,14 +18,14 @@ import {
   Link as LinkIcon,
   ExternalLink,
 } from "lucide-react";
-import PublicNavbar from "@/components/common/public/PublicNavbar";
-import BottomNavbar from "@/components/common/public/ButtonNavbar";
+import PublicNavbar from "@/components/common/public/CPublicNavbar";
+import BottomNavbar from "@/components/common/public/CButtonNavbar";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import BorderLine from "@/components/common/main/Border";
 import CartLink from "@/components/common/main/CardLink";
 import FormattedDate from "@/constants/formattedDate";
 // import SholatScheduleCard from "@/components/pages/home/SholatSchedule";
-import SocialMediaModal from "@/components/pages/home/SocialMediaModal";
+import SocialMediaModal from "@/components/pages/home/CSocialMediaModal";
 import ShimmerImage from "@/components/common/main/ShimmerImage";
 
 const currentUrl = typeof window !== "undefined" ? window.location.href : "";

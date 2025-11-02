@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
-import PublicUserDropdown from "@/components/common/public/UserDropDown";
+import PublicUserDropdown from "@/components/common/public/CUserDropDown";
 
 export interface LinktreeNavbarProps {
   /** Nama brand di kiri (default: "sekolahislamku") */

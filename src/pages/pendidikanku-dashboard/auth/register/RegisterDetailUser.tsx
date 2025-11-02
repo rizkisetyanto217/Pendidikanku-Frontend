@@ -1,6 +1,6 @@
 // src/pages/pendaftaran/PendaftaranPage.tsx
 import React, { useMemo } from "react";
-import { ModalRegister } from "../components/RegisterModalUser";
+import { ModalRegister } from "../components/CRegisterModalUser";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 

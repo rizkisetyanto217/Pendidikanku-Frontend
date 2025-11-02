@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
-import PublicNavbar from "@/components/common/public/PublicNavbar";
+import PublicNavbar from "@/components/common/public/CPublicNavbar";
 import CartLink from "@/components/common/main/CardLink";
 import ShimmerImage from "@/components/common/main/ShimmerImage";
 import {
@@ -19,7 +19,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 // import MasjidkuHomePrayerCard from "@/components/pages/home/MasjidkuHomePrayerCard";
-import LinktreeNavbar from "@/components/common/public/LintreeNavbar";
+import LinktreeNavbar from "@/components/common/public/CLintreeNavbar";
 
 /* =========================================================
    Helpers

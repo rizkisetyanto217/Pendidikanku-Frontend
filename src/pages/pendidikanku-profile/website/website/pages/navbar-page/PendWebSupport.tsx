@@ -9,7 +9,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
-import WebsiteNavbar from "@/components/common/public/WebsiteNavbar";
+import WebsiteNavbar from "@/components/common/public/CWebsiteNavbar";
 
 const FullBleed: React.FC<{
   children: React.ReactNode;

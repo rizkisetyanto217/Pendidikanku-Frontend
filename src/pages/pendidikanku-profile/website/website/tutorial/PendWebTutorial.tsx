@@ -18,7 +18,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 
-import WebsiteNavbar from "@/components/common/public/WebsiteNavbar";
+import WebsiteNavbar from "@/components/common/public/CWebsiteNavbar";
 import WebsiteFooter from "@/pages/pendidikanku-profile/website/website/components/CMasjidkuWebFooter";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
