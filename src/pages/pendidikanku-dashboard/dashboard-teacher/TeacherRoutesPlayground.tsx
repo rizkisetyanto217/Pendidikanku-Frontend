@@ -8,17 +8,44 @@ import {
 } from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 import { Layers, ChevronRight } from "lucide-react";
 
-/* Prefix rute yang termasuk “tenant scope” */
-const TENANT_PREFIXES = [
-  "/guru",
-  "/sekolah",
-  "/menu-utama",
-  "/wali",
-  "/siswa",
-  "/admin",
-];
+/* Prefix rute yang termasuk “tenant scope” (tanpa slash depan utk cek segmen) */
+const TENANT_SEGMENTS = new Set([
+  "guru",
+  "sekolah",
+  "menu-utama",
+  "wali",
+  "siswa",
+  "admin",
+]);
 
-/* Klik <a> → inject /:sid jika perlu */
+/** Sisipkan /:sid jika path menuju tenant scope tetapi belum ada sid.
+ *  Menjaga basename (contoh: /app) kalau deployment memakai subpath.
+ */
+function ensureTenantInPath(path: string, sid: string): string {
+  const p = path.startsWith("/") ? path : `/${path}`;
+  const segs = p.replace(/^\/+/, "").split("/"); // ["app","guru","..."] atau ["guru","..."]
+
+  if (segs.length === 0) return `/${sid}`;
+  // Sudah ada sid?
+  if (segs[0] === sid) return p;
+
+  // CASE A: tanpa basename, seg0 adalah tenant segment (guru/sekolah/...)
+  if (TENANT_SEGMENTS.has(segs[0])) {
+    return `/${sid}/${segs.join("/")}`;
+  }
+
+  // CASE B: dengan basename, cek seg1
+  if (segs.length >= 2 && TENANT_SEGMENTS.has(segs[1])) {
+    const base = segs[0];
+    const rest = segs.slice(1).join("/"); // "guru/..."
+    return `/${base}/${sid}/${rest}`;
+  }
+
+  // Bukan tenant scope → biarkan apa adanya
+  return p;
+}
+
+/** Komponen wrapper: intercept klik <a> internal dan injeksi /:sid untuk tenant scope */
 function TenantClickRewriter({
   sid,
   children,
@@ -27,13 +54,6 @@ function TenantClickRewriter({
   children: React.ReactNode;
 }) {
   const nav = useNavigate();
-
-  const ensureTenant = (path: string) => {
-    const p = path.startsWith("/") ? path : `/${path}`;
-    if (p.startsWith(`/${sid}/`) || p === `/${sid}`) return p;
-    const isTenantScope = TENANT_PREFIXES.some((pref) => p.startsWith(pref));
-    return isTenantScope ? `/${sid}${p}` : p;
-  };
 
   return (
     <div
@@ -44,24 +64,24 @@ function TenantClickRewriter({
         if (!a) return;
 
         const hrefAttr = a.getAttribute("href") || "";
-        if (
-          !hrefAttr ||
-          hrefAttr.startsWith("http") ||
+        if (!hrefAttr) return;
+
+        // Abaikan link eksternal / anchor spesial
+        const isExternal =
+          /^https?:\/\//i.test(hrefAttr) ||
           hrefAttr.startsWith("mailto:") ||
-          hrefAttr.startsWith("#")
-        ) {
-          return;
-        }
+          hrefAttr.startsWith("tel:");
+        if (isExternal || hrefAttr === "#" || hrefAttr.startsWith("#")) return;
 
-        const url = new URL(hrefAttr, window.location.origin);
-        const needsTenant =
-          !url.pathname.startsWith(`/${sid}/`) &&
-          TENANT_PREFIXES.some((p) => url.pathname.startsWith(p));
+        // Dapatkan bagian path/search/hash dari anchor DOM (stabil di browser & tak butuh window.origin)
+        const path = a.pathname || "/";
+        const nextPath = ensureTenantInPath(path, sid);
+        const finalUrl = `${nextPath}${a.search || ""}${a.hash || ""}`;
 
-        if (needsTenant) {
+        // Jika berubah, tahan default dan navigate
+        if (finalUrl !== `${path}${a.search || ""}${a.hash || ""}`) {
           e.preventDefault();
-          const next = ensureTenant(`${url.pathname}${url.search}${url.hash}`);
-          nav(next);
+          nav(finalUrl);
         }
       }}
     >
@@ -74,7 +94,7 @@ export default function TeacherRoutesPlayground() {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
 
-  // Ambil :schoolId atau :school_id dari URL; fallback ke query `school_id` atau default demo
+  // Ambil :schoolId atau :school_id; fallback ke query `school_id` atau default demo
   const { schoolId: p1, school_id: p2 } = useParams<{
     schoolId?: string;
     school_id?: string;
@@ -83,24 +103,19 @@ export default function TeacherRoutesPlayground() {
   const sp = new URLSearchParams(search);
   const sid = p1 || p2 || sp.get("school_id") || "demo-school";
 
-  // Helper prefix
-  const ensureTenant = (path: string) => {
-    const p = path.startsWith("/") ? path : `/${path}`;
-    if (p.startsWith(`/${sid}/`) || p === `/${sid}`) return p;
-    const isTenantScope = TENANT_PREFIXES.some((pref) => p.startsWith(pref));
-    return isTenantScope ? `/${sid}${p}` : p;
-  };
-
-  // Link aman (auto prefix)
+  // Helper Link yang aman
   const TenantLink = ({
     to,
     children,
   }: {
     to: string;
     children: React.ReactNode;
-  }) => <Link to={ensureTenant(to)}>{children}</Link>;
+  }) => {
+    const safe = ensureTenantInPath(to, sid);
+    return <Link to={safe}>{children}</Link>;
+  };
 
-  // Demo IDs (disesuaikan dengan dummy yg sudah kita pakai)
+  // Demo IDs
   const demo = {
     classId: "cls-10a-2025",
     scheduleId: "sch-001",
@@ -108,7 +123,7 @@ export default function TeacherRoutesPlayground() {
     studentId: "stu-10a-001",
   };
 
-  const base = ensureTenant("/guru");
+  const base = ensureTenantInPath("/guru", sid);
 
   const groups: { title: string; links: { label: string; to: string }[] }[] = [
     {
@@ -201,7 +216,6 @@ export default function TeacherRoutesPlayground() {
         { label: "Menu • Profil Guru", to: `${base}/menu-utama/profil-guru` },
         { label: "Menu • Pengaturan", to: `${base}/menu-utama/pengaturan` },
         { label: "Menu • Tugas", to: `${base}/menu-utama/tugas` },
-        // { label: "Menu • Sertifikat", to: `${base}/menu-utama/sertifikat` },
       ],
     },
     {

@@ -11,7 +11,7 @@ import clsx from "clsx";
 import axios from "@/lib/axios";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
-import PageHeaderUser from "@/components/common/home/PageHeaderUser";
+import PageHeaderUser from "@/components/common/home/CPageHeaderUser";
 
 type QuizMode = "first-pass" | "mastery";
 const SCORING_MODE: QuizMode = "mastery";

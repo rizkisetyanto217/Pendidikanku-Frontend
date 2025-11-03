@@ -17,8 +17,8 @@ import SharePopover from "./CSharePopover";
 import { useResponsive } from "@/hooks/isResponsive";
 import { apiLogout } from "@/lib/axios";
 
-import MyProfile, { MyProfileData } from "./CMyProfile";
-import ModalEditProfile, { EditProfileData } from "./CModalEditProfile";
+import MyProfile, { MyProfileData } from "../../../pages/pendidikanku-dashboard/components/home/CMyProfile";
+import ModalEditProfile, { EditProfileData } from "../../../pages/pendidikanku-dashboard/components/modal/CModalEditProfile";
 import { pickTheme, ThemeName } from "@/constants/thema";
 
 /* ================= Helpers ================= */

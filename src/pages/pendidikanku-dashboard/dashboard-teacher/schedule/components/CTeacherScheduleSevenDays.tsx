@@ -1,92 +1,44 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+// src/pages/sekolahislamku/dashboard-teacher/class/components/AllTodaySchedule.tsx
+import React, { useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
-import Swal from "sweetalert2";
-import "sweetalert2/dist/sweetalert2.min.css"; // ⬅️ pastikan CSS swal ter-load
 import {
   SectionCard,
   Btn,
   Badge,
   type Palette,
 } from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
-import { Calendar, Clock, MapPin, Plus, ArrowLeft } from "lucide-react";
+import { Plus, Calendar, Clock, MapPin, ArrowLeft } from "lucide-react";
 
-import { fetchTeacherHome } from "../types/teacher";
+// API & Types
+import {
+  fetchTeacherHome,
+  TEACHER_HOME_QK,
+  type TeacherHomeResponse,
+  type TodayClass,
+  type UpcomingClass,
+} from "../../class/types/teacher";
 
-import AddSchedule from "../../schedule/TeacherAddSchedule";
+import ParentTopBar from "@/pages/pendidikanku-dashboard/components/home/CParentTopBar";
+import ParentSidebar from "@/pages/pendidikanku-dashboard/components/home/CParentSideBar";
+import AddSchedule from "../TeacherAddSchedule";
 
-/* ================= Types ================= */
+/* =========================
+   Types (UI normalized)
+========================= */
 type ScheduleItem = {
   id?: string;
   time: string; // "07:30"
   title: string; // "TPA A — Tahsin"
-  room?: string; // "22 Agu • Aula 1" | "Aula 1"
+  room?: string; // "22 Agu • Aula 1" atau "Aula 1"
   dateISO: string; // ISO tanggal (00:00)
 };
 
-/* ================ SweetAlert utilities (inline) ================ */
-const SWAL_CONTAINER_Z = "z-[2000]"; // pastikan berada paling atas
-
-async function confirmDelete({
-  title = "Yakin hapus data?",
-  text = "Tindakan ini tidak bisa dibatalkan.",
-  confirmText = "Ya, hapus",
-  cancelText = "Batal",
-}: {
-  title?: string;
-  text?: string;
-  confirmText?: string;
-  cancelText?: string;
-} = {}) {
-  const res = await Swal.fire({
-    title,
-    text,
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonText: confirmText,
-    cancelButtonText: cancelText,
-    heightAuto: false,
-    backdrop: true,
-    buttonsStyling: false,
-    customClass: {
-      container: SWAL_CONTAINER_Z,
-      popup: "rounded-2xl",
-      confirmButton:
-        "swal2-confirm bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 rounded-lg",
-      cancelButton:
-        "swal2-cancel bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium px-4 py-2 rounded-lg ml-2",
-    },
-  });
-  return res.isConfirmed;
-}
-
-function toastSuccess(msg = "Berhasil.") {
-  return Swal.fire({
-    title: "Sukses",
-    text: msg,
-    icon: "success",
-    timer: 1400,
-    showConfirmButton: false,
-    heightAuto: false,
-    customClass: { container: SWAL_CONTAINER_Z, popup: "rounded-2xl" },
-  });
-}
-
-function toastError(msg = "Terjadi kesalahan.") {
-  return Swal.fire({
-    title: "Gagal",
-    text: msg,
-    icon: "error",
-    timer: 1800,
-    showConfirmButton: true,
-    heightAuto: false,
-    customClass: { container: SWAL_CONTAINER_Z, popup: "rounded-2xl" },
-  });
-}
-
-/* ================= Date helpers ================= */
+/* =========================
+   Helpers
+========================= */
 const startOfDay = (d = new Date()) => {
   const x = new Date(d);
   x.setHours(0, 0, 0, 0);
@@ -114,7 +66,7 @@ const fmtLong = (iso: string) =>
     month: "long",
   });
 
-/** Ekstrak nama lokasi murni dari field room yang mungkin “DD Mon • Ruang” */
+/** Ambil nama lokasi murni dari "DD Mon • Aula 1" → "Aula 1" */
 const getPureLocation = (room?: string) => {
   if (!room) return "";
   const parts = room.split("•").map((s) => s.trim());
@@ -130,72 +82,58 @@ const makeScheduleSlug = (it: ScheduleItem) => {
   return encodeURIComponent(raw);
 };
 
-/** Normalisasi from API object → UI ScheduleItem (sertakan id fallback stabil) */
-const normalizeItem = (c: any, fallback: Date): ScheduleItem => {
-  const dateISO = c.dateISO
-    ? toISODate(new Date(c.dateISO))
+/** Normalisasi dari tipe API ke tipe UI (ScheduleItem) */
+const normalizeItem = (
+  c: UpcomingClass | TodayClass,
+  fallback: Date
+): ScheduleItem => {
+  const dateISO = (c as UpcomingClass).dateISO
+    ? toISODate(new Date((c as UpcomingClass).dateISO))
     : toISODate(fallback);
-  const title = `${c.className} — ${c.subject}`;
-  const id: string = c.id ?? `${dateISO}|${c.time}|${title}`;
+
   return {
-    id,
+    id: c.id,
     time: c.time,
-    title,
+    title: `${c.className} — ${c.subject}`,
     dateISO,
-    room: c.dateISO ? `${fmtShort(c.dateISO)} • ${c.room ?? "-"}` : c.room,
+    room: (c as UpcomingClass).dateISO
+      ? `${fmtShort((c as UpcomingClass).dateISO)} • ${c.room ?? "-"}`
+      : c.room,
   };
 };
 
-/* ================= Component ================= */
-export default function CTeacherScheduleThreeDays() {
+/* =========================
+   Component
+========================= */
+export default function CTeacherScheduleSevenDays() {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
+  const qc = useQueryClient();
   const navigate = useNavigate();
 
-  // optional preload dari router state
-  const location = useLocation();
-  const preload = (location.state as any)?.items as ScheduleItem[] | undefined;
-
-  const { data } = useQuery({
-    queryKey: ["teacher-home"],
+  const { data } = useQuery<TeacherHomeResponse>({
+    queryKey: TEACHER_HOME_QK,
     queryFn: fetchTeacherHome,
     staleTime: 60_000,
   });
 
-  // Ambil 3 hari ke depan (hari ini s/d +2)
-  const DAYS = 3;
+  // Ambil 7 hari ke depan (hari ini s/d +6)
+  const DAYS = 7;
   const today = startOfDay(new Date());
   const end = startOfDay(addDays(today, DAYS - 1));
 
-  // Susun sumber data
+  // Sumber data: upcoming (7 hari) → fallback todayClasses
   const rawItems: ScheduleItem[] = useMemo(() => {
-    if (Array.isArray(preload) && preload.length) {
-      return preload
-        .map((p) => ({
-          ...p,
-          id:
-            p.id ??
-            `${toISODate(new Date(p.dateISO ?? today))}|${p.time}|${p.title}`,
-          dateISO: p.dateISO
-            ? toISODate(new Date(p.dateISO))
-            : toISODate(today),
-        }))
-        .sort((a, b) => {
-          const da = new Date(a.dateISO).getTime();
-          const db = new Date(b.dateISO).getTime();
-          if (da !== db) return da - db;
-          return a.time.localeCompare(b.time);
-        });
-    }
-    const upcoming = (data?.upcomingClasses ?? []).filter((u: any) => {
+    const upcoming = (data?.upcomingClasses ?? []).filter((u) => {
       const d = startOfDay(new Date(u.dateISO));
       return d >= today && d <= end;
     });
-    const fromUpcoming = upcoming.map((u: any) => normalizeItem(u, today));
+
+    const fromUpcoming = upcoming.map((u) => normalizeItem(u, today));
     const fromToday =
       fromUpcoming.length > 0
         ? []
-        : (data?.todayClasses ?? []).map((t: any) => normalizeItem(t, today));
+        : (data?.todayClasses ?? []).map((t) => normalizeItem(t, today));
 
     return [...fromUpcoming, ...fromToday].sort((a, b) => {
       const da = new Date(a.dateISO).getTime();
@@ -203,40 +141,36 @@ export default function CTeacherScheduleThreeDays() {
       if (da !== db) return da - db;
       return a.time.localeCompare(b.time);
     });
-  }, [preload, data?.upcomingClasses, data?.todayClasses]);
+  }, [data?.upcomingClasses, data?.todayClasses]);
 
-  /* ====== Lokal state supaya bisa Add/Edit/Delete tanpa reload ====== */
-  const [localItems, setLocalItems] = useState<ScheduleItem[]>(rawItems);
-  useEffect(() => setLocalItems(rawItems), [rawItems]);
-
-  /* ====== Search & Filter lokasi ====== */
+  /* ---------- UI State: search & filter lokasi ---------- */
   const [search, setSearch] = useState("");
   const [locFilter, setLocFilter] = useState<string | "semua">("semua");
 
   const lokasiOptions = useMemo(() => {
     const set = new Set(
-      localItems
+      rawItems
         .map((x) => getPureLocation(x.room))
         .map((s) => s.trim())
         .filter(Boolean)
     );
     return ["semua", ...Array.from(set)];
-  }, [localItems]);
+  }, [rawItems]);
 
   const filtered = useMemo(() => {
     const s = search.trim().toLowerCase();
-    return localItems.filter((j) => {
+    return rawItems.filter((j) => {
       const location = getPureLocation(j.room);
       const matchSearch =
         j.title.toLowerCase().includes(s) ||
         location.toLowerCase().includes(s) ||
-        j.time.toLowerCase().includes(s);
+        (j.time ?? "").toLowerCase().includes(s);
       const matchLoc = locFilter === "semua" || location === locFilter;
       return matchSearch && matchLoc;
     });
-  }, [localItems, search, locFilter]);
+  }, [rawItems, search, locFilter]);
 
-  /* ====== Bucket per hari (3 kotak) ====== */
+  /* ---------- Bucket per hari (7 kotak) ---------- */
   const dayBuckets = useMemo(() => {
     return Array.from({ length: DAYS }).map((_, i) => {
       const dISO = toISODate(addDays(today, i));
@@ -249,129 +183,122 @@ export default function CTeacherScheduleThreeDays() {
 
   /* ---------- Tambah / Edit / Hapus ---------- */
   const [showTambahJadwal, setShowTambahJadwal] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
   const [targetDateISO, setTargetDateISO] = useState<string | null>(null);
 
   const openAdd = (dateISO?: string) => {
-    setEditingId(null);
     setTargetDateISO(dateISO ?? toISODate(today));
     setShowTambahJadwal(true);
   };
 
-  const openEdit = (it: ScheduleItem) => {
-    setEditingId(it.id ?? `${it.dateISO}|${it.time}|${it.title}`);
-    setTargetDateISO(it.dateISO);
-    setShowTambahJadwal(true);
-  };
-
-  const handleSubmitSchedule = (payload: {
+  const handleAddSchedule = (item: {
     time: string;
     title: string;
     room?: string;
   }) => {
-    const baseDateISO = targetDateISO ?? toISODate(today);
-    if (editingId) {
-      // Edit: replace item yang cocok
-      setLocalItems((prev) =>
-        prev
-          .map((x) =>
-            (x.id ?? `${x.dateISO}|${x.time}|${x.title}`) === editingId
-              ? {
-                  ...x,
-                  time: payload.time,
-                  title: payload.title,
-                  room: payload.room
-                    ? `${fmtShort(baseDateISO)} • ${payload.room}`
-                    : x.room,
-                }
-              : x
-          )
-          .sort((a, b) => {
-            const da = new Date(a.dateISO).getTime();
-            const db = new Date(b.dateISO).getTime();
-            if (da !== db) return da - db;
-            return a.time.localeCompare(b.time);
-          })
-      );
-    } else {
-      // Add: masuk ke tanggal target (default: hari ini)
-      const newItem: ScheduleItem = {
-        id: `local-${Date.now()}`,
-        dateISO: baseDateISO,
-        time: payload.time,
-        title: payload.title,
-        room: payload.room
-          ? `${fmtShort(baseDateISO)} • ${payload.room}`
-          : undefined,
+    // sinkronisasi cache "teacher-home" → todayClasses (optimistic)
+    qc.setQueryData(TEACHER_HOME_QK, (prev: any) => {
+      if (!prev) return prev;
+      const [classNameRaw = "", subjectRaw = ""] = item.title.split(" — ");
+      const newTc: TodayClass = {
+        id: `temp-${Date.now()}`,
+        time: item.time,
+        className: classNameRaw || "Kelas",
+        subject: subjectRaw || "Pelajaran",
+        room: item.room,
+        status: "upcoming",
       };
-      setLocalItems((prev) =>
-        [...prev, newItem].sort((a, b) => {
-          const da = new Date(a.dateISO).getTime();
-          const db = new Date(b.dateISO).getTime();
-          if (da !== db) return da - db;
-          return a.time.localeCompare(b.time);
-        })
-      );
-    }
+      return {
+        ...prev,
+        todayClasses: [...(prev.todayClasses ?? []), newTc].sort(
+          (a: TodayClass, b: TodayClass) => a.time.localeCompare(b.time)
+        ),
+      };
+    });
     setShowTambahJadwal(false);
   };
 
-  const handleDelete = async (it: ScheduleItem) => {
-    const ok = await confirmDelete({
-      title: "Yakin hapus jadwal?",
-      text: `Jadwal "${it.title}" akan dihapus permanen.`,
-      confirmText: "Ya, hapus",
-      cancelText: "Batal",
-    });
-    if (!ok) return;
-
-    try {
-      // TODO: panggil API delete bila sudah ada:
-      // await axios.delete(`/api/schedules/${encodeURIComponent(it.id!)}`);
-
-      const key = it.id ?? `${it.dateISO}|${it.time}|${it.title}`;
-      setLocalItems((prev) =>
-        prev.filter(
-          (x) => (x.id ?? `${x.dateISO}|${x.time}|${x.title}`) !== key
-        )
-      );
-
-      await toastSuccess("Jadwal berhasil dihapus.");
-    } catch (e: any) {
-      await toastError(e?.response?.data?.message ?? "Gagal menghapus jadwal.");
-    }
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const openEdit = (it: ScheduleItem) => {
+    setEditingId(it.id ?? `${it.dateISO}-${it.time}-${it.title}`);
+    setTargetDateISO(it.dateISO);
+    setShowTambahJadwal(true);
   };
 
-  /* ================= Render ================= */
+  const handleDelete = (it: ScheduleItem) => {
+    if (!confirm(`Hapus jadwal "${it.title}" pada ${it.time}?`)) return;
+
+    qc.setQueryData<TeacherHomeResponse>(TEACHER_HOME_QK, (prev) => {
+      if (!prev) return prev;
+
+      const sameUpcoming = (u: UpcomingClass) =>
+        (it.id && u.id === it.id) ||
+        (toISODate(new Date(u.dateISO)) === it.dateISO &&
+          u.time === it.time &&
+          `${u.className} — ${u.subject}` === it.title);
+
+      const sameToday = (t: TodayClass) =>
+        (it.id && t.id === it.id) ||
+        (t.time === it.time && `${t.className} — ${t.subject}` === it.title);
+
+      return {
+        ...prev,
+        upcomingClasses: (prev.upcomingClasses ?? []).filter(
+          (u) => !sameUpcoming(u)
+        ),
+        todayClasses: (prev.todayClasses ?? []).filter((t) => !sameToday(t)),
+      };
+    });
+  };
+
+  /* =========================
+     UI
+  ========================= */
   return (
     <div
       className="w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      {/* Modal Tambah/Edit Jadwal */}
+      <ParentTopBar
+        palette={palette}
+        gregorianDate={new Date().toISOString()}
+        title="Jadwal 7 Hari Kedepan"
+        dateFmt={(iso) =>
+          new Date(iso).toLocaleDateString("id-ID", {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          })
+        }
+      />
+
+      {/* Modal: Tambah Jadwal */}
       <AddSchedule
         open={showTambahJadwal}
         onClose={() => setShowTambahJadwal(false)}
         palette={palette}
-        onSubmit={handleSubmitSchedule}
+        onSubmit={handleAddSchedule}
       />
 
-      <main className="w-full">
-        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
+      <main className="mx-auto Replace px-4 py-6">
+        <div className="lg:flex lg:items-start lg:gap-4">
+          <aside className="lg:w-64 mb-6 lg:mb-0 lg:sticky lg:top-16 shrink-0">
+            <ParentSidebar />
+          </aside>
+
           <div className="flex-1 min-w-0 space-y-4">
             {/* Header actions */}
-            <div className="md:flex hidden items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <Btn
-                  palette={palette}
-                  variant="ghost"
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="flex items-center gap-2 font-semibold text-lg">
+                <button
                   onClick={() => navigate(-1)}
+                  className="inline-flex items-center justify-center rounded-full p-1 hover:opacity-80"
+                  aria-label="Kembali"
+                  title="Kembali"
                 >
-                  <ArrowLeft className="cursor-pointer" size={20} />
-                </Btn>
-                <div className="font-semibold text-lg">
-                  Jadwal 3 Hari Kedepan
-                </div>
+                  <ArrowLeft size={20} />
+                </button>
+                <span>Jadwal 7 Hari Kedepan</span>
               </div>
             </div>
 
@@ -390,6 +317,7 @@ export default function CTeacherScheduleThreeDays() {
                       color: palette.black1,
                       border: `1px solid ${palette.silver1}`,
                     }}
+                    aria-label="Cari jadwal"
                   />
                 </div>
 
@@ -407,6 +335,7 @@ export default function CTeacherScheduleThreeDays() {
                         color: palette.black1,
                         border: `1px solid ${palette.silver1}`,
                       }}
+                      aria-label="Filter lokasi"
                     >
                       {lokasiOptions.map((o) => (
                         <option key={o} value={o}>
@@ -419,7 +348,7 @@ export default function CTeacherScheduleThreeDays() {
               </div>
             </SectionCard>
 
-            {/* Per hari (3 kotak) */}
+            {/* 7 kotak — satu per hari */}
             <div className="grid gap-3">
               {dayBuckets.map(({ dateISO, items }) => (
                 <SectionCard
@@ -451,7 +380,7 @@ export default function CTeacherScheduleThreeDays() {
                     <div
                       className="px-4 py-3 text-sm"
                       style={{
-                        color: palette.black2,
+                        color: palette.silver2,
                         background: palette.white1,
                       }}
                     >
@@ -466,7 +395,7 @@ export default function CTeacherScheduleThreeDays() {
                         const slug = makeScheduleSlug(s);
                         return (
                           <div
-                            key={s.id ?? `${s.dateISO}-${s.time}-${i}`}
+                            key={`${s.id ?? i}-${s.time}`}
                             className="px-4 py-3 flex items-center justify-between gap-4"
                             style={{ background: palette.white1 }}
                           >
@@ -493,26 +422,26 @@ export default function CTeacherScheduleThreeDays() {
                               </div>
                             </div>
 
+                            {/* Aksi */}
                             <div className="flex items-center gap-2 shrink-0">
-                              {/* Detail: Link + bawa state item */}
-                              <Link to={`./${slug}`} state={{ item: s }}>
-                                <Btn
-                                  palette={palette}
-                                  size="sm"
-                                  variant="white1"
-                                >
-                                  Detail
-                                </Btn>
-                              </Link>
-
                               <Btn
                                 palette={palette}
                                 size="sm"
-                                variant="ghost"
+                                variant="white1"
                                 onClick={() => openEdit(s)}
                               >
                                 Edit
                               </Btn>
+                              {/* Link ke detail + kirim state item */}
+                              <Link to={`./${slug}`} state={{ item: s }}>
+                                <Btn
+                                  palette={palette}
+                                  size="sm"
+                                  variant="ghost"
+                                >
+                                  Detail
+                                </Btn>
+                              </Link>
                               <Btn
                                 palette={palette}
                                 size="sm"

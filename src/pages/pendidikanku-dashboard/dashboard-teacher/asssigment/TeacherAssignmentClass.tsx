@@ -30,8 +30,8 @@ import {
   type Assignment,
   type AssignmentStatus,
 } from "../class/types/assignments";
-import ModalEditAssignmentClass from "../class/components/CTeacherModalEditAssignmentClass";
-import { EditAssignmentPayload } from "../class/components/CTeacherModalEditAssignment";
+import ModalEditAssignmentClass from "./components/CTeacherModalEditAssignmentClass";
+import { EditAssignmentPayload } from "./components/CTeacherModalEditAssignment";
 import Swal from "sweetalert2";
 import ModalAddAssignmentClass, {
   AddAssignmentClassPayload,

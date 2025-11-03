@@ -33,9 +33,9 @@ import TeacherAllAssignment from "@/pages/pendidikanku-dashboard/dashboard-teach
 
 // Schedule
 import TeacherSchedule from "@/pages/pendidikanku-dashboard/dashboard-teacher/schedule/TeacherSchedule";
-import TeacherScheduleThreeDays from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/components/CTeacherScheduleThreeDays";
+import TeacherScheduleThreeDays from "@/pages/pendidikanku-dashboard/dashboard-teacher/schedule/components/CTeacherScheduleThreeDays";
 import TeacherDetailScheduleThreeDays from "@/pages/pendidikanku-dashboard/dashboard-teacher/schedule/TeacherDetailScheduleThreeDays";
-import TeacherScheduleSevenDays from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/components/CTeacherScheduleSevenDays";
+import TeacherScheduleSevenDays from "@/pages/pendidikanku-dashboard/dashboard-teacher/schedule/components/CTeacherScheduleSevenDays";
 import TeacherDetailScheduleSevenDays from "@/pages/pendidikanku-dashboard/dashboard-teacher/schedule/TeacherDetailScheduleSevenDays";
 
 // Menu utama guru

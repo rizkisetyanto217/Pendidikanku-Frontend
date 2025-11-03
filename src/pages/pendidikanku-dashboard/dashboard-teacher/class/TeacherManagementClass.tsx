@@ -14,7 +14,7 @@ import ParentTopBar from "../../components/home/CParentTopBar";
 import ParentSidebar from "../../components/home/CParentSideBar";
 import ModalEditManagementClass, {
   ClassInfo,
-} from "./TeacherModalEditManagementClass";
+} from "./CTeacherModalEditManagementClass";
 import AddStudent from "./TeacherAddStudent";
 import Swal from "sweetalert2";
 
