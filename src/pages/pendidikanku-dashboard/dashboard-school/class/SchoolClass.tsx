@@ -721,17 +721,17 @@ const SchoolClass: React.FC<{
                     <span className="truncate">
                       Menampilkan {items.length} section
                     </span>
-                    {isFetching && (
+                    {/* {isFetching && (
                       <span className="opacity-70">• Menyegarkan…</span>
-                    )}
+                    )} */}
                   </div>
-                  <button
+                  {/* <button
                     onClick={() => refetch()}
                     className="underline"
                     disabled={isFetching}
                   >
                     {isFetching ? "Menyegarkan…" : "Refresh"}
-                  </button>
+                  </button> */}
                 </div>
               </div>
             </SectionCard>

@@ -1,6 +1,7 @@
-import React, { useEffect, useMemo, useState } from "react";
+// src/pages/pendidikanku-dashboard/dashboard-school/academic/SchoolAcademic.tsx
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Palette, pickTheme, ThemeName } from "@/constants/thema";
+import { pickTheme, type Palette } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import axios from "@/lib/axios";
 import { useNavigate, useParams } from "react-router-dom";
@@ -46,7 +47,6 @@ type AcademicTerm = {
   updated_at?: string;
 };
 
-/* ========== API types ========= */
 type AcademicTermApi = {
   academic_term_id: string;
   academic_term_school_id: string;
@@ -61,12 +61,18 @@ type AcademicTermApi = {
   academic_term_created_at?: string;
   academic_term_updated_at?: string;
 };
+
 type AdminTermsResponse = {
   data: AcademicTermApi[];
   pagination?: { limit: number; offset: number; total: number };
 };
 
-/* ===================== Helpers ===================== */
+/* ===================== Const & Helpers ===================== */
+const API_PREFIX = "/public";
+const ADMIN_PREFIX = "/a";
+const TERMS_QKEY = (schoolId?: string) =>
+  ["academic-terms-merged", schoolId] as const;
+
 const dateShort = (iso?: string) =>
   iso
     ? new Date(iso).toLocaleDateString("id-ID", {
@@ -76,26 +82,18 @@ const dateShort = (iso?: string) =>
       })
     : "-";
 
-const TERMS_QKEY = (schoolId?: string) =>
-  ["academic-terms-merged", schoolId] as const;
-
-/* ===================== Helpers (tanggal & mapping) ===================== */
-
-// --- helper: normalisasi "2028/29" => "2028/2029"
 function normalizeAcademicYear(input: string) {
   const s = (input || "").trim();
   const m = s.match(/^(\d{4})\s*\/\s*(\d{2})$/);
   if (m) {
     const start = Number(m[1]);
-    const end = start + 1;
-    return `${start}/${end}`;
+    return `${start}/${start + 1}`;
   }
   const mFull = s.match(/^(\d{4})\s*\/\s*(\d{4})$/);
   if (mFull) return `${mFull[1]}/${mFull[2]}`;
   return s;
 }
 
-// --- helper: stringify error dari server
 function extractErrorMessage(err: any) {
   const d = err?.response?.data;
   if (!d) return err?.message || "Request error";
@@ -113,10 +111,13 @@ function extractErrorMessage(err: any) {
   }
 }
 
-// --- mapper payload -> API body
 function toZDate(d: string) {
-  return d ? `${d}T00:00:00Z` : "";
+  if (!d) return "";
+  if (d.includes("T")) return d; // jangan double
+  return `${d}T00:00:00Z`;
 }
+
+/* ========== Payload & mapping ========= */
 type TermPayload = {
   academic_year: string;
   name: string;
@@ -126,7 +127,24 @@ type TermPayload = {
   is_active: boolean;
   slug?: string;
 };
-function mapTermPayloadToApi(p: TermPayload) {
+
+function mapApiToTerm(x: AcademicTermApi): AcademicTerm {
+  return {
+    id: x.academic_term_id,
+    school_id: x.academic_term_school_id,
+    academic_year: x.academic_term_academic_year,
+    name: x.academic_term_name,
+    start_date: x.academic_term_start_date,
+    end_date: x.academic_term_end_date,
+    is_active: x.academic_term_is_active,
+    angkatan: x.academic_term_angkatan,
+    slug: x.academic_term_slug,
+    created_at: x.academic_term_created_at,
+    updated_at: x.academic_term_updated_at,
+  };
+}
+
+function mapPayloadToApi(p: TermPayload) {
   return {
     academic_term_academic_year: normalizeAcademicYear(p.academic_year),
     academic_term_name: p.name,
@@ -138,17 +156,15 @@ function mapTermPayloadToApi(p: TermPayload) {
   };
 }
 
-const API_PREFIX = "/public";
-const ADMIN_PREFIX = "/a";
-
-/* ===================== Mutations ===================== */
+/* ===================== Mutations (CRUD) ===================== */
 function useCreateTerm(schoolId?: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: TermPayload) => {
-      const apiBody = mapTermPayloadToApi(payload);
-      const url = `${ADMIN_PREFIX}/${encodeURIComponent(schoolId!)}/academic-terms`;
-      const { data } = await axios.post(url, apiBody);
+      const { data } = await axios.post(
+        `${ADMIN_PREFIX}/${encodeURIComponent(schoolId!)}/academic-terms`,
+        mapPayloadToApi(payload)
+      );
       return data;
     },
     onSuccess: async () => {
@@ -171,10 +187,9 @@ function useUpdateTerm(schoolId?: string) {
       id: string;
       payload: TermPayload;
     }) => {
-      const apiBody = mapTermPayloadToApi(payload);
       const { data } = await axios.patch(
         `${ADMIN_PREFIX}/${encodeURIComponent(schoolId!)}/academic-terms/${id}`,
-        apiBody
+        mapPayloadToApi(payload)
       );
       return data;
     },
@@ -186,16 +201,16 @@ function useUpdateTerm(schoolId?: string) {
           TERMS_QKEY(schoolId),
           previous.map((t) =>
             t.id === id
-              ? ({
+              ? {
                   ...t,
-                  academic_year: payload.academic_year,
+                  academic_year: normalizeAcademicYear(payload.academic_year),
                   name: payload.name,
                   start_date: toZDate(payload.start_date),
                   end_date: toZDate(payload.end_date),
-                  angkatan: payload.angkatan,
-                  is_active: payload.is_active,
+                  angkatan: Number(payload.angkatan),
+                  is_active: Boolean(payload.is_active),
                   slug: payload.slug ?? t.slug,
-                } as AcademicTerm)
+                }
               : t
           )
         );
@@ -381,6 +396,17 @@ function TermFormModal({
               </label>
             </div>
           </div>
+
+          <div>
+            <label className="text-sm opacity-80">Slug (opsional)</label>
+            <input
+              value={values.slug || ""}
+              onChange={(e) => set("slug", e.target.value)}
+              placeholder="ganjil-2025"
+              className="w-full mt-1 px-3 py-2 rounded-lg border bg-transparent"
+              style={{ borderColor: palette.silver1 }}
+            />
+          </div>
         </div>
 
         <div className="flex items-center justify-end gap-2 pt-2">
@@ -415,50 +441,49 @@ const SchoolAcademic: React.FC<{
   backTo?: string;
   backLabel?: string;
 }> = () => {
-  const { school_id } = useParams<{ school_id?: string }>();
+  // PAKAI :schoolId (camelCase) sesuai AppRoutes
+  const { schoolId } = useParams<{ schoolId: string }>();
+
   const { isDark, themeName } = useHtmlDarkMode();
-  const palette: Palette = pickTheme(themeName as ThemeName, isDark);
+  const palette: Palette = pickTheme(themeName as any, isDark);
   const navigate = useNavigate();
 
   const { setTopBar, resetTopBar } = useTopBar();
   useEffect(() => {
-    setTopBar({ mode: "back", title: "Periode Akademik" });
+    setTopBar({ mode: "menu", title: "Periode Akademik" });
     return resetTopBar;
   }, [setTopBar, resetTopBar]);
 
-  const termsQ = useQuery({
-    queryKey: TERMS_QKEY(school_id),
-    enabled: !!school_id,
+  useEffect(() => {
+    if (!schoolId) console.warn("[SchoolAcademic] Missing :schoolId in params");
+  }, [schoolId]);
+
+  const termsQ = useQuery<AcademicTerm[], Error>({
+    queryKey: TERMS_QKEY(schoolId),
+    enabled: !!schoolId,
     staleTime: 60_000,
     retry: 1,
-    queryFn: async (): Promise<AcademicTerm[]> => {
+    // v5: pengganti keepPreviousData
+    placeholderData: (prev) => prev ?? [],
+    queryFn: async () => {
       const res = await axios.get<AdminTermsResponse>(
-        `${API_PREFIX}/${encodeURIComponent(school_id!)}/academic-terms/list`,
+        `${API_PREFIX}/${encodeURIComponent(schoolId!)}/academic-terms/list`,
         { params: { limit: 999, offset: 0, _: Date.now() } }
       );
       const raw = res.data?.data ?? [];
-      return raw.map((x) => ({
-        id: x.academic_term_id,
-        school_id: x.academic_term_school_id,
-        academic_year: x.academic_term_academic_year,
-        name: x.academic_term_name,
-        start_date: x.academic_term_start_date,
-        end_date: x.academic_term_end_date,
-        is_active: x.academic_term_is_active,
-        angkatan: x.academic_term_angkatan,
-        slug: x.academic_term_slug,
-        created_at: x.academic_term_created_at,
-        updated_at: x.academic_term_updated_at,
-      }));
+      return raw.map(mapApiToTerm);
     },
   });
 
-  const terms = termsQ.data ?? [];
+  const terms: AcademicTerm[] = termsQ.data ?? [];
 
-  /* ==== 🔎 Search pakai DataViewKit (sinkron URL ?q=) */
-  const { q, setQ } = useSearchQuery("q");
+  /* ==== 🔎 Search (sinkron ?q=) */
+  const { q, setQ } = useSearchQuery("q") as {
+    q: string;
+    setQ: (v: string) => void;
+  };
 
-  const filtered = useMemo(() => {
+  const filtered: AcademicTerm[] = useMemo(() => {
     const s = (q || "").toLowerCase().trim();
     if (!s) return terms;
     return terms.filter(
@@ -469,7 +494,7 @@ const SchoolAcademic: React.FC<{
     );
   }, [terms, q]);
 
-  /* ==== ⏭ Pagination pakai DataViewKit */
+  /* ==== ⏭ Pagination */
   const total = filtered.length;
   const {
     offset,
@@ -483,7 +508,7 @@ const SchoolAcademic: React.FC<{
     handleNext,
   } = useOffsetLimit(total, 20, 200);
 
-  const pageTerms = useMemo(
+  const pageTerms: AcademicTerm[] = useMemo(
     () => filtered.slice(offset, Math.min(offset + limit, total)),
     [filtered, offset, limit, total]
   );
@@ -494,16 +519,15 @@ const SchoolAcademic: React.FC<{
     return actives[0] ?? terms[0] ?? null;
   }, [terms]);
 
-  const createTerm = useCreateTerm(school_id);
-  const updateTerm = useUpdateTerm(school_id);
-  const deleteTerm = useDeleteTerm(school_id);
+  const createTerm = useCreateTerm(schoolId);
+  const updateTerm = useUpdateTerm(schoolId);
+  const deleteTerm = useDeleteTerm(schoolId);
 
   const [modal, setModal] = useState<{
     mode: "create" | "edit";
     editing?: AcademicTerm | null;
   } | null>(null);
 
-  /* ✅ memoized initial + key agar modal re-mount saat ganti item/mode */
   const modalInitial = useMemo(() => {
     if (!(modal?.mode === "edit" && modal.editing)) return undefined;
     const e = modal.editing;
@@ -519,7 +543,7 @@ const SchoolAcademic: React.FC<{
   }, [modal?.mode, modal?.editing?.id]);
 
   /* ==== Kolom DataTable (desktop) */
-  const columns: Column<AcademicTerm>[] = React.useMemo(
+  const columns: Column<AcademicTerm>[] = useMemo(
     () => [
       {
         key: "year",
@@ -581,6 +605,28 @@ const SchoolAcademic: React.FC<{
     [palette, deleteTerm]
   );
 
+  const handleSubmit = useCallback(
+    (v: TermPayload) => {
+      if (modal?.mode === "edit" && modal.editing) {
+        updateTerm.mutate(
+          { id: modal.editing.id, payload: v },
+          {
+            onSuccess: () => setModal(null),
+            onError: (e: any) =>
+              alert(extractErrorMessage(e) || "Gagal memperbarui term"),
+          }
+        );
+      } else {
+        createTerm.mutate(v, {
+          onSuccess: () => setModal(null),
+          onError: (e: any) =>
+            alert(extractErrorMessage(e) || "Gagal membuat term"),
+        });
+      }
+    },
+    [modal, updateTerm, createTerm]
+  );
+
   return (
     <div
       className="min-h-screen w-full"
@@ -599,9 +645,9 @@ const SchoolAcademic: React.FC<{
           <SearchBar
             palette={palette}
             value={q}
-            onChange={setQ} // otomatis debounce & sinkron ?q= & reset offset
+            onChange={setQ}
             placeholder="Cari tahun, nama, atau angkatan…"
-            debounceMs={500} // ⬅️ penting
+            debounceMs={500}
             rightExtra={
               <PerPageSelect
                 palette={palette}
@@ -638,13 +684,25 @@ const SchoolAcademic: React.FC<{
                   </div>
                 ) : termsQ.isError ? (
                   <div
-                    className="rounded-xl border p-4 text-sm flex items-center gap-2"
+                    className="rounded-xl border p-4 text-sm space-y-2"
                     style={{
                       borderColor: palette.silver1,
-                      color: palette.silver2,
+                      color: palette.black2,
                     }}
                   >
-                    <Info size={16} /> Gagal memuat periode akademik.
+                    <div className="flex items-center gap-2">
+                      <Info size={16} /> Gagal memuat periode akademik.
+                    </div>
+                    <pre className="text-xs opacity-70 overflow-auto">
+                      {extractErrorMessage(termsQ.error)}
+                    </pre>
+                    <Btn
+                      palette={palette}
+                      size="sm"
+                      onClick={() => termsQ.refetch()}
+                    >
+                      Coba lagi
+                    </Btn>
                   </div>
                 ) : !activeTerm ? (
                   <div
@@ -734,9 +792,9 @@ const SchoolAcademic: React.FC<{
                   <>
                     {/* Mobile: Cards */}
                     <div className="md:hidden">
-                      <CardGrid
+                      <CardGrid<AcademicTerm>
                         items={pageTerms}
-                        renderItem={(t) => (
+                        renderItem={(t: AcademicTerm) => (
                           <TermCard
                             key={t.id}
                             term={t}
@@ -758,7 +816,7 @@ const SchoolAcademic: React.FC<{
 
                     {/* Tablet/Desktop: Table */}
                     <div className="hidden md:block">
-                      <DataTable
+                      <DataTable<AcademicTerm>
                         palette={palette}
                         columns={columns}
                         rows={pageTerms}
@@ -766,7 +824,7 @@ const SchoolAcademic: React.FC<{
                       />
                     </div>
 
-                    {/* ===== Pagination Footer (DataViewKit) ===== */}
+                    {/* ===== Pagination Footer ===== */}
                     <PaginationBar
                       palette={palette}
                       pageStart={pageStart}
@@ -801,36 +859,7 @@ const SchoolAcademic: React.FC<{
         palette={palette}
         initial={modalInitial}
         loading={createTerm.isPending || updateTerm.isPending}
-        onSubmit={(v) => {
-          if (modal?.mode === "edit" && modal.editing) {
-            const fullPayload: TermPayload = {
-              academic_year: v.academic_year,
-              name: v.name,
-              start_date: v.start_date,
-              end_date: v.end_date,
-              angkatan: v.angkatan,
-              is_active: v.is_active,
-              slug: v.slug ?? "",
-            };
-            updateTerm.mutate(
-              { id: modal.editing.id, payload: fullPayload },
-              {
-                onSuccess: () => setModal(null),
-                onError: (e: any) => {
-                  alert(e?.response?.data?.message ?? "Gagal memperbarui term");
-                },
-              }
-            );
-          } else {
-            createTerm.mutate(v, {
-              onSuccess: () => setModal(null),
-              onError: (e: any) => {
-                const msg = extractErrorMessage(e);
-                alert(msg || "Gagal membuat term");
-              },
-            });
-          }
-        }}
+        onSubmit={handleSubmit}
       />
     </div>
   );

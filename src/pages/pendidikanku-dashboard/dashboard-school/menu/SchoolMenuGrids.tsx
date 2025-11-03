@@ -73,7 +73,7 @@ export default function SchoolMenuGrids() {
         to: "academic",
         icon: CalendarDays,
       },
-      { key: "ruangan", label: "Ruangan", to: "room-school", icon: Building2 },
+      { key: "ruangan", label: "Ruangan", to: "ruangan", icon: Building2 },
       { key: "kelas-all", label: "Seluruh Kelas", to: "kelas", icon: Layers },
       {
         key: "kelas-aktif",
@@ -89,7 +89,7 @@ export default function SchoolMenuGrids() {
         label: "Murid",
         to: "murid",
         icon: Users,
-        note: "Cari Murid",
+        // note: "Cari Murid",
       },
       { key: "profil", label: "Profil", to: "profil-sekolah", icon: IdCard },
       // { key: "website", label: "Website", to: "/website", icon: Globe },
