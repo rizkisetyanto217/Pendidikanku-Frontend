@@ -66,8 +66,8 @@ export default function AppRoutes() {
       </Route>
 
       {/* --- Protected (dengan schoolId) --- */}
-      {/* Ganti :school_id -> :schoolId agar konsisten */}
-      <Route path=":school_id" element={<ProtectedRoute />}>
+      {/* Ganti :schoolId -> :schoolId agar konsisten */}
+      <Route path=":schoolId" element={<ProtectedRoute />}>
         {/* ===== Guru cluster: hanya teacher/admin/dkm ===== */}
         <Route
           element={<RequireschoolRoles allow={["teacher", "admin", "dkm"]} />}
@@ -89,7 +89,7 @@ export default function AppRoutes() {
       </Route>
 
       {/* --- Forbidden harus di atas wildcard --- */}
-      <Route path=":school_id/forbidden" element={<Forbidden403 />} />
+      <Route path=":schoolId/forbidden" element={<Forbidden403 />} />
 
       {/* --- 404 & Unauthorized --- */}
       <Route path="/unauthorized" element={<Unauthorized />} />

@@ -1,15 +1,104 @@
-import { Link } from "react-router-dom";
-import { pickTheme, ThemeName, type Palette } from "@/constants/thema";
+// src/pages/pendidikanku-dashboard/dashboard-teacher/TeacherRoutesPlayground.tsx
+import { Link, useLocation, useParams, useNavigate } from "react-router-dom";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
+import { pickTheme, ThemeName, type Palette } from "@/constants/thema";
 import {
   SectionCard,
   Btn,
 } from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 import { Layers, ChevronRight } from "lucide-react";
 
+/* Prefix rute yang termasuk “tenant scope” */
+const TENANT_PREFIXES = [
+  "/guru",
+  "/sekolah",
+  "/menu-utama",
+  "/wali",
+  "/siswa",
+  "/admin",
+];
+
+/* Klik <a> → inject /:sid jika perlu */
+function TenantClickRewriter({
+  sid,
+  children,
+}: {
+  sid: string;
+  children: React.ReactNode;
+}) {
+  const nav = useNavigate();
+
+  const ensureTenant = (path: string) => {
+    const p = path.startsWith("/") ? path : `/${path}`;
+    if (p.startsWith(`/${sid}/`) || p === `/${sid}`) return p;
+    const isTenantScope = TENANT_PREFIXES.some((pref) => p.startsWith(pref));
+    return isTenantScope ? `/${sid}${p}` : p;
+  };
+
+  return (
+    <div
+      onClick={(e) => {
+        const a = (e.target as HTMLElement).closest(
+          "a"
+        ) as HTMLAnchorElement | null;
+        if (!a) return;
+
+        const hrefAttr = a.getAttribute("href") || "";
+        if (
+          !hrefAttr ||
+          hrefAttr.startsWith("http") ||
+          hrefAttr.startsWith("mailto:") ||
+          hrefAttr.startsWith("#")
+        ) {
+          return;
+        }
+
+        const url = new URL(hrefAttr, window.location.origin);
+        const needsTenant =
+          !url.pathname.startsWith(`/${sid}/`) &&
+          TENANT_PREFIXES.some((p) => url.pathname.startsWith(p));
+
+        if (needsTenant) {
+          e.preventDefault();
+          const next = ensureTenant(`${url.pathname}${url.search}${url.hash}`);
+          nav(next);
+        }
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
 export default function TeacherRoutesPlayground() {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
+
+  // Ambil :schoolId atau :school_id dari URL; fallback ke query `school_id` atau default demo
+  const { schoolId: p1, school_id: p2 } = useParams<{
+    schoolId?: string;
+    school_id?: string;
+  }>();
+  const { search } = useLocation();
+  const sp = new URLSearchParams(search);
+  const sid = p1 || p2 || sp.get("school_id") || "demo-school";
+
+  // Helper prefix
+  const ensureTenant = (path: string) => {
+    const p = path.startsWith("/") ? path : `/${path}`;
+    if (p.startsWith(`/${sid}/`) || p === `/${sid}`) return p;
+    const isTenantScope = TENANT_PREFIXES.some((pref) => p.startsWith(pref));
+    return isTenantScope ? `/${sid}${p}` : p;
+  };
+
+  // Link aman (auto prefix)
+  const TenantLink = ({
+    to,
+    children,
+  }: {
+    to: string;
+    children: React.ReactNode;
+  }) => <Link to={ensureTenant(to)}>{children}</Link>;
 
   // Demo IDs (disesuaikan dengan dummy yg sudah kita pakai)
   const demo = {
@@ -19,7 +108,7 @@ export default function TeacherRoutesPlayground() {
     studentId: "stu-10a-001",
   };
 
-  const base = "/guru"; // semua absolute biar gampang dites di mana pun
+  const base = ensureTenant("/guru");
 
   const groups: { title: string; links: { label: string; to: string }[] }[] = [
     {
@@ -130,52 +219,54 @@ export default function TeacherRoutesPlayground() {
             <div>
               <div className="font-semibold">Playground Rute Guru</div>
               <div className="text-sm" style={{ color: palette.black2 }}>
-                Semua link uji cepat di bawah ini menggunakan base path{" "}
-                <code>/guru</code> dan contoh ID.
+                Base tenant: <code>/{sid}</code> • Semua link memakai prefix
+                tenant otomatis.
               </div>
             </div>
           </div>
         </SectionCard>
 
-        {groups.map((g) => (
-          <SectionCard key={g.title} palette={palette}>
-            <div className="p-5 space-y-3">
-              <div className="font-semibold">{g.title}</div>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                {g.links.map((lk) => (
-                  <Link key={lk.to} to={lk.to}>
-                    <div
-                      className="flex items-center justify-between rounded-xl border px-3 py-2 text-sm hover:opacity-90 transition"
-                      style={{
-                        borderColor: palette.silver1,
-                        background: palette.white1,
-                        color: palette.black1,
-                      }}
-                    >
-                      <span className="truncate">{lk.label}</span>
-                      <ChevronRight size={16} />
-                    </div>
-                  </Link>
-                ))}
+        <TenantClickRewriter sid={sid}>
+          {groups.map((g) => (
+            <SectionCard key={g.title} palette={palette}>
+              <div className="p-5 space-y-3">
+                <div className="font-semibold">{g.title}</div>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                  {g.links.map((lk) => (
+                    <TenantLink key={lk.to} to={lk.to}>
+                      <div
+                        className="flex items-center justify-between rounded-xl border px-3 py-2 text-sm hover:opacity-90 transition"
+                        style={{
+                          borderColor: palette.silver1,
+                          background: palette.white1,
+                          color: palette.black1,
+                        }}
+                      >
+                        <span className="truncate">{lk.label}</span>
+                        <ChevronRight size={16} />
+                      </div>
+                    </TenantLink>
+                  ))}
+                </div>
               </div>
+            </SectionCard>
+          ))}
+
+          <SectionCard palette={palette}>
+            <div className="p-5 flex items-center justify-between">
+              <div className="text-sm" style={{ color: palette.black2 }}>
+                Base: <code>/{sid}/guru</code> • Demo: classId=
+                <code>{demo.classId}</code>, scheduleId=
+                <code>{demo.scheduleId}</code>
+              </div>
+              <TenantLink to={base}>
+                <Btn palette={palette} variant="outline" size="sm">
+                  Ke Dashboard Guru
+                </Btn>
+              </TenantLink>
             </div>
           </SectionCard>
-        ))}
-
-        <SectionCard palette={palette}>
-          <div className="p-5 flex items-center justify-between">
-            <div className="text-sm" style={{ color: palette.black2 }}>
-              Base path: <code>/guru</code> • Demo: classId=
-              <code>{demo.classId}</code>, scheduleId=
-              <code>{demo.scheduleId}</code>
-            </div>
-            <Link to="/guru">
-              <Btn palette={palette} variant="outline" size="sm">
-                Ke Dashboard Guru
-              </Btn>
-            </Link>
-          </div>
-        </SectionCard>
+        </TenantClickRewriter>
       </div>
     </div>
   );

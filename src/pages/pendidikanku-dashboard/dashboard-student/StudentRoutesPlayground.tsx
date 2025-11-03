@@ -1,25 +1,111 @@
-import { Link } from "react-router-dom";
+// src/pages/pendidikanku-dashboard/dashboard-student/StudentRoutesPlayground.tsx
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
-import { pickTheme, ThemeName } from "@/constants/thema";
+import { pickTheme, ThemeName, type Palette } from "@/constants/thema";
 import {
   SectionCard,
   Btn,
-  type Palette,
 } from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
+import { Layers, ChevronRight } from "lucide-react";
 
-/**
- * Halaman khusus untuk menguji semua tautan StudentRoutes.
- * Gunakan path: /murid/_dev-links
- */
+/* Prefix rute yang termasuk “tenant scope” */
+const TENANT_PREFIXES = [
+  "/guru",
+  "/sekolah",
+  "/menu-utama",
+  "/wali",
+  "/siswa",
+  "/murid",
+  "/admin",
+];
+
+/* Klik <a> → inject /:sid jika perlu */
+function TenantClickRewriter({
+  sid,
+  children,
+}: {
+  sid: string;
+  children: React.ReactNode;
+}) {
+  const nav = useNavigate();
+
+  const ensureTenant = (path: string) => {
+    const p = path.startsWith("/") ? path : `/${path}`;
+    if (p.startsWith(`/${sid}/`) || p === `/${sid}`) return p;
+    const isTenantScope = TENANT_PREFIXES.some((pref) => p.startsWith(pref));
+    return isTenantScope ? `/${sid}${p}` : p;
+  };
+
+  return (
+    <div
+      onClick={(e) => {
+        const a = (e.target as HTMLElement).closest(
+          "a"
+        ) as HTMLAnchorElement | null;
+        if (!a) return;
+
+        const hrefAttr = a.getAttribute("href") || "";
+        if (
+          !hrefAttr ||
+          hrefAttr.startsWith("http") ||
+          hrefAttr.startsWith("mailto:") ||
+          hrefAttr.startsWith("#")
+        ) {
+          return;
+        }
+
+        const url = new URL(hrefAttr, window.location.origin);
+        const needsTenant =
+          !url.pathname.startsWith(`/${sid}/`) &&
+          TENANT_PREFIXES.some((p) => url.pathname.startsWith(p));
+
+        if (needsTenant) {
+          e.preventDefault();
+          const next = ensureTenant(`${url.pathname}${url.search}${url.hash}`);
+          nav(next);
+        }
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
 export default function StudentRoutesPlayground() {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
+
+  // Ambil :schoolId / :school_id atau query ?school_id=..., fallback demo
+  const { schoolId: p1, school_id: p2 } = useParams<{
+    schoolId?: string;
+    school_id?: string;
+  }>();
+  const { search } = useLocation();
+  const sp = new URLSearchParams(search);
+  const sid = p1 || p2 || sp.get("school_id") || "demo-school";
+
+  // Helper prefix
+  const ensureTenant = (path: string) => {
+    const p = path.startsWith("/") ? path : `/${path}`;
+    if (p.startsWith(`/${sid}/`) || p === `/${sid}`) return p;
+    const isTenantScope = TENANT_PREFIXES.some((pref) => p.startsWith(pref));
+    return isTenantScope ? `/${sid}${p}` : p;
+  };
+
+  // Link aman (auto prefix)
+  const TenantLink = ({
+    to,
+    children,
+  }: {
+    to: string;
+    children: React.ReactNode;
+  }) => <Link to={ensureTenant(to)}>{children}</Link>;
 
   // Contoh ID untuk rute dinamis
   const sampleScheduleId = "sch-001";
   const sampleClassId = "class-001";
 
-  const base = "/murid";
+  const base = ensureTenant("/murid");
 
   const groups: {
     title: string;
@@ -96,76 +182,69 @@ export default function StudentRoutesPlayground() {
           note: `:id=${sampleClassId}`,
         },
         { to: `${base}/menu-utama/profil-murid`, label: "Profil dari Menu" },
-        // Sertifikat sementara nonaktif di routing utama
-        // { to: `${base}/menu-utama/sertifikat-murid`, label: "Sertifikat" },
       ],
     },
-    // Pengumuman sementara dinonaktifkan di definisi routes
-    // {
-    //   title: "Pengumuman",
-    //   links: [
-    //     { to: `${base}/announcements`, label: "Pengumuman (lama)" },
-    //     { to: `${base}/pengumuman`, label: "Pengumuman (baru)" },
-    //   ],
-    // },
   ];
 
   return (
-    <div
-      className="min-h-[60vh] w-full px-4 md:px-6 py-6"
-      style={{ background: palette.white2, color: palette.black1 }}
-    >
-      <div className="max-w-screen-xl mx-auto space-y-4">
+    <div style={{ background: palette.white2, color: palette.black1 }}>
+      <div className="max-w-screen-xl mx-auto p-4 md:p-6 space-y-4">
         <SectionCard palette={palette} className="p-5">
           <div className="flex items-center justify-between gap-3 flex-wrap">
-            <div>
-              <h1 className="text-xl font-semibold">Dev • Student Routes</h1>
-              <p className="text-sm mt-1" style={{ color: palette.black2 }}>
-                Halaman ini berisi tautan ujicoba untuk semua rute murid. Rute
-                dinamis menggunakan contoh <code>{sampleScheduleId}</code> dan{" "}
-                <code>{sampleClassId}</code>.
-              </p>
+            <div className="flex items-center gap-3">
+              <Layers size={18} color={palette.quaternary} />
+              <div>
+                <h1 className="text-xl font-semibold">Playground Rute Murid</h1>
+                <p className="text-sm mt-1" style={{ color: palette.black2 }}>
+                  Base tenant: <code>/{sid}</code> • Semua link di bawah
+                  otomatis diprefix tenant.
+                </p>
+              </div>
             </div>
-            <Link to={base}>
+            <TenantLink to={base}>
               <Btn palette={palette} size="sm" variant="secondary">
                 Ke Dashboard Murid
               </Btn>
-            </Link>
+            </TenantLink>
           </div>
         </SectionCard>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {groups.map((g) => (
-            <SectionCard key={g.title} palette={palette} className="p-4">
-              <h2 className="font-medium mb-3">{g.title}</h2>
-              <ul className="space-y-2">
-                {g.links.map((l) => (
-                  <li key={l.to} className="flex items-center justify-between">
-                    <Link
-                      to={l.to}
-                      className="underline underline-offset-2 hover:opacity-80 truncate"
+        <TenantClickRewriter sid={sid}>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {groups.map((g) => (
+              <SectionCard key={g.title} palette={palette} className="p-4">
+                <h2 className="font-medium mb-3">{g.title}</h2>
+                <ul className="space-y-2">
+                  {g.links.map((l) => (
+                    <li
+                      key={l.to}
+                      className="flex items-center justify-between"
                     >
-                      {l.label}
-                    </Link>
-                    {l.note ? (
-                      <span
-                        className="ml-3 text-xs px-2 py-0.5 rounded-full"
-                        style={{
-                          background: palette.white1,
-                          border: `1px solid ${palette.silver1}`,
-                          color: palette.black2,
-                        }}
-                        title={l.note}
-                      >
-                        {l.note}
-                      </span>
-                    ) : null}
-                  </li>
-                ))}
-              </ul>
-            </SectionCard>
-          ))}
-        </div>
+                      <TenantLink to={l.to}>
+                        <span className="underline underline-offset-2 hover:opacity-80 truncate">
+                          {l.label}
+                        </span>
+                      </TenantLink>
+                      {l.note ? (
+                        <span
+                          className="ml-3 text-xs px-2 py-0.5 rounded-full"
+                          style={{
+                            background: palette.white1,
+                            border: `1px solid ${palette.silver1}`,
+                            color: palette.black2,
+                          }}
+                          title={l.note}
+                        >
+                          {l.note}
+                        </span>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              </SectionCard>
+            ))}
+          </div>
+        </TenantClickRewriter>
       </div>
     </div>
   );

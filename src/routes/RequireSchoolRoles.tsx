@@ -5,45 +5,38 @@ import {
   useschoolMembership,
   type schoolRole,
 } from "@/hooks/useSchoolMembership";
-import { getAccessToken } from "@/lib/axios";
+import { getAccessToken, getActiveschoolId } from "@/lib/axios";
 
 export default function RequireschoolRoles({
   allow,
 }: {
   allow: schoolRole[];
 }): ReactElement | null {
-  // ✅ samakan dengan router: :school_id
-  const { school_id } = useParams<{ school_id?: string }>();
-  const schoolId = school_id ?? ""; // alias lokal yang stabil
+  // support kedua nama param biar konsisten dgn routes
+  const { schoolId: p1, school_id: p2 } = useParams<{
+    schoolId?: string;
+    school_id?: string;
+  }>();
+  const sid = p1 || p2 || getActiveschoolId() || ""; // ← fallback ke cookie kalau ada
   const loc = useLocation();
-  const access = getAccessToken();
 
-  if (!access) {
-    return (
-      <Navigate
-        to="/login"
-        replace
-        state={{ from: loc.pathname + loc.search }}
-      />
-    );
+  // belum login → ke /login
+  if (!getAccessToken()) {
+    return <Navigate to="/login" replace state={{ from: loc }} />;
   }
 
-  // ✅ kirim id yang benar ke hook
-  const { loading, roles } = useschoolMembership(schoolOrUndef(schoolId));
+  // load membership dg sid (boleh undefined untuk hook-mu)
+  const { loading, roles } = useschoolMembership(sid || undefined);
   if (loading) return null;
 
-  // ✅ redirect dengan id yang benar
-  if (!roles.length) {
-    return <Navigate to={`/${schoolId}/forbidden`} replace />;
-  }
+  // BANGUN PATH FORBIDDEN YANG AMAN (tanpa "//")
+  const forbiddenPath = sid ? `/${sid}/forbidden` : `/forbidden`;
+
+  if (!roles.length)
+    return <Navigate to={forbiddenPath} replace state={{ from: loc }} />;
   if (!roles.some((r) => allow.includes(r))) {
-    return <Navigate to={`/${schoolId}/forbidden`} replace />;
+    return <Navigate to={forbiddenPath} replace state={{ from: loc }} />;
   }
 
   return <Outlet />;
-}
-
-// kecil tapi rapi
-function schoolOrUndef(v?: string) {
-  return v && v.length ? v : undefined;
 }
