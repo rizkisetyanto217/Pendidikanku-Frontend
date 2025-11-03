@@ -16,6 +16,8 @@ import {
   Loader2,
   Pencil,
   Trash2,
+  ArrowLeft,
+  Plus,
 } from "lucide-react";
 import { Badge, Btn, SectionCard } from "../../components/ui/CPrimitives";
 import { useTopBar } from "../../components/home/CUseTopBar";
@@ -631,47 +633,58 @@ const SchoolAcademic: React.FC<{
       className="min-h-screen w-full overflow-x-hidden"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      {/* ===== Header: wrap-friendly ===== */}
-      <div
-        className="p-4 md:p-5 pb-3 border-b flex flex-wrap items-center gap-2"
-        style={{ borderColor: palette.silver1 }}
-      >
-        {/* Judul */}
-        <div className="flex items-center gap-2 font-semibold order-1">
-          <Layers size={18} color={palette.quaternary} /> Daftar Periode
-        </div>
+{/* ===== Header ===== */}
+<div
+  className="p-4 md:p-5 pb-3 border-b flex flex-wrap items-center gap-3"
+  style={{ borderColor: palette.silver1 }}
+>
+  {/* Back + Title */}
+  <div className="hidden md:flex items-center gap-2 font-semibold order-1">
+    <Btn
+      palette={palette}
+      variant="ghost"
+      size="sm"
+      onClick={() => navigate(-1)}
+      className="cursor-pointer"
+    >
+      <ArrowLeft size={18} />
+    </Btn>
+    <h1>Periode Akademik</h1>
+  </div>
 
-        {/* Search + per-page */}
-        <div className="order-3 sm:order-2 w-full sm:w-auto flex-1 min-w-0">
-          <SearchBar
-            palette={palette}
-            value={q}
-            onChange={setQ}
-            placeholder="Cari tahun, nama, atau angkatan…"
-            debounceMs={500}
-            className="w-full"
-            rightExtra={
-              <PerPageSelect
-                palette={palette}
-                value={limit}
-                onChange={(n) => setLimit(n)}
-              />
-            }
-          />
-        </div>
+  {/* Search + per-page */}
+  <div className="order-3 sm:order-2 w-full sm:w-auto flex-1 min-w-0">
+    <SearchBar
+      palette={palette}
+      value={q}
+      onChange={setQ}
+      placeholder="Cari tahun, nama, atau angkatan…"
+      debounceMs={500}
+      className="w-full"
+      rightExtra={
+        <PerPageSelect
+          palette={palette}
+          value={limit}
+          onChange={(n) => setLimit(n)}
+        />
+      }
+    />
+  </div>
 
-        {/* Tombol aksi */}
-        <div className="order-2 sm:order-3 ml-auto flex items-center gap-2">
-          <Btn
-            palette={palette}
-            size="sm"
-            className="gap-1"
-            onClick={() => setModal({ mode: "create" })}
-          >
-            Tambah
-          </Btn>
-        </div>
-      </div>
+  {/* Tombol Tambah */}
+  <div className="order-2 sm:order-3 ml-auto flex items-center gap-2">
+    <Btn
+      palette={palette}
+      size="sm"
+      className="gap-1"
+      onClick={() => setModal({ mode: "create" })}
+    >
+       <Plus size={16} className="mr-1" />Tambah
+    </Btn>
+  </div>
+  
+</div>
+
 
       <main className="w-full">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">

@@ -1,39 +1,40 @@
 // src/pages/sekolahislamku/students/StudentsPage.tsx
-/* ================= Imports ================= */
-import { useState, useMemo } from "react";
-import { useNavigate, NavLink } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import axios from "@/lib/axios";
-
+import { useState, useMemo, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
-
 import {
   SectionCard,
   Btn,
   Badge,
   type Palette,
 } from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
-
-import TambahSiswa from "./modal/SchoolAddStudent";
-import UploadFileSiswa from "./modal/SchoolUploadFileStudent";
-
+import {
+  SearchBar,
+  PerPageSelect,
+  PaginationBar,
+  DataTable,
+  type Column,
+  CardGrid,
+  useSearchQuery,
+  useOffsetLimit,
+} from "@/pages/pendidikanku-dashboard/components/common/CDataViewKit";
 import {
   UserPlus,
-  ChevronRight,
   Upload,
-  AlertTriangle,
-  Mail,
-  Phone,
-  ArrowLeft,
   Eye,
   Edit3,
   Trash2,
-  X,
+  ArrowLeft,
+  Users,
+  Link as LinkIcon,
+  Info,
+  Loader2,
 } from "lucide-react";
+import TambahSiswa from "./modal/SchoolAddStudent";
+import UploadFileSiswa from "./modal/SchoolUploadFileStudent";
+import { useTopBar } from "@/pages/pendidikanku-dashboard/components/home/CUseTopBar";
 
-/* ================= Types ================= */
 export interface StudentItem {
   id: string;
   nis?: string;
@@ -45,27 +46,7 @@ export interface StudentItem {
   email?: string;
   status: "aktif" | "nonaktif" | "alumni";
 }
-type SchoolStudentProps = {
-  showBack?: boolean;
-  backTo?: string;
-  backLabel?: string;
-};
 
-/* ================= Helpers ================= */
-const genderLabel = (g?: "L" | "P") =>
-  g === "L" ? "Laki-laki" : g === "P" ? "Perempuan" : "-";
-
-const hijriWithWeekday = (iso?: string) =>
-  iso
-    ? new Date(iso).toLocaleDateString("id-ID-u-ca-islamic-umalqura", {
-        weekday: "long",
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      })
-    : "-";
-
-/* ================= Dummy Data ================= */
 const DUMMY_STUDENTS: StudentItem[] = [
   {
     id: "s1",
@@ -91,217 +72,316 @@ const DUMMY_STUDENTS: StudentItem[] = [
   },
 ];
 
-/* ================= Modals ================= */
-function StudentDetailModal({
-  open,
-  onClose,
-  student,
-  palette,
-}: {
-  open: boolean;
-  onClose: () => void;
-  student: StudentItem | null;
-  palette: Palette;
-}) {
-  if (!open || !student) return null;
-  return (
-    <div
-      className="fixed inset-0 z-50 grid place-items-center"
-      style={{ background: "rgba(0,0,0,.35)" }}
-      onClick={onClose}
-    >
-      <div
-        className="w-[min(480px,95vw)] rounded-2xl shadow-xl p-5"
-        onClick={(e) => e.stopPropagation()}
-        style={{ background: palette.white1, color: palette.black1 }}
-      >
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-lg">Detail Siswa</h3>
-          <button
-            className="p-1 rounded-lg"
-            onClick={onClose}
-            style={{ color: palette.black2 }}
-          >
-            <X size={16} />
-          </button>
-        </div>
-        <div className="space-y-2 text-sm">
-          <div>
-            <strong>Nama:</strong> {student.name}
-          </div>
-          <div>
-            <strong>NIS:</strong> {student.nis ?? "-"}
-          </div>
-          <div>
-            <strong>Kelas:</strong> {student.class_name ?? "-"}
-          </div>
-          <div>
-            <strong>JK:</strong> {genderLabel(student.gender)}
-          </div>
-          <div>
-            <strong>Orang Tua:</strong> {student.parent_name ?? "-"}
-          </div>
-          <div>
-            <strong>Kontak:</strong> {student.phone ?? "-"} |{" "}
-            {student.email ?? "-"}
-          </div>
-          <div>
-            <Badge
-              palette={palette}
-              variant={
-                student.status === "aktif"
-                  ? "success"
-                  : student.status === "nonaktif"
-                    ? "warning"
-                    : "info"
-              }
-            >
-              {student.status}
-            </Badge>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function StudentEditModal({
-  open,
-  onClose,
-  onSave,
-  palette,
-  student,
-}: {
-  open: boolean;
-  onClose: () => void;
-  onSave: (s: StudentItem) => void;
-  palette: Palette;
-  student: StudentItem | null;
-}) {
-  const [form, setForm] = useState<StudentItem>(
-    student ?? {
-      id: "",
-      nis: "",
-      name: "",
-      class_name: "",
-      gender: "L",
-      parent_name: "",
-      phone: "",
-      email: "",
-      status: "aktif",
-    }
-  );
-
-  useMemo(() => {
-    if (student) setForm(student);
-  }, [student]);
-
-  if (!open) return null;
-
-  const handleSave = () => {
-    if (!form.name) return;
-    onSave(form);
-    onClose();
-  };
-
-  const set = <K extends keyof StudentItem>(k: K, v: StudentItem[K]) =>
-    setForm((s) => ({ ...s, [k]: v }));
-
-  return (
-    <div
-      className="fixed inset-0 z-50 grid place-items-center"
-      style={{ background: "rgba(0,0,0,.35)" }}
-      onClick={onClose}
-    >
-      <div
-        className="w-[min(500px,95vw)] rounded-2xl shadow-xl p-5"
-        onClick={(e) => e.stopPropagation()}
-        style={{ background: palette.white1, color: palette.black1 }}
-      >
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-lg">Edit Siswa</h3>
-          <button
-            className="p-1 rounded-lg"
-            onClick={onClose}
-            style={{ color: palette.black2 }}
-          >
-            <X size={16} />
-          </button>
-        </div>
-        <div className="grid gap-3 text-sm">
-          <input
-            placeholder="Nama"
-            value={form.name}
-            onChange={(e) => set("name", e.target.value)}
-            className="border px-3 py-2 rounded-lg"
-            style={{ borderColor: palette.silver1 }}
-          />
-          <input
-            placeholder="NIS"
-            value={form.nis}
-            onChange={(e) => set("nis", e.target.value)}
-            className="border px-3 py-2 rounded-lg"
-            style={{ borderColor: palette.silver1 }}
-          />
-          <input
-            placeholder="Kelas"
-            value={form.class_name}
-            onChange={(e) => set("class_name", e.target.value)}
-            className="border px-3 py-2 rounded-lg"
-            style={{ borderColor: palette.silver1 }}
-          />
-          <select
-            value={form.status}
-            onChange={(e) => set("status", e.target.value as any)}
-            className="border px-3 py-2 rounded-lg"
-            style={{ borderColor: palette.silver1 }}
-          >
-            <option value="aktif">Aktif</option>
-            <option value="nonaktif">Nonaktif</option>
-            <option value="alumni">Alumni</option>
-          </select>
-        </div>
-        <div className="flex justify-end gap-2 mt-4">
-          <Btn palette={palette} variant="ghost" onClick={onClose}>
-            Batal
-          </Btn>
-          <Btn palette={palette} onClick={handleSave}>
-            Simpan
-          </Btn>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ================= Main Component ================= */
-const StudentsPage: React.FC<SchoolStudentProps> = () => {
+const StudentsPage: React.FC = () => {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
-  const { data: user } = useCurrentUser();
 
+  const { setTopBar, resetTopBar } = useTopBar();
+    useEffect(() => {
+      setTopBar({ mode: "back", title: "Data Siswa" });
+      return resetTopBar;
+    }, [setTopBar, resetTopBar]);
+
+  const [students, setStudents] = useState<StudentItem[]>(DUMMY_STUDENTS);
   const [openAdd, setOpenAdd] = useState(false);
   const [openImport, setOpenImport] = useState(false);
-  const [students, setStudents] = useState<StudentItem[]>(DUMMY_STUDENTS);
-  const [detail, setDetail] = useState<StudentItem | null>(null);
-  const [edit, setEdit] = useState<StudentItem | null>(null);
 
-  const handleDelete = (s: StudentItem) => {
-    if (!confirm(`Hapus siswa ${s.name}?`)) return;
-    setStudents((prev) => prev.filter((x) => x.id !== s.id));
-  };
+  /* 🔎 Search bar integration (sinkron dengan ?q=) */
+  const { q, setQ } = useSearchQuery("q");
 
-  const handleSaveEdit = (s: StudentItem) => {
-    setStudents((prev) => prev.map((x) => (x.id === s.id ? { ...s } : x)));
-  };
+  /* Filtered result */
+  const filtered = useMemo(() => {
+    const s = (q || "").toLowerCase().trim();
+    if (!s) return students;
+    return students.filter(
+      (x) =>
+        x.name.toLowerCase().includes(s) ||
+        (x.class_name ?? "").toLowerCase().includes(s) ||
+        (x.nis ?? "").toLowerCase().includes(s)
+    );
+  }, [students, q]);
 
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  /* Pagination (20 per halaman default) */
+  const total = filtered.length;
+  const {
+    offset,
+    limit,
+    setLimit,
+    pageStart,
+    pageEnd,
+    canPrev,
+    canNext,
+    handlePrev,
+    handleNext,
+  } = useOffsetLimit(total, 20, 200);
+  const pageItems = useMemo(
+    () => filtered.slice(offset, Math.min(offset + limit, total)),
+    [filtered, offset, limit, total]
+  );
+
+  /* Table Columns */
+  const columns: Column<StudentItem>[] = useMemo(
+    () => [
+      { key: "nis", header: "NIS", cell: (r) => r.nis ?? "-" },
+      { key: "name", header: "Nama", cell: (r) => r.name },
+      { key: "class_name", header: "Kelas", cell: (r) => r.class_name ?? "-" },
+      {
+        key: "status",
+        header: "Status",
+        cell: (r) => (
+          <Badge
+            palette={palette}
+            variant={
+              r.status === "aktif"
+                ? "success"
+                : r.status === "nonaktif"
+                ? "warning"
+                : "info"
+            }
+          >
+            {r.status}
+          </Badge>
+        ),
+      },
+      {
+        key: "aksi",
+        header: "Aksi",
+        cell: (r) => (
+          <div className="flex items-center gap-2 justify-end">
+            <Btn
+              size="sm"
+              variant="ghost"
+              palette={palette}
+              onClick={() => alert(`Detail siswa: ${r.name}`)}
+            >
+              <Eye size={16} />
+            </Btn>
+            <Btn
+              size="sm"
+              variant="ghost"
+              palette={palette}
+              onClick={() => alert(`Edit siswa: ${r.name}`)}
+            >
+              <Edit3 size={16} />
+            </Btn>
+            <Btn
+              size="sm"
+              variant="ghost"
+              palette={palette}
+              onClick={() => {
+                if (confirm(`Hapus siswa ${r.name}?`))
+                  setStudents((prev) => prev.filter((x) => x.id !== r.id));
+              }}
+            >
+              <Trash2 size={16} />
+            </Btn>
+          </div>
+        ),
+      },
+    ],
+    [palette]
+  );
+
   return (
     <div
-      className="w-full"
+      className="min-h-screen w-full overflow-x-hidden"
       style={{ background: palette.white2, color: palette.black1 }}
     >
+      {/* ===== Header ===== */}
+      <div
+        className="p-4 md:p-5 pb-3  flex flex-wrap items-center gap-3"
+       
+      >
+        <div className="hidden md:flex items-center gap-2 font-semibold order-1">
+          <Btn
+            palette={palette}
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate(-1)}
+          >
+            <ArrowLeft size={18} />
+          </Btn>
+          <h1>Data Siswa</h1>
+        </div>
+
+        {/* SearchBar + PerPageSelect */}
+        <div className="order-3 sm:order-2 w-full sm:w-auto flex-1 min-w-0">
+          <SearchBar
+            palette={palette}
+            value={q}
+            onChange={setQ}
+            placeholder="Cari siswa, kelas, atau NIS…"
+            debounceMs={400}
+            rightExtra={
+              <PerPageSelect
+                palette={palette}
+                value={limit}
+                onChange={(n) => setLimit(n)}
+              />
+            }
+          />
+        </div>
+
+      </div>
+      {/* Tombol Tambah & Import */}
+        <div className="order-2 sm:order-3 ml-auto flex items-center gap-2">
+          <Btn
+            palette={palette}
+            size="sm"
+            variant="outline"
+            className="gap-1"
+            onClick={() => setOpenImport(true)}
+          >
+            <Upload size={14} /> Import
+          </Btn>
+          <Btn
+            palette={palette}
+            size="sm"
+            className="gap-1"
+            onClick={() => setOpenAdd(true)}
+          >
+            <UserPlus size={14} /> Tambah
+          </Btn>
+        </div>
+
+      {/* ===== Body ===== */}
+      <main className="w-full">
+        <div className="max-w-screen-2xl mx-auto flex flex-col gap-6 mt-2 md:p-2">
+          <SectionCard palette={palette}>
+            <div
+              className="p-4 md:p-5 pb-3 border-b flex items-center justify-between gap-2"
+              style={{ borderColor: palette.silver1 }}
+            >
+              <div className="flex items-center gap-2 font-semibold">
+                <Users size={18} color={palette.quaternary} /> Daftar Siswa
+              </div>
+              <div className="text-sm" style={{ color: palette.black2 }}>
+                {total} total
+              </div>
+            </div>
+
+            <div className="p-4 md:p-5">
+              {students.length === 0 ? (
+                <div
+                  className="rounded-xl border p-4 text-sm flex items-center gap-2"
+                  style={{
+                    borderColor: palette.silver1,
+                    color: palette.silver2,
+                  }}
+                >
+                  <Info size={16} /> Belum ada data siswa.
+                </div>
+              ) : (
+                <>
+                  {/* Mobile Cards */}
+                  <div className="md:hidden">
+                    <CardGrid<StudentItem>
+                      items={pageItems}
+                      renderItem={(s) => (
+                        <div
+                          key={s.id}
+                          className="rounded-2xl border p-4 space-y-2"
+                          style={{
+                            borderColor: palette.silver1,
+                            background: palette.white1,
+                          }}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <div className="font-semibold">{s.name}</div>
+                              <div
+                                className="text-sm opacity-80"
+                                style={{ color: palette.black2 }}
+                              >
+                                NIS {s.nis ?? "-"} • Kelas {s.class_name ?? "-"}
+                              </div>
+                            </div>
+                            <Badge
+                              palette={palette}
+                              variant={
+                                s.status === "aktif"
+                                  ? "success"
+                                  : s.status === "nonaktif"
+                                  ? "warning"
+                                  : "info"
+                              }
+                            >
+                              {s.status}
+                            </Badge>
+                          </div>
+
+                          <div className="flex justify-end gap-2 pt-2">
+                            <Btn
+                              size="sm"
+                              variant="ghost"
+                              palette={palette}
+                              onClick={() => alert(`Detail: ${s.name}`)}
+                            >
+                              <Eye size={16} />
+                            </Btn>
+                            <Btn
+                              size="sm"
+                              variant="ghost"
+                              palette={palette}
+                              onClick={() => alert(`Edit: ${s.name}`)}
+                            >
+                              <Edit3 size={16} />
+                            </Btn>
+                            <Btn
+                              size="sm"
+                              variant="ghost"
+                              palette={palette}
+                              onClick={() => {
+                                if (confirm(`Hapus ${s.name}?`))
+                                  setStudents((prev) =>
+                                    prev.filter((x) => x.id !== s.id)
+                                  );
+                              }}
+                            >
+                              <Trash2 size={16} />
+                            </Btn>
+                          </div>
+                        </div>
+                      )}
+                    />
+                  </div>
+
+                  {/* Desktop Table */}
+                  <div className="hidden md:block">
+                    <DataTable<StudentItem>
+                      palette={palette}
+                      columns={columns}
+                      rows={pageItems}
+                      minWidth={840}
+                    />
+                  </div>
+
+                  <PaginationBar
+                    palette={palette}
+                    pageStart={pageStart}
+                    pageEnd={pageEnd}
+                    total={total}
+                    canPrev={canPrev}
+                    canNext={canNext}
+                    onPrev={handlePrev}
+                    onNext={handleNext}
+                    rightExtra={
+                      <span
+                        className="text-sm"
+                        style={{ color: palette.black2 }}
+                      >
+                        {total} total
+                      </span>
+                    }
+                  />
+                </>
+              )}
+            </div>
+          </SectionCard>
+        </div>
+      </main>
+
       {/* Modals */}
       <TambahSiswa
         open={openAdd}
@@ -314,136 +394,6 @@ const StudentsPage: React.FC<SchoolStudentProps> = () => {
         onClose={() => setOpenImport(false)}
         palette={palette}
       />
-
-      <StudentDetailModal
-        open={!!detail}
-        onClose={() => setDetail(null)}
-        student={detail}
-        palette={palette}
-      />
-      <StudentEditModal
-        open={!!edit}
-        onClose={() => setEdit(null)}
-        student={edit}
-        onSave={handleSaveEdit}
-        palette={palette}
-      />
-
-      {/* Layout */}
-      <main className="w-full px-4 md:px-6 py-4 md:py-8">
-        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
-          {/* Content */}
-          <section className="flex-1 flex flex-col space-y-6 min-w-0">
-            <div className="flex items-center justify-between">
-              <div className="  md:flex hidden items-center gap-3">
-                <Btn
-                  palette={palette}
-                  variant="ghost"
-                  onClick={() => navigate(-1)}
-                >
-                  <ArrowLeft className="cursor-pointer" size={20} />
-                </Btn>
-
-                <h1 className="font-semibold text-lg">Data Siswa</h1>
-              </div>
-              <div className="flex gap-2">
-                <Btn
-                  onClick={() => setOpenImport(true)}
-                  size="sm"
-                  palette={palette}
-                  variant="outline"
-                  className="flex items-center gap-1.5 text-xs sm:text-sm"
-                >
-                  <Upload size={14} /> Import CSV
-                </Btn>
-                <Btn
-                  onClick={() => setOpenAdd(true)}
-                  size="sm"
-                  palette={palette}
-                  className="flex items-center gap-1.5 text-xs sm:text-sm"
-                >
-                  <UserPlus size={14} /> Tambah Siswa
-                </Btn>
-              </div>
-            </div>
-
-            {/* Table */}
-            <SectionCard palette={palette}>
-              <div className="overflow-x-auto">
-                <table className="min-w-[800px] w-full text-sm border-collapse">
-                  <thead style={{ color: palette.black2 }}>
-                    <tr
-                      className="border-b"
-                      style={{ borderColor: palette.silver1 }}
-                    >
-                      <th className="py-3 px-4 text-left">NIS</th>
-                      <th className="py-3 px-4 text-left">Nama</th>
-                      <th className="py-3 px-4 text-left">Kelas</th>
-                      <th className="py-3 px-4 text-left">Status</th>
-                      <th className="py-3 px-4 text-right">Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {students.map((s) => (
-                      <tr
-                        key={s.id}
-                        className="border-b hover:bg-black/5 transition-colors"
-                        style={{ borderColor: palette.silver1 }}
-                      >
-                        <td className="py-3 px-4">{s.nis}</td>
-                        <td className="py-3 px-4">{s.name}</td>
-                        <td className="py-3 px-4">{s.class_name}</td>
-                        <td className="py-3 px-4">
-                          <Badge
-                            palette={palette}
-                            variant={
-                              s.status === "aktif"
-                                ? "success"
-                                : s.status === "nonaktif"
-                                  ? "warning"
-                                  : "info"
-                            }
-                          >
-                            {s.status}
-                          </Badge>
-                        </td>
-                        <td className="py-3 px-4">
-                          <div className="flex justify-end gap-2">
-                            <Btn
-                              size="sm"
-                              variant="ghost"
-                              palette={palette}
-                              onClick={() => setDetail(s)}
-                            >
-                              <Eye size={16} />
-                            </Btn>
-                            <Btn
-                              size="sm"
-                              variant="ghost"
-                              palette={palette}
-                              onClick={() => setEdit(s)}
-                            >
-                              <Edit3 size={16} />
-                            </Btn>
-                            <Btn
-                              size="sm"
-                              variant="ghost"
-                              palette={palette}
-                              onClick={() => handleDelete(s)}
-                            >
-                              <Trash2 size={16} />
-                            </Btn>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </SectionCard>
-          </section>
-        </div>
-      </main>
     </div>
   );
 };

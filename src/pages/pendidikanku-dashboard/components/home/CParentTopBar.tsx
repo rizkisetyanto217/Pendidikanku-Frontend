@@ -54,8 +54,8 @@ export default function ParentTopBar({
   onBackClick,
   onMenuClick,
   dateFmt,
-  sidebarOpen = true, // 👈 default open
-  onToggleSidebar, // 👈 handler dari MainLayout
+  sidebarOpen = true,
+  onToggleSidebar,
 }: ParentTopBarProps) {
   const { isDark } = useHtmlDarkMode();
   const navigate = useNavigate();
@@ -107,8 +107,8 @@ export default function ParentTopBar({
             role === "teacher"
               ? "guru"
               : role === "student"
-                ? "murid"
-                : "sekolah";
+              ? "murid"
+              : "sekolah";
           navigate(`/${id}/${target}`, { replace: true });
         }
 
@@ -125,8 +125,8 @@ export default function ParentTopBar({
   const pageKind: "sekolah" | "murid" | "guru" = pathname.includes("/sekolah")
     ? "sekolah"
     : pathname.includes("/guru")
-      ? "guru"
-      : "murid";
+    ? "guru"
+    : "murid";
 
   const base = id ? `/${id}/${pageKind}` : `/${pageKind}`;
   const navs: NavItem[] = useMemo(
@@ -185,14 +185,18 @@ export default function ParentTopBar({
             >
               <Menu
                 size={18}
-                className={`transition-transform duration-300 ${sidebarOpen ? "rotate-180" : "rotate-0"}`}
+                className={`transition-transform duration-300 ${
+                  sidebarOpen ? "rotate-180" : "rotate-0"
+                }`}
               />
             </button>
           )}
+
+          {/* 🔽 Tombol Back hanya tampil di mobile */}
           {showBack && (
             <button
               onClick={handleBack}
-              className="h-9 w-9 grid place-items-center rounded-xl border"
+              className="h-9 w-9 grid place-items-center rounded-xl border md:hidden"
               style={{ borderColor: palette.silver1 }}
               title="Kembali"
             >
@@ -205,7 +209,9 @@ export default function ParentTopBar({
             alt="Logo school"
             className="w-12 h-12 rounded-full object-cover border"
             style={{ borderColor: palette.primary }}
-            onError={(e) => (e.currentTarget.src = "/image/Gambar-school.jpeg")}
+            onError={(e) =>
+              (e.currentTarget.src = "/image/Gambar-school.jpeg")
+            }
           />
 
           <span
@@ -232,7 +238,6 @@ export default function ParentTopBar({
           <PublicUserDropdown variant="icon" withBg={false} />
         </div>
 
-        {/* === MOBILE BAR === */}
         {/* === MOBILE BAR === */}
         <div className="flex md:hidden items-center justify-between w-full">
           {/* Kiri: back kalau ada; kalau tidak, tampilkan menu */}

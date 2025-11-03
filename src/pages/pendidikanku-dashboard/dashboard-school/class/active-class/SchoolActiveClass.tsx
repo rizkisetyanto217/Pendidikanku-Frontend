@@ -204,7 +204,7 @@ const SchoolActiveClass: React.FC = () => {
           >
             <ArrowLeft size={18} />
           </Btn>
-          <Layers size={18} color={palette.quaternary} /> Daftar Kelas Aktif
+          <h1>Daftar Kelas Aktif</h1>
         </div>
 
         <div className="order-3 sm:order-2 w-full sm:w-auto flex-1 min-w-0">
@@ -223,12 +223,6 @@ const SchoolActiveClass: React.FC = () => {
               />
             }
           />
-        </div>
-
-        <div className="order-2 sm:order-3 ml-auto flex items-center gap-2">
-          <Btn palette={palette} size="sm" className="gap-1">
-            <FilterIcon size={16} /> Filter
-          </Btn>
         </div>
       </div>
 

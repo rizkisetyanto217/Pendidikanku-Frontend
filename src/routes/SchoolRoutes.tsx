@@ -77,7 +77,7 @@ export const SchoolRoutes = (
     </Route>
 
     {/* === Lainnya === */}
-    <Route path="all-announcement" element={<SchoolAllAnnouncement />} />
+    <Route path="pengumuman" element={<SchoolAllAnnouncement />} />
     <Route path="kelas">
       <Route index element={<SchoolClasses />} />
       <Route path="detail/:id" element={<SchoolManageClass />} />
@@ -104,7 +104,7 @@ export const SchoolRoutes = (
       <Route path="guru" element={<SchoolTeacher showBack />} />
       {/* <Route path="all-announcement" element={<AllAnnouncement />} /> */}
       <Route path="sekolah" element={<SchoolDashboard showBack />} />
-      <Route path="ruangan" element={<SchoolRoom showBack />} />
+      <Route path="ruangan" element={<SchoolRoom />} />
       <Route path="ruangan/:id" element={<SchoolDetailRoom />} />
       <Route path="spp" element={<SchoolSpp />} />
       <Route path="pelajaran" element={<SchoolSubject />} />
@@ -117,7 +117,7 @@ export const SchoolRoutes = (
         path="sertifikat/detail/:classId/:studentId"
         element={<SchoolDetailCertificate />}
       />
-      <Route path="murid" element={<SchoolStudent showBack />} />
+      <Route path="murid" element={<SchoolStudent />} />
       <Route path="buku">
         <Route index element={<SchoolBooks showBack />} />
         <Route path="detail/:id" element={<SchoolDetailBook />} />
@@ -126,12 +126,16 @@ export const SchoolRoutes = (
         <Route index element={<SchoolClasses showBack />} />
         <Route path="kelola" element={<SchoolManageClass />} />
       </Route>
-      <Route path="academic">
+      <Route path="akademik">
         <Route index element={<SchoolAcademic showBack />} />
         <Route path="detail" element={<DetailAcademic />} />
         <Route path="kelola" element={<SchoolManagementAcademic />} />
       </Route>
     </Route>
     <Route path="dev/semua-link" element={<SchoolRoutesPlayground />} />
+    <Route path="kelas">
+      <Route index element={<SchoolClasses />} />
+      <Route path="kelola" element={<SchoolManageClass />} />
+    </Route>
   </Route>
 );

@@ -1,6 +1,6 @@
 // src/pages/sekolahislamku/dashboard-school/SchoolTeacher.tsx
 
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useEffect } from "react";
 import { useNavigate, NavLink, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
@@ -38,6 +38,7 @@ import {
 
 import TambahGuru from "./components/CSchoolAddTeacher";
 import UploadFileGuru from "./components/CSchoolUploadFileTeacher";
+import { useTopBar } from "../../components/home/CUseTopBar";
 
 /* ================= Types (API) ================= */
 export interface TeacherApiRow {
@@ -177,7 +178,7 @@ const PageHeader = ({
   rightExtras?: React.ReactNode;
 }) => (
   <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-4">
-    <div className="flex items-center gap-2 flex-1">
+    <div className="hidden md:flex items-center gap-2 flex-1">
       {onBackClick && (
         <Btn
           palette={palette}
@@ -293,6 +294,12 @@ const SchoolTeacher: React.FC<SchoolTeacherProps> = ({ showBack = false }) => {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
+
+    const { setTopBar, resetTopBar } = useTopBar();
+    useEffect(() => {
+      setTopBar({ mode: "back", title: "Guru" });
+      return resetTopBar;
+    }, [setTopBar, resetTopBar]);
 
   // ✅ Ambil :schoolId dari PATH: /:schoolId/sekolah/...
   const { schoolId } = useParams<{ schoolId: string }>();

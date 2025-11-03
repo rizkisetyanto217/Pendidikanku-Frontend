@@ -12,6 +12,7 @@ import {
   AlertTriangle,
   Layers,
   Info,
+  ArrowLeft,
 } from "lucide-react";
 
 import { Btn, Badge, SectionCard } from "../../components/ui/CPrimitives";
@@ -27,6 +28,7 @@ import {
   CardGrid,
   PerPageSelect,
 } from "@/pages/pendidikanku-dashboard/components/common/CDataViewKit";
+import { Navigate, useNavigate } from "react-router-dom";
 
 /* ===================== Dummy Types & Data ===================== */
 type InvoiceStatus = "unpaid" | "paid" | "overdue";
@@ -118,10 +120,11 @@ const dateFmt = (iso: string) =>
 const SchoolFinance: React.FC = () => {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as any, isDark);
-  const { setTopBar, resetTopBar } = useTopBar();
+  const navigate = useNavigate();
 
+  const { setTopBar, resetTopBar } = useTopBar();
   React.useEffect(() => {
-    setTopBar({ mode: "menu", title: "Keuangan Sekolah" });
+    setTopBar({ mode: "back", title: "Keuangan Sekolah" });
     return resetTopBar;
   }, [setTopBar, resetTopBar]);
 
@@ -237,8 +240,17 @@ const SchoolFinance: React.FC = () => {
         className="p-4 md:p-5 pb-3 border-b flex flex-wrap items-center gap-2"
         style={{ borderColor: palette.silver1 }}
       >
-        <div className="flex items-center gap-2 font-semibold order-1">
-          <Layers size={18} color={palette.quaternary} /> Keuangan Sekolah
+        <div className="hidden md:flex items-center gap-2 font-semibold order-1">
+          <Btn
+            palette={palette}
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate(-1)}
+            className="cursor-pointer"
+          >
+            <ArrowLeft size={18} />
+          </Btn>
+          <h1>Keuangan Sekolah</h1>
         </div>
 
         <div className="order-3 sm:order-2 w-full sm:w-auto flex-1 min-w-0">

@@ -1,5 +1,5 @@
 // src/pages/sekolahislamku/pages/finance/SchoolSpp.tsx
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { pickTheme, ThemeName } from "@/constants/thema";
@@ -33,6 +33,7 @@ import {
   Users,
   Info,
 } from "lucide-react";
+import { useTopBar } from "../../components/home/CUseTopBar";
 
 /* ===================== Types & Helpers ===================== */
 type SppStatus = "unpaid" | "paid" | "overdue";
@@ -65,6 +66,12 @@ const SchoolSpp: React.FC = () => {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
+
+  const { setTopBar, resetTopBar } = useTopBar();
+  useEffect(() => {
+    setTopBar({ mode: "back", title: "SPP Murid" });
+    return resetTopBar;
+  }, [setTopBar, resetTopBar]);
 
   const today = new Date();
   const ym = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(
@@ -177,7 +184,7 @@ const SchoolSpp: React.FC = () => {
         className="p-4 md:p-5 pb-3 border-b flex flex-wrap items-center gap-2"
         style={{ borderColor: palette.silver1 }}
       >
-        <div className="flex items-center gap-2 font-semibold order-1">
+        <div className="hidden md:flex items-center gap-2 font-semibold order-1">
           <Btn
             palette={palette}
             variant="ghost"
@@ -187,7 +194,7 @@ const SchoolSpp: React.FC = () => {
           >
             <ArrowLeft size={18} />
           </Btn>
-          <Users size={18} color={palette.quaternary} /> SPP Murid
+         <h1>SPP Murid</h1>
         </div>
 
         <div className="order-3 sm:order-2 w-full sm:w-auto flex-1 min-w-0">
