@@ -99,7 +99,7 @@ export const SchoolRoutes = (
     <Route path="menu-utama">
       <Route index element={<SchoolMenuGrids />} />
       <Route path="profil-sekolah" element={<SchoolProfile showBack />} />
-      <Route path="keuangan" element={<SchoolFinance showBack />} />
+      <Route path="keuangan" element={<SchoolFinance />} />
       <Route path="keuangan/detail/:id" element={<SchoolDetailBill />} />
       <Route path="guru" element={<SchoolTeacher showBack />} />
       {/* <Route path="all-announcement" element={<AllAnnouncement />} /> */}
