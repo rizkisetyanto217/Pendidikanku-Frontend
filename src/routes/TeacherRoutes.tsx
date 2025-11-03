@@ -18,15 +18,9 @@ import TeacherDetailGrading from "@/pages/pendidikanku-dashboard/dashboard-teach
 import TeacherClass from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/TeacherClass";
 import TeacherDetailClass from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/TeacherDetailClass";
 import TeacherClassAttandence from "@/pages/pendidikanku-dashboard/dashboard-teacher/attendance/TeacherClassAttandence";
-import TeacherDetailMateri from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/TeacherDetailMaterial";
-import TeacherClassMaterial from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/TeacherClassMaterial";
 import TeacherAssignmentClass from "@/pages/pendidikanku-dashboard/dashboard-teacher/asssigment/TeacherAssignmentClass";
 
-import TeacherStudentScore from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/components/TeacherStudentScore";
-import TeacherDetailStudent from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/TeacherDetailStudent";
-import TeacherTaskScore from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/components/TeacherTaskScore";
 
-import TeacherHomeroom from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/TeacherHomeroomTeacher";
 import TeacherManagementClass from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/TeacherManagementClass";
 import TeacherDetailClassQuiz from "@/pages/pendidikanku-dashboard/dashboard-teacher/class/TeacherDetailClassQuiz";
 import TeacherAllAssignment from "@/pages/pendidikanku-dashboard/dashboard-teacher/asssigment/TeacherAllAssignment";
@@ -93,27 +87,16 @@ export const TeacherRoutes = (
       <Route index element={<TeacherClass />} />
       <Route path=":id" element={<TeacherDetailClass />} />
       <Route path=":id/absensi" element={<TeacherClassAttandence />} />
-      <Route
-        path=":id/material/:materialId"
-        element={<TeacherDetailMateri />}
-      />
-      <Route path=":id/materi" element={<TeacherClassMaterial />} />
       <Route path=":id/tugas" element={<TeacherAssignmentClass />} />
 
-      <Route
-        path=":id/student/:studentId/score"
-        element={<TeacherStudentScore />}
-      />
+
     </Route>
 
     {/* Tugas & Manajemen */}
     <Route path="tugas">
       <Route index element={<TeacherAllAssignment />} />
-      <Route path="detail" element={<TeacherDetailStudent />} />
     </Route>
-    <Route path="kelas/detail/score" element={<TeacherTaskScore />} />
 
-    <Route path="kelas/homeroom" element={<TeacherHomeroom />} />
     <Route path="kelola-kelas/:name" element={<TeacherManagementClass />} />
     <Route path="quizClass/detail" element={<TeacherDetailClassQuiz />} />
 
