@@ -27,7 +27,7 @@ import SchoolDetailBook from "@/pages/pendidikanku-dashboard/dashboard-school/bo
 import SchoolMenuGrids from "@/pages/pendidikanku-dashboard/dashboard-school/menu/SchoolMenuGrids";
 import SchoolRoom from "@/pages/pendidikanku-dashboard/dashboard-school/academic/rooms/SchoolRoom";
 import SchoolDetailRoom from "@/pages/pendidikanku-dashboard/dashboard-school/academic/rooms/SchoolDetailRoom";
-import SchoolSpp from "@/pages/pendidikanku-dashboard/dashboard-school/finance/spp/SchoolSpp";
+import SchoolSpp from "@/pages/pendidikanku-dashboard/dashboard-school/finance/SchoolSpp";
 import SchoolSubject from "@/pages/pendidikanku-dashboard/dashboard-school/subject/SchoolSubject";
 import SchoolCertificate from "@/pages/pendidikanku-dashboard/dashboard-school/academic/certificate/SchoolCertificate";
 import SchoolDetailCertificate from "@/pages/pendidikanku-dashboard/dashboard-school/academic/certificate/components/CSchoolDetailCertificate";

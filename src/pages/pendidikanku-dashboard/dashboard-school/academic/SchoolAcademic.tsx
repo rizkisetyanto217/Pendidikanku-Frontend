@@ -113,7 +113,7 @@ function extractErrorMessage(err: any) {
 
 function toZDate(d: string) {
   if (!d) return "";
-  if (d.includes("T")) return d; // jangan double
+  if (d.includes("T")) return d;
   return `${d}T00:00:00Z`;
 }
 
@@ -441,7 +441,6 @@ const SchoolAcademic: React.FC<{
   backTo?: string;
   backLabel?: string;
 }> = () => {
-  // PAKAI :schoolId (camelCase) sesuai AppRoutes
   const { schoolId } = useParams<{ schoolId: string }>();
 
   const { isDark, themeName } = useHtmlDarkMode();
@@ -463,7 +462,7 @@ const SchoolAcademic: React.FC<{
     enabled: !!schoolId,
     staleTime: 60_000,
     retry: 1,
-    // v5: pengganti keepPreviousData
+    // v5 pengganti keepPreviousData
     placeholderData: (prev) => prev ?? [],
     queryFn: async () => {
       const res = await axios.get<AdminTermsResponse>(
@@ -629,25 +628,28 @@ const SchoolAcademic: React.FC<{
 
   return (
     <div
-      className="min-h-screen w-full"
+      className="min-h-screen w-full overflow-x-hidden"
       style={{ background: palette.white2, color: palette.black1 }}
     >
+      {/* ===== Header: wrap-friendly ===== */}
       <div
-        className="p-4 md:p-5 pb-3 border-b flex items-center justify-between gap-2"
+        className="p-4 md:p-5 pb-3 border-b flex flex-wrap items-center gap-2"
         style={{ borderColor: palette.silver1 }}
       >
-        <div className="flex items-center gap-2 font-semibold">
+        {/* Judul */}
+        <div className="flex items-center gap-2 font-semibold order-1">
           <Layers size={18} color={palette.quaternary} /> Daftar Periode
         </div>
 
-        {/* 🔎 SearchBar + per-page */}
-        <div className="w-full max-w-md ml-auto">
+        {/* Search + per-page */}
+        <div className="order-3 sm:order-2 w-full sm:w-auto flex-1 min-w-0">
           <SearchBar
             palette={palette}
             value={q}
             onChange={setQ}
             placeholder="Cari tahun, nama, atau angkatan…"
             debounceMs={500}
+            className="w-full"
             rightExtra={
               <PerPageSelect
                 palette={palette}
@@ -658,7 +660,8 @@ const SchoolAcademic: React.FC<{
           />
         </div>
 
-        <div className="flex items-center gap-2">
+        {/* Tombol aksi */}
+        <div className="order-2 sm:order-3 ml-auto flex items-center gap-2">
           <Btn
             palette={palette}
             size="sm"

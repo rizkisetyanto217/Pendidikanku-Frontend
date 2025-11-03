@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import React, {useEffect, useMemo, useRef, useState} from "react";
+import {useSearchParams} from "react-router-dom";
 import {
   Btn,
   type Palette,
@@ -22,7 +22,7 @@ function pickTableBorder(palette: Palette) {
 }
 function pickRowHoverBg(palette: Palette) {
   // gunakan white3 jika ada, fallback ke primary2
-  return palette.white3 || palette.primary2;
+  return (palette as any).white3 || palette.primary2;
 }
 function pickContainerBg(palette: Palette) {
   return palette.white1;
@@ -33,11 +33,9 @@ function pickContainerBorder(palette: Palette) {
 function pickContainerFg(palette: Palette) {
   return palette.black1;
 }
-
-// Tambahkan helper baru
-function pickRowZebraBg(p: Palette) {
-  // pakai white3 kalau ada; fallback ke primary2 yang sangat transparan
-  return p.white3 || p.primary2;
+function pickRowZebraBg(palette: Palette) {
+  // pakai white3 kalau ada; fallback ke primary2
+  return (palette as any).white3 || palette.primary2;
 }
 
 /* =========================================================
@@ -71,10 +69,10 @@ export function useSearchQuery(paramKey = "q") {
     // reset offset hanya bila perlu
     if ((sp.get("offset") ?? "0") !== "0") next.set("offset", "0");
 
-    setSp(next, { replace: true });
+    setSp(next, {replace: true});
   };
 
-  return { q, setQ };
+  return {q, setQ};
 }
 
 /* =========================================================
@@ -110,7 +108,7 @@ export function PerPageSelect({
         }}
       >
         {options.map((n) => (
-          <option key={n} value={n} style={{ color: palette.black1 }}>
+          <option key={n} value={n} style={{color: palette.black1}}>
             {n}/hal
           </option>
         ))}
@@ -122,7 +120,7 @@ export function PerPageSelect({
         width={16}
         height={16}
         className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2"
-        style={{ color: palette.silver2, opacity: 0.9 }}
+        style={{color: palette.silver2, opacity: 0.9}}
       >
         <path
           d="M7 10l5 5 5-5"
@@ -198,7 +196,7 @@ export function SearchBar({
           height={18}
           className="mt-1"
           aria-hidden
-          style={{ color: pickTextMuted(palette), opacity: 0.7 }}
+          style={{color: pickTextMuted(palette), opacity: 0.7}}
         >
           <path
             d="M21 21l-4.3-4.3M10 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16Z"
@@ -216,7 +214,7 @@ export function SearchBar({
         className="flex-1 outline-none bg-transparent text-sm"
         autoFocus={autoFocus}
         aria-label="Cari data"
-        style={{ color: pickContainerFg(palette) }}
+        style={{color: pickContainerFg(palette)}}
       />
       {rightExtra}
     </div>
@@ -253,7 +251,7 @@ export function useOffsetLimit(
       next.get("offset") === sp.get("offset") &&
       next.get("limit") === sp.get("limit");
     if (same) return;
-    setSp(next, { replace: true });
+    setSp(next, {replace: true});
   };
 
   const setOffset = (newOffset: number) => {
@@ -323,7 +321,7 @@ export function PaginationBar({
 }) {
   return (
     <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-      <div className="text-sm" style={{ color: pickTextMuted(palette) }}>
+      <div className="text-sm" style={{color: pickTextMuted(palette)}}>
         Menampilkan {pageStart}–{pageEnd} dari {total} data
       </div>
       <div className="flex items-center gap-2">
@@ -348,6 +346,7 @@ export function PaginationBar({
 /* =========================================================
    ScrollAreaX — wrapper dengan horizontal scroll ramah mobile
    ========================================================= */
+// Mobile: hidden, Desktop (md+): auto
 export function ScrollAreaX({
   children,
   palette,
@@ -358,7 +357,7 @@ export function ScrollAreaX({
   return (
     <div className="relative" aria-label="Scrollable table region">
       <div
-        className="overflow-x-auto overscroll-x-contain max-w-full rounded-2xl shadow-sm"
+        className="overflow-x-hidden md:overflow-x-auto overscroll-x-contain max-w-full rounded-2xl shadow-sm"
         role="region"
         aria-roledescription="horizontal scroller"
         tabIndex={0}
@@ -383,7 +382,6 @@ export type Column<T> = {
   className?: string;
 };
 
-// Ubah signature DataTable: tambah prop `zebra`
 export function DataTable<T>({
   palette,
   columns,
@@ -391,7 +389,7 @@ export function DataTable<T>({
   minWidth = 840,
   headerSticky = true,
   emptyState,
-  zebra = true, // ⬅️ default aktif
+  zebra = true,
 }: {
   palette: Palette;
   columns: Column<T>[];
@@ -399,13 +397,13 @@ export function DataTable<T>({
   minWidth?: number;
   headerSticky?: boolean;
   emptyState?: React.ReactNode;
-  zebra?: boolean; // ⬅️ prop baru
+  zebra?: boolean;
 }) {
   const [hovered, setHovered] = useState<number | null>(null);
 
   return (
     <ScrollAreaX palette={palette}>
-      <table className="w-full text-sm text-left" style={{ minWidth }}>
+      <table className="w-full text-sm text-left" style={{minWidth}}>
         <thead>
           <tr
             style={{
@@ -422,7 +420,7 @@ export function DataTable<T>({
                   headerSticky ? "sticky top-0 z-10 backdrop-blur" : "",
                   c.className || "",
                 ].join(" ")}
-                style={{ color: pickTableHeaderFg(palette) }}
+                style={{color: pickTableHeaderFg(palette)}}
               >
                 {c.header}
               </th>
@@ -432,14 +430,14 @@ export function DataTable<T>({
 
         <tbody
           className="divide-y"
-          style={{ borderColor: pickTableBorder(palette) }}
+          style={{borderColor: pickTableBorder(palette)}}
         >
           {rows.length === 0 && (
             <tr>
               <td
                 className="px-4 py-6 text-sm"
                 colSpan={columns.length}
-                style={{ color: pickTextMuted(palette), opacity: 0.85 }}
+                style={{color: pickTextMuted(palette), opacity: 0.85}}
               >
                 {emptyState ?? "Tidak ada data."}
               </td>
@@ -448,7 +446,7 @@ export function DataTable<T>({
 
           {rows.map((r, i) => {
             const isHovered = hovered === i;
-            const isZebra = zebra && i % 2 === 1; // baris ganjil
+            const isZebra = zebra && i % 2 === 1;
             const baseBg = isZebra ? pickRowZebraBg(palette) : "transparent";
             const bg = isHovered ? pickRowHoverBg(palette) : baseBg;
 
@@ -457,13 +455,13 @@ export function DataTable<T>({
                 key={i}
                 onMouseEnter={() => setHovered(i)}
                 onMouseLeave={() => setHovered(null)}
-                style={{ background: bg, transition: "background 120ms ease" }}
+                style={{background: bg, transition: "background 120ms ease"}}
               >
                 {columns.map((c) => (
                   <td
                     key={c.key}
                     className={["px-4 py-3", c.className || ""].join(" ")}
-                    style={{ color: pickContainerFg(palette) }}
+                    style={{color: pickContainerFg(palette)}}
                   >
                     {c.cell(r)}
                   </td>
@@ -493,10 +491,8 @@ export function CardGrid<T>({
 }) {
   if (items.length === 0) {
     return (
-      <div className="text-sm" style={{ color: "#000000" }}>
-        <span style={{ color: "inherit", opacity: 0.7 }}>
-          {emptyState ?? "Tidak ada data."}
-        </span>
+      <div className="text-sm">
+        <span style={{opacity: 0.7}}>{emptyState ?? "Tidak ada data."}</span>
       </div>
     );
   }
