@@ -1,6 +1,5 @@
-// src/pages/sekolahislamku/dashboard-school/TeachersPage.tsx
+// src/pages/sekolahislamku/dashboard-school/SchoolTeacher.tsx
 
-/* ================= Imports ================= */
 import { useMemo, useState, useCallback } from "react";
 import { useNavigate, NavLink, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -12,6 +11,7 @@ import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import {
   SectionCard,
   Btn,
+  Badge,
   type Palette,
 } from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 import {
@@ -23,6 +23,18 @@ import {
   Phone,
   ArrowLeft,
 } from "lucide-react";
+
+/* DataViewKit */
+import {
+  useSearchQuery,
+  SearchBar,
+  useOffsetLimit,
+  PaginationBar,
+  DataTable,
+  type Column,
+  CardGrid,
+  PerPageSelect,
+} from "@/pages/pendidikanku-dashboard/components/common/CDataViewKit";
 
 import TambahGuru from "./components/CSchoolAddTeacher";
 import UploadFileGuru from "./components/CSchoolUploadFileTeacher";
@@ -54,7 +66,6 @@ export interface TeacherApiRow {
   school_teacher_school_name_snapshot: string | null;
   school_teacher_school_slug_snapshot: string | null;
 
-  // bisa array asli atau string "[]"
   school_teacher_sections: any[] | string;
   school_teacher_csst: any[] | string;
 
@@ -64,7 +75,7 @@ export interface TeacherApiRow {
 }
 
 type PublicTeachersResponse = {
-  pagination: {
+  pagination?: {
     page: number;
     per_page: number;
     total: number;
@@ -81,7 +92,7 @@ export interface TeacherItem {
   code?: string | null;
   slug?: string | null;
 
-  name: string; // prefix + name + suffix
+  name: string;
   avatarUrl?: string | null;
   phone?: string;
   subject?: string;
@@ -94,7 +105,6 @@ export interface TeacherItem {
   joinedAt?: string | null;
   leftAt?: string | null;
 
-  // opsional untuk filter tampilan
   nip?: string;
   gender?: "L" | "P";
   email?: string;
@@ -132,7 +142,6 @@ function safeParseArray(v: unknown): any[] {
   }
   return [];
 }
-
 function parsePhoneFromWa(wa?: string | null) {
   if (!wa) return undefined;
   try {
@@ -145,11 +154,12 @@ function parsePhoneFromWa(wa?: string | null) {
 }
 
 /* ================= Slug/school Hook ================= */
+// ✅ :schoolId konsisten dengan IndexRoute & SchoolRoutes
 function useSchoolPath() {
-  const { school_id } = useParams<{ school_id?: string }>();
-  const base = school_id ?? "";
+  const { schoolId } = useParams<{ schoolId: string }>();
+  const base = schoolId ?? "";
   const makePath = (path: string) => `/${base}/sekolah/${path}`;
-  return { base, makePath, school_id: base };
+  return { base, makePath, schoolId: base };
 }
 
 /* ================= UI Bits ================= */
@@ -158,28 +168,31 @@ const PageHeader = ({
   onImportClick,
   onAddClick,
   onBackClick,
+  rightExtras,
 }: {
   palette: Palette;
   onImportClick: () => void;
   onAddClick: () => void;
   onBackClick?: () => void;
+  rightExtras?: React.ReactNode;
 }) => (
-  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6">
-    <div className="flex items-center gap-3 md:mt-0">
+  <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-4">
+    <div className="flex items-center gap-2 flex-1">
       {onBackClick && (
         <Btn
           palette={palette}
           variant="ghost"
           onClick={onBackClick}
-          className="items-center gap-1.5 md:mt-0 hidden md:block"
+          className="items-center gap-1.5"
         >
           <ArrowLeft size={20} />
         </Btn>
       )}
-      <h1 className="text-lg font-semibold hidden md:block">Guru</h1>
+      <h1 className="text-lg font-semibold">Guru</h1>
     </div>
 
-    <div className="flex items-center gap-2 flex-wrap -mt-3 md:-mt-0">
+    <div className="flex items-center gap-2 flex-wrap">
+      {rightExtras}
       <Btn
         onClick={onImportClick}
         className="flex items-center gap-1.5 text-xs sm:text-sm"
@@ -207,6 +220,7 @@ const PageHeader = ({
   </div>
 );
 
+/* ==== Kartu (mobile) ==== */
 function TeacherCardMobile({
   teacher,
   palette,
@@ -217,92 +231,35 @@ function TeacherCardMobile({
   const { makePath } = useSchoolPath();
   return (
     <div
-      className="border rounded-lg p-4 space-y-3"
-      style={{ borderColor: palette.silver1 }}
+      className="rounded-2xl border p-4 space-y-3"
+      style={{ borderColor: palette.silver1, background: palette.white1 }}
     >
-      <div className="font-medium">{teacher.name}</div>
+      <div className="flex items-center justify-between gap-2">
+        <div className="font-medium min-w-0 truncate">{teacher.name}</div>
+        <Badge
+          palette={palette}
+          variant={teacher.isActive ? "success" : "outline"}
+        >
+          {teacher.isActive ? "Aktif" : "Nonaktif"}
+        </Badge>
+      </div>
+
       <div className="text-xs opacity-70">{teacher.subject ?? "-"}</div>
 
       <div className="text-sm space-y-1">
         <div>
-          <span className="text-gray-600">NIP: </span>
+          <span className="opacity-70">NIP: </span>
           {teacher.nip ?? "-"}
         </div>
         <div>
-          <span className="text-gray-600">Gender: </span>
+          <span className="opacity-70">Gender: </span>
           {genderLabel(teacher.gender)}
         </div>
-        <div>
-          <span className="text-gray-600">Kontak: </span>
-          <div className="flex gap-3 mt-1">
-            {teacher.phone && (
-              <a
-                href={`tel:${teacher.phone}`}
-                className="flex items-center gap-1 text-sm hover:underline"
-                style={{ color: palette.primary }}
-              >
-                <Phone size={14} /> {teacher.phone}
-              </a>
-            )}
-            {teacher.email && (
-              <a
-                href={`mailto:${teacher.email}`}
-                className="flex items-center gap-1 text-sm hover:underline"
-                style={{ color: palette.primary }}
-              >
-                <Mail size={14} /> Email
-              </a>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div
-        className="flex gap-2 pt-2 border-t"
-        style={{ borderColor: palette.silver1 }}
-      >
-        <NavLink
-          to={makePath(`guru/${teacher.id}`)}
-          className="underline text-sm"
-          style={{ color: palette.primary }}
-        >
-          Detail
-        </NavLink>
-      </div>
-    </div>
-  );
-}
-
-const TeacherTableRow = ({
-  teacher,
-  palette,
-}: {
-  teacher: TeacherItem;
-  palette: Palette;
-}) => {
-  const { makePath } = useSchoolPath();
-  return (
-    <tr
-      className="border-t hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-      style={{ borderColor: palette.silver1 }}
-    >
-      <td className="py-3 px-5">{teacher.nip ?? "-"}</td>
-      <td className="py-3">
-        <div className="font-medium">{teacher.name}</div>
-        <div className="text-xs opacity-70">
-          {teacher.employment ?? "-"} •{" "}
-          {teacher.isActive ? "Aktif" : "Nonaktif"}
-          {teacher.isVerified ? " • Terverifikasi" : ""}
-        </div>
-      </td>
-      <td className="py-3">{teacher.subject ?? "-"}</td>
-      <td className="py-3">{genderLabel(teacher.gender)}</td>
-      <td className="py-3">
-        <div className="flex items-center gap-3 text-sm">
+        <div className="flex gap-3 mt-1">
           {teacher.phone && (
             <a
               href={`tel:${teacher.phone}`}
-              className="flex items-center gap-1 hover:underline"
+              className="flex items-center gap-1 text-sm hover:underline"
               style={{ color: palette.primary }}
             >
               <Phone size={14} /> {teacher.phone}
@@ -311,146 +268,25 @@ const TeacherTableRow = ({
           {teacher.email && (
             <a
               href={`mailto:${teacher.email}`}
-              className="flex items-center gap-1 hover:underline"
+              className="flex items-center gap-1 text-sm hover:underline"
               style={{ color: palette.primary }}
             >
               <Mail size={14} /> Email
             </a>
           )}
         </div>
-      </td>
-      <td className="py-3 text-right">
-        <div className="flex items-center gap-2 justify-end mr-3">
-          <NavLink to={makePath(`guru/${teacher.id}`)}>
-            <Btn
-              size="sm"
-              palette={palette}
-              variant="quaternary"
-              className="flex items-center gap-1"
-            >
-              Detail <ChevronRight size={14} />
-            </Btn>
-          </NavLink>
-        </div>
-      </td>
-    </tr>
-  );
-};
-
-const TeachersTable = ({
-  palette,
-  teachers,
-  isLoading,
-  isError,
-  isFetching,
-  onRefetch,
-  errorMessage,
-}: {
-  palette: Palette;
-  teachers: TeacherItem[];
-  isLoading: boolean;
-  isError: boolean;
-  isFetching: boolean;
-  onRefetch: () => void;
-  errorMessage?: string;
-}) => (
-  <SectionCard palette={palette} className="p-0">
-    {/* Mobile */}
-    <div className="block md:hidden p-4 space-y-3">
-      {isLoading && <div className="text-center text-sm">Memuat data…</div>}
-      {isError && (
-        <div
-          className="text-center text-sm"
-          style={{ color: palette.warning1 }}
-        >
-          <AlertTriangle size={16} className="inline mr-1" /> Terjadi kesalahan.
-          {errorMessage ? (
-            <span className="ml-1">({errorMessage})</span>
-          ) : null}{" "}
-          <button className="underline ml-1" onClick={onRefetch}>
-            Coba lagi
-          </button>
-        </div>
-      )}
-      {!isLoading && !isError && teachers.length === 0 && (
-        <div className="text-center text-sm opacity-70">
-          Belum ada data guru.
-        </div>
-      )}
-      {!isLoading &&
-        !isError &&
-        teachers.map((t) => (
-          <TeacherCardMobile key={t.id} teacher={t} palette={palette} />
-        ))}
-    </div>
-
-    {/* Desktop */}
-    <div className="hidden md:block overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead>
-          <tr
-            className="text-left border-b"
-            style={{ color: palette.black2, borderColor: palette.silver1 }}
-          >
-            <th className="py-3 px-5">NIP</th>
-            <th>Nama</th>
-            <th>Mapel</th>
-            <th>Gender</th>
-            <th>Kontak</th>
-          </tr>
-        </thead>
-        <tbody>
-          {isLoading && (
-            <tr>
-              <td colSpan={6} className="py-8 text-center opacity-70">
-                Memuat data…
-              </td>
-            </tr>
-          )}
-          {isError && (
-            <tr>
-              <td
-                colSpan={6}
-                className="py-8 text-center"
-                style={{ color: palette.warning1 }}
-              >
-                <AlertTriangle size={16} className="inline mr-1" /> Terjadi
-                kesalahan.
-                {errorMessage ? (
-                  <span className="ml-1">({errorMessage})</span>
-                ) : null}
-              </td>
-            </tr>
-          )}
-          {!isLoading && !isError && teachers.length === 0 && (
-            <tr>
-              <td colSpan={6} className="py-10 text-center opacity-70">
-                Belum ada data guru.
-              </td>
-            </tr>
-          )}
-          {!isLoading &&
-            !isError &&
-            teachers.map((t) => (
-              <TeacherTableRow key={t.id} teacher={t} palette={palette} />
-            ))}
-        </tbody>
-      </table>
-    </div>
-
-    <div
-      className="p-3 text-sm flex items-center justify-between border-t"
-      style={{ color: palette.black2, borderColor: palette.silver1 }}
-    >
-      <div>
-        {isFetching ? "Memuat ulang…" : `Menampilkan ${teachers.length} data`}
       </div>
-      <button className="underline" onClick={onRefetch}>
-        Refresh
-      </button>
+
+      <div className="pt-1 flex justify-end">
+        <NavLink to={makePath(`guru/${teacher.id}`)}>
+          <Btn size="sm" palette={palette} className="gap-1">
+            Detail <ChevronRight size={14} />
+          </Btn>
+        </NavLink>
+      </div>
     </div>
-  </SectionCard>
-);
+  );
+}
 
 /* ================= Main Component ================= */
 const SchoolTeacher: React.FC<SchoolTeacherProps> = ({ showBack = false }) => {
@@ -458,21 +294,21 @@ const SchoolTeacher: React.FC<SchoolTeacherProps> = ({ showBack = false }) => {
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
 
-  // Ambil school_id dari PATH: /:school_id/sekolah/menu-utama/guru
-  const { school_id: schoolIdParam } = useParams<{ school_id?: string }>();
-  const schoolId = schoolIdParam ?? "";
+  // ✅ Ambil :schoolId dari PATH: /:schoolId/sekolah/...
+  const { schoolId } = useParams<{ schoolId: string }>();
 
   const [openAdd, setOpenAdd] = useState(false);
   const [openImport, setOpenImport] = useState(false);
-  const [q, setQ] = useState("");
 
-  // Early return: path belum benar
+  // 🔎 Search sinkron ke ?q=
+  const { q, setQ } = useSearchQuery("q");
+
   if (!schoolId) {
     return (
       <div className="p-4">
         <p className="text-sm">
-          <b>school_id</b> tidak ditemukan di path. Pastikan URL seperti:
-          <code className="ml-1">/school_ID/sekolah/menu-utama/guru</code>
+          <b>schoolId</b> tidak ditemukan di path. Pastikan URL seperti:
+          <code className="ml-1">/SCHOOL_ID/sekolah/menu-utama/guru</code>
         </p>
       </div>
     );
@@ -488,13 +324,14 @@ const SchoolTeacher: React.FC<SchoolTeacherProps> = ({ showBack = false }) => {
     error,
   } = useQuery<PublicTeachersResponse, AxiosError>({
     queryKey: ["public-school-teachers", schoolId],
-    enabled: true,
+    enabled: Boolean(schoolId),
     staleTime: 2 * 60 * 1000,
     retry: 1,
     queryFn: async () => {
+      // Server belum support search/pagination? — ambil bulk lalu paginate di client
       const res = await axios.get<PublicTeachersResponse>(
         `/public/${schoolId}/school-teachers/list`,
-        { params: { page: 1, per_page: 50 } }
+        { params: { page: 1, per_page: 999 } }
       );
       return res.data;
     },
@@ -506,8 +343,8 @@ const SchoolTeacher: React.FC<SchoolTeacherProps> = ({ showBack = false }) => {
       ? (error?.response?.data as string)
       : error?.message);
 
-  /* ================= Mapping: API -> UI ================= */
-  const teachersFromApi: TeacherItem[] = useMemo(() => {
+  /* ================= Mapping API -> UI ================= */
+  const allTeachers: TeacherItem[] = useMemo(() => {
     const rows = resp?.data ?? [];
     return rows.map((t) => {
       const csstArr = safeParseArray(t.school_teacher_csst);
@@ -520,7 +357,6 @@ const SchoolTeacher: React.FC<SchoolTeacherProps> = ({ showBack = false }) => {
         id: t.school_teacher_id,
         code: t.school_teacher_code,
         slug: t.school_teacher_slug,
-
         name: buildTeacherName(
           t.school_teacher_user_teacher_title_prefix_snapshot,
           t.school_teacher_user_teacher_name_snapshot,
@@ -531,28 +367,117 @@ const SchoolTeacher: React.FC<SchoolTeacherProps> = ({ showBack = false }) => {
           t.school_teacher_user_teacher_whatsapp_url_snapshot
         ),
         subject,
-
         employment: t.school_teacher_employment,
         isActive: t.school_teacher_is_active,
         isPublic: t.school_teacher_is_public,
         isVerified: t.school_teacher_is_verified,
-
         joinedAt: t.school_teacher_joined_at,
         leftAt: t.school_teacher_left_at,
       } as TeacherItem;
     });
   }, [resp]);
 
-  const teachers = useMemo(() => {
+  /* ==== Filter by q (client) ==== */
+  const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
-    if (!needle) return teachersFromApi;
-    return teachersFromApi.filter(
+    if (!needle) return allTeachers;
+    return allTeachers.filter(
       (t) =>
         t.name.toLowerCase().includes(needle) ||
         (t.nip ?? "").toLowerCase().includes(needle) ||
         (t.email ?? "").toLowerCase().includes(needle)
     );
-  }, [teachersFromApi, q]);
+  }, [allTeachers, q]);
+
+  /* ==== Pagination (client) ==== */
+  const total = filtered.length;
+  const {
+    offset,
+    limit,
+    setLimit,
+    pageStart,
+    pageEnd,
+    canPrev,
+    canNext,
+    handlePrev,
+    handleNext,
+  } = useOffsetLimit(total, 20, 200);
+
+  const pageItems = useMemo(
+    () => filtered.slice(offset, Math.min(offset + limit, total)),
+    [filtered, offset, limit, total]
+  );
+
+  /* ==== Kolom: DataTable (desktop) ==== */
+  const columns: Column<TeacherItem>[] = useMemo(
+    () => [
+      { key: "nip", header: "NIP", cell: (t) => t.nip ?? "-" },
+      {
+        key: "name",
+        header: "Nama",
+        cell: (t) => (
+          <div className="min-w-0">
+            <div className="font-medium">{t.name}</div>
+            <div className="text-xs opacity-70">
+              {t.employment ?? "-"} • {t.isActive ? "Aktif" : "Nonaktif"}
+              {t.isVerified ? " • Terverifikasi" : ""}
+            </div>
+          </div>
+        ),
+      },
+      { key: "subject", header: "Mapel", cell: (t) => t.subject ?? "-" },
+      { key: "gender", header: "Gender", cell: (t) => genderLabel(t.gender) },
+      {
+        key: "contact",
+        header: "Kontak",
+        cell: (t) => (
+          <div className="flex items-center gap-3 text-sm">
+            {t.phone && (
+              <a
+                href={`tel:${t.phone}`}
+                className="flex items-center gap-1 hover:underline"
+                style={{ color: palette.primary }}
+              >
+                <Phone size={14} /> {t.phone}
+              </a>
+            )}
+            {t.email && (
+              <a
+                href={`mailto:${t.email}`}
+                className="flex items-center gap-1 hover:underline"
+                style={{ color: palette.primary }}
+              >
+                <Mail size={14} /> Email
+              </a>
+            )}
+          </div>
+        ),
+      },
+      {
+        key: "aksi",
+        header: "Aksi",
+        cell: (t) => {
+          const { makePath } = useSchoolPath();
+          return (
+            <div className="flex items-center justify-end">
+              <NavLink to={makePath(`guru/${t.id}`)}>
+                <Btn
+                  size="sm"
+                  palette={palette}
+                  variant="quaternary"
+                  className="flex items-center gap-1"
+                >
+                  Detail <ChevronRight size={14} />
+                </Btn>
+              </NavLink>
+            </div>
+          );
+        },
+        className: "text-right",
+      },
+    ],
+    [palette]
+  );
 
   const handleOpenAdd = useCallback(() => setOpenAdd(true), []);
   const handleOpenImport = useCallback(() => setOpenImport(true), []);
@@ -587,37 +512,120 @@ const SchoolTeacher: React.FC<SchoolTeacherProps> = ({ showBack = false }) => {
       <main className="w-full">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           <section className="flex-1 flex flex-col space-y-6 min-w-0">
+            {/* ===== Header + Search ===== */}
             <PageHeader
               palette={palette}
               onImportClick={handleOpenImport}
               onAddClick={handleOpenAdd}
               onBackClick={showBack ? () => navigate(-1) : undefined}
+              rightExtras={
+                <div className="w-full md:w-80">
+                  <SearchBar
+                    palette={palette}
+                    value={q}
+                    onChange={setQ}
+                    placeholder="Cari nama, NIP, email…"
+                    debounceMs={500}
+                    rightExtra={
+                      <PerPageSelect
+                        palette={palette}
+                        value={limit}
+                        onChange={setLimit}
+                      />
+                    }
+                  />
+                </div>
+              }
             />
 
-            {/* (Opsional) Input cari cepat */}
-            <div className="flex items-center gap-2">
-              <input
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                placeholder="Cari guru (nama, NIP, email)"
-                className="w-full rounded-md border px-3 py-2 text-sm"
-                style={{
-                  borderColor: palette.silver1,
-                  background: "transparent",
-                  color: "inherit",
-                }}
-              />
-            </div>
+            {/* ===== Body ===== */}
+            <SectionCard palette={palette}>
+              <div className="p-4 md:p-5 pb-2 flex items-center justify-between">
+                <div className="font-medium">Daftar Guru</div>
+                <div className="text-sm" style={{ color: palette.black2 }}>
+                  {isFetching ? "memuat…" : `${total} total`}
+                </div>
+              </div>
 
-            <TeachersTable
-              palette={palette}
-              teachers={teachers}
-              isLoading={isLoading}
-              isError={!!isError}
-              isFetching={isFetching}
-              onRefetch={refetch}
-              errorMessage={errorMessage}
-            />
+              <div className="p-4 md:p-5">
+                {isLoading ? (
+                  <div className="text-sm opacity-70">Memuat data…</div>
+                ) : isError ? (
+                  <div
+                    className="rounded-xl border p-4 text-sm"
+                    style={{ borderColor: palette.silver1 }}
+                  >
+                    <div style={{ color: palette.warning1 }}>
+                      <AlertTriangle size={16} className="inline mr-1" />
+                      Terjadi kesalahan.
+                    </div>
+                    {errorMessage && (
+                      <pre className="text-xs opacity-70 mt-2 overflow-auto">
+                        {errorMessage}
+                      </pre>
+                    )}
+                    <Btn
+                      palette={palette}
+                      size="sm"
+                      className="mt-3"
+                      onClick={() => refetch()}
+                    >
+                      Coba lagi
+                    </Btn>
+                  </div>
+                ) : total === 0 ? (
+                  <div className="py-6 text-sm opacity-70">
+                    Belum ada data guru.
+                  </div>
+                ) : (
+                  <>
+                    {/* Mobile: Cards */}
+                    <div className="md:hidden">
+                      <CardGrid<TeacherItem>
+                        items={pageItems}
+                        renderItem={(t) => (
+                          <TeacherCardMobile
+                            key={t.id}
+                            teacher={t}
+                            palette={palette}
+                          />
+                        )}
+                      />
+                    </div>
+
+                    {/* Desktop: Table */}
+                    <div className="hidden md:block">
+                      <DataTable<TeacherItem>
+                        palette={palette}
+                        columns={columns}
+                        rows={pageItems}
+                        minWidth={980}
+                      />
+                    </div>
+
+                    {/* Footer Pagination */}
+                    <PaginationBar
+                      palette={palette}
+                      pageStart={pageStart}
+                      pageEnd={pageEnd}
+                      total={total}
+                      canPrev={canPrev}
+                      canNext={canNext}
+                      onPrev={handlePrev}
+                      onNext={handleNext}
+                      rightExtra={
+                        <span
+                          className="text-sm"
+                          style={{ color: palette.black2 }}
+                        >
+                          {isFetching ? "memuat…" : `${total} total`}
+                        </span>
+                      }
+                    />
+                  </>
+                )}
+              </div>
+            </SectionCard>
           </section>
         </div>
       </main>

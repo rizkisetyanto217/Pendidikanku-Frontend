@@ -8,6 +8,7 @@ import {
   SectionCard,
   Btn,
   type Palette,
+  Badge,
 } from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -18,6 +19,10 @@ import {
   Pencil,
   Trash2,
   Plus,
+  Info,
+  Loader2,
+  BookOpen,
+  Link as LinkIcon,
 } from "lucide-react";
 
 /* 🔌 DataViewKit */
@@ -130,7 +135,7 @@ function useBooksListPublic(params: {
     queryFn: async () => {
       const r = await axios.get<PublicBooksResponse>(
         `/public/${encodeURIComponent(schoolId)}/books/list`,
-        { withCredentials: false }
+        { withCredentials: false, params: { _: Date.now() } }
       );
 
       const mapped: BookAPI[] = (r.data?.data ?? []).map((b) => ({
@@ -149,6 +154,8 @@ function useBooksListPublic(params: {
       const sliced = mapped.slice(offset, Math.min(offset + limit, total));
       return { data: sliced, pagination: { limit, offset, total } };
     },
+    placeholderData: (prev) =>
+      prev ?? { data: [], pagination: { limit, offset, total: 0 } },
     staleTime: 60_000,
     gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
@@ -177,6 +184,10 @@ function useCreateBook(schoolId: string) {
     },
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: ["books-list-public"] });
+      await qc.refetchQueries({
+        queryKey: ["books-list-public"],
+        type: "active",
+      });
     },
   });
 }
@@ -197,6 +208,10 @@ function useUpdateBook() {
     },
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: ["books-list-public"] });
+      await qc.refetchQueries({
+        queryKey: ["books-list-public"],
+        type: "active",
+      });
     },
   });
 }
@@ -212,6 +227,10 @@ function useDeleteBook() {
     },
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: ["books-list-public"] });
+      await qc.refetchQueries({
+        queryKey: ["books-list-public"],
+        type: "active",
+      });
     },
     onError: (err: any) => {
       alert(err?.response?.data?.message ?? "Gagal menghapus buku.");
@@ -488,8 +507,11 @@ function BookModal({
                     style={{ color: palette.black2 }}
                   >
                     {form.urls.map((u, i) => (
-                      <span key={i} className="inline-block mr-2">
-                        • {u}
+                      <span
+                        key={i}
+                        className="inline-flex items-center gap-1 mr-2"
+                      >
+                        <LinkIcon size={12} /> {u}
                       </span>
                     ))}
                   </div>
@@ -502,7 +524,7 @@ function BookModal({
           <div className="pt-4 md:pt-6 flex justify-end gap-2">
             <Btn
               palette={palette}
-              variant="ghost"
+              variant="secondary"
               onClick={onClose}
               disabled={submitting}
             >
@@ -530,7 +552,7 @@ const SchoolBooks: React.FC<{
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
 
   const navigate = useNavigate();
-  const [sp, setSp] = useSearchParams();
+  const [sp] = useSearchParams();
 
   // Ambil schoolId dari path param
   const params = useParams<{
@@ -544,8 +566,8 @@ const SchoolBooks: React.FC<{
   /* 🔎 Search sinkron URL */
   const { q, setQ } = useSearchQuery("q");
 
-  /* ⏭ Pagination sinkron URL */
-  const totalDummy = Number(sp.get("total") ?? 0); // tidak dipakai; hanya placeholder supaya hook stabil
+  /* ⏭ Pagination sinkron URL (mengikuti pola lama, tapi UI-nya diseragamkan) */
+  const totalDummy = Number(sp.get("total") ?? 0);
   const {
     offset,
     limit,
@@ -558,7 +580,7 @@ const SchoolBooks: React.FC<{
     handleNext,
   } = useOffsetLimit(totalDummy, 20, 200);
 
-  /* Fetch data (client slice di server hook agar UI konsisten) */
+  /* Fetch data */
   const booksQ = useBooksListPublic({ schoolId, limit, offset });
   const data = booksQ.data?.data ?? [];
   const total = booksQ.data?.pagination?.total ?? 0;
@@ -650,6 +672,12 @@ const SchoolBooks: React.FC<{
       ),
     },
     {
+      key: "slug",
+      header: "Slug",
+      className: "w-[180px]",
+      cell: (r) => r.books_slug ?? "-",
+    },
+    {
       key: "usage",
       header: "Dipakai di",
       cell: () => "-",
@@ -699,10 +727,10 @@ const SchoolBooks: React.FC<{
   const CardItem = (b: BookAPI) => (
     <div
       key={b.books_id}
-      className="rounded-xl border p-3 flex gap-3 cursor-pointer"
+      className="rounded-2xl border p-4 flex gap-3 cursor-pointer"
       style={{ borderColor: palette.silver1, background: palette.white1 }}
       onClick={() => {
-        const qs = sp.toString();
+        const qs = new URLSearchParams(sp).toString();
         const url = `${base}/sekolah/buku/detail/${b.books_id}${qs ? `?${qs}` : ""}`;
         navigate(url);
       }}
@@ -789,108 +817,156 @@ const SchoolBooks: React.FC<{
   /* ====== Render ====== */
   return (
     <div
-      className="w-full"
+      className="min-h-screen w-full overflow-x-hidden"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <main className="w-full">
-        <div className="max-w-screen-2xl mx-auto flex flex-col gap-6">
-          {/* Header bar */}
-          <div className="flex items-center gap-3">
-            {showBack && (
-              <Btn
-                palette={palette}
-                variant="ghost"
-                onClick={() => (backTo ? navigate(backTo) : navigate(-1))}
-                className="inline-flex items-center gap-2"
-              >
-                <ArrowLeft size={20} />
-                {backLabel}
-              </Btn>
-            )}
-
-            {/* Search */}
-            <div className="flex-1">
-              <SearchBar
-                palette={palette}
-                value={q}
-                onChange={setQ}
-                placeholder="Cari judul, penulis, atau slug…"
-                leftIcon={
-                  <SearchIcon
-                    size={18}
-                    style={{ color: palette.black2, opacity: 0.7 }}
-                  />
-                }
-                rightExtra={
-                  <PerPageSelect
-                    palette={palette}
-                    value={limit}
-                    onChange={(n) => setLimit(n)}
-                  />
-                }
-              />
-            </div>
-
-            {/* Add */}
-            <Btn
-              palette={palette}
-              className="inline-flex items-center gap-2"
-              onClick={() => setBookModal({ mode: "create" })}
-            >
-              <Plus size={18} /> Buku
-            </Btn>
-          </div>
-
-          {/* Summary */}
-          <div className="text-sm px-1" style={{ color: palette.black2 }}>
-            {yyyyMmDdLocal()} •{" "}
-            {booksQ.isFetching ? "memuat…" : `${total} total`}
-          </div>
-
-          {/* List */}
-          <div className="md:hidden">
-            {booksQ.isLoading ? (
-              <div className="grid grid-cols-1 gap-3">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <CardSkeleton key={i} palette={palette} />
-                ))}
-              </div>
-            ) : items.length === 0 ? (
-              <SectionCard palette={palette} className="p-10 text-center">
-                <div className="text-sm" style={{ color: palette.black2 }}>
-                  {q ? "Tidak ada hasil untuk pencarianmu." : "Belum ada buku."}
-                </div>
-              </SectionCard>
-            ) : (
-              <CardGrid items={items} renderItem={CardItem} />
-            )}
-          </div>
-
-          <div className="hidden md:block">
-            <DataTable
-              palette={palette}
-              columns={columns}
-              rows={items.map((b, i) => ({ ...b, _index: offset + i }))}
-              minWidth={900}
-            />
-          </div>
-
-          {/* Pagination */}
-          <PaginationBar
+      {/* ===== Header: wrap-friendly (seragam dgn Academic Terms) ===== */}
+      <div
+        className="p-4 md:p-5 pb-3 border-b flex flex-wrap items-center gap-2"
+        style={{ borderColor: palette.silver1 }}
+      >
+        {/* Back (opsional) */}
+        {showBack && (
+          <Btn
             palette={palette}
-            pageStart={items.length ? offset + 1 : 0}
-            pageEnd={Math.min(offset + limit, total)}
-            total={total}
-            canPrev={canPrev}
-            canNext={canNext}
-            onPrev={handlePrev}
-            onNext={handleNext}
+            variant="ghost"
+            onClick={() => (backTo ? navigate(backTo) : navigate(-1))}
+            className="inline-flex items-center gap-2 order-1"
+          >
+            <ArrowLeft size={20} />
+            {backLabel}
+          </Btn>
+        )}
+
+        {/* Title */}
+        <div className="flex items-center gap-2 font-semibold order-2">
+          <BookOpen size={18} color={palette.quaternary} /> Daftar Buku
+        </div>
+
+        {/* Search + per-page */}
+        <div className="order-4 sm:order-3 w-full sm:w-auto flex-1 min-w-0">
+          <SearchBar
+            palette={palette}
+            value={q}
+            onChange={setQ}
+            placeholder="Cari judul, penulis, atau slug…"
+            debounceMs={500}
+            className="w-full"
+            leftIcon={
+              <SearchIcon
+                size={18}
+                style={{ color: palette.black2, opacity: 0.7 }}
+              />
+            }
             rightExtra={
-              <span className="text-sm" style={{ color: palette.black2 }}>
-                {booksQ.isFetching ? "memuat…" : `${total} total`}
-              </span>
+              <PerPageSelect
+                palette={palette}
+                value={limit}
+                onChange={(n) => setLimit(n)}
+              />
             }
           />
+        </div>
+
+        {/* Add */}
+        <div className="order-3 sm:order-4 ml-auto flex items-center gap-2">
+          <Btn
+            palette={palette}
+            size="sm"
+            className="gap-1"
+            onClick={() => setBookModal({ mode: "create" })}
+          >
+            <Plus size={18} /> Buku
+          </Btn>
+        </div>
+      </div>
+
+      <main className="w-full">
+        <div className="max-w-screen-2xl mx-auto flex flex-col gap-6">
+          {/* ===== Section: List (seragam) ===== */}
+          <SectionCard palette={palette}>
+            <div
+              className="p-4 md:p-5 pb-3 border-b flex items-center justify-between gap-2"
+              style={{ borderColor: palette.silver1 }}
+            >
+              <div className="flex items-center gap-2 font-semibold">
+                <BookOpen size={18} color={palette.quaternary} /> Daftar Buku
+              </div>
+              <div className="text-sm" style={{ color: palette.black2 }}>
+                {booksQ.isFetching ? "memuat…" : `${total} total`}
+              </div>
+            </div>
+
+            <div className="p-4 md:p-5">
+              {booksQ.isLoading ? (
+                <div className="flex items-center gap-2 text-sm opacity-70">
+                  <Loader2 className="animate-spin" size={16} /> Memuat…
+                </div>
+              ) : total === 0 ? (
+                <div
+                  className="rounded-xl border p-4 text-sm flex items-center gap-2"
+                  style={{
+                    borderColor: palette.silver1,
+                    color: palette.silver2,
+                  }}
+                >
+                  <Info size={16} /> Belum ada buku.
+                </div>
+              ) : items.length === 0 ? (
+                <div
+                  className="rounded-xl border p-4 text-sm flex items-center gap-2"
+                  style={{
+                    borderColor: palette.silver1,
+                    color: palette.silver2,
+                  }}
+                >
+                  <Info size={16} /> Tidak ada hasil untuk pencarianmu.
+                </div>
+              ) : (
+                <>
+                  {/* Mobile: Cards */}
+                  <div className="md:hidden">
+                    <CardGrid items={items} renderItem={CardItem} />
+                  </div>
+
+                  {/* Desktop: Table */}
+                  <div className="hidden md:block">
+                    <DataTable
+                      palette={palette}
+                      columns={columns}
+                      rows={items.map((b, i) => ({ ...b, _index: offset + i }))}
+                      minWidth={900}
+                    />
+                  </div>
+
+                  {/* ===== Pagination Footer ===== */}
+                  <PaginationBar
+                    palette={palette}
+                    pageStart={items.length ? offset + 1 : 0}
+                    pageEnd={Math.min(offset + limit, total)}
+                    total={total}
+                    canPrev={canPrev}
+                    canNext={canNext}
+                    onPrev={handlePrev}
+                    onNext={handleNext}
+                    rightExtra={
+                      <span
+                        className="text-sm"
+                        style={{ color: palette.black2 }}
+                      >
+                        {booksQ.isFetching ? "memuat…" : `${total} total`}
+                      </span>
+                    }
+                  />
+                </>
+              )}
+            </div>
+          </SectionCard>
+
+          {/* ===== Timestamp kecil (opsional, serupa lainnya) ===== */}
+          <div className="text-sm px-1" style={{ color: palette.black2 }}>
+            {yyyyMmDdLocal()}
+          </div>
         </div>
       </main>
 

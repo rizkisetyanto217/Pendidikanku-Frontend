@@ -1,4 +1,3 @@
-// src/pages/sekolahislamku/pages/classes/SchoolClasses.tsx
 import { useMemo, useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -236,15 +235,7 @@ async function fetchClassesPublic(
 }
 
 /* ================= Card ================= */
-function ClassCard({
-  r,
-  slug,
-  palette,
-}: {
-  r: ClassRow;
-  slug: string;
-  palette: Palette;
-}) {
+function ClassCard({ r, palette }: { r: ClassRow; palette: Palette }) {
   return (
     <div
       className="rounded-xl border p-3 space-y-2 min-w-0"
@@ -310,12 +301,9 @@ const SchoolClass: React.FC<{
   const [openTambah, setOpenTambah] = useState(false);
   const [openTambahLevel, setOpenTambahLevel] = useState(false);
 
-  // ambil school_id dari path
-  const { school_id, slug = "" } = useParams<{
-    school_id?: string;
-    slug: string;
-  }>();
-  const schoolId = school_id ?? "";
+  // ✅ Ambil :schoolId dari protected route
+  const { schoolId } = useParams<{ schoolId: string }>();
+  const hasSchool = Boolean(schoolId);
 
   const q = (sp.get("q") ?? "").trim();
   const status = (sp.get("status") ?? "all") as ClassStatus | "all";
@@ -328,8 +316,8 @@ const SchoolClass: React.FC<{
   // Levels dari endpoint publik
   const levelsQ = useQuery({
     queryKey: ["levels-public", schoolId],
-    enabled: Boolean(schoolId),
-    queryFn: () => fetchLevelsPublic(schoolId),
+    enabled: hasSchool,
+    queryFn: () => fetchLevelsPublic(schoolId!),
     staleTime: 60_000,
     refetchOnWindowFocus: false,
   });
@@ -347,10 +335,10 @@ const SchoolClass: React.FC<{
     refetch,
   } = useQuery({
     queryKey: ["class-sections", schoolId, q, status, levelId],
-    enabled: Boolean(schoolId),
+    enabled: hasSchool,
     queryFn: () =>
       fetchClassSections({
-        schoolId,
+        schoolId: schoolId!,
         q,
         status,
         classId: levelId || undefined, // kalau BE belum support, tetap aman
@@ -362,8 +350,8 @@ const SchoolClass: React.FC<{
   // Classes (middle layer)
   const classesQ = useQuery({
     queryKey: ["classes-public", schoolId, q, status, levelId],
-    enabled: Boolean(schoolId),
-    queryFn: () => fetchClassesPublic(schoolId, { q, status, levelId }),
+    enabled: hasSchool,
+    queryFn: () => fetchClassesPublic(schoolId!, { q, status, levelId }),
     staleTime: 60_000,
     refetchOnWindowFocus: false,
   });
@@ -510,7 +498,7 @@ const SchoolClass: React.FC<{
     const dummy: ApiClassSection = {
       class_section_id: (row as any).id ?? uid("sec"),
       class_section_class_id: (row as any).classId ?? "",
-      class_section_school_id: (row as any).schoolId ?? schoolId,
+      class_section_school_id: (row as any).schoolId ?? schoolId!,
       class_section_teacher_id: (row as any).teacherId ?? null,
       class_section_slug: (row as any).slug ?? toSlug(row.name ?? "kelas-baru"),
       class_section_name: row.name ?? "Kelas Baru",
@@ -630,7 +618,6 @@ const SchoolClass: React.FC<{
                 <div className="font-medium flex items-center gap-2">
                   <Layers size={18} /> Kelas (Dalam Tingkat)
                 </div>
-                {/* (opsional) tombol tambah Class */}
               </div>
 
               <div className="pb-4">
@@ -703,12 +690,7 @@ const SchoolClass: React.FC<{
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-3 md:gap-4">
                     {items.map((r) => (
-                      <ClassCard
-                        key={r.id}
-                        r={r}
-                        slug={slug}
-                        palette={palette}
-                      />
+                      <ClassCard key={r.id} r={r} palette={palette} />
                     ))}
                   </div>
                 )}
@@ -721,17 +703,17 @@ const SchoolClass: React.FC<{
                     <span className="truncate">
                       Menampilkan {items.length} section
                     </span>
-                    {/* {isFetching && (
+                    {isFetching && (
                       <span className="opacity-70">• Menyegarkan…</span>
-                    )} */}
+                    )}
                   </div>
-                  {/* <button
+                  <button
                     onClick={() => refetch()}
                     className="underline"
                     disabled={isFetching}
                   >
                     {isFetching ? "Menyegarkan…" : "Refresh"}
-                  </button> */}
+                  </button>
                 </div>
               </div>
             </SectionCard>

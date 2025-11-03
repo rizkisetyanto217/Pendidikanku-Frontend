@@ -449,7 +449,7 @@ const SchoolAcademic: React.FC<{
 
   const { setTopBar, resetTopBar } = useTopBar();
   useEffect(() => {
-    setTopBar({ mode: "menu", title: "Periode Akademik" });
+    setTopBar({ mode: "back", title: "Periode Akademik" });
     return resetTopBar;
   }, [setTopBar, resetTopBar]);
 

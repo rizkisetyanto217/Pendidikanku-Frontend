@@ -1,13 +1,13 @@
 // src/pages/sekolahislamku/pages/academic/SchoolActiveClass.tsx
-import React, { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
+import React, {useEffect, useMemo, useState} from "react";
+import {useQuery} from "@tanstack/react-query";
+import {useNavigate} from "react-router-dom";
 
 // Theme & utils
-import { pickTheme, ThemeName } from "@/constants/thema";
+import {pickTheme, ThemeName} from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 
-// UI primitives & layout
+// UI primitives
 import {
   SectionCard,
   Btn,
@@ -15,25 +15,30 @@ import {
   type Palette,
 } from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 
+// Common DataViewKit utilities
+import {
+  useSearchQuery,
+  SearchBar,
+  useOffsetLimit,
+  PaginationBar,
+  DataTable,
+  type Column,
+  CardGrid,
+  PerPageSelect,
+} from "@/pages/pendidikanku-dashboard/components/common/CDataViewKit";
 
 // Icons
 import {
   Users,
   GraduationCap,
+  Layers,
   Filter as FilterIcon,
-  RefreshCcw,
   ArrowLeft,
+  Info,
 } from "lucide-react";
+import {useTopBar} from "@/pages/pendidikanku-dashboard/components/home/CUseTopBar";
 
-/* ============== Helpers ============== */
-
-const toLocalNoonISO = (d: Date) => {
-  const x = new Date(d);
-  x.setHours(12, 0, 0, 0);
-  return x.toISOString();
-};
-
-/* ============== Types ============== */
+/* ===================== Types & Dummy ===================== */
 type ClassRow = {
   id: string;
   name: string;
@@ -47,16 +52,17 @@ type ApiActiveClassResp = {
   list: ClassRow[];
 };
 
-function ActiveClassCard({ r, palette }: { r: ClassRow; palette: Palette }) {
+/* ===================== Card UI (Mobile) ===================== */
+function ActiveClassCard({r, palette}: {r: ClassRow; palette: Palette}) {
   return (
     <div
-      className="rounded-xl border p-3 space-y-2"
-      style={{ borderColor: palette.silver1, background: palette.white1 }}
+      className="rounded-2xl border p-4 flex flex-col gap-3"
+      style={{borderColor: palette.silver1, background: palette.white1}}
     >
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex justify-between items-start">
         <div className="min-w-0">
-          <div className="text-xs opacity-70">Nama Kelas</div>
-          <div className="font-semibold truncate">{r.name}</div>
+          <div className="font-semibold text-base truncate">{r.name}</div>
+          <div className="text-sm opacity-70">{r.academic_year}</div>
         </div>
         <Badge
           palette={palette}
@@ -66,40 +72,39 @@ function ActiveClassCard({ r, palette }: { r: ClassRow; palette: Palette }) {
         </Badge>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        <div className="min-w-0">
-          <div className="text-xs opacity-70">Wali Kelas</div>
-          <div className="text-sm truncate">{r.homeroom_teacher}</div>
-        </div>
-        <div>
-          <div className="text-xs opacity-70">Tahun Ajaran</div>
-          <div className="text-sm">{r.academic_year}</div>
-        </div>
-      </div>
-
-      <div>
-        <div className="text-xs opacity-70">Jumlah Siswa</div>
-        <div className="text-sm">{r.student_count}</div>
+      <div
+        className="text-sm flex flex-col gap-1"
+        style={{color: palette.black2}}
+      >
+        <span className="flex items-center gap-1">
+          <GraduationCap size={14} /> Wali Kelas: {r.homeroom_teacher}
+        </span>
+        <span className="flex items-center gap-1">
+          <Users size={14} /> {r.student_count} siswa
+        </span>
       </div>
     </div>
   );
 }
 
-/* ============== Page ============== */
+/* ===================== Page ===================== */
 const SchoolActiveClass: React.FC = () => {
-  const { isDark, themeName } = useHtmlDarkMode();
+  const {isDark, themeName} = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
 
-  const gregorianISO = toLocalNoonISO(new Date());
+  const {setTopBar, resetTopBar} = useTopBar();
+    useEffect(() => {
+    setTopBar({mode: "back", title: "Daftar Kelas Aktif"});
+    return resetTopBar;
+  }, [setTopBar, resetTopBar]);
 
-  // Query data (dummy)
+  // === Dummy Query ===
   const classesQ = useQuery({
     queryKey: ["active-classes"],
     queryFn: async (): Promise<ApiActiveClassResp> => {
-      // Ganti ke axios.get("/api/a/classes/active") nanti
       const dummy: ApiActiveClassResp = {
-        list: Array.from({ length: 8 }).map((_, i) => ({
+        list: Array.from({length: 18}).map((_, i) => ({
           id: `cls-${i + 1}`,
           name: `Kelas ${i + 1}${["A", "B"][i % 2]}`,
           academic_year: "2025/2026",
@@ -114,62 +119,188 @@ const SchoolActiveClass: React.FC = () => {
   });
 
   const rows = useMemo(() => classesQ.data?.list ?? [], [classesQ.data]);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  /* ==== 🔎 Search ==== */
+  const {q, setQ} = useSearchQuery("q");
+  const filtered = useMemo(() => {
+    const s = q.toLowerCase().trim();
+    if (!s) return rows;
+    return rows.filter(
+      (r) =>
+        r.name.toLowerCase().includes(s) ||
+        r.homeroom_teacher.toLowerCase().includes(s) ||
+        r.academic_year.includes(s)
+    );
+  }, [q, rows]);
+
+  /* ==== ⏭ Pagination ==== */
+  const total = filtered.length;
+  const {
+    offset,
+    limit,
+    setLimit,
+    pageStart,
+    pageEnd,
+    canPrev,
+    canNext,
+    handlePrev,
+    handleNext,
+  } = useOffsetLimit(total, 8, 100);
+
+  const pageRows = filtered.slice(offset, offset + limit);
+
+  /* ==== Columns for Desktop Table ==== */
+  const columns: Column<ClassRow>[] = useMemo(
+    () => [
+      {
+        key: "name",
+        header: "Nama Kelas",
+        cell: (r) => <span className="font-medium">{r.name}</span>,
+      },
+      {
+        key: "academic_year",
+        header: "Tahun Ajaran",
+        cell: (r) => r.academic_year,
+      },
+      {key: "teacher", header: "Wali Kelas", cell: (r) => r.homeroom_teacher},
+      {
+        key: "students",
+        header: "Jumlah Siswa",
+        cell: (r) => `${r.student_count}`,
+      },
+      {
+        key: "status",
+        header: "Status",
+        cell: (r) => (
+          <Badge
+            palette={palette}
+            variant={r.status === "active" ? "success" : "outline"}
+          >
+            {r.status === "active" ? "Aktif" : "Nonaktif"}
+          </Badge>
+        ),
+      },
+    ],
+    [palette]
+  );
+
   return (
     <div
-      className="w-full"
-      style={{ background: palette.white2, color: palette.black1 }}
+      className="min-h-screen w-full overflow-x-hidden"
+      style={{background: palette.white2, color: palette.black1}}
     >
+      
+      <div
+        className="p-4 md:p-5 pb-3 border-b flex flex-wrap items-center gap-2"
+        style={{borderColor: palette.silver1}}
+      >
+        <div className="md:flex hidden items-center gap-2 font-semibold order-1">
+          <Btn
+            palette={palette}
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate(-1)}
+            className="cursor-pointer"
+          >
+            <ArrowLeft size={18} />
+          </Btn>
+          <Layers size={18} color={palette.quaternary} /> Daftar Kelas Aktif
+        </div>
+
+        <div className="order-3 sm:order-2 w-full sm:w-auto flex-1 min-w-0">
+          <SearchBar
+            palette={palette}
+            value={q}
+            onChange={setQ}
+            placeholder="Cari kelas, wali, atau tahun ajaran…"
+            debounceMs={400}
+            className="w-full"
+            rightExtra={
+              <PerPageSelect
+                palette={palette}
+                value={limit}
+                onChange={setLimit}
+              />
+            }
+          />
+        </div>
+
+        <div className="order-2 sm:order-3 ml-auto flex items-center gap-2">
+          <Btn palette={palette} size="sm" className="gap-1">
+            <FilterIcon size={16} /> Filter
+          </Btn>
+        </div>
+      </div>
+
       <main className="w-full">
-        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
-          {/* Main */}
+        <div className="max-w-screen-2xl mx-auto flex flex-col gap-6 p-4 md:p-5">
+          {/* ===== Section: Daftar Kelas ===== */}
+          <SectionCard palette={palette}>
+            <div
+              className="p-4 md:p-5 pb-3 border-b flex items-center justify-between gap-2"
+              style={{borderColor: palette.silver1}}
+            >
+              <div className="flex items-center gap-2 font-semibold">
+                <GraduationCap size={18} color={palette.quaternary} /> Daftar
+                Kelas
+              </div>
+              <div className="text-sm" style={{color: palette.black2}}>
+                {total} total
+              </div>
+            </div>
 
-          <section className="flex-1 flex flex-col space-y-6 min-w-0">
-            {/* Header */}
-            <section className="flex items-center justify-between">
-              <div className="flex items-center font-semibold text-lg">
-                <Btn
-                  onClick={() => navigate(-1)}
-                  palette={palette}
-                  variant="ghost"
-                  className="cursor-pointer mr-3"
+            <div className="p-4 md:p-5">
+              {classesQ.isLoading ? (
+                <div
+                  className="py-8 text-center text-sm flex items-center justify-center gap-2"
+                  style={{color: palette.black2}}
                 >
-                  <ArrowLeft size={20} />
-                </Btn>
-                <h1>Daftar Kelas Aktif</h1>
-              </div>
-            </section>
-
-            {/* Table */}
-            {/* Cards (all devices) */}
-            <SectionCard palette={palette}>
-              <div className="p-4 md:p-5 pb-2 font-medium flex items-center gap-2">
-                <FilterIcon size={18} /> Daftar Kelas
-              </div>
-
-              <div className="px-4 md:px-5 pb-4">
-                {rows.length === 0 ? (
-                  <div
-                    className="py-8 text-center"
-                    style={{ color: palette.black2 }}
-                  >
-                    Tidak ada data kelas.
-                  </div>
-                ) : (
-                  // responsive: 1 / 2 kolom
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-                    {rows.map((r) => (
-                      <ActiveClassCard key={r.id} r={r} palette={palette} />
-                    ))}
-                  </div>
-                )}
-
-                <div className="pt-3 text-sm" style={{ color: palette.black2 }}>
-                  Menampilkan {rows.length} kelas
+                  <Info size={16} /> Memuat data kelas…
                 </div>
-              </div>
-            </SectionCard>
-          </section>
+              ) : total === 0 ? (
+                <div
+                  className="py-8 text-center text-sm flex items-center justify-center gap-2"
+                  style={{color: palette.black2}}
+                >
+                  <Info size={16} /> Tidak ada data kelas.
+                </div>
+              ) : (
+                <>
+                  {/* Mobile: Cards */}
+                  <div className="md:hidden">
+                    <CardGrid<ClassRow>
+                      items={pageRows}
+                      renderItem={(r) => (
+                        <ActiveClassCard key={r.id} r={r} palette={palette} />
+                      )}
+                    />
+                  </div>
+
+                  {/* Desktop: Table */}
+                  <div className="hidden md:block">
+                    <DataTable<ClassRow>
+                      palette={palette}
+                      columns={columns}
+                      rows={pageRows}
+                      minWidth={840}
+                    />
+                  </div>
+
+                  {/* Pagination Footer */}
+                  <PaginationBar
+                    palette={palette}
+                    pageStart={pageStart}
+                    pageEnd={pageEnd}
+                    total={total}
+                    canPrev={canPrev}
+                    canNext={canNext}
+                    onPrev={handlePrev}
+                    onNext={handleNext}
+                  />
+                </>
+              )}
+            </div>
+          </SectionCard>
         </div>
       </main>
     </div>
