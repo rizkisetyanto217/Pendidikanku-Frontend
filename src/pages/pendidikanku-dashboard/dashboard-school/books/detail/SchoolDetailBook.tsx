@@ -130,19 +130,12 @@ export default function SchoolBookDetail() {
       className="min-h-screen"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <ParentTopBar
-        palette={palette}
-        title="Detail Buku"
-        gregorianDate={new Date().toISOString()}
-        showBack
-      />
+      
 
       <main className="w-full px-4 py-4 md:px-6 md:py-8">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
-          {/* Sidebar */}
-          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-            <ParentSidebar />
-          </aside>
+         
+          
 
           {/* Main */}
           <section className="flex-1 flex flex-col space-y-6 min-w-0">

@@ -1,5 +1,5 @@
 // src/pages/sekolahislamku/pages/academic/CalenderAcademic.tsx
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import axios from "@/lib/axios"; // tetap ada kalau nanti ganti ke backend asli
@@ -26,6 +26,7 @@ import {
   X,
   ArrowLeft,
 } from "lucide-react";
+import { useTopBar } from "../../components/home/CUseTopBar";
 
 /* ================= Helpers ================= */
 type EventRow = {
@@ -117,6 +118,12 @@ const SchoolCalenderAcademic: React.FC = () => {
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
   const qc = useQueryClient();
+
+  const { setTopBar, resetTopBar } = useTopBar();
+  useEffect(() => {
+    setTopBar({ mode: "back", title: "Kalender Akademik" });
+    return resetTopBar;
+  }, [setTopBar, resetTopBar]);
 
   const [month, setMonth] = useState<string>(toMonthStr());
   const [selectedDay, setSelectedDay] = useState<string | null>(null);

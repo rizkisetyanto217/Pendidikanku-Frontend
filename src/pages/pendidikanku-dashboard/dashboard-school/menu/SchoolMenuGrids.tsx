@@ -70,7 +70,7 @@ export default function SchoolMenuGrids() {
       {
         key: "periode",
         label: "Periode Akademik",
-        to: "academic",
+        to: "akademik",
         icon: CalendarDays,
       },
       { key: "ruangan", label: "Ruangan", to: "ruangan", icon: Building2 },

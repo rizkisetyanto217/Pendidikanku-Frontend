@@ -25,6 +25,7 @@ import {
   X,
   ArrowLeft,
 } from "lucide-react";
+import { useTopBar } from "../../components/home/CUseTopBar";
 
 /* ================= Helpers ================= */
 
@@ -108,6 +109,12 @@ const SchoolProfile: React.FC<SchoolProfileProps> = ({
     else navigate(-1);
   };
 
+  const { setTopBar, resetTopBar } = useTopBar();
+  useEffect(() => {
+    setTopBar({ mode: "back", title: "Profil Sekolah" });
+    return resetTopBar;
+  }, [setTopBar, resetTopBar]);
+
   // ------ DATA DUMMY disimpan di state ------
   const [data, setData] = useState<SchoolProfileForm>({
     name: "Sekolah Islamku",
@@ -174,7 +181,7 @@ const SchoolProfile: React.FC<SchoolProfileProps> = ({
       className="w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <main className="w-full px-4 md:px-6 md:py-8">
+      <main className="w-full">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Main Content */}
           <section className="flex-1 flex flex-col space-y-6 min-w-0">
@@ -191,7 +198,7 @@ const SchoolProfile: React.FC<SchoolProfileProps> = ({
                 </Btn>
               )}
               <h1 className="font-semibold text-lg md:text-xl">
-                Identitas Sekolah
+                Profil Sekolah
               </h1>
             </div>
 

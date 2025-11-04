@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { pickTheme, type Palette } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import axios from "@/lib/axios";
-import { useNavigate, useParams } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 
 import {
   CalendarDays,
@@ -18,6 +18,7 @@ import {
   Trash2,
   ArrowLeft,
   Plus,
+  Eye,
 } from "lucide-react";
 import { Badge, Btn, SectionCard } from "../../components/ui/CPrimitives";
 import { useTopBar } from "../../components/home/CUseTopBar";
@@ -414,7 +415,7 @@ function TermFormModal({
         <div className="flex items-center justify-end gap-2 pt-2">
           <Btn
             palette={palette}
-            variant="secondary"
+            variant="destructive"
             onClick={onClose}
             disabled={loading}
           >
@@ -529,6 +530,17 @@ const SchoolAcademic: React.FC<{
     editing?: AcademicTerm | null;
   } | null>(null);
 
+  // 🆕 Tambahan state untuk konfirmasi hapus
+  const [deleteData, setDeleteData] = useState<AcademicTerm | null>(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+
+  const handleDeleteTerm = async () => {
+  if (deleteData) {
+    await deleteTerm.mutateAsync(deleteData.id);
+    setDeleteModalOpen(false);
+  }
+};
+
   const modalInitial = useMemo(() => {
     if (!(modal?.mode === "edit" && modal.editing)) return undefined;
     const e = modal.editing;
@@ -575,35 +587,63 @@ const SchoolAcademic: React.FC<{
         header: "Aksi",
         cell: (t) => (
           <div className="flex items-center gap-2">
+            {/* 👁️ Tombol Detail */}
+            <Btn
+              palette={palette}
+              size="sm"
+              variant="outline"
+              className="p-2"
+              title="Lihat Detail"
+              onClick={() =>
+                navigate(`/${schoolId}/sekolah/akademik/detail/${t.id}`, {
+                  state: {
+                    term: {
+                      academic_terms_school_id: t.school_id,
+                      academic_terms_academic_year: t.academic_year,
+                      academic_terms_name: t.name,
+                      academic_terms_start_date: t.start_date,
+                      academic_terms_end_date: t.end_date,
+                      academic_terms_is_active: t.is_active,
+                      academic_terms_angkatan: t.angkatan,
+                    },
+                  },
+                })
+              }
+            >
+              <Eye size={16} />
+            </Btn>
+
+            {/* ✏️ Tombol Edit */}
             <Btn
               palette={palette}
               size="sm"
               variant="secondary"
               onClick={() => setModal({ mode: "edit", editing: t })}
-              className="inline-flex items-center gap-1"
+              className="p-2"
+              title="Edit"
             >
-              <Pencil size={14} /> Edit
+              <Pencil size={16} />
             </Btn>
+
+            {/* 🗑️ Tombol Hapus */}
             <Btn
               palette={palette}
               size="sm"
-              variant="ghost"
+              variant="destructive"
               onClick={() => {
-                const ok = confirm(
-                  `Hapus periode?\n${t.academic_year} — ${t.name}`
-                );
-                if (!ok) return;
-                deleteTerm.mutate(t.id);
+               setDeleteData(t);
+                setDeleteModalOpen(true);
               }}
-              className="inline-flex items-center gap-1"
+              className="p-2"
+              title="Hapus"
             >
-              <Trash2 size={14} /> Hapus
+              <Trash2 size={16} />
             </Btn>
           </div>
         ),
       },
     ],
-    [palette, deleteTerm]
+    [palette, navigate, deleteTerm]
   );
 
   const handleSubmit = useCallback(
@@ -635,11 +675,11 @@ const SchoolAcademic: React.FC<{
     >
 {/* ===== Header ===== */}
 <div
-  className="p-4 md:p-5 pb-3 border-b flex flex-wrap items-center gap-3"
+  // className="p-4 md:p-5 pb-3  flex-wrap items-center gap-3"
   style={{ borderColor: palette.silver1 }}
 >
   {/* Back + Title */}
-  <div className="hidden md:flex items-center gap-2 font-semibold order-1">
+  <div className="hidden md:flex items-center gap-2 font-semibold order-1 mb-4">
     <Btn
       palette={palette}
       variant="ghost"
@@ -653,7 +693,7 @@ const SchoolAcademic: React.FC<{
   </div>
 
   {/* Search + per-page */}
-  <div className="order-3 sm:order-2 w-full sm:w-auto flex-1 min-w-0">
+  <div className="order-3 sm:order-2 w-full sm:w-auto mb-4 flex-1 min-w-0">
     <SearchBar
       palette={palette}
       value={q}
@@ -670,24 +710,22 @@ const SchoolAcademic: React.FC<{
       }
     />
   </div>
-
+</div>
   {/* Tombol Tambah */}
   <div className="order-2 sm:order-3 ml-auto flex items-center gap-2">
     <Btn
       palette={palette}
       size="sm"
+      variant="ghost"
       className="gap-1"
       onClick={() => setModal({ mode: "create" })}
     >
        <Plus size={16} className="mr-1" />Tambah
     </Btn>
   </div>
-  
-</div>
-
 
       <main className="w-full">
-        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
+        <div className="mx-auto flex flex-col lg:flex-row gap-4 mt-4 lg:gap-6">
           {/* Main */}
           <section className="flex-1 flex flex-col space-y-6 min-w-0">
             {/* ===== Ringkasan term aktif ===== */}
@@ -815,16 +853,14 @@ const SchoolAcademic: React.FC<{
                             key={t.id}
                             term={t}
                             palette={palette}
-                            onEdit={() =>
-                              setModal({ mode: "edit", editing: t })
-                            }
+                            onEdit={() => setModal({ mode: "edit", editing: t })}
                             onDelete={() => {
-                              const ok = confirm(
-                                `Hapus periode?\n${t.academic_year} — ${t.name}`
-                              );
+                              const ok = confirm(`Hapus periode?\n${t.academic_year} — ${t.name}`);
                               if (!ok) return;
                               deleteTerm.mutate(t.id);
                             }}
+                            schoolId={schoolId!}
+                            navigate={navigate}
                           />
                         )}
                       />
@@ -887,15 +923,19 @@ function TermCard({
   palette,
   onEdit,
   onDelete,
+  schoolId,
+  navigate,
 }: {
   term: AcademicTerm;
   palette: Palette;
   onEdit: () => void;
   onDelete: () => void;
+  schoolId: string;
+  navigate: ReturnType<typeof useNavigate>;
 }) {
   return (
     <div
-      className="rounded-2xl border p-4 flex flex-col gap-3"
+      className="rounded-2xl p-4 flex flex-col gap-3"
       style={{ borderColor: palette.silver1, background: palette.white1 }}
     >
       <div className="flex items-start justify-between gap-2">
@@ -930,23 +970,54 @@ function TermCard({
       </div>
 
       <div className="pt-1 mt-1 flex items-center justify-end gap-2">
+        {/* 👁️ Tombol Detail */}
+        <Btn
+          palette={palette}
+          size="sm"
+          variant="outline"
+          className="p-2"
+          title="Lihat Detail"
+          onClick={() =>
+            navigate(`/${schoolId}/sekolah/menu-utama/akademik/detail/${term.id}`, {
+              state: {
+                term: {
+                  academic_terms_school_id: term.school_id,
+                  academic_terms_academic_year: term.academic_year,
+                  academic_terms_name: term.name,
+                  academic_terms_start_date: term.start_date,
+                  academic_terms_end_date: term.end_date,
+                  academic_terms_is_active: term.is_active,
+                  academic_terms_angkatan: term.angkatan,
+                },
+              },
+            })
+          }
+        >
+          <Eye size={16} />
+        </Btn>
+
+        {/* ✏️ Tombol Edit */}
         <Btn
           palette={palette}
           size="sm"
           variant="secondary"
           onClick={onEdit}
-          className="inline-flex items-center gap-1"
+          className="p-2"
+          title="Edit"
         >
-          <Pencil size={14} /> Edit
+          <Pencil size={16} />
         </Btn>
+
+        {/* 🗑️ Tombol Hapus */}
         <Btn
           palette={palette}
           size="sm"
-          variant="ghost"
+          variant="destructive"
           onClick={onDelete}
-          className="inline-flex items-center gap-1"
+          className="p-2"
+          title="Hapus"
         >
-          <Trash2 size={14} /> Hapus
+          <Trash2 size={16} />
         </Btn>
       </div>
     </div>

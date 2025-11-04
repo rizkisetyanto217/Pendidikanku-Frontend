@@ -27,6 +27,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { DeleteConfirmModal } from "../../components/common/CDeleteConfirmModal";
+import { useTopBar } from "../../components/home/CUseTopBar";
 
 /* ================= Types ================= */
 export type SubjectStatus = "active" | "inactive";
@@ -666,6 +667,12 @@ const SchoolSubject: React.FC = () => {
   const navigate = useNavigate();
   const schoolId = useResolvedSchoolId();
 
+  const { setTopBar, resetTopBar } = useTopBar();
+  useEffect(() => {
+    setTopBar({ mode: "back", title: "Daftar pelajaran" });
+    return resetTopBar;
+  }, [setTopBar, resetTopBar]);
+
   const [detailData, setDetailData] = useState<SubjectRow | null>(null);
   const [openCreate, setOpenCreate] = useState(false);
   const [editData, setEditData] = useState<SubjectRow | null>(null);
@@ -773,7 +780,7 @@ const SchoolSubject: React.FC = () => {
 
   return (
     <div className="w-full">
-      <main className="w-full px-4 md:px-6 py-4 md:py-8">
+      <main className="w-full">
         <div className="max-w-screen-2xl mx-auto flex flex-col gap-6">
           {/* Toolbar */}
           <div className="flex items-center justify-between">

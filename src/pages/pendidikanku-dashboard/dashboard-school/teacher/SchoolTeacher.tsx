@@ -295,11 +295,11 @@ const SchoolTeacher: React.FC<SchoolTeacherProps> = ({ showBack = false }) => {
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
 
-    const { setTopBar, resetTopBar } = useTopBar();
-    useEffect(() => {
-      setTopBar({ mode: "back", title: "Guru" });
-      return resetTopBar;
-    }, [setTopBar, resetTopBar]);
+  const { setTopBar, resetTopBar } = useTopBar();
+  useEffect(() => {
+    setTopBar({ mode: "back", title: "Guru" });
+    return resetTopBar;
+  }, [setTopBar, resetTopBar]);
 
   // ✅ Ambil :schoolId dari PATH: /:schoolId/sekolah/...
   const { schoolId } = useParams<{ schoolId: string }>();

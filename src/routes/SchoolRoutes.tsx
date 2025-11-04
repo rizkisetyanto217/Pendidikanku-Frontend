@@ -11,11 +11,11 @@ import SchoolDetailBill from "@/pages/pendidikanku-dashboard/dashboard-school/fi
 import SchoolTeacher from "@/pages/pendidikanku-dashboard/dashboard-school/teacher/SchoolTeacher";
 import SchoolDetailTeacher from "@/pages/pendidikanku-dashboard/dashboard-school/teacher/components/CSchoolDetailTeacher";
 import SchoolAcademic from "@/pages/pendidikanku-dashboard/dashboard-school/academic/SchoolAcademic";
-import DetailAcademic from "@/pages/pendidikanku-dashboard/dashboard-school/academic/components/SchoolDetailAcademic";
+import SchoolDetailAcademic from "@/pages/pendidikanku-dashboard/dashboard-school/academic/SchoolDetailAcademic";
 import SchoolManagementAcademic from "@/pages/pendidikanku-dashboard/dashboard-school/academic/SchoolManagementAcademic";
 import SchoolDetailSchedule from "@/pages/pendidikanku-dashboard/dashboard-school/academic/schedule/SchoolDetailSchedule";
 import SchoolAllAnnouncement from "@/pages/pendidikanku-dashboard/dashboard-school/coming-soon/announcement-(pending)/SchoolAllAnnouncement";
-import SchoolClasses from "@/pages/pendidikanku-dashboard/dashboard-school/class/SchoolClass";
+import SchoolClass from "@/pages/pendidikanku-dashboard/dashboard-school/class/SchoolClass";
 import SchoolSection from "@/pages/pendidikanku-dashboard/dashboard-school/class/section/SchoolSection";
 
 import SchoolAttendance from "@/pages/pendidikanku-dashboard/dashboard-school/coming-soon/attendance-(pending)/SchoolAttendance";
@@ -38,6 +38,7 @@ import SchoolActiveClass from "@/pages/pendidikanku-dashboard/dashboard-school/c
 import SchoolRoutesPlayground from "@/pages/pendidikanku-dashboard/dashboard-school/SchoolRoutesPlayground";
 import SchoolSectionDetail from "@/pages/pendidikanku-dashboard/dashboard-school/class/section/SchoolSectionDetail";
 import SchoolParent from "@/pages/pendidikanku-dashboard/dashboard-school/class/parent/SchoolParent";
+import SchoolClasses from "@/pages/pendidikanku-dashboard/dashboard-school/class/classes/SchoolClasses";
 
 export const SchoolRoutes = (
   <Route path="sekolah" element={<DashboardLayout />}>
@@ -74,14 +75,14 @@ export const SchoolRoutes = (
     {/* === Akademik === */}
     <Route path="akademik">
       <Route index element={<SchoolAcademic />} />
-      <Route path="detail" element={<DetailAcademic />} />
+      <Route path="detail/:id" element={<SchoolDetailAcademic />} />
       <Route path="kelola" element={<SchoolManagementAcademic />} />
     </Route>
 
     {/* === Lainnya === */}
     <Route path="pengumuman" element={<SchoolAllAnnouncement />} />
     <Route path="kelas">
-      <Route index element={<SchoolClasses />} />
+      <Route index element={<SchoolClass />} />
       <Route path="kelola/:id" element={<SchoolSection />} />
       <Route path="section/:id" element={<SchoolSectionDetail />} />
       // di file routes dashboard school
@@ -131,8 +132,16 @@ export const SchoolRoutes = (
 
       <Route path="akademik">
         <Route index element={<SchoolAcademic showBack />} />
-        <Route path="detail" element={<DetailAcademic />} />
+        <Route path="detail/:id" element={<SchoolDetailAcademic />} />
         <Route path="kelola" element={<SchoolManagementAcademic />} />
+      </Route>
+      <Route path="kelas">
+        <Route index element={<SchoolClass />} />
+        <Route path="kelola/:id" element={<SchoolSection />} />
+        <Route path="section/:id" element={<SchoolSectionDetail />} />
+        // di file routes dashboard school
+        <Route path="tingkat/:levelId" element={<SchoolParent />} />
+        <Route path="kelas/:classId" element={<SchoolClasses />} />
       </Route>
     </Route>
     <Route path="dev/semua-link" element={<SchoolRoutesPlayground />} />

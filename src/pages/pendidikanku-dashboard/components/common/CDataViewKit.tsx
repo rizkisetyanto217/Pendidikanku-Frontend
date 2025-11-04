@@ -35,7 +35,7 @@ function pickContainerFg(palette: Palette) {
 }
 function pickRowZebraBg(palette: Palette) {
   // pakai white3 kalau ada; fallback ke primary2
-  return (palette as any).white3 || palette.primary2;
+  return palette.white1;
 }
 
 /* =========================================================
@@ -403,7 +403,7 @@ export function DataTable<T>({
 
   return (
     <ScrollAreaX palette={palette}>
-      <table className="w-full text-sm text-left" style={{minWidth}}>
+      <table className="w-full text-sm text-center" style={{minWidth}}>
         <thead>
           <tr
             style={{

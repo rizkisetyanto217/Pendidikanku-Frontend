@@ -24,6 +24,8 @@ import {
   BookOpen,
   Link as LinkIcon,
 } from "lucide-react";
+import { DeleteConfirmModal } from "@/pages/pendidikanku-dashboard/components/common/CDeleteConfirmModal";
+
 
 /* 🔌 DataViewKit */
 import {
@@ -36,6 +38,7 @@ import {
   CardGrid,
   type Column,
 } from "@/pages/pendidikanku-dashboard/components/common/CDataViewKit";
+import { useTopBar } from "../../components/home/CUseTopBar";
 
 /* =========================================================
    Types API (PUBLIC)
@@ -550,9 +553,14 @@ const SchoolBooks: React.FC<{
 }> = ({ showBack = false, backTo, backLabel = "Kembali" }) => {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
-
   const navigate = useNavigate();
   const [sp] = useSearchParams();
+
+  const { setTopBar, resetTopBar } = useTopBar();
+  useEffect(() => {
+    setTopBar({ mode: "back", title: "Daftar Buku" });
+    return resetTopBar;
+  }, [setTopBar, resetTopBar]);
 
   // Ambil schoolId dari path param
   const params = useParams<{
@@ -606,6 +614,17 @@ const SchoolBooks: React.FC<{
     mode: "create" | "edit";
     book?: BookAPI | null;
   } | null>(null);
+
+  // state untuk modal hapus
+  const [deleteBookData, setDeleteBookData] = useState<BookAPI | null>(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+
+  const handleDeleteBook = async () => {
+    if (deleteBookData) {
+      await deleteBook.mutateAsync(deleteBookData.books_id);
+      setDeleteModalOpen(false); // Menutup modal setelah berhasil menghapus
+    }
+  };
 
   /* ====== Columns (Desktop) */
   const columns: Column<BookAPI & { _index: number }>[] = [
@@ -708,16 +727,13 @@ const SchoolBooks: React.FC<{
             className="inline-flex items-center gap-1"
             onClick={(e) => {
               e.stopPropagation();
-              if (deleteBook.isPending) return;
-              const ok = confirm(
-                `Hapus buku ini?\nJudul: ${r.books_title ?? "-"}`
-              );
-              if (!ok) return;
-              deleteBook.mutate(r.books_id);
+              setDeleteBookData(r); // Menyimpan data buku yang akan dihapus
+              setDeleteModalOpen(true); // Menampilkan modal konfirmasi
             }}
           >
             <Trash2 size={14} /> Hapus
           </Btn>
+
         </div>
       ),
     },
@@ -797,17 +813,15 @@ const SchoolBooks: React.FC<{
               size="sm"
               variant="ghost"
               className="inline-flex items-center gap-1"
-              onClick={() => {
-                if (deleteBook.isPending) return;
-                const ok = confirm(
-                  `Hapus buku ini?\nJudul: ${b.books_title ?? "-"}`
-                );
-                if (!ok) return;
-                deleteBook.mutate(b.books_id);
+              onClick={(e) => {
+                e.stopPropagation();
+                setDeleteBookData(b); // Menyimpan data buku yang akan dihapus
+                setDeleteModalOpen(true); // Menampilkan modal konfirmasi
               }}
             >
               <Trash2 size={14} /> Hapus
             </Btn>
+
           </div>
         </div>
       </div>
@@ -822,7 +836,7 @@ const SchoolBooks: React.FC<{
     >
       {/* ===== Header: wrap-friendly (seragam dgn Academic Terms) ===== */}
       <div
-        className="p-4 md:p-5 pb-3 border-b flex flex-wrap items-center gap-2"
+        className="p-4 md:p-5 pb-3 hidden md:flex flex-wrap items-center gap-2"
         style={{ borderColor: palette.silver1 }}
       >
         {/* Back (opsional) */}
@@ -831,19 +845,17 @@ const SchoolBooks: React.FC<{
             palette={palette}
             variant="ghost"
             onClick={() => (backTo ? navigate(backTo) : navigate(-1))}
-            className="inline-flex items-center gap-2 order-1"
-          >
+            className="inline-flex items-center gap-2 order-1">
             <ArrowLeft size={20} />
-            {backLabel}
           </Btn>
         )}
 
         {/* Title */}
         <div className="flex items-center gap-2 font-semibold order-2">
-          <BookOpen size={18} color={palette.quaternary} /> Daftar Buku
+          <h1>Daftar Buku </h1>
         </div>
-
-        {/* Search + per-page */}
+      </div>
+      {/* Search + per-page */}
         <div className="order-4 sm:order-3 w-full sm:w-auto flex-1 min-w-0">
           <SearchBar
             palette={palette}
@@ -869,7 +881,7 @@ const SchoolBooks: React.FC<{
         </div>
 
         {/* Add */}
-        <div className="order-3 sm:order-4 ml-auto flex items-center gap-2">
+        <div className="order-3 sm:order-4 ml-auto flex items-center gap-2 mt-2">
           <Btn
             palette={palette}
             size="sm"
@@ -879,10 +891,9 @@ const SchoolBooks: React.FC<{
             <Plus size={18} /> Buku
           </Btn>
         </div>
-      </div>
 
       <main className="w-full">
-        <div className="max-w-screen-2xl mx-auto flex flex-col gap-6">
+        <div className="max-w-screen-2xl mx-auto flex flex-col gap-6 mt-2">
           {/* ===== Section: List (seragam) ===== */}
           <SectionCard palette={palette}>
             <div
@@ -971,28 +982,16 @@ const SchoolBooks: React.FC<{
       </main>
 
       {/* Modal */}
-      <BookModal
-        open={!!bookModal}
-        mode={bookModal?.mode ?? "create"}
-        book={bookModal?.book ?? null}
+      <DeleteConfirmModal
+        open={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={handleDeleteBook}
         palette={palette}
-        onClose={() => setBookModal(null)}
-        onSubmit={async (form) => {
-          if (bookModal?.mode === "edit" && bookModal.book) {
-            await updateBook.mutateAsync({
-              bookId: bookModal.book.books_id,
-              payload: form,
-            });
-          } else {
-            await createBook.mutateAsync(form);
-          }
-        }}
-        submitting={createBook.isPending || updateBook.isPending}
-        onSuccess={() => {
-          setBookModal(null);
-          booksQ.refetch();
-        }}
-      />
+        title="Hapus Buku?"
+        message={`Yakin ingin menghapus buku "${deleteBookData?.books_title}"? Tindakan ini tidak dapat dibatalkan.`}
+        confirmLabel="Hapus"
+        cancelLabel="Batal"
+        loading={deleteBook.isPending}/>
     </div>
   );
 };
