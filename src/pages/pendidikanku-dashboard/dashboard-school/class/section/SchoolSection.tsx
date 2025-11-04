@@ -1,8 +1,9 @@
-// src/pages/sekolahislamku/academic/SchoolManagementAcademicDetail.tsx
+// src/pages/pendidikanku-dashboard/dashboard-school/class/detail/SchoolManageClass.tsx
 import React, { useMemo, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import axiosInstance from "@/lib/axios";
+import axios from "@/lib/axios";
+
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import {
@@ -13,90 +14,64 @@ import {
 } from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
 import {
   ArrowLeft,
+  ArrowRight,
   BookOpen,
   MapPin,
   Layers,
   Users,
-  Calendar,
   Clock4,
-  FileText,
   Hash,
   Link as LinkIcon,
 } from "lucide-react";
 
 /* =========================================================
-   ACADEMIC TYPES — Public Class Sections (Detail via list?id&with_csst)
-   Sesuaikan hanya jika BE mengubah nama field.
+   Tipe API ringkas (disamakan dengan halaman detail)
 ========================================================= */
+type DeliveryMode = "offline" | "online" | "hybrid";
+type EnrollmentMode = "self_select" | "assigned" | "invitation" | "mixed";
 
-/** Standar pagination dari API publik */
-export interface ApiPagination {
-  page: number;
-  per_page: number;
-  total: number;
-  total_pages: number;
-  has_next: boolean;
-  has_prev: boolean;
-}
+type ApiSchedule = {
+  start?: string;
+  end?: string;
+  days?: string[];
+  location?: string;
+};
 
-/** Jadwal generik */
-export interface ApiSchedule {
-  start?: string; // "07:30"
-  end?: string; // "09:00"
-  days?: string[]; // ["Senin","Rabu"]
-  location?: string; // "Gedung A, Lt. 2" atau URL utk virtual
-}
-
-/** Snapshot ruang pada CSST/Section */
-export interface ApiRoomSnapshot {
+type ApiRoomSnapshot = {
   code?: string | null;
   name?: string | null;
   slug?: string | null;
   capacity?: number | null;
   location?: string | null;
   is_virtual?: boolean | null;
-}
+};
 
-/** Snapshot guru pada CSST */
-export interface ApiTeacherSnapshot {
+type ApiTeacherSnapshot = {
   id?: string | null;
   name?: string | null;
   avatar_url?: string | null;
   title_prefix?: string | null;
   title_suffix?: string | null;
   whatsapp_url?: string | null;
-}
+};
 
-/** Snapshot buku pada CSST */
-export interface ApiBookSnapshot {
+type ApiBookSnapshot = {
   id?: string | null;
   slug?: string | null;
   title?: string | null;
   author?: string | null;
   image_url?: string | null;
-}
+};
 
-/** Snapshot mapel pada CSST */
-export interface ApiSubjectSnapshot {
+type ApiSubjectSnapshot = {
   id?: string | null;
   url?: string | null;
   code?: string | null;
   name?: string | null;
   slug?: string | null;
-}
+};
 
-/** Delivery/teaching mode item CSST */
-export type DeliveryMode = "offline" | "online" | "hybrid";
-
-/** Enrollment mode (dari section) */
-export type EnrollmentMode =
-  | "self_select"
-  | "assigned"
-  | "invitation"
-  | "mixed";
-
-/** Item CSST (Class Section Subject Teacher) di includes.csst_by_section */
-export interface ApiCSSTItem {
+type ApiCSSTItem = {
   class_section_subject_teacher_id: string;
   class_section_subject_teacher_school_id: string;
   class_section_subject_teacher_section_id: string;
@@ -105,15 +80,12 @@ export interface ApiCSSTItem {
   class_section_subject_teacher_teacher_id?: string | null;
   class_section_subject_teacher_name?: string | null;
   class_section_subject_teacher_slug?: string | null;
-
   class_section_subject_teacher_room_id?: string | null;
 
   class_section_subject_teacher_total_attendance?: number;
   class_section_subject_teacher_enrolled_count?: number;
-
   class_section_subject_teacher_delivery_mode?: DeliveryMode;
 
-  /* Snapshots */
   class_section_subject_teacher_room_snapshot?: ApiRoomSnapshot | null;
   class_section_subject_teacher_room_name_snap?: string | null;
   class_section_subject_teacher_room_slug_snap?: string | null;
@@ -136,25 +108,19 @@ export interface ApiCSSTItem {
   class_section_subject_teacher_subject_code_snap?: string | null;
   class_section_subject_teacher_subject_slug_snap?: string | null;
 
-  /** BW: array of alternative/extra books (kalau suatu saat BE kirim) */
-  class_section_subject_teacher_books_snapshot?: ApiBookSnapshot[] | null;
-
   class_section_subject_teacher_is_active?: boolean;
-  class_section_subject_teacher_created_at?: string; // ISO
-  class_section_subject_teacher_updated_at?: string; // ISO
-  class_section_subject_teacher_deleted_at?: string | null; // ISO | null
-}
+  class_section_subject_teacher_created_at?: string;
+  class_section_subject_teacher_updated_at?: string;
+  class_section_subject_teacher_deleted_at?: string | null;
+};
 
-/** Data utama section (single) */
-export interface ApiClassSection {
+type ApiClassSection = {
   class_section_id: string;
   class_section_school_id: string;
   class_section_class_id: string;
 
   class_section_teacher_id?: string | null;
-  class_section_assistant_teacher_id?: string | null;
   class_section_class_room_id?: string | null;
-  class_section_leader_student_id?: string | null;
 
   class_section_slug: string;
   class_section_name: string;
@@ -166,17 +132,11 @@ export interface ApiClassSection {
   class_section_total_students?: number | null;
 
   class_section_group_url?: string | null;
-  class_section_image_url?: string | null;
-  class_section_image_object_key?: string | null;
-  class_section_image_url_old?: string | null;
-  class_section_image_object_key_old?: string | null;
-  class_section_image_delete_pending_until?: string | null;
 
   class_section_is_active: boolean;
-  class_section_created_at: string; // ISO
-  class_section_updated_at: string; // ISO
+  class_section_created_at: string;
+  class_section_updated_at: string;
 
-  /* Snapshots (parent/class/term/room) */
   class_section_class_slug_snap?: string | null;
 
   class_section_parent_name_snap?: string | null;
@@ -188,109 +148,35 @@ export interface ApiClassSection {
   class_section_room_slug_snap?: string | null;
   class_section_room_location_snap?: string | null;
 
-  class_section_term_id?: string | null;
   class_section_term_name_snap?: string | null;
   class_section_term_slug_snap?: string | null;
   class_section_term_year_label_snap?: string | null;
 
-  class_section_snapshot_updated_at?: string | null; // ISO
-
-  /* Optional nested snapshots (bentuk objek) */
-  class_section_class_snapshot?: {
-    slug?: string | null;
-    // tambah field lain bila BE menambahkan
-  } | null;
-
-  class_section_parent_snapshot?: {
-    code?: string | null;
-    name?: string | null;
-    slug?: string | null;
-    level?: string | null;
-  } | null;
-
-  class_section_term_snapshot?: {
-    name?: string | null;
-    slug?: string | null;
-    year_label?: string | null;
-  } | null;
+  class_section_snapshot_updated_at?: string | null;
 
   class_section_room_snapshot?: ApiRoomSnapshot | null;
 
-  /* Aggregates & fitur */
-  class_sections_csst?: ApiCSSTItem[] | []; // di payload kamu kosong; utama ada di includes
+  class_sections_csst?: ApiCSSTItem[] | [];
   class_sections_csst_count?: number;
   class_sections_csst_active_count?: number;
 
   class_section_csst_enrollment_mode?: EnrollmentMode;
   class_section_csst_self_select_requires_approval?: boolean;
+};
 
-  /** Fitur/flag tambahan dari BE */
-  class_section_features?: Record<string, unknown>;
-}
-
-/** Includes pada response (key → array CSST) */
-export interface ApiIncludes {
+type ApiIncludes = {
   csst_by_section?: Record<string, ApiCSSTItem[]>;
-}
+};
 
-/** Response detail dari endpoint list?id...&with_csst=true */
-export interface ApiSectionListWithIncludes {
-  pagination?: ApiPagination;
-  includes?: ApiIncludes;
+type ApiSectionListWithIncludes = {
   data: ApiClassSection[];
-}
+  includes?: ApiIncludes;
+};
 
 /* =========================================================
-   UTIL: Helper tipe untuk UI/mapper
+   Helpers
 ========================================================= */
-
-/** Hasil parsing final untuk halaman detail */
-export interface SectionDetailView {
-  section: ApiClassSection;
-  csst: ApiCSSTItem[];
-}
-
-/** Mapper aman dari response mentah → view model */
-export function toSectionDetailView(
-  resp: ApiSectionListWithIncludes,
-  sectionId: string
-): SectionDetailView | null {
-  const section = resp?.data?.[0];
-  if (!section) return null;
-
-  const csst =
-    resp?.includes?.csst_by_section?.[sectionId] ??
-    section.class_sections_csst ??
-    [];
-
-  return { section, csst };
-}
-
-/* =========================================================
-   API Fetcher (strongly-typed)
-========================================================= */
-
-/**
- * Fetch detail section via endpoint list (pakai id + with_csst=true).
- * @param schoolId UUID sekolah
- * @param id UUID section
- */
-export async function fetchSectionDetail(
-  schoolId: string,
-  id: string
-): Promise<SectionDetailView | null> {
-  const res = await axiosInstance.get<ApiSectionListWithIncludes>(
-    `/public/${schoolId}/class-sections/list`,
-    { params: { id, with_csst: true } }
-  );
-  return toSectionDetailView(res.data, id);
-}
-
-/* =========================================================
-   UTIL: Formatter tampilan
-========================================================= */
-
-export function scheduleToText(sch?: ApiSchedule | null): string {
+const scheduleToText = (sch?: ApiSchedule | null): string => {
   if (!sch) return "-";
   const days = (sch.days ?? []).join(", ");
   const time =
@@ -300,41 +186,51 @@ export function scheduleToText(sch?: ApiSchedule | null): string {
   const loc = sch.location ? ` @${sch.location}` : "";
   const left = [days, time].filter(Boolean).join(" ");
   return left ? `${left}${loc}` : "-";
-}
+};
+
+const useSectionWithCSST = (schoolId: string, id: string) =>
+  useQuery({
+    queryKey: ["section-manage", schoolId, id],
+    enabled: !!schoolId && !!id,
+    queryFn: async () => {
+      const res = await axios.get<ApiSectionListWithIncludes>(
+        `/public/${schoolId}/class-sections/list`,
+        { params: { id, with_csst: true } }
+      );
+      const section = res.data?.data?.[0];
+      const csst =
+        res.data?.includes?.csst_by_section?.[id] ??
+        section?.class_sections_csst ??
+        [];
+      return { section, csst } as {
+        section?: ApiClassSection;
+        csst: ApiCSSTItem[];
+      };
+    },
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
+  });
 
 /* =========================================================
-   PAGE COMPONENT — Detail Akademik
+   PAGE: Manage (ringkas Section + semua CSST)
 ========================================================= */
-
-export default function SchoolManagementAcademicDetail() {
+export default function SchoolSection() {
   const { schoolId = "", id = "" } = useParams<{
     schoolId: string;
     id: string;
   }>();
   const navigate = useNavigate();
+
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
 
-  const { data, isFetching, isLoading } = useQuery({
-    queryKey: ["academic-detail", schoolId, id],
-    enabled: !!schoolId && !!id,
-    queryFn: () => fetchSectionDetail(schoolId, id),
-    staleTime: 60_000,
-    refetchOnWindowFocus: false,
-  });
-
-  const view = data;
-  const section = view?.section;
-  const csst = view?.csst ?? [];
-
-  const [showRaw, setShowRaw] = useState(false);
+  const { data, isLoading, isFetching } = useSectionWithCSST(schoolId, id);
+  const section = data?.section;
+  const csst = data?.csst ?? [];
 
   if (isLoading) {
     return (
-      <div
-        className="p-6 text-center"
-        style={{ color: palette.black2, background: palette.white2 }}
-      >
+      <div className="p-6 text-center" style={{ color: palette.black2 }}>
         Memuat data...
       </div>
     );
@@ -342,11 +238,8 @@ export default function SchoolManagementAcademicDetail() {
 
   if (!section) {
     return (
-      <div
-        className="p-6 text-center"
-        style={{ color: palette.black2, background: palette.white2 }}
-      >
-        Data tidak ditemukan.
+      <div className="p-6 text-center" style={{ color: palette.black2 }}>
+        Data section tidak ditemukan.
       </div>
     );
   }
@@ -357,7 +250,7 @@ export default function SchoolManagementAcademicDetail() {
       style={{ background: palette.white2, color: palette.black1 }}
     >
       <main className="max-w-screen-2xl mx-auto py-6 px-4 space-y-6">
-        {/* ===== Header ===== */}
+        {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Btn
@@ -368,73 +261,32 @@ export default function SchoolManagementAcademicDetail() {
             >
               <ArrowLeft size={20} className="mr-1" /> Kembali
             </Btn>
-            <h1 className="text-lg font-semibold">Detail Kelas Akademik</h1>
+            <h1 className="text-lg font-semibold">Kelola Kelas</h1>
           </div>
-          <div className="flex items-center gap-2">
-            <Badge
-              palette={palette}
-              variant={section.class_section_is_active ? "success" : "outline"}
-            >
-              {section.class_section_is_active ? "Aktif" : "Nonaktif"}
-            </Badge>
-          </div>
+          <Badge
+            palette={palette}
+            variant={section.class_section_is_active ? "success" : "outline"}
+          >
+            {section.class_section_is_active ? "Aktif" : "Nonaktif"}
+          </Badge>
         </div>
 
-        {/* ===== Info Umum Section ===== */}
+        {/* Ringkasan Section singkat + tombol ke halaman detail penuh */}
         <SectionCard palette={palette}>
-          <div className="p-5 space-y-4">
-            <div className="grid md:grid-cols-3 gap-4">
-              <div
-                className="rounded-xl border p-3"
-                style={{
-                  borderColor: palette.silver1,
-                  background: palette.white1,
-                }}
-              >
-                <div className="text-xs opacity-70 mb-1">Nama Kelas</div>
-                <div className="font-semibold">
-                  {section.class_section_name}
-                </div>
-                <div className="text-xs opacity-70 break-all">
-                  slug: {section.class_section_slug}
-                </div>
+          <div className="p-5">
+            <div className="flex items-center justify-between">
+              <div className="font-medium flex items-center gap-2">
+                <Layers size={18} /> Ringkasan Section
               </div>
-
-              <div
-                className="rounded-xl border p-3"
-                style={{
-                  borderColor: palette.silver1,
-                  background: palette.white1,
-                }}
-              >
-                <div className="text-xs opacity-70 mb-1">Kode</div>
-                <div className="font-semibold">
-                  {section.class_section_code ?? "-"}
-                </div>
-                <div className="text-xs opacity-70">
-                  ID: {section.class_section_id}
-                </div>
-              </div>
-
-              <div
-                className="rounded-xl border p-3"
-                style={{
-                  borderColor: palette.silver1,
-                  background: palette.white1,
-                }}
-              >
-                <div className="text-xs opacity-70 mb-1">Tingkat (Parent)</div>
-                <div className="font-semibold">
-                  {section.class_section_parent_name_snap ?? "-"}
-                </div>
-                <div className="text-xs opacity-70">
-                  {section.class_section_parent_code_snap} •{" "}
-                  {section.class_section_parent_slug_snap}
-                </div>
-              </div>
+              {/* Gunakan relative path dari /sekolah/kelas/kelola/:id -> ../section/:id */}
+              <Link to={`../section/${section.class_section_id}`}>
+                <Btn palette={palette} size="sm" variant="outline">
+                  Lihat Detail Lengkap <ArrowRight className="ml-2" size={16} />
+                </Btn>
+              </Link>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-4">
+            <div className="mt-4 grid md:grid-cols-3 gap-3">
               <div
                 className="rounded-xl border p-3"
                 style={{
@@ -442,180 +294,81 @@ export default function SchoolManagementAcademicDetail() {
                   background: palette.white1,
                 }}
               >
-                <div className="text-xs opacity-70 mb-1">Ruang</div>
-                <div className="font-semibold">
+                <div className="text-xs opacity-70">Nama Kelas</div>
+                <div className="font-semibold truncate">
+                  {section.class_section_name}
+                </div>
+                <div className="text-xs opacity-70 truncate">
+                  Kode: {section.class_section_code ?? "-"}
+                </div>
+              </div>
+
+              <div
+                className="rounded-xl border p-3"
+                style={{
+                  borderColor: palette.silver1,
+                  background: palette.white1,
+                }}
+              >
+                <div className="text-xs opacity-70">Parent / Tingkat</div>
+                <div className="font-semibold truncate">
+                  {section.class_section_parent_name_snap ?? "-"}
+                </div>
+                <div className="text-xs opacity-70 truncate">
+                  {section.class_section_parent_slug_snap ?? "-"}
+                </div>
+              </div>
+
+              <div
+                className="rounded-xl border p-3"
+                style={{
+                  borderColor: palette.silver1,
+                  background: palette.white1,
+                }}
+              >
+                <div className="text-xs opacity-70">Ruang</div>
+                <div className="font-semibold truncate">
                   {section.class_section_room_name_snap ??
                     section.class_section_room_snapshot?.name ??
                     "-"}
                 </div>
-                <div className="text-xs opacity-70 flex items-center gap-1">
+                <div className="text-xs opacity-70 flex items-center gap-1 truncate">
                   <MapPin size={14} />
                   {section.class_section_room_location_snap ??
                     section.class_section_room_snapshot?.location ??
                     "-"}
                 </div>
               </div>
-
-              <div
-                className="rounded-xl border p-3"
-                style={{
-                  borderColor: palette.silver1,
-                  background: palette.white1,
-                }}
-              >
-                <div className="text-xs opacity-70 mb-1">
-                  Tahun Ajaran / Term
-                </div>
-                <div className="font-semibold">
-                  {section.class_section_term_name_snap ??
-                    section.class_section_term_snapshot?.name ??
-                    "-"}
-                </div>
-                <div className="text-xs opacity-70">
-                  {section.class_section_term_slug_snap ??
-                    section.class_section_term_snapshot?.slug ??
-                    ""}{" "}
-                  •{" "}
-                  {section.class_section_term_year_label_snap ??
-                    section.class_section_term_snapshot?.year_label ??
-                    ""}
-                </div>
-              </div>
-
-              <div
-                className="rounded-xl border p-3"
-                style={{
-                  borderColor: palette.silver1,
-                  background: palette.white1,
-                }}
-              >
-                <div className="text-xs opacity-70 mb-1">Siswa</div>
-                <div className="font-semibold">
-                  {section.class_section_total_students ?? 0}
-                </div>
-                <div className="text-xs opacity-70">
-                  Kapasitas: {section.class_section_capacity ?? "-"}
-                </div>
-              </div>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-4">
-              <div
-                className="rounded-xl border p-3"
-                style={{
-                  borderColor: palette.silver1,
-                  background: palette.white1,
-                }}
-              >
-                <div className="text-xs opacity-70 mb-1">Jadwal (Section)</div>
-                <div className="font-semibold">
-                  {scheduleToText(section.class_section_schedule)}
-                </div>
-                {!!section.class_section_group_url && (
-                  <a
-                    href={section.class_section_group_url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-xs underline inline-flex gap-1 mt-1"
-                    style={{ color: palette.primary }}
-                  >
-                    <LinkIcon size={12} />
-                    Link Grup
-                  </a>
-                )}
-              </div>
-
-              <div
-                className="rounded-xl border p-3"
-                style={{
-                  borderColor: palette.silver1,
-                  background: palette.white1,
-                }}
-              >
-                <div className="text-xs opacity-70 mb-1">Enrollment Mode</div>
-                <div className="font-semibold">
-                  {section.class_section_csst_enrollment_mode ?? "-"}
-                </div>
-                <div className="text-xs opacity-70">
-                  Approval?{" "}
-                  {section.class_section_csst_self_select_requires_approval
-                    ? "Ya"
-                    : "Tidak"}
-                </div>
-              </div>
-
-              <div
-                className="rounded-xl border p-3"
-                style={{
-                  borderColor: palette.silver1,
-                  background: palette.white1,
-                }}
-              >
-                <div className="text-xs opacity-70 mb-1">
-                  Class / Parent Snapshot
-                </div>
-                <div className="text-xs">
-                  class_slug: {section.class_section_class_slug_snap ?? "-"}
-                </div>
-                <div className="text-xs">
-                  parent_level: {section.class_section_parent_level_snap ?? "-"}
-                </div>
-                <div className="text-xs opacity-70">
-                  snapshot_updated:{" "}
-                  {section.class_section_snapshot_updated_at ?? "-"}
-                </div>
-              </div>
-            </div>
-
-            {section.class_section_room_snapshot && (
-              <div
-                className="rounded-xl p-3 text-sm"
-                style={{
-                  border: `1px solid ${palette.silver1}`,
-                  background: palette.white1,
-                }}
-              >
-                <div className="font-medium mb-1 flex items-center gap-2">
-                  <MapPin size={14} /> Detail Ruang (Snapshot)
-                </div>
-                <div className="grid sm:grid-cols-3 gap-1">
-                  <div>
-                    Nama: {section.class_section_room_snapshot.name ?? "-"}
-                  </div>
-                  <div>
-                    Kode: {section.class_section_room_snapshot.code ?? "-"}
-                  </div>
-                  <div>
-                    Slug: {section.class_section_room_snapshot.slug ?? "-"}
-                  </div>
-                  <div>
-                    Lokasi:{" "}
-                    {section.class_section_room_snapshot.location ?? "-"}
-                  </div>
-                  <div>
-                    Kapasitas:{" "}
-                    {section.class_section_room_snapshot.capacity ?? "-"}
-                  </div>
-                  <div>
-                    Jenis:{" "}
-                    {section.class_section_room_snapshot.is_virtual
-                      ? "Virtual"
-                      : "Fisik"}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div className="pt-2 text-xs opacity-70">
-              Dibuat:{" "}
-              {new Date(section.class_section_created_at).toLocaleString()} •
-              Diperbarui:{" "}
-              {new Date(section.class_section_updated_at).toLocaleString()}
+            <div
+              className="mt-3 rounded-xl border p-3 text-sm"
+              style={{
+                borderColor: palette.silver1,
+                background: palette.white1,
+              }}
+            >
+              <span className="opacity-70 mr-2">Jadwal:</span>
+              <span className="font-medium">
+                {scheduleToText(section.class_section_schedule)}
+              </span>
+              {!!section.class_section_group_url && (
+                <a
+                  href={section.class_section_group_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="ml-3 underline inline-flex items-center gap-1 text-xs"
+                  style={{ color: palette.primary }}
+                >
+                  <LinkIcon size={12} />
+                  Link Grup
+                </a>
+              )}
             </div>
           </div>
         </SectionCard>
 
-        {/* ===== Mata Pelajaran (CSST) ===== */}
+        {/* Daftar CSST (mapel & pengajar) */}
         <SectionCard palette={palette}>
           <div className="p-5">
             <div className="flex items-center justify-between pb-3">
@@ -708,7 +461,7 @@ export default function SchoolManagementAcademicDetail() {
                         </div>
                       </div>
 
-                      {/* Buku */}
+                      {/* Buku (jika ada) */}
                       {book && (
                         <div
                           className="flex items-center gap-3 text-sm"
@@ -794,42 +547,7 @@ export default function SchoolManagementAcademicDetail() {
             )}
           </div>
         </SectionCard>
-
-        {/* ===== JSON mentah (opsional, untuk debugging) ===== */}
-        <SectionCard palette={palette}>
-          <div className="p-5">
-            <button
-              className="text-sm underline inline-flex items-center gap-2"
-              onClick={() => setShowRaw((s) => !s)}
-              style={{ color: palette.primary }}
-            >
-              <FileText size={16} />
-              {showRaw ? "Sembunyikan JSON mentah" : "Lihat JSON mentah"}
-            </button>
-            {showRaw && (
-              <pre
-                className="mt-3 text-xs p-3 rounded-xl overflow-auto"
-                style={{
-                  border: `1px solid ${palette.silver1}`,
-                  background: palette.white1,
-                  color: palette.black1,
-                  maxHeight: 420,
-                }}
-              >
-                {JSON.stringify({ section, csst }, null, 2)}
-              </pre>
-            )}
-          </div>
-        </SectionCard>
       </main>
     </div>
   );
 }
-
-/* =========================================================
-   TIP ROUTING
-   Tambahkan route:
-   <Route path="/sekolah/:schoolId/academic/detail/:id" element={<SchoolManagementAcademicDetail />} />
-   Lalu arahkan tombol dari list:
-   navigate(`/sekolah/${schoolId}/academic/detail/${sectionId}`);
-========================================================= */

@@ -1,22 +1,16 @@
 // src/pages/sekolahislamku/pages/academic/SchoolSubject.tsx
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useCallback, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigate, useParams } from "react-router-dom";
-
-// Theme & utils
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import axios from "@/lib/axios";
-
-// UI
 import {
   SectionCard,
   Badge,
   Btn,
   type Palette,
 } from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
-
-// Icons
 import {
   ArrowLeft,
   Eye,
@@ -25,6 +19,12 @@ import {
   Trash2,
   X,
   BookOpen,
+  Search,
+  Filter,
+  ArrowUpDown,
+  Loader2,
+  AlertCircle,
+  CheckCircle2,
 } from "lucide-react";
 import { DeleteConfirmModal } from "../../components/common/CDeleteConfirmModal";
 
@@ -38,6 +38,7 @@ export type SubjectRow = {
   status: SubjectStatus;
   class_count: number;
   total_hours_per_week: number | null;
+  book_count: number;
   assignments: ClassSubjectItem[];
 };
 
@@ -55,7 +56,7 @@ type SubjectsAPIItem = {
 };
 type SubjectsAPIResp = {
   data: SubjectsAPIItem[];
-  pagination: { limit: number; offset: number; total: number };
+  pagination?: { limit: number; offset: number; total: number };
 };
 
 type ClassSubjectItem = {
@@ -79,13 +80,44 @@ type ClassSubjectItem = {
 };
 type ClassSubjectsAPIResp = {
   data: ClassSubjectItem[];
-  pagination: { limit: number; offset: number; total: number };
+  pagination?: { limit: number; offset: number; total: number };
 };
 
-/* ================= Helpers ================= */
+type ClassSubjectBookItem = {
+  class_subject_book_id: string;
+  class_subject_book_school_id: string;
+  class_subject_book_class_subject_id: string;
+  class_subject_book_book_id: string;
+  class_subject_book_slug: string;
+  class_subject_book_is_active: boolean;
+  class_subject_book_book_title_snapshot: string;
+  class_subject_book_book_author_snapshot: string | null;
+  class_subject_book_book_slug_snapshot: string;
+  class_subject_book_book_image_url_snapshot: string | null;
+  class_subject_book_subject_id_snapshot: string; // <-- mapping ke subject_id
+  class_subject_book_subject_code_snapshot: string;
+  class_subject_book_subject_name_snapshot: string;
+  class_subject_book_subject_slug_snapshot: string;
+  class_subject_book_created_at: string;
+  class_subject_book_updated_at: string;
+};
+type CSBListResp = {
+  data: ClassSubjectBookItem[];
+  pagination?: {
+    page: number;
+    per_page: number;
+    total: number;
+    total_pages: number;
+    has_next: boolean;
+    has_prev: boolean;
+  };
+};
+
+/* ================= Const ================= */
 const API_PREFIX = "/public"; // GET list
 const ADMIN_PREFIX = "/a"; // POST/PUT/DELETE (admin)
 
+/* ================= Helpers ================= */
 const sumHours = (arr: ClassSubjectItem[]) => {
   const hrs = arr
     .map((x) => x.class_subject_hours_per_week ?? 0)
@@ -94,7 +126,14 @@ const sumHours = (arr: ClassSubjectItem[]) => {
   return hrs.reduce((a, b) => a + b, 0);
 };
 
-/* ================= Reusable Mutations ================= */
+function useResolvedSchoolId() {
+  const params = useParams<{ schoolId?: string; school_id?: string }>();
+  const { search } = useLocation();
+  const sp = useMemo(() => new URLSearchParams(search), [search]);
+  return params.schoolId || params.school_id || sp.get("school_id") || "";
+}
+
+/* ================= Mutations ================= */
 function useCreateSubjectMutation(school_id: string) {
   const qc = useQueryClient();
   return useMutation({
@@ -144,7 +183,17 @@ function useDeleteSubjectMutation(school_id: string, subjectId: string) {
   });
 }
 
-/* ================= Modal Detail ================= */
+/* ================= Small UI ================= */
+function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="flex justify-between border-b py-1 text-sm">
+      <span className="opacity-90">{label}</span>
+      <span>{value}</span>
+    </div>
+  );
+}
+
+/* ================= Detail Modal ================= */
 function SubjectDetailModal({
   open,
   palette,
@@ -190,6 +239,7 @@ function SubjectDetailModal({
                   : "-"
               }
             />
+            <InfoRow label="Jumlah Buku" value={subject.book_count} />
           </div>
 
           <div className="mt-2">
@@ -246,16 +296,7 @@ function SubjectDetailModal({
   );
 }
 
-function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div className="flex justify-between border-b py-1 text-sm">
-      <span className="opacity-90">{label}</span>
-      <span>{value}</span>
-    </div>
-  );
-}
-
-/* =============== Subject Card =============== */
+/* ================= Card ================= */
 function SubjectCard({
   palette,
   row,
@@ -292,16 +333,20 @@ function SubjectCard({
             </Badge>
           </div>
 
-          <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
+          <div className="mt-3 grid grid-cols-3 gap-3 text-sm">
             <div className="rounded-lg border p-2">
-              <div className="opacity-70 text-xs">Jumlah Kelas</div>
+              <div className="opacity-70 text-xs">Kelas</div>
               <div className="font-medium">{row.class_count}</div>
             </div>
             <div className="rounded-lg border p-2">
-              <div className="opacity-70 text-xs">Total Jam/Minggu</div>
+              <div className="opacity-70 text-xs">Jam/Minggu</div>
               <div className="font-medium">
                 {row.total_hours_per_week ?? "-"}
               </div>
+            </div>
+            <div className="rounded-lg border p-2">
+              <div className="opacity-70 text-xs">Buku</div>
+              <div className="font-medium">{row.book_count}</div>
             </div>
           </div>
 
@@ -339,7 +384,7 @@ function SubjectCard({
   );
 }
 
-/* =============== Create Modal =============== */
+/* ================= Create Modal ================= */
 function CreateSubjectModal({
   open,
   palette,
@@ -367,7 +412,6 @@ function CreateSubjectModal({
     if (file) fd.append("file", file);
     await createMutation.mutateAsync(fd);
     onClose();
-    // Fields reset
     setCode("");
     setName("");
     setDesc("");
@@ -467,6 +511,7 @@ function CreateSubjectModal({
   );
 }
 
+/* ================= Edit Modal ================= */
 function EditSubjectModal({
   open,
   palette,
@@ -486,8 +531,7 @@ function EditSubjectModal({
   const [isActive, setIsActive] = useState(subject?.status === "active");
   const [file, setFile] = useState<File | null>(null);
 
-  // Sync when subject changes
-  React.useEffect(() => {
+  useEffect(() => {
     setCode(subject?.code ?? "");
     setName(subject?.name ?? "");
     setIsActive(subject?.status === "active");
@@ -514,13 +558,6 @@ function EditSubjectModal({
 
   if (!open || !subject) return null;
 
-  const labelStyle: React.CSSProperties = { color: palette.black2 };
-  const fieldStyle: React.CSSProperties = {
-    borderColor: palette.silver1,
-    background: "transparent",
-    color: palette.black1,
-  };
-
   return (
     <div
       className="fixed inset-0 z-[95] flex items-center justify-center p-4"
@@ -529,23 +566,10 @@ function EditSubjectModal({
       <SectionCard
         palette={palette}
         className="w-full max-w-xl rounded-2xl overflow-hidden shadow-2xl"
-        style={{
-          background: palette.white1,
-          borderColor: palette.silver1,
-          color: palette.black1,
-        }}
       >
-        <div
-          className="flex items-center justify-between px-4 py-3 border-b"
-          style={{ borderColor: palette.silver1 }}
-        >
+        <div className="flex items-center justify-between px-4 py-3 border-b">
           <h3 className="font-semibold">Edit Mapel — {subject.name}</h3>
-          <button
-            onClick={onClose}
-            className="p-1 rounded-lg"
-            style={{ color: palette.black2 }}
-            title="Tutup"
-          >
+          <button onClick={onClose} className="p-1" title="Tutup">
             <X size={18} />
           </button>
         </div>
@@ -553,25 +577,19 @@ function EditSubjectModal({
         <form onSubmit={handleSubmit} className="px-4 py-4 space-y-3 text-sm">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <label className="flex flex-col gap-1">
-              <span className="opacity-80" style={labelStyle}>
-                Kode
-              </span>
+              <span className="opacity-80">Kode</span>
               <input
                 className="rounded-lg px-3 py-2 border outline-none"
-                style={fieldStyle}
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
               />
             </label>
 
             <label className="flex flex-col gap-1">
-              <span className="opacity-80" style={labelStyle}>
-                Nama *
-              </span>
+              <span className="opacity-80">Nama *</span>
               <input
                 required
                 className="rounded-lg px-3 py-2 border outline-none"
-                style={fieldStyle}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
@@ -583,20 +601,15 @@ function EditSubjectModal({
               type="checkbox"
               checked={isActive}
               onChange={(e) => setIsActive(e.target.checked)}
-              // warna centang ikut primary
-              style={{ accentColor: palette.primary }}
             />
-            <span style={{ color: palette.black1 }}>Aktif</span>
+            <span>Aktif</span>
           </label>
 
           <label className="flex flex-col gap-1">
-            <span className="opacity-80" style={labelStyle}>
-              Deskripsi (opsional)
-            </span>
+            <span className="opacity-80">Deskripsi (opsional)</span>
             <textarea
               className="rounded-lg px-3 py-2 border outline-none"
               rows={3}
-              style={fieldStyle}
               value={desc}
               onChange={(e) => setDesc(e.target.value)}
               placeholder="Update deskripsi jika perlu"
@@ -604,20 +617,19 @@ function EditSubjectModal({
           </label>
 
           <label className="flex flex-col gap-1">
-            <span className="opacity-80" style={labelStyle}>
+            <span className="opacity-80">
               Gambar (opsional — menimpa yang lama)
             </span>
             <input
               type="file"
               accept="image/*"
               className="rounded-lg px-3 py-2 border file:mr-3 file:py-1 file:px-2 file:rounded-md"
-              style={fieldStyle}
               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
             />
           </label>
 
           {updateMutation.isError && (
-            <div style={{ color: palette.error1 }}>
+            <div className="text-red-600">
               {(updateMutation.error as any)?.message ??
                 "Gagal mengubah subject."}
             </div>
@@ -647,50 +659,68 @@ function EditSubjectModal({
   );
 }
 
-/* =============== Delete Confirm =============== */
-
-/* ================== Page ================== */
+/* ================= Page ================= */
 const SchoolSubject: React.FC = () => {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
-  const { school_id } = useParams<{ school_id: string }>();
-  // const schoolId = school_id; // pakai alias lokal biar konsisten di bawah
+  const schoolId = useResolvedSchoolId();
 
   const [detailData, setDetailData] = useState<SubjectRow | null>(null);
   const [openCreate, setOpenCreate] = useState(false);
   const [editData, setEditData] = useState<SubjectRow | null>(null);
   const [deleteData, setDeleteData] = useState<SubjectRow | null>(null);
 
-  // panggil hook dengan argumen terkini (aman, hook tetap dipanggil setiap render)
-  const delMut = useDeleteSubjectMutation(
-    school_id ?? "",
-    deleteData?.id ?? ""
-  );
+  // controls
+  const [q, setQ] = useState("");
+  const [onlyActive, setOnlyActive] = useState<"1" | "0">("1");
+  const [sortBy, setSortBy] = useState<
+    "name-asc" | "name-desc" | "code-asc" | "code-desc"
+  >("name-asc");
+
+  const delMut = useDeleteSubjectMutation(schoolId ?? "", deleteData?.id ?? "");
 
   const mergedQ = useQuery({
-    queryKey: ["subjects-merged", school_id],
-    enabled: !!school_id,
+    queryKey: ["subjects-merged", schoolId],
+    enabled: !!schoolId,
     queryFn: async (): Promise<SubjectRow[]> => {
-      const [subjectsResp, classSubjectsResp] = await Promise.all([
+      const [subjectsResp, classSubjectsResp, booksResp] = await Promise.all([
         axios
-          .get<SubjectsAPIResp>(`${API_PREFIX}/${school_id}/subjects/list`, {
+          .get<SubjectsAPIResp>(`${API_PREFIX}/${schoolId}/subjects/list`, {
             params: { limit: 500, offset: 0 },
           })
           .then((r) => r.data),
         axios
           .get<ClassSubjectsAPIResp>(
-            `${API_PREFIX}/${school_id}/class-subjects/list`,
-            { params: { limit: 1000, offset: 0 } }
+            `${API_PREFIX}/${schoolId}/class-subjects/list`,
+            {
+              params: { limit: 1000, offset: 0 },
+            }
+          )
+          .then((r) => r.data),
+        axios
+          .get<CSBListResp>(
+            `${API_PREFIX}/${schoolId}/class-subject-books/list`,
+            {
+              params: { per_page: 1000, page: 1 },
+            }
           )
           .then((r) => r.data),
       ]);
 
+      // index class-subjects by subject_id
       const classBySubject = new Map<string, ClassSubjectItem[]>();
       for (const cs of classSubjectsResp.data) {
         const key = cs.class_subject_subject_id;
         if (!classBySubject.has(key)) classBySubject.set(key, []);
         classBySubject.get(key)!.push(cs);
+      }
+
+      // index books by subject snapshot id
+      const bookCountBySubject = new Map<string, number>();
+      for (const b of booksResp.data) {
+        const sid = b.class_subject_book_subject_id_snapshot;
+        bookCountBySubject.set(sid, (bookCountBySubject.get(sid) ?? 0) + 1);
       }
 
       const rows: SubjectRow[] = subjectsResp.data.map((s) => {
@@ -702,6 +732,7 @@ const SchoolSubject: React.FC = () => {
           status: s.subject_is_active ? "active" : "inactive",
           class_count: assignments.length,
           total_hours_per_week: sumHours(assignments),
+          book_count: bookCountBySubject.get(s.subject_id) ?? 0,
           assignments,
         };
       });
@@ -710,10 +741,38 @@ const SchoolSubject: React.FC = () => {
     },
   });
 
-  const rows = useMemo(() => mergedQ.data ?? [], [mergedQ.data]);
+  const filtered = useMemo(() => {
+    let arr = (mergedQ.data ?? []).slice();
+
+    if (onlyActive === "1") {
+      arr = arr.filter((s) => s.status === "active");
+    }
+    if (q.trim()) {
+      const k = q.trim().toLowerCase();
+      arr = arr.filter(
+        (s) =>
+          s.name.toLowerCase().includes(k) || s.code.toLowerCase().includes(k)
+      );
+    }
+
+    const [key, dir] = (sortBy || "name-asc").split("-") as [
+      "name" | "code",
+      "asc" | "desc",
+    ];
+    const asc = dir !== "desc";
+    arr.sort((a, b) => {
+      const A = (key === "code" ? a.code : a.name).toLowerCase();
+      const B = (key === "code" ? b.code : b.name).toLowerCase();
+      if (A < B) return asc ? -1 : 1;
+      if (A > B) return asc ? 1 : -1;
+      return 0;
+    });
+
+    return arr;
+  }, [mergedQ.data, q, onlyActive, sortBy]);
 
   return (
-    <div className="w-full" style={{ background: palette.white2 }}>
+    <div className="w-full">
       <main className="w-full px-4 md:px-6 py-4 md:py-8">
         <div className="max-w-screen-2xl mx-auto flex flex-col gap-6">
           {/* Toolbar */}
@@ -738,33 +797,77 @@ const SchoolSubject: React.FC = () => {
             </Btn>
           </div>
 
+          {/* Controls */}
+          <SectionCard palette={palette} className="p-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="flex items-center gap-2 rounded-2xl border px-3 py-2">
+                <Search size={16} />
+                <input
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                  placeholder="Cari nama/kode…"
+                  className="w-full bg-transparent outline-none text-sm"
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Filter size={16} className="opacity-70" />
+                <select
+                  value={onlyActive}
+                  onChange={(e) => setOnlyActive(e.target.value as "1" | "0")}
+                  className="rounded-xl border px-3 py-2 bg-background text-sm w-full"
+                >
+                  <option value="1">Aktif saja</option>
+                  <option value="0">Semua</option>
+                </select>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <ArrowUpDown size={16} className="opacity-70" />
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as any)}
+                  className="rounded-xl border px-3 py-2 bg-background text-sm w-full"
+                >
+                  <option value="name-asc">Nama A→Z</option>
+                  <option value="name-desc">Nama Z→A</option>
+                  <option value="code-asc">Kode A→Z</option>
+                  <option value="code-desc">Kode Z→A</option>
+                </select>
+              </div>
+            </div>
+          </SectionCard>
+
           {/* State: loading / error / empty */}
           {mergedQ.isLoading && (
-            <SectionCard palette={palette} className="p-6 text-center">
-              Memuat…
+            <SectionCard
+              palette={palette}
+              className="p-6 text-center flex items-center justify-center gap-2"
+            >
+              <Loader2 className="animate-spin" /> Memuat…
             </SectionCard>
           )}
           {mergedQ.isError && (
             <SectionCard
               palette={palette}
-              className="p-6 text-center text-red-600"
+              className="p-6 text-center text-red-600 flex items-center gap-2"
             >
-              Gagal memuat data.
+              <AlertCircle /> Gagal memuat data.
             </SectionCard>
           )}
-          {!mergedQ.isLoading && !mergedQ.isError && rows.length === 0 && (
+          {!mergedQ.isLoading && !mergedQ.isError && filtered.length === 0 && (
             <SectionCard
               palette={palette}
               className="p-6 text-center opacity-70"
             >
-              Tidak ada data.
+              Tidak ada data yang cocok.
             </SectionCard>
           )}
 
           {/* Grid Cards */}
-          {!mergedQ.isLoading && !mergedQ.isError && rows.length > 0 && (
+          {!mergedQ.isLoading && !mergedQ.isError && filtered.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-              {rows.map((r) => (
+              {filtered.map((r) => (
                 <SubjectCard
                   key={r.id}
                   palette={palette}
@@ -788,36 +891,36 @@ const SchoolSubject: React.FC = () => {
       />
 
       {/* Modal Create */}
-      {school_id && (
+      {schoolId && (
         <CreateSubjectModal
           open={openCreate}
           palette={palette}
-          schoolId={school_id}
+          schoolId={schoolId}
           onClose={() => setOpenCreate(false)}
         />
       )}
 
       {/* Modal Edit */}
-      {school_id && (
+      {schoolId && (
         <EditSubjectModal
           open={!!editData}
           palette={palette}
-          schoolId={school_id}
+          schoolId={schoolId}
           subject={editData}
           onClose={() => setEditData(null)}
         />
       )}
 
       {/* Modal Delete */}
-      {school_id && (
+      {schoolId && (
         <DeleteConfirmModal
           open={!!deleteData}
           palette={palette}
           onClose={() => setDeleteData(null)}
           onConfirm={async () => {
-            if (!school_id || !deleteData) return;
+            if (!schoolId || !deleteData) return;
             try {
-              await delMut.mutateAsync(); // ← tidak perlu kirim variabel lagi
+              await delMut.mutateAsync();
             } finally {
               setDeleteData(null);
             }

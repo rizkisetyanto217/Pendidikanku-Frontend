@@ -1,4 +1,5 @@
-import { useMemo, useState, useEffect } from "react";
+// src/pages/pendidikanku-dashboard/dashboard-school/class/SchoolClass.tsx
+import { useMemo, useState, useEffect, MouseEvent } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   useSearchParams,
@@ -6,7 +7,7 @@ import {
   useParams,
   useNavigate,
 } from "react-router-dom";
-import { Plus, Layers, ArrowLeft } from "lucide-react";
+import { Plus, Layers, ArrowLeft, Pencil } from "lucide-react";
 
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
@@ -276,7 +277,7 @@ function ClassCard({ r, palette }: { r: ClassRow; palette: Palette }) {
         <div className="text-sm break-words">{r.schedule || "-"}</div>
       </div>
       <div className="pt-1 flex justify-end gap-2">
-        <Link to="manage" state={{ classData: r }}>
+        <Link to={`kelola/${r.id}`} state={{ classData: r }}>
           <Btn palette={palette} size="sm">
             Kelola
           </Btn>
@@ -524,6 +525,18 @@ const SchoolClass: React.FC<{
     setOpenTambah(false);
   };
 
+  /* ==== helper: go edit without changing filter ==== */
+  const goEditLevel = (e: MouseEvent, id: string) => {
+    e.stopPropagation();
+    e.preventDefault();
+    navigate(`/${schoolId}/sekolah/kelas/tingkat/${id}`);
+  };
+  const goEditClass = (e: MouseEvent, id: string) => {
+    e.stopPropagation();
+    e.preventDefault();
+    navigate(`/${schoolId}/sekolah/kelas/kelas/${id}`);
+  };
+
   return (
     <div
       className="h-full w-full overflow-x-hidden"
@@ -566,6 +579,7 @@ const SchoolClass: React.FC<{
               <div className="pb-4">
                 <div className="px-4 md:px-5">
                   <div className="flex flex-wrap gap-2 min-w-0">
+                    {/* Semua Tingkat */}
                     <button
                       className={`px-3 py-1.5 ml-0 rounded-lg border text-sm ${
                         !levelId ? "font-semibold" : ""
@@ -582,15 +596,14 @@ const SchoolClass: React.FC<{
                       Semua Tingkat
                     </button>
 
-                    {levels.map((lv) => {
+                    {/* Item Level + ✏️ */}
+                    {(levels ?? []).map((lv) => {
                       const cnt = sectionCountByLevel.get(lv.slug) ?? 0;
                       const active = levelId === lv.id;
                       return (
-                        <button
+                        <div
                           key={lv.id}
-                          className={`px-3 py-1.5 rounded-lg border text-sm ${
-                            active ? "font-semibold" : ""
-                          }`}
+                          className="inline-flex items-center gap-1 rounded-lg border"
                           style={{
                             borderColor: palette.silver1,
                             background: active
@@ -600,11 +613,27 @@ const SchoolClass: React.FC<{
                               ? palette.primary
                               : palette.quaternary,
                           }}
-                          onClick={() => setParam("level_id", lv.id)}
                         >
-                          {lv.name}{" "}
-                          <span style={{ color: palette.black2 }}>({cnt})</span>
-                        </button>
+                          <button
+                            className={`px-3 py-1.5 text-sm ${
+                              active ? "font-semibold" : ""
+                            }`}
+                            onClick={() => setParam("level_id", lv.id)}
+                            title={lv.slug}
+                          >
+                            {lv.name}{" "}
+                            <span style={{ color: palette.black2 }}>
+                              ({cnt})
+                            </span>
+                          </button>
+                          <button
+                            className="p-1 pr-2 opacity-80 hover:opacity-100"
+                            title="Edit Tingkat"
+                            onClick={(e) => goEditLevel(e, lv.id)}
+                          >
+                            <Pencil size={14} />
+                          </button>
+                        </div>
                       );
                     })}
                   </div>
@@ -623,6 +652,7 @@ const SchoolClass: React.FC<{
               <div className="pb-4">
                 <div className="px-4 md:px-5">
                   <div className="flex flex-wrap gap-2 min-w-0">
+                    {/* Semua Kelas */}
                     <button
                       className={`px-3 py-1.5 ml-0 rounded-lg border text-sm ${
                         !classId ? "font-semibold" : ""
@@ -639,14 +669,13 @@ const SchoolClass: React.FC<{
                       Semua Kelas
                     </button>
 
+                    {/* Item Class + ✏️ */}
                     {classChips.map((c) => {
                       const active = classId === c.id;
                       return (
-                        <button
+                        <div
                           key={c.id}
-                          className={`px-3 py-1.5 rounded-lg border text-sm ${
-                            active ? "font-semibold" : ""
-                          }`}
+                          className="inline-flex items-center gap-1 rounded-lg border"
                           style={{
                             borderColor: palette.silver1,
                             background: active
@@ -656,14 +685,28 @@ const SchoolClass: React.FC<{
                               ? palette.primary
                               : palette.quaternary,
                           }}
-                          onClick={() => setParam("class_id", c.id)}
-                          title={c.slug ?? c.name}
                         >
-                          {c.name}{" "}
-                          <span style={{ color: palette.black2 }}>
-                            ({c.count})
-                          </span>
-                        </button>
+                          <button
+                            className={`px-3 py-1.5 text-sm ${
+                              active ? "font-semibold" : ""
+                            }`}
+                            style={{ lineHeight: 1 }}
+                            onClick={() => setParam("class_id", c.id)}
+                            title={c.slug ?? c.name}
+                          >
+                            {c.name}{" "}
+                            <span style={{ color: palette.black2 }}>
+                              ({c.count})
+                            </span>
+                          </button>
+                          <button
+                            className="p-1 pr-2 opacity-80 hover:opacity-100"
+                            title="Edit Kelas (middle)"
+                            onClick={(e) => goEditClass(e, c.id)}
+                          >
+                            <Pencil size={14} />
+                          </button>
+                        </div>
                       );
                     })}
                   </div>
