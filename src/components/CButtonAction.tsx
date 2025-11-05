@@ -1,4 +1,4 @@
-// src/pages/pendidikanku-dashboard/components/common/CButtonAction.tsx
+// src/pages/pendidikanku-dashboard/components/CButtonAction.tsx
 import React from "react";
 import { Eye, Pencil, Trash2 } from "lucide-react";
 import { Btn, type Palette } from "@/pages/pendidikanku-dashboard/components/ui/CPrimitives";
@@ -13,18 +13,11 @@ interface CButtonActionProps {
   disableView?: boolean;
   disableEdit?: boolean;
   disableDelete?: boolean;
+  confirmMessage?: string; // ✅ Tambahkan prop ini
 }
 
 /**
  * 🔘 Komponen Reusable untuk aksi (Lihat, Edit, Hapus)
- * - Gunakan di tabel atau kartu data
- * - Contoh:
- *   <CButtonAction
- *      palette={palette}
- *      onView={() => navigate(`/detail/${id}`)}
- *      onEdit={() => setModal({mode:'edit', editing:item})}
- *      onDelete={() => deleteItem.mutate(id)}
- *   />
  */
 const CButtonAction: React.FC<CButtonActionProps> = ({
   palette,
@@ -36,10 +29,22 @@ const CButtonAction: React.FC<CButtonActionProps> = ({
   disableView,
   disableEdit,
   disableDelete,
+  confirmMessage,
 }) => {
+  const handleDeleteClick = () => {
+    if (!onDelete) return;
+    // ✅ tampilkan alert konfirmasi bawaan browser
+    if (confirmMessage) {
+      const ok = window.confirm(confirmMessage);
+      if (ok) onDelete();
+    } else {
+      onDelete();
+    }
+  };
+
   return (
     <div className="flex items-center gap-2">
-      {/* 👁️ Tombol Lihat Detail */}
+      {/* 👁️ Lihat */}
       {!disableView && (
         <Btn
           palette={palette}
@@ -53,7 +58,7 @@ const CButtonAction: React.FC<CButtonActionProps> = ({
         </Btn>
       )}
 
-      {/* ✏️ Tombol Edit */}
+      {/* ✏️ Edit */}
       {!disableEdit && (
         <Btn
           palette={palette}
@@ -67,7 +72,7 @@ const CButtonAction: React.FC<CButtonActionProps> = ({
         </Btn>
       )}
 
-      {/* 🗑️ Tombol Hapus */}
+      {/* 🗑️ Hapus */}
       {!disableDelete && (
         <Btn
           palette={palette}
@@ -75,7 +80,7 @@ const CButtonAction: React.FC<CButtonActionProps> = ({
           variant="destructive"
           className="p-2"
           title="Hapus"
-          onClick={onDelete}
+          onClick={handleDeleteClick} // ✅ Panggil handler baru
         >
           <Trash2 size={16} />
         </Btn>

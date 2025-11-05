@@ -34,6 +34,8 @@ import {
   CardGrid,
   PerPageSelect,
 } from "@/pages/pendidikanku-dashboard/components/common/CDataViewKit";
+import { DeleteConfirmModal } from "../../components/common/CDeleteConfirmModal";
+import CButtonAction from "@/components/CButtonAction";
 
 /* ===================== Types ===================== */
 type AcademicTerm = {
@@ -586,62 +588,24 @@ const SchoolAcademic: React.FC<{
         key: "aksi",
         header: "Aksi",
         cell: (t) => (
-          <div className="flex items-center gap-2">
-            {/* 👁️ Tombol Detail */}
-            <Btn
-              palette={palette}
-              size="sm"
-              variant="outline"
-              className="p-2"
-              title="Lihat Detail"
-              onClick={() =>
-                navigate(`/${schoolId}/sekolah/akademik/detail/${t.id}`, {
-                  state: {
-                    term: {
-                      academic_terms_school_id: t.school_id,
-                      academic_terms_academic_year: t.academic_year,
-                      academic_terms_name: t.name,
-                      academic_terms_start_date: t.start_date,
-                      academic_terms_end_date: t.end_date,
-                      academic_terms_is_active: t.is_active,
-                      academic_terms_angkatan: t.angkatan,
-                    },
-                  },
-                })
-              }
-            >
-              <Eye size={16} />
-            </Btn>
+          <CButtonAction
+            palette={palette}
+            onView={() =>
+              navigate(`/${schoolId}/sekolah/akademik/detail/${t.id}`, {
+                state: { term: t },
+              })
+            }
+            onEdit={() => setModal({ mode: "edit", editing: t })}
+            onDelete={() => {
+              setDeleteData(t);
+              setDeleteModalOpen(true);
+            }}
 
-            {/* ✏️ Tombol Edit */}
-            <Btn
-              palette={palette}
-              size="sm"
-              variant="secondary"
-              onClick={() => setModal({ mode: "edit", editing: t })}
-              className="p-2"
-              title="Edit"
-            >
-              <Pencil size={16} />
-            </Btn>
-
-            {/* 🗑️ Tombol Hapus */}
-            <Btn
-              palette={palette}
-              size="sm"
-              variant="destructive"
-              onClick={() => {
-               setDeleteData(t);
-                setDeleteModalOpen(true);
-              }}
-              className="p-2"
-              title="Hapus"
-            >
-              <Trash2 size={16} />
-            </Btn>
-          </div>
+            confirmMessage={`Hapus periode ${t.academic_year} — ${t.name}?`}
+          />
         ),
-      },
+      }
+
     ],
     [palette, navigate, deleteTerm]
   );
@@ -820,7 +784,7 @@ const SchoolAcademic: React.FC<{
                 style={{ borderColor: palette.silver1 }}
               >
                 <div className="flex items-center gap-2 font-semibold">
-                  <Layers size={18} color={palette.quaternary} /> Daftar Periode
+                  <Layers size={18} color={palette.secondary} /> Daftar Periode
                 </div>
                 <div className="text-sm" style={{ color: palette.black2 }}>
                   {termsQ.isFetching ? "memuat…" : `${total} total`}
@@ -844,58 +808,57 @@ const SchoolAcademic: React.FC<{
                   </div>
                 ) : (
                   <>
-                    {/* Mobile: Cards */}
-                    <div className="md:hidden">
-                      <CardGrid<AcademicTerm>
-                        items={pageTerms}
-                        renderItem={(t: AcademicTerm) => (
-                          <TermCard
-                            key={t.id}
-                            term={t}
-                            palette={palette}
-                            onEdit={() => setModal({ mode: "edit", editing: t })}
-                            onDelete={() => {
-                              const ok = confirm(`Hapus periode?\n${t.academic_year} — ${t.name}`);
-                              if (!ok) return;
-                              deleteTerm.mutate(t.id);
-                            }}
-                            schoolId={schoolId!}
-                            navigate={navigate}
-                          />
-                        )}
-                      />
-                    </div>
-
-                    {/* Tablet/Desktop: Table */}
-                    <div className="hidden md:block">
-                      <DataTable<AcademicTerm>
-                        palette={palette}
-                        columns={columns}
-                        rows={pageTerms}
-                        minWidth={840}
-                      />
-                    </div>
-
-                    {/* ===== Pagination Footer ===== */}
-                    <PaginationBar
-                      palette={palette}
-                      pageStart={pageStart}
-                      pageEnd={pageEnd}
-                      total={total}
-                      canPrev={canPrev}
-                      canNext={canNext}
-                      onPrev={handlePrev}
-                      onNext={handleNext}
-                      rightExtra={
-                        <span
-                          className="text-sm"
-                          style={{ color: palette.black2 }}
-                        >
-                          {termsQ.isFetching ? "memuat…" : `${total} total`}
-                        </span>
-                      }
+                  {/* Mobile: Cards */}
+                  <div className="md:hidden">
+                    <CardGrid<AcademicTerm>
+                      items={pageTerms}
+                      renderItem={(t: AcademicTerm) => (
+                        <TermCard
+                          key={t.id}
+                          term={t}
+                          palette={palette}
+                          onEdit={() => setModal({ mode: "edit", editing: t })}
+                          onDelete={() => {
+                            setDeleteData(t);           // ✅ simpan data yang akan dihapus
+                            setDeleteModalOpen(true);   // ✅ buka modal konfirmasi
+                          }}
+                          schoolId={schoolId!}
+                          navigate={navigate}
+                        />
+                      )}
                     />
-                  </>
+                  </div>
+
+                  {/* Tablet/Desktop: Table */}
+                  <div className="hidden md:block">
+                    <DataTable<AcademicTerm>
+                      palette={palette}
+                      columns={columns}
+                      rows={pageTerms}
+                      minWidth={840}
+                    />
+                  </div>
+
+                  {/* ===== Pagination Footer ===== */}
+                  <PaginationBar
+                    palette={palette}
+                    pageStart={pageStart}
+                    pageEnd={pageEnd}
+                    total={total}
+                    canPrev={canPrev}
+                    canNext={canNext}
+                    onPrev={handlePrev}
+                    onNext={handleNext}
+                    rightExtra={
+                      <span
+                        className="text-sm"
+                        style={{ color: palette.black2 }}
+                      >
+                        {termsQ.isFetching ? "memuat…" : `${total} total`}
+                      </span>
+                    }
+                  />
+                </>
                 )}
               </div>
             </SectionCard>
@@ -903,15 +866,40 @@ const SchoolAcademic: React.FC<{
         </div>
       </main>
 
-      {/* ===== Modal Create/Edit ===== */}
+      {/* Modal Create/Edit */}
       <TermFormModal
         key={modal?.editing?.id ?? modal?.mode ?? "closed"}
         open={!!modal}
         onClose={() => setModal(null)}
         palette={palette}
-        initial={modalInitial}
+        initial={
+          modal?.editing
+            ? {
+                academic_year: modal.editing.academic_year,
+                name: modal.editing.name,
+                start_date: modal.editing.start_date.slice(0, 10),
+                end_date: modal.editing.end_date.slice(0, 10),
+                angkatan: modal.editing.angkatan,
+                is_active: modal.editing.is_active,
+                slug: modal.editing.slug ?? "",
+              }
+            : undefined
+        }
         loading={createTerm.isPending || updateTerm.isPending}
         onSubmit={handleSubmit}
+      />
+
+      {/* 🗑️ Modal Konfirmasi Hapus */}
+      <DeleteConfirmModal
+        open={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={handleDeleteTerm}
+        palette={palette}
+        title={`Hapus "${deleteData?.name}"?`}
+        message="Yakin ingin menghapus periode akademik ini? Tindakan ini tidak dapat dibatalkan."
+        confirmLabel={deleteTerm.isPending ? "Menghapus…" : "Hapus"}
+        cancelLabel="Batal"
+        loading={deleteTerm.isPending}
       />
     </div>
   );
@@ -970,55 +958,16 @@ function TermCard({
       </div>
 
       <div className="pt-1 mt-1 flex items-center justify-end gap-2">
-        {/* 👁️ Tombol Detail */}
-        <Btn
+        <CButtonAction
           palette={palette}
-          size="sm"
-          variant="outline"
-          className="p-2"
-          title="Lihat Detail"
-          onClick={() =>
+          onView={() =>
             navigate(`/${schoolId}/sekolah/menu-utama/akademik/detail/${term.id}`, {
-              state: {
-                term: {
-                  academic_terms_school_id: term.school_id,
-                  academic_terms_academic_year: term.academic_year,
-                  academic_terms_name: term.name,
-                  academic_terms_start_date: term.start_date,
-                  academic_terms_end_date: term.end_date,
-                  academic_terms_is_active: term.is_active,
-                  academic_terms_angkatan: term.angkatan,
-                },
-              },
+              state: { term },
             })
           }
-        >
-          <Eye size={16} />
-        </Btn>
-
-        {/* ✏️ Tombol Edit */}
-        <Btn
-          palette={palette}
-          size="sm"
-          variant="secondary"
-          onClick={onEdit}
-          className="p-2"
-          title="Edit"
-        >
-          <Pencil size={16} />
-        </Btn>
-
-        {/* 🗑️ Tombol Hapus */}
-        <Btn
-          palette={palette}
-          size="sm"
-          variant="destructive"
-          onClick={onDelete}
-          className="p-2"
-          title="Hapus"
-        >
-          <Trash2 size={16} />
-        </Btn>
+          onEdit={onEdit}
+          onDelete={onDelete}
+        />
       </div>
     </div>
   );
